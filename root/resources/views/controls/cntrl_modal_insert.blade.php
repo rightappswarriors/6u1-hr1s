@@ -1,0 +1,2 @@
+<button class="btn btn-success" type="submit" form="{{$cntrl_frm_id}}">Save</button>
+<button class="btn btn-secondary" type="button" data-dismiss="modal" data-toggle="modal" data-target="#hris-mdl-calendar">Cancel</button>

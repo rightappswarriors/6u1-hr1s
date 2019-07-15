@@ -1,0 +1,33 @@
+.error-span {
+	color: #ff6666;
+}
+
+.error-input {
+	background-color: #ff6666;
+	color: white;
+}
+
+.error-label {
+	color: #ff6666 !important;
+	border-bottom: double;
+}
+
+.error::placeholder {
+	color: white;
+}
+
+/*.breadcrumb-item {
+	cursor: pointer;
+}*/
+
+.breadcrumb-item.active {
+	color: #007bff;
+}
+
+.hidden {
+	display: none;
+}
+
+/*.show {
+	display: block;
+}*/
