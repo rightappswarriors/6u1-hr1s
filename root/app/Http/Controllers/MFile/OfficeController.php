@@ -5,8 +5,9 @@ namespace App\Http\Controllers\MFile;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Core;
-use Office;
 use DB;
+use Employee;
+use Office;
 
 class OfficeController extends Controller
 {
@@ -73,5 +74,16 @@ class OfficeController extends Controller
             return true;
         }
         return false;
+    }
+    public function getEmployees(Request $r)
+    {
+        $employees = DB::table('hr_employee')->where('department', '=', $r->ofc_id)->get();
+        if (count($employees) > 0) {
+            for ($i=0; $i < count($employees); $i++) { 
+                $emp = $employees[$i];
+                $emp->empname = Employee::name($emp->empid);
+            }
+        }
+        return json_encode($employees);
     }
 }

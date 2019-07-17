@@ -6,6 +6,46 @@
 			<i class="fa fa-calendar"></i> Generate DTR 
 		</div>
 		<div class="card-body">
+			<form method="post" action="{{url('timekeeping/generate-dtr/generate-dtr')}}" id="frm-pp" class="mb-2">
+				<div class="form-inline">
+					<div class="form-group mr-2">
+						<label class="mr-1">Month:</label>
+						<select class="form-control mr-2" name="payroll_month" id="payroll_month" required>
+							@foreach(Core::Months() as $key => $value)
+							<option value="{{$key}}" {{($key == date('m')) ? 'selected' : ''}}>{{$value}}</option>
+							@endforeach
+						</select>
+						<label class="mr-1">Payroll Period:</label>
+						<select class="form-control mr-2" name="payroll_period" id="payroll_period" required>
+							<option value="15D">15th Day</option>
+							<option value="30D">30th Day</option>
+						</select>
+						<select class="form-control YearSelector" name="payroll_year" id="payroll_year" required>
+						</select>
+					</div>
+				</div>
+				<div class="form-inline mt-2">
+					<div class="form-group mr-2">
+						<label class="mr-1">Select Office:</label>
+						<select class="form-control" name="payroll_dep" id="payroll_ofc">
+							<option value="" selected="" disabled="">-no office selected-</option>
+							@isset($data[3])
+								@if(count($data[3]) > 0)
+									@foreach($data[3] as $ofc)
+									<option value="{{$ofc->oid}}">{{$ofc->cc_desc}}</option>
+									@endforeach
+								@endif
+							@endisset
+						</select>
+					</div>
+					<div class="form-group">
+						{{-- <button type="button" class="btn btn-primary btn-spin" id="btn-generate-ind">Generate</button> --}}
+						<button type="button" class="btn btn-primary btn-spin" id="btn-generate-ofc">Generate</button>
+					</div>
+				</div>
+			</form>
+		</div>
+		<div class="card-body">
 			<div class="card mb-2">
 				<div class="card-body">
 					<div class="row">
@@ -17,39 +57,17 @@
 										<th>Name</th>
 									</thead>
 									<tbody>
-										@foreach($data[2] as $emp)
+										{{-- @foreach($data[2] as $emp)
 										<tr>
 											<td>{{$emp->empid}}</td>
 											<td>{{$emp->name}}</td>
 										</tr>
-										@endforeach
+										@endforeach --}}
 									</tbody>
 								</table>
 							</div>
 						</div>
 						<div class="col">
-							<form method="post" action="{{url('timekeeping/generate-dtr/generate-dtr')}}" id="frm-pp" class="mb-2">
-								<div class="form-inline">
-									<div class="form-group mr-2">
-										<label class="mr-1">Month:</label>
-										<select class="form-control mr-2" name="payroll_month" id="payroll_month" required>
-											@foreach(Core::Months() as $key => $value)
-											<option value="{{$key}}" {{($key == date('m')) ? 'selected' : ''}}>{{$value}}</option>
-											@endforeach
-										</select>
-										<label class="mr-1">Payroll Period:</label>
-										<select class="form-control mr-2" name="payroll_period" id="payroll_period" required>
-											<option value="15D" {{(date('d') <= 15) ? 'selected' : ''}}>15th Day</option>
-											<option value="30D" {{(date('d') > 15) ? 'selected' : ''}}>30th Day</option>
-										</select>
-										<select class="form-control YearSelector" name="payroll_year" id="payroll_year" required>
-										</select>
-									</div>
-									<div class="form-group">
-										<button type="button" class="btn btn-primary btn-spin" id="btn-generate">Generate</button>
-									</div>
-								</div>
-							</form>
 							<div class="table-responsive mb-2">
 								<table class="table table-bordered">
 									<col width="35%">
@@ -175,6 +193,7 @@
 	<script type="text/javascript">
 		var selected_row = null;
 		var dtr_summary = null;
+		var emp_count = 0;
 		tbl_emp.on('click', 'tbody > tr', function() {
 			$(this).parents('tbody').find('.table-active').removeClass('table-active');
 			selected_row = $(this);
@@ -188,7 +207,7 @@
 		{
 			$('#alert-generate-error').collapse('hide');
 			$('#alert-generate-error-body').empty();
-			$('#btn-generate').attr('disabled', false);
+			$('#btn-generate-ind').attr('disabled', false);
 			$.ajax({
 				type : 'get',
 				url : '{{url('timekeeping/generate-dtr/partial-generation')}}',
@@ -208,7 +227,7 @@
 							for (var i=0; i<d.errors.length; i++) {
 								$('#alert-generate-error-body').append('Missing time logs on '+d.errors[i]+'<br>');
 							}
-							$('#btn-generate').attr('disabled', true);
+							$('#btn-generate-ind').attr('disabled', true);
 							alert("DTR has errors. Cannot be saved.");
 						}
 					} else {
@@ -216,6 +235,11 @@
 					}
 				}
 			});
+		}
+
+		function LoadByOffice()
+		{
+
 		}
 
 		function LoadSummaryTable(data)
@@ -242,6 +266,14 @@
 			]).draw();
 		}
 
+		function LoadEmployeeTable(data)
+		{
+			tbl_emp.row.add([
+				data.empid,
+				data.empname
+			]).draw();
+		}
+
 		// $('#frm-pp').on('submit', function(e) {
 		// 	e.preventDefault();
 			
@@ -257,9 +289,15 @@
 			maintable.search(selected_row.children()[1].innerText).draw();
 		}
 
-		function onToggleSaveDTRModal()
+		function onToggleSaveDTRModal_ind()
 		{
 			$('#frm-add').attr('action', '{{url('timekeeping/generate-dtr/save-dtr')}}?empid='+selected_row.children()[0].innerText+"&ppid="+$('#payroll_period').val());
+			$('#modal-add').modal('show');
+		}
+
+		function onToggleSaveDTRModal_ofc()
+		{
+			$('#frm-add').attr('action', '{{url('timekeeping/generate-dtr/save-dtr/by-department')}}?ppid='+$('#payroll_period').val()+'&ofc_id='+$('#payroll_ofc').val());
 			$('#modal-add').modal('show');
 		}
 
@@ -306,21 +344,37 @@
 			$('#modal-add').modal('hide');
 		});
 
-		$('#btn-generate').on('click', function() {
+		$('#btn-generate-ind').on('click', function() {
 			if (selected_row!=null) {
-				onToggleSaveDTRModal();
+				onToggleSaveDTRModal_ind();
 			} else {
+				$('#spinning-icon').hide();
 				alert("Please select an employee.");
 			}
 		});
 
-		$('#payroll_period').on('change', function() {
-			if (selected_row!=null) {
-				LoadDtrTable();
+		$('#btn-generate-ofc').on('click', function() {
+			if ($('#payroll_ofc').val()!=null) {
+				if (emp_count > 0) {
+					onToggleSaveDTRModal_ofc();
+				} else {
+					$('#spinning-icon').hide();
+					alert("No employees");
+				}
+			} else {
+				$('#spinning-icon').hide();
+				alert("Please select an office.");
 			}
 		});
 
 		$('#payroll_month').on('change', function() {
+			if (selected_row!=null) {
+				LoadDtrTable();
+			}
+			$('#payroll_period').val('15D').trigger('change');
+		});
+
+		$('#payroll_period').on('change', function() {
 			if (selected_row!=null) {
 				LoadDtrTable();
 			}
@@ -330,6 +384,26 @@
 			if (selected_row!=null) {
 				LoadDtrTable();
 			}
+		});
+
+		$('#payroll_ofc').on('change', function() {
+			tbl_emp.clear().draw();
+			emp_count = 0;
+			$.ajax({
+				type : 'get',
+				url : '{{url('master-file/office/get-employees')}}',
+				data : {
+					ofc_id : $('#payroll_ofc').val()
+				},
+				dataTy : 'json',
+				success : function(data) {
+					var d = JSON.parse(data);
+					emp_count = d.length;
+					for (var i = 0; i < d.length; i++) {
+						LoadEmployeeTable(d[i]);
+					}
+				}
+			});
 		});
 	</script>
 @endsection

@@ -38,13 +38,10 @@
 				Route::post('/upload', 'HomeController@uploadImage')->name('home_settings_image	');
 			});
 		});
-		
 		/* HOME */
+
 		/* MASTER FILE */
-
-		// Route::group(['middleware'=>['rights':]]);
-
-		Route::prefix('master-file')->group(function() {
+		Route::group(['prefix'=>'master-file', 'middleware'=>'restrictions', 'restriction'=>'masterfile'], function() {
 			/* DEPARTMENT */
 			// Route::prefix('department')->group(function() {
 			// 	Route::get('/', 'MFile\DepartmentController@view');
@@ -59,6 +56,7 @@
 				Route::post('/', 'MFile\OfficeController@add');
 				Route::post('/update', 'MFile\OfficeController@update');
 				Route::post('/delete', 'MFile\OfficeController@delete');
+				Route::get('/get-employees', 'MFile\OfficeController@getEmployees');
 			});
 			/* DEPARTMENT */
 			/* DEPARTMENT SECTION */
@@ -222,11 +220,12 @@
 			});
 			/* CONTRIBUTION REMITTANCE */
 		});
-
 		/* MASTER FILE */
+		
 
 		/* CALENDAR */
-		Route::prefix('calendar')->group(function() {
+		Route::group(['prefix'=>'calendar', 'middleware'=>'restrictions', 'restriction'=>'calendar'], function() {
+		// Route::prefix('calendar')->group(function() {
 			/* MAIN */
 			Route::get('/', 'Calendar\CalendarMainController@view');
 			Route::get('/get', 'Calendar\CalendarMainController@get_deleted');
@@ -240,7 +239,8 @@
 		/* CALENDAR */
 
 		/* TIMEKEEPING */
-		Route::prefix('timekeeping')->group(function() {
+		Route::group(['prefix'=>'timekeeping', 'middleware'=>'restrictions', 'restriction'=>'timekeeping'], function() {
+		// Route::prefix('timekeeping')->group(function() {
 			/* LOG BOX */
 			Route::prefix('log-box')->group(function() {
 				Route::get('/', 'TimeKeeping\LogBoxController@view');
@@ -293,13 +293,15 @@
 				Route::get('/partial-generation', 'Timekeeping\GenerateDTRController@GenerateDTR');
 				Route::post('/generate-dtr', 'Timekeeping\GenerateDTRController@GenerateDTR');
 				Route::post('/save-dtr', 'Timekeeping\GenerateDTRController@SaveDTR');
+				Route::post('/save-dtr/by-department', 'TimeKeeping\GenerateDTRController@GenerateByEmployee');
 			});
 			/* GENERATE DTR */
 		});
 		/* TIMEKEEPING */
 
 		/* PAYROLL */
-		Route::prefix('payroll')->group(function() {
+		Route::group(['prefix'=>'payroll', 'middleware'=>'restrictions', 'restriction'=>'payroll'], function() {
+		// Route::prefix('payroll')->group(function() {
 			/* LOAN ENTRY */
 			Route::prefix('loan-entry')->group(function() {
 				Route::get('/', 'Payroll\Loan\LoanEntryController@view');
@@ -339,6 +341,11 @@
 				});
 			});
 			/* OTHER EARNINGS */
+			/* OTHER DEDUCTIONS */
+			Route::prefix('other-deductions')->group(function() {
+				Route::get('/', 'Payroll\OtherDeductionMainController@view')->name('odhome');
+			});
+			/* OTHER DEDUCTIONS*/
 			/* GENERATE PAYROLL */
 			Route::prefix('generate-payroll')->group(function() {
 				Route::get('/', 'Payroll\GeneratePayrollController@view');
@@ -370,7 +377,8 @@
 		/* PAYROLL */
 
 		/* REPORTS */
-		Route::prefix('reports')->group(function() {
+		Route::group(['prefix'=>'reports', 'middleware'=>'restrictions', 'restriction'=>'reps'], function() {
+		// Route::prefix('reports')->group(function() {
 			Route::prefix('timekeeping')->group(function() {
 				Route::prefix('EmployeeDTR')->group(function() {
 					Route::get('/', 'Reports\PrintEmployeeDTRController@view');
@@ -397,7 +405,8 @@
 		/* REPORTS */
 
 		/* RECORDS */
-		Route::prefix('records')->group(function() {
+		Route::group(['prefix'=>'records', 'middleware'=>'restrictions', 'restriction'=>'recs'], function() {
+		// Route::prefix('records')->group(function() {
 			/* SERVICE RECORD */
 			Route::prefix('service-record')->group(function(){
 				Route::get('/', 'Records\ServiceRecordController@view');
@@ -408,8 +417,9 @@
 		/* RECORDS */
 
 		/* SETTINGS */
+		Route::group(['prefix'=>'settings', 'middleware'=>'restrictions', 'restriction'=>'setts'], function() {
 			// Route::get('/maintenance-mode/{var}', 'WebsiteController@MaintenanceMode')->name('website.maintenancemode');
-		Route::prefix('settings')->group(function() {
+		// Route::prefix('settings')->group(function() {
 			/* SYSTEM DATA UPDATE */
 			Route::prefix('payrollsettings')->group(function() {
 				Route::get('', 'Settings\PayrollSettingsController@view');

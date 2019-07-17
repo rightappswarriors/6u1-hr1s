@@ -477,7 +477,7 @@ class Core extends Model
     	$datetime1 = date_create(date('Y-m-d',strtotime($date_1)));
 	    $datetime2 = date_create(date('Y-m-d', strtotime($date_2)));
 	    $interval = date_diff($datetime1, $datetime2);
-	    $interval = $interval->format('%a');
+	    $interval = $interval->format('%a'); 
 	    $workdays = [];
 	    
 	    list($year, $month, $day) = explode("-", $date_1);
@@ -802,7 +802,7 @@ class Core extends Model
     		7 => 'July',
     		8 => 'August',
     		9 => 'September',
-    		0 => 'October',
+    		10 => 'October',
     		11 => 'November',
     		12 => 'December',
     	];

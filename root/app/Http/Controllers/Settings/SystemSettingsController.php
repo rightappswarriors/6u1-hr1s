@@ -38,17 +38,17 @@ class SystemSettingsController extends Controller
 
     public function view()
     {
-        if(Session::get('_user')[0]->grp_id == "001") {
+        // if(Session::get('_user')[0]->grp_id == "001") {
             $data = (array) [$this->ghistory][0];
             $size = $this->size;
 
             // dd($data);
 
             return view('pages.settings.system_settings', compact('data', 'size'));
-        } else {
-            Core::Set_Alert('warning', 'It seems like you do not have the rights to open this page. Ask your administrator for access.');
-            return back();
-        }
+        // } else {
+        //     Core::Set_Alert('warning', 'It seems like you do not have the rights to open this page. Ask your administrator for access.');
+        //     return back();
+        // }
     }
 
     public function update(Request $r)

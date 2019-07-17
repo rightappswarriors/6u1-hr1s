@@ -22,14 +22,13 @@ class GeneratePayrollController extends Controller
     public function __construct()
     {
     	$this->ghistory = DB::table('hr_emp_payroll2')->orderBy('date_generated', 'DESC')->orderBy('time_generated', 'DESC')->get();
+        $this->dtrsum = DB::table('hr_dtr_sum_hdr')->join('hr_dtr_sum_employees', 'hr_dtr_sum_hdr.code', '=', 'hr_dtr_sum_employees.dtr_sum_id')->where('isgenerated', '=', 0)->orderBy('date_generated', 'DESC')->orderBy('time_generated', 'ASC')->get();
     }
 
     // Redirects to blade
     public function view()
     {
-    	$ghistory = $this->ghistory;
-    	// dd($ghistory);
-    	$data = [DB::table('hr_dtr_sum_hdr')->orderBy('date_generated', 'DESC')->orderBy('time_generated', 'ASC')->get(),$ghistory];
+    	$data = [$this->dtrsum,$this->ghistory];
         // dd($data);
     	return view('pages.payroll.generate_payroll', compact('data'));
     }
@@ -38,12 +37,10 @@ class GeneratePayrollController extends Controller
     public function find_dtr(Request $r)
     {
         try {
-            $return = (object)[];
-            $dtr_summaries = DB::table('hr_dtr_sum_employees')->where('isgenerated', 0)->get();
-            $return->dtr_summaries = $dtr_summaries;
+            $return_val = (object)[];
             $pp = Payroll::PayrollPeriod2($r->month, $r->payroll_period);
-            $return->search = date('Y-m-d', strtotime($pp->from))." to ".date('Y-m-d', strtotime($pp->to));
-            return json_encode( $return);
+            $return_val->search = date('Y-m-d', strtotime($pp->from))." to ".date('Y-m-d', strtotime($pp->to));
+            return json_encode( $return_val);
         } catch (\Exception $e) {
             return "error". $e->getMessage();
         }
@@ -65,7 +62,7 @@ class GeneratePayrollController extends Controller
             $results = [];
             // $errors = [];
             $test_arr = [];
-            $payroll = (object)[];
+            $return_val = (object)[];
 
             // Get records that is not generated yet
             $pp = Payroll::PayrollPeriod2($r->month,$r->payroll_period); if ($pp =="error") { return "no pp"; }
@@ -249,7 +246,10 @@ class GeneratePayrollController extends Controller
                         array_push($results, "Error on attempt no.".$i." (".$e->getMessage().")");
                     }
                 }
-                return $results;
+                $return_val->results = $results;
+                $return_val->ghistory = $this->ghistory;
+                $return_val->dtrsum = $this->dtrsum;
+                return $return_val;
             } else {
                 return "no record";
             }

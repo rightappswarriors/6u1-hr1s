@@ -13,7 +13,7 @@ class EmployeeController extends Controller
 {
     public function __construct()
     {
-        $SQLOffice = "SELECT oid,* FROM rssys.m08 WHERE active = TRUE";
+        $SQLOffice = "SELECT oid,* FROM rssys.m08 WHERE active = TRUE ORDER BY cc_desc ASC";
         $this->office= DB::select($SQLOffice);
         $SQLDept = "SELECT * FROM hris.hr_department WHERE COALESCE(cancel, cancel, '')<>'Y' ORDER BY dept_name ASC";
         $this->dept = DB::select($SQLDept);

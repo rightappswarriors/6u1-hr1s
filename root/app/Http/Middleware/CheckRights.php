@@ -4,25 +4,27 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Session;
-use Core;
 
 class CheckRights
 {
-    // Check authentication session.
-    public function handle($request, Closure $next, $level)
+    /**
+     * Handle an incoming request.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \Closure  $next
+     * @return mixed
+     */
+    public function handle($request, Closure $next)
     {
+        $currAction = $request->route()->getAction();
+        $req = $currAction['restriction'];
 
-        if(intval(Session::get('_user')[0]->grp_id) < $level) {
-            return redirect('/home');
+        $arr_rest = explode(', ', Session::get('_user')[0]->restriction);
+
+        if(!in_array($req, $arr_rest)) {
+            return redirect('/error/2');
         }
 
-        $this->RefreshSession(Session::get('_user'));
         return $next($request);
     }
-
-    public function RefreshSession($session)
-    {
-        Session::put('_user', $session);
-    }
-
 }

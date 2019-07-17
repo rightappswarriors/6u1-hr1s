@@ -47,7 +47,7 @@
     </a>
   </li>
   {{-- USER MENU --}}
-  <li class="nav-item" id="masterfile">
+  <li class="nav-item" id="masterfile" hidden>
     <a class="nav-link nav-link-collapse collapsed" data-toggle="collapse" href="#MF" aria-expanded="false">
       <i class="fa fa-fw fa-key"></i>
       <span>Master File</span>
@@ -114,13 +114,13 @@
       </li> --}}
     </ul>
   </li>
-  <li class="nav-item" id="calendar">
+  <li class="nav-item" id="calendar" hidden>
     <a class="nav-link" href="{{url('calendar/')}}">
       <i class="fa fa-calendar"></i>
       <span>Calendar</span>
     </a>
   </li>
-  <li class="nav-item" id="timekeeping">
+  <li class="nav-item" id="timekeeping" hidden>
     <a class="nav-link nav-link-collapse collapsed" data-toggle="collapse" href="#TK" aria-expanded="false">
       <i class="fa fa-fw fa-clock-o"></i>
       <span>Timekeeping</span>
@@ -149,7 +149,7 @@
       </li>
     </ul>
   </li>
-  <li class="nav-item" id="payroll">
+  <li class="nav-item" id="payroll" hidden>
     <a class="nav-link nav-link-collapse collapsed" data-toggle="collapse" href="#PR" aria-expanded="false">
       <i class="fa fa-fw fa-money"></i>
       <span>Payroll</span>
@@ -170,8 +170,8 @@
       <li id="payrollother-earnings">
         <a href="{{url('payroll/other-earnings')}}">Other Earnings</a>
       </li>
-      <li id="">
-        <a href="#">Other Deductions Entry</a>
+      <li id="payrollother-deductions">
+        <a href="{{url('payroll/other-deductions')}}">Other Deductions Entry</a>
       </li>
       <li class="nav-separator"></li>
       <li id="payrollgenerate-payroll">
@@ -188,7 +188,7 @@
       </li> --}}
     </ul>
   </li>
-  <li class="nav-item" id="reps">
+  <li class="nav-item" id="reps" hidden>
     <a class="nav-link nav-link-collapse collapsed" data-toggle="collapse" href="#Reports" aria-expanded="false">
       <i class="fa fa-fw fa-file"></i>
       <span>Reports</span>
@@ -261,7 +261,7 @@
       </li>
     </ul>
   </li>
-  <li class="nav-item" id="recs">
+  <li class="nav-item" id="recs" hidden>
     <a class="nav-link nav-link-collapse collapsed" data-toggle="collapse" href="#Records" aria-expanded="false">
       <i class="fa fa-fw fa-book"></i>
       <span>Records</span>
@@ -275,7 +275,7 @@
       </li> --}}
     </ul>
   </li>
-  <li class="nav-item" id="setts">
+  <li class="nav-item" id="setts" hidden>
     <a class="nav-link nav-link-collapse collapsed" data-toggle="collapse" href="#Settings" aria-expanded="false">
       <i class="fa fa-fw fa-wrench"></i>
       <span>Settings</span>
@@ -288,9 +288,9 @@
         <a href="{{url('settings/payrollsettings')}}">Payroll Settings</a>
       </li>
       <li class="nav-separator"></li>
-      <li id="settingsgroup-rights">
+      {{-- <li id="settingsgroup-rights">
         <a href="{{url('settings/group-rights')}}">Group Rights Settings</a>
-      </li>
+      </li> --}}
       <li id="settingsuser">
         <a href="{{url('settings/user')}}">User Settings</a>
       </li>
@@ -365,10 +365,6 @@
     }
 
     @isset(Account::CURRENT()->restriction)
-      @foreach(X05S::Load_All() as $k => $v)
-        $('#'+'{{$v->id}}')[0].setAttribute('hidden', '');
-      @endforeach
-
       @foreach(X05S::Load_All() as $k => $v)
         if('{{Account::CURRENT()->restriction}}'.split(', ').includes('{{$v->id}}')) {
           $('#'+'{{$v->id}}')[0].removeAttribute('hidden');

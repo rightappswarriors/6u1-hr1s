@@ -55,7 +55,7 @@
 @endphp
 
 <div class="myimg-frame-big" align="center">
-	<img src="{{url($img_path)}}">
+	<img src="{{url($img_path)}}" style="width: 400px">
 </div>
 <div class="mt-2" align="center">
 	<h2>{{$msg_header}}</h2>

@@ -53,7 +53,7 @@ class LoanEntryController extends Controller
 
         $dpm = number_format( floatval($r->txt_amnt_loan) / floatval($r->txt_mo_tbp) , 2, '.', ''); // deduc per month
 
-        $data = ['loan_code'=>$r->txt_code, 'loan_desc'=>$r->txt_desc, 'loan_transdate'=>$r->dtp_trnxdt, 'loan_location'=>$r->cbo_stocklocation, 'loan_type'=>$r->cbo_contraacct, 'user_id'=>Account::CURRENT()->uid, 'whs_location_code'=>$r->cbo_stocklocation/*, 'loan_cost_center_code'=>$r->cbo_costcenter*/, 'loan_cost_center_name'=>$r->cbo_costcenter/*, 'loan_sub_cost_center'=>$r->cbo_scc*/, 'loan_amount'=>$r->txt_amnt_loan, 'loan_deduction'=>$dpm/*, 'deduction_date'=>$r->dtp_deduction*/, 'employee_no'=>$r->empid, 'employee_name'=>$emp->firstname.' '.$emp->lastname, 'months_to_be_paid'=>$r->txt_mo_tbp];
+        $data = ['loan_code'=>$r->txt_code, 'loan_desc'=>$r->txt_desc, 'loan_transdate'=>$r->dtp_trnxdt, 'loan_location'=>$r->cbo_stocklocation, 'loan_type'=>$r->cbo_contraacct, 'user_id'=>Account::CURRENT()->uid, 'whs_location_code'=>$r->cbo_stocklocation/*, 'loan_cost_center_code'=>$r->cbo_costcenter*/, 'loan_cost_center_name'=>$r->cbo_costcenter/*, 'loan_sub_cost_center'=>$r->cbo_scc*/, 'loan_amount'=>$r->txt_amnt_loan, 'loan_deduction'=>$dpm/*, 'deduction_date'=>$r->dtp_deduction*/, 'employee_no'=>$r->empid, 'employee_name'=>$emp->firstname.' '.$emp->lastname, 'months_to_be_paid'=>$r->txt_mo_tbp, 'period_to_pay'=>$r->cbo_per_tp];
         try {
 
             DB::table(Loan::$tbl_name)->insert($data);
@@ -77,6 +77,7 @@ class LoanEntryController extends Controller
                     $sql[$i]->loan_transdate = \Carbon\Carbon::parse($sql[$i]->loan_transdate)->format('M d, Y');
                     $sql[$i]->emp_name = Employee::GetEmployee($sql[$i]->employee_no)->lastname.', '.Employee::GetEmployee($sql[$i]->employee_no)->firstname.' '.Employee::GetEmployee($sql[$i]->employee_no)->mi;
                     $sql[$i]->deduction_date = \Carbon\Carbon::parse($sql[$i]->deduction_date)->format('M d, Y');
+                    $sql[$i]->period_readable = ($sql[$i]->period_to_pay == "30")?"30th day":"15th day";
                 }
                 return $sql;
             } else {
@@ -94,7 +95,7 @@ class LoanEntryController extends Controller
 
         $dpm = number_format( floatval($r->txt_amnt_loan) / floatval($r->txt_mo_tbp) , 2, '.', ''); // deduc per month
 
-        $data = ['loan_code'=>$r->txt_code, 'loan_desc'=>$r->txt_desc, 'loan_transdate'=>$r->dtp_trnxdt, 'loan_location'=>$r->cbo_stocklocation, 'loan_type'=>$r->cbo_contraacct, 'user_id'=>Account::CURRENT()->uid, 'whs_location_code'=>$r->cbo_stocklocation/*, 'loan_cost_center_code'=>$r->cbo_costcenter*/, 'loan_cost_center_name'=>$r->cbo_costcenter/*, 'loan_sub_cost_center'=>$r->cbo_scc*/, 'loan_amount'=>$r->txt_amnt_loan, 'loan_deduction'=>$dpm/*, 'deduction_date'=>$r->dtp_deduction*/, 'employee_no'=>$r->empid, 'employee_name'=>$emp->firstname.' '.$emp->lastname, 'months_to_be_paid'=>$r->txt_mo_tbp];
+        $data = ['loan_code'=>$r->txt_code, 'loan_desc'=>$r->txt_desc, 'loan_transdate'=>$r->dtp_trnxdt, 'loan_location'=>$r->cbo_stocklocation, 'loan_type'=>$r->cbo_contraacct, 'user_id'=>Account::CURRENT()->uid, 'whs_location_code'=>$r->cbo_stocklocation/*, 'loan_cost_center_code'=>$r->cbo_costcenter*/, 'loan_cost_center_name'=>$r->cbo_costcenter/*, 'loan_sub_cost_center'=>$r->cbo_scc*/, 'loan_amount'=>$r->txt_amnt_loan, 'loan_deduction'=>$dpm/*, 'deduction_date'=>$r->dtp_deduction*/, 'employee_no'=>$r->empid, 'employee_name'=>$emp->firstname.' '.$emp->lastname, 'months_to_be_paid'=>$r->txt_mo_tbp, 'period_to_pay'=>$r->cbo_per_tp];
         try {
             DB::table(Loan::$tbl_name)->where(Loan::$pk, $r->txt_code)->update($data);
             Core::Set_Alert('success', 'Successfully modified a Loan Entry.');

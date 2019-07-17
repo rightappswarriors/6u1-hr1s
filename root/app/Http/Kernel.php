@@ -42,7 +42,7 @@ class Kernel extends HttpKernel
             \App\Http\Middleware\CheckAuth::class,
         ],
 
-        'rights' => [
+        'restrictions' => [
             \App\Http\Middleware\CheckRights::class,
         ],
 

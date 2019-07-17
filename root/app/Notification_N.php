@@ -10,7 +10,6 @@ use X08;
 
 class Notification_N extends Model
 {
-	// Load all loans
 
     public static $tbl_name = "notification";
     public static $tbl_name_2 = "notification_user";

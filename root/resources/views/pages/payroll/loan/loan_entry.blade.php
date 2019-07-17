@@ -59,16 +59,17 @@
 									<thead>
 										<tr>
 											<th>Code</th>
-											<th>Employee Name</th>
-											<th>Transaction Date</th>
+											<th>Employee <br>Name</th>
+											<th>Transaction <br>Date</th>
 											{{-- <th>Location</th>
 											<th>Warehouse Location</th> --}}
-											<th>Loan Type</th>
+											<th>Loan <br>Type</th>
 											{{-- <th>Cost Center</th> --}}
+											<th>Period <br>to Pay</th>
 											<th>Amount</th>
 											<th>Deduction</th>
 											<th>Months to <br> be Paid</th>
-											<th>Description</th>
+											<th>Reason</th>
 											{{-- <th>Deduction Date</th> --}}
 										</tr>
 									</thead>
@@ -125,7 +126,7 @@
 @section('to-modal')
 	<!-- Add Modal -->
 	<div class="modal fade" id="modal-pp" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-		<div class="modal-dialog" role="document">
+		<div class="modal-dialog modal-lg" role="document">
 			<div class="modal-content">
 				<div class="modal-header">
 					<h5 class="modal-title" id="exampleModalLabel">Info</h5>
@@ -138,12 +139,11 @@
 						@csrf
 						<input type="hidden" class="form-control" name="empid" readonly hidden required>
 						<span class="AddMode">
-							<div class="row">
-								<div class="col"> <!-- Column 1 -->
-									<div class="form-group">
-										<label>Issuance No.:</label>
-										<input type="text" name="txt_code" style="text-transform: uppercase;" class="form-control" maxlength="8" placeholder="XXX" required>
-									</div>
+							<div class="row mb-2">
+								<div class="col-6"> 
+									<!-- Column 1 Row 1 -->
+									<b>Basic Information</b>
+									<div class="dropdown-divider"></div>
 									<div class="form-group">
 										<label>Employee:</label>
 										<input type="text" class="form-control" name="cbo_employee_txt" id="cbo_employee_txt" readonly required>
@@ -155,9 +155,15 @@
 										</select>
 									</div>
 									<div class="form-group">
-										<label>Description:</label>
+										<label>Reason:</label>
 										<textarea type="text" name="txt_desc" style="" class="form-control" maxlength="100" required></textarea>
 									</div>
+								</div>
+
+								<div class="col-6">
+									<!-- Column 2 Row 1 -->
+									<b>Loan Details</b>
+									<div class="dropdown-divider"></div>
 									<div class="form-group">
 										<label>Loan Type:</label>
 										<select name="cbo_contraacct" id="" style="text-transform: uppercase;" class="form-control" required>
@@ -177,9 +183,19 @@
 										</select>
 									</div>
 									<div class="form-group">
-										<label>Transaction Date:</label>
-										<input type="text" name="dtp_trnxdt" class="form-control" id="trans_date" value="{{date('m/d/Y')}}" required readonly>
+										<label>Period to pay:</label>
+										<select name="cbo_per_tp" style="text-transform: uppercase;" class="form-control" required>
+											<option value="" selected hidden disabled>---</option>
+											<option value="15">15th Day</option>
+											<option value="30">30th Day</option>
+										</select>
 									</div>
+								</div> 
+							</div>
+
+
+							<div class="row">
+								<div class="col-6">
 									{{-- <div class="form-group">
 										<label>Cost Center:</label>
 										<select name="cbo_costcenter" id="" style="text-transform: uppercase;" class="form-control" required>
@@ -198,6 +214,13 @@
 											@endfor
 										</select>
 									</div> --}}
+									<!-- Column 1 Row 2 -->
+									<b>Transaction Details</b>
+									<div class="dropdown-divider"></div>
+									<div class="form-group">
+										<label>Transaction Date:</label>
+										<input type="text" name="dtp_trnxdt" class="form-control" id="trans_date" value="{{date('m/d/Y')}}" required readonly>
+									</div>
 									<div class="form-group">
 										<label>Amount of loan:</label>
 										<input type="number" name="txt_amnt_loan" class="form-control" required>
@@ -205,6 +228,15 @@
 									<div class="form-group">
 										<label>Months to be paid:</label>
 										<input type="number" name="txt_mo_tbp" class="form-control" required>
+									</div>
+								</div>
+								<div class="col-6">
+									<!-- Column 2 Row 2 -->
+									<b>Summary</b>
+									<div class="dropdown-divider"></div>
+									<div class="form-group">
+										<label>Issuance No.:</label>
+										<input type="text" name="txt_code" style="text-transform: uppercase;" class="form-control" maxlength="8" placeholder="XXX" required>
 									</div>
 									<div class="form-group">
 										<label>Deduction per month:</label>
@@ -335,6 +367,7 @@
 			$('select[name="cbo_costcenter"]').val(data.loan_cost_center_code).trigger('change');
 			$('select[name="cbo_scc"]').val(data.loan_sub_cost_center).trigger('change');
 			$('input[name="txt_mo_tbp"]').val(data.loan_amount);
+			$('select[name="cbo_per_tp"]').val(data.period_to_pay).trigger('change');
 			$('input[name="txt_amnt_loan"]').val(data.months_to_be_paid);
 			$('input[name="txt_deduction"]').val(data.loan_deduction);
 			$('input[name="dtp_deduction"]').val(data.deduction_date);
@@ -352,6 +385,7 @@
 			$('input[name="dtp_trnxdt"]').val('{{date('m-d-Y')}}');
 			$('select[name="cbo_costcenter"]').val('').trigger('change');
 			$('select[name="cbo_scc"]').val('').trigger('change');
+			$('select[name="cbo_per_tp"]').val('').trigger('change');
 			$('input[name="txt_amnt_loan"]').val(''); 
 			$('input[name="txt_mo_tbp"]').val(1);
 			$('input[name="txt_deduction"]').val('');
@@ -365,6 +399,7 @@
 				data.emp_name,
 				data.loan_transdate,
 				data.type_readable,
+				data.period_readable,
 				data.loan_amount,
 				data.loan_deduction,
 				data.months_to_be_paid,

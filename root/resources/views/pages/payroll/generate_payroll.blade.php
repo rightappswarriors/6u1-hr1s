@@ -22,6 +22,7 @@
 						<select class="form-control mr-2 YearSelector" id="year" name="year">
 						</select>
 						<button type="submit" class="btn btn-primary"><i class="fa fa-search"></i></button>
+						<button type="button" class="btn btn-primary" onclick="ClearSearch()"><i class="fa fa-eraser"></i></button>
 						<button type="button" class="btn btn-primary" onclick="GeneratePayroll()">Generate</button>
 					</form>
 				</div>
@@ -30,7 +31,7 @@
 		<div class="card-header">
 			<div class="row">
 				<div class="col">
-					<i class="fa fa-clock-o"></i> Generated DTR Summary
+					<i class="fa fa-clock-o"></i> Available DTR Summary
 				</div>
 				<div class="col border-left">
 					<i class="fa fa-clock-o"></i> Generated Payroll History
@@ -118,10 +119,17 @@
 				success : function(data)
 				{
 					var d = JSON.parse(data);
+					dataTable_gds.search(d.search).draw();
 					dataTable_gdh.search(d.search).draw();
 				}
 			});
 		});
+
+		function ClearSearch()
+		{
+			dataTable_gds.search('').draw();
+			dataTable_gdh.search('').draw();
+		}
 
 		function GeneratePayroll()
 		{
@@ -136,15 +144,16 @@
 					if (data == "no record") {
 						alert("No generated DTR available.");
 					} else {
-						if (data.length > 0) {
-							for (var i = 0; i < data.length; i++) {
-								var d = data[i];
-								var e = d.split(":");
-								if (e[1]!="ok") {
-									alert(d);
-								}
-							}
-						}
+						console.log(data);
+						// if (data.length > 0) {
+						// 	for (var i = 0; i < data.length; i++) {
+						// 		var d = data[i];
+						// 		var e = d.split(":");
+						// 		if (e[1]!="ok") {
+						// 			alert(d);
+						// 		}
+						// 	}
+						// }
 					}
 				}
 			});

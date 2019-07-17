@@ -22,6 +22,7 @@ class HomeController extends Controller
 
     public function view()
     {
+        // dd(in_array('masterfile', explode(', ', Session::get('_user')[0]->restriction)));
         try {
 
             $dtr = DTR::GetTimedInToday(); /*dd($dtr[0]->status);*/

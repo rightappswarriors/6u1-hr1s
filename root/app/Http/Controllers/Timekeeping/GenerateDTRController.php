@@ -4,11 +4,13 @@ namespace App\Http\Controllers\Timekeeping;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\MFile\OfficeController;
 use Core;
 use DB;
 use Employee;
 use ErrorCode;
 use PayrollPeriod;
+use Office;
 use Payroll;
 use Session;
 use Timelog;
@@ -22,12 +24,14 @@ class GenerateDTRController extends Controller
     {
     	$this->employees = Employee::Load_Employees();
     	$this->payrollperiod = PayrollPeriod::Load_PayrollPeriod();
+        $this->office = Office::get_all();
     }
 
     public function view()
     {
     	$dh = $this->LoadDTRHistory();
     	$emp = $this->employees;
+        $ofc = $this->office;/* dd($ofc);*/
     	for($i=0;$i<count($dh);$i++) {
     		$pp = /*PayrollPeriod::getPayrollPeriod($dh[$i]->ppid)*/ null;
     		$dh[$i]->pp = $pp[0]." to ".$pp[1];
@@ -36,7 +40,7 @@ class GenerateDTRController extends Controller
     	for ($i=0; $i < count($emp); $i++) { 
     		$emp[$i]->name = Employee::Name($emp[$i]->empid);
     	}
-    	$data = [$dh, $this->payrollperiod, $emp];
+    	$data = [$dh, $this->payrollperiod, $emp, $ofc];
     	return view('pages.timekeeping.generate_dtr', compact('data'));
     }
 
@@ -52,6 +56,12 @@ class GenerateDTRController extends Controller
         | *Some values are from different models
         | *Be wary when changing values that came from other models/controllers for some of them
         | are connected to other models/controllers as well
+        */
+        /**
+        * @param $r->code
+        * @param $r->pp
+        * @param $r->month
+        * @param $r->year
         */
         try {
             $late = "00:00";
@@ -78,7 +88,6 @@ class GenerateDTRController extends Controller
             $totalleave = 0;
             $errors = [];
             $errors2 = [];
-
 
             for ($i=0; $i < count($workdays); $i++) { 
                 // $day = $pp->start+$i;
@@ -178,7 +187,7 @@ class GenerateDTRController extends Controller
             return json_encode($data);
 	    } catch (\Exception $e) {
             ErrorCode::Generate('controller', 'GenerateDTRController', '00002', $e->getMessage());
-	    	return $e->getMessage();
+	    	// return $e->getMessage();
 	    	return "error";
 	    }
     }
@@ -272,5 +281,31 @@ class GenerateDTRController extends Controller
             ErrorCode::Generate('controller', 'GenerateDTRController', '00005', $e->getMessage());
             return "error";
         }
+    }
+
+    public function GenerateByEmployee(Request $r) //continue here
+    {
+        // return dd($r->all());
+        try {
+            $OfficeController = new OfficeController;
+            $employees = $OfficeController->getEmployees($r);
+            return $employees;
+            if (count($employees) > 0) {
+                for ($i=0; $i < count($employees); $i++) { 
+                    $emp = $employees[$i];
+                    $this->CheckDTR($emp->empid, $r->ppid);
+                }
+            } else {
+                return "no employees";
+            }
+        } catch (\Exception $e) {
+            ErrorCode::Generate('controller', 'GenerateDTRController', '00006', $e->getMessage());
+            return "error";
+        }
+    }
+
+    public function CheckDTR($empid, $pp, $form, $to)
+    {
+
     }
 }

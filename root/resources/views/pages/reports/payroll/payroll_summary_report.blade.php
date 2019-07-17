@@ -89,7 +89,7 @@
 	<script type="text/javascript">
 		function ExportPS()
 		{
-			PrintPage('{{url('reports/payroll/payroll-summary-report/export')}}?pp='+$('#payroll_period').val()+'&year='+$('#year').val()+'&month='+$('#month').val());
+			PrintPage('{{url('reports/payroll-summary-report/export')}}?pp='+$('#payroll_period').val()+'&year='+$('#year').val()+'&month='+$('#month').val());
 		}
 
 		function SearchOnTable()
@@ -117,7 +117,7 @@
 		function PrintPayslip()
 		{
 			if (selected_row != null) {
-				PrintPage('{{url('reports/payroll/payroll-summary-report/print')}}?item_no='+selected_row.attr('data'));
+				PrintPage('{{url('reports/payroll-summary-report/print')}}?item_no='+selected_row.attr('data'));
 			} else {
 				alert("No selected payroll.");
 			}
