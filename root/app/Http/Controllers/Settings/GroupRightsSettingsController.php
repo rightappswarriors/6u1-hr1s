@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use DB;
 use Core;
 use Employee;
+use X05S;
 use X07;
 
 class GroupRightsSettingsController extends Controller
@@ -29,7 +30,7 @@ class GroupRightsSettingsController extends Controller
                 }
             }
         }
-        $data = [$this->employees, $groups, 'nogr' => $a];
+        $data = [$this->employees, $groups, 'nogr' => $a, X05S::Load_All()];
     	return view('pages.settings.group_rights_settings', compact('data'));
     }
 
@@ -78,4 +79,48 @@ class GroupRightsSettingsController extends Controller
         }
     }
 
+    ////////////////////////////////////////////////// NEW //////////////////////////////////////////////////
+
+    public function EditRights(Request $r)
+    {
+        try {
+            $res = implode(', ', $r->restrictions);
+            $data = ['restrictions' => $res];
+            return DB::table('x07')->where('grp_id', $r->restriction_grpid)->update($data);
+        } catch (Exception $e) {
+            return "error";
+        }
+    }
+
+    public function AddRights_New(Request $r)
+    {
+        try {
+            $latest_entry = DB::table('x07')->get();
+            foreach($latest_entry as $k => $v) {
+                if($v->grp_desc == strtoupper($r->txt_grp)) {
+                    return "Group already exist";
+                }
+            }
+
+            $latest_id = Core::get_nextincrementlimitchar(Core::getm99('grp_id'), 3);
+            $flag = DB::table('x07')->insert(['grp_id'=>$latest_id, 'grp_desc'=>$r->txt_grp]);
+            if(!$flag) 
+                return "query error";
+            else {
+                Core::updatem99('grp_id', $latest_id);
+                return "okay";
+            }
+        } catch (Exception $e) {
+            return "error";
+        }
+    }
+
+    public function DeleteRights(Request $r)
+    {
+        try {
+            return DB::table('x07')->where('grp_id', $r->hidden_txt_id)->update(['cancel'=> true]);
+        } catch (Exception $e) {
+            return "error";
+        }
+    }
 }

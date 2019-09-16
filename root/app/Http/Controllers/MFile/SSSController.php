@@ -93,4 +93,43 @@ class SSSController extends Controller
     		return back();
     	}
 	}
+
+	public function sss_add(Request $r)
+	{
+		$data = ['description' => $r->desc];
+		try {
+			SSS::Add($data);
+			Core::Set_Alert('success', 'Successfully added a SSS Loan Type.');
+    		return "Okay";
+		} catch (\Illuminate\Database\QueryException $e) {
+    		Core::Set_Alert('danger', $e->getMessage());
+    		return "Error";
+    	}
+	}
+
+	public function sss_edit(Request $r)
+	{
+		$data = ['description' => $r->desc];
+		try {
+			SSS::Edit($r->sss_sub_id, $data);
+			Core::Set_Alert('success', 'Successfully edited a SSS Loan Type.');
+    		return "Okay";
+		} catch (\Illuminate\Database\QueryException $e) {
+    		Core::Set_Alert('danger', $e->getMessage());
+    		return "Error";
+    	}
+	}
+
+	public function sss_del(Request $r)
+	{
+		$data = ['cancel' => true];
+		try {
+			SSS::Del($r->sss_sub_id, $data);
+			Core::Set_Alert('success', 'Successfully deleted a SSS Loan Type.');
+    		return "Okay";
+		} catch (\Illuminate\Database\QueryException $e) {
+    		Core::Set_Alert('danger', $e->getMessage());
+    		return "Error";
+    	}
+	}
 }

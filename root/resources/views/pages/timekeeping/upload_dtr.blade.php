@@ -16,10 +16,10 @@
 				{{csrf_field()}}
 				<div class="form-group">
 					<label class="mr-2">DTR File:</label>
-					<input type="file" name="file_dtr" class="form-control" placeholder="Answer">
+					<input type="file" name="file_dtr" class="form-control" placeholder="Answer" disabled="">
 				</div>
 				<div class="ml-2 form-group">
-					<button type="submit" class="btn btn-success btn-spin" onclick="event.preventDefault();document.getElementById('frm-uploaddtr').submit();">Upload</button>
+					<button type="submit" class="btn btn-success btn-spin" onclick="event.preventDefault();document.getElementById('frm-uploaddtr').submit();" disabled="">Upload</button>
 				</div>
 			</form>
 		</div>

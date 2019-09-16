@@ -109,49 +109,56 @@
 
                         <div class="row" id="data_row">
                             @isset($data[0])
+                                @php
+                                @endphp
                                 @foreach($data[0] as $k => $v)
                                     <div class="col-sm-4">
-                                        <div class="card m-2">
-                                            @if(Employee::GetEmployee($v->empid)!=null)
-                                            <div class="card-header">
-                                                <center><b>{{Employee::Name($v->empid)}}</b></center>
-                                                <center>{{Employee::GetJobTitle($v->empid)}}</center>
+                                        @if(!Timelog::IfEmployeeAlreadyOut($v->empid, date('Y-m-d')))
+                                            @php
+                                                // $
+                                            @endphp
+                                            <div class="card m-2">
+                                                @if(Employee::GetEmployee($v->empid)!=null)
+                                                    <div class="card-header">
+                                                        <center><b>{{Employee::Name($v->empid)}}</b></center>
+                                                        <center>{{Employee::GetJobTitle($v->empid)}}</center>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <div class="nav-profile">
+                                                            @if(Employee::GetEmployee($v->empid)->picture != "")
+                                                                <center>
+                                                                    <img src="{{asset('images/profile-imgs/'.Employee::GetEmployee($v->empid)->picture.'.jpg')}}" style="width: 50% !important">
+                                                                </center>
+                                                            @else
+                                                                <center>
+                                                                    <img src="{{asset('images/profile-imgs/profile_user2.jpg')}}" style="width: 50% !important">
+                                                                </center>
+                                                            @endif
+                                                            
+                                                        </div>
+                                                    </div>
+                                                    <div class="card-footer">
+                                                        @if($v->status == "1")<b style="color: #3a4">TIME IN</b> @else <b style="color: #e34">TIME OUT</b>  @endif
+                                                        
+                                                        <b>: {{date('h:ia', strtotime($v->time_log))}} {{\Carbon\Carbon::parse($v->work_date)->format('M d, Y')}}</b>
+                                                    </div>
+                                                @else
+                                                    <div class="card-header">
+                                                        <center>USER NOT FOUND</center>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <div class="nav-profile">
+                                                            <center>
+                                                                <img src="{{asset('images/profile-imgs/user-error.png')}}" style="width: 50% !important">
+                                                            </center>
+                                                        </div>
+                                                    </div>
+                                                    <div class="card-footer">
+                                                        <center>ERROR LOADING USER INFO</center>
+                                                    </div>
+                                                @endif
                                             </div>
-                                            <div class="card-body">
-                                                <div class="nav-profile">
-                                                    @if(Employee::GetEmployee($v->empid)->picture != "")
-                                                        <center>
-                                                            <img src="{{asset('images/profile-imgs/'.Employee::GetEmployee($v->empid)->picture.'.jpg')}}" style="width: 50% !important">
-                                                        </center>
-                                                    @else
-                                                        <center>
-                                                            <img src="{{asset('images/profile-imgs/profile_user2.jpg')}}" style="width: 50% !important">
-                                                        </center>
-                                                    @endif
-                                                    
-                                                </div>
-                                            </div>
-                                            <div class="card-footer">
-                                                @if($v->status == "1")<b style="color: #3a4">TIME IN</b> @else <b style="color: #e34">TIME OUT</b>  @endif
-                                                
-                                                <b>: {{date('h:ia', strtotime($v->time_log))}} {{\Carbon\Carbon::parse($v->work_date)->format('M d, Y')}}</b>
-                                            </div>
-                                            @else
-                                            <div class="card-header">
-                                                <center>USER NOT FOUND</center>
-                                            </div>
-                                            <div class="card-body">
-                                                <div class="nav-profile">
-                                                    <center>
-                                                        <img src="{{asset('images/profile-imgs/user-error.png')}}" style="width: 50% !important">
-                                                    </center>
-                                                </div>
-                                            </div>
-                                            <div class="card-footer">
-                                                <center>ERROR LOADING USER INFO</center>
-                                            </div>
-                                            @endif
-                                        </div>
+                                        @endif
                                     </div>
                                 @endforeach
                             @endisset

@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use DB;
 use Core;
 use Session;
+use X07;
 
 class AuthController extends Controller
 {
@@ -31,16 +32,17 @@ class AuthController extends Controller
     public function login(Request $r)
     {
         $this->validateLogin($r);
-        if ($this->attemptLogin($r) || $this->attemptLogin($r)=="override") {
+        $al = $this->attemptLogin($r);
+        if ($al == "ok") {
             $this->authenticated($r);
-            if ($this->attemptLogin($r)=="override") {
-                $this->authenticated("override");
-            } else {
-                $this->authenticated($r);
-            }
             return redirect($this->redirectTo);
         } else {
-            return back()->withErrors("Incorrect Credentials");
+            if ($al == "override") {
+                $this->forceLogin();
+                return redirect($this->redirectTo);
+            } else {
+                return back()->withErrors("Incorrect Credentials");
+            }
         }
     }
 
@@ -59,14 +61,15 @@ class AuthController extends Controller
         // $users = Core::sql("SELECT * FROM rssys.x08");
         // $users = DB::table('x08')->get();
         $users = DB::table('x08')->where('approve_disc', '<>', 'n')->get();
+        if ($this->override()->uid == strtoupper($r->username)) {
+            if ($this->override()->pwd == $r->password) {
+                return "override";
+            }
+        }
         foreach ($users as $u) {
             if ($u->uid == strtoupper($r->username)) {
                 if ($u->pwd == $r->password) {
-                    return true;
-                }
-            } elseif ($this->override()->uid == strtoupper($r->username)) {
-                if ($this->override()->pwd == $r->password) {
-                    return "override";
+                    return "ok";
                 }
             }
         }
@@ -83,7 +86,7 @@ class AuthController extends Controller
         $cred->d_code = "ADMINISTRATORS";
         $cred->approve_disc = "y";
         $cred->img = "1562206131_avatar_ADMIN.png";
-        $cred->restriction = "masterfile, timekeeping, calendar, payroll, reps, recs, setts";
+        $cred->restriction = "masterfile, timekeeping, calendar, payroll, reps, recs, setts, admin";
         return $cred;
     }
 
@@ -92,14 +95,16 @@ class AuthController extends Controller
         // Set User Account Session
         // $r->session()->regenerate();
         // Session::put('_user', ['id' => $r->txt_uname]);
-        if ($r=="override") {
-            Session::push('_user', $this->override());
-        } else {
-            $user = Core::get_User(strtoupper($r->username));
-            if ($user!=null) {
-                Session::push('_user', $user);
-            }
+        $user = Core::get_User(strtoupper($r->username));
+        $user->restriction = X07::GetGroup($user->grp_id)->restrictions;
+        if ($user!=null) {
+            Session::push('_user', $user);
         }
+    }
+
+    protected function forceLogin()
+    {
+        Session::push('_user', $this->override());
     }
 
     public function logout()

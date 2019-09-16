@@ -98,6 +98,16 @@
             @endphp
             <div class="row">
               <div class="col">
+                {{-- <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <h4 class="alert-heading">New Updates are Available!</h4>
+                    <hr>
+                    <marquee>
+                      <p>There are new updates on Timekeeping, Payroll, and Reports. If there are any errors/bugs, please let us know so that we can fix it as soon as possible. Thank you.</p>
+                    </marquee>
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                </div> --}}
                 <div class="row mb-3">
                   @for($a = 0; $a <=3; $a++)
                   <div class="col">

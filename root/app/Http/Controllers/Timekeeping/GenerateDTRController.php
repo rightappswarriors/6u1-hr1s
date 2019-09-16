@@ -7,11 +7,13 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\MFile\OfficeController;
 use Core;
 use DB;
+use Account;
 use Employee;
+use EmployeeFlag;
 use ErrorCode;
-use PayrollPeriod;
 use Office;
 use Payroll;
+use PayrollPeriod;
 use Session;
 use Timelog;
 
@@ -51,7 +53,12 @@ class GenerateDTRController extends Controller
 
     public function GenerateDTR(Request $r)
     {
-	    /*
+	    return $this->Generate($r);
+    }
+
+    public function Generate($r)
+    {
+        /*
         | *Retrieves timelog info and computes the total time of late, overtime, and undertime
         | *Some values are from different models
         | *Be wary when changing values that came from other models/controllers for some of them
@@ -93,7 +100,7 @@ class GenerateDTRController extends Controller
                 // $day = $pp->start+$i;
                 // $date = date('Y-m-d', strtotime(Core::GetMonth((int)$r->month)." ".$day.", ".date('Y')));
                 $date = date('Y-m-d', strtotime($workdays[$i]));
-                $record = DB::table('hr_tito2')->distinct('work_date')->where('work_date', '=', $date)->where('empid', $employee->empid)->orderby('work_date', 'ASC')->get(); 
+                $record = DB::table('hr_tito2')->distinct('work_date')->where('work_date', '=', $date)->where('empid', $employee->empid)->orderby('work_date', 'ASC')->get();
 
                 if (Timelog::IfWeekdays($date)) {
                     if (count($record)<=0) {
@@ -133,7 +140,7 @@ class GenerateDTRController extends Controller
                                     array_push($arr_overtime, $y);
                                 }
                                 $totalpresent+=1;
-                                 array_push($errors2, [$i, "H"=>Timelog::IfHoliday($date), "L"=>Timelog::IfLate($record[0]->time_log), "U"=>Timelog::IfUndertime($record[0]->time_log, $record[1]->time_log), "O"=>Core::ToMinutes($r_time) > Core::ToMinutes($req_hrs2)]);
+                                array_push($errors2, [$i, "H"=>Timelog::IfHoliday($date), "L"=>Timelog::IfLate($record[0]->time_log), "U"=>Timelog::IfUndertime($record[0]->time_log, $record[1]->time_log), "O"=>Core::ToMinutes($r_time) > Core::ToMinutes($req_hrs2)]);
                             }
                         }
                     }
@@ -152,6 +159,8 @@ class GenerateDTRController extends Controller
             if (DB::table('hr_dtr_sum_hdr')->where('empid', $employee->empid)->where('date_from', $pp->from)->where('date_to', $pp->to)->first()!=null) {
                 $record = 1;
             }
+
+            $flag = EmployeeFlag::chk_flagged($r->code);
 
             $data = [
                 // 'employee'=>$employee,
@@ -179,24 +188,46 @@ class GenerateDTRController extends Controller
                 'isgenerated'=>$record,
                 'errors'=>$errors,
                 '_errors2'=>$errors2,
+                'flag' => $flag,
             ];
 
-            // Session::forget('dtr_summary');
-            // Session::put('dtr_summary', $data);
+            if ($flag) {
+                $data['absences'] = 0;
+                $data['holidays'] = 0;
+                $data['late'] = "00:00:00";
+                $data['undertime'] = "00:00:00";
+                $data['overtime'] = "00:00:00";
+            }
 
             return json_encode($data);
-	    } catch (\Exception $e) {
+        } catch (\Exception $e) {
             ErrorCode::Generate('controller', 'GenerateDTRController', '00002', $e->getMessage());
-	    	// return $e->getMessage();
-	    	return "error";
-	    }
+            return "error";
+        }
     }
 
     public function SaveDTR(Request $r)
     {
+        return [$this->Save($r), "indv"];
+    }
+
+    public function Save($r)
+    {
+        /**
+        * @param $r->dtrs
+        * @param $r->empid
+        * @param $r->ppid
+        * @param $r->month
+        * @param $r->year
+        *
+        * @return "error"
+        * @return "max"
+        */
         try {
             if (isset($r->dtrs['errors'])) {
-                return "existing-error";
+                if (count($r->dtrs['errors']) > 0) {
+                    return "existing-error";
+                }
             }
             $record = DB::table('hr_dtr_sum_hdr')->where('empid', $r->empid)->where('date_from', $r->dtrs['date_from'])->where('date_to', $r->dtrs['date_to'])->first();
             if ($record==null) {
@@ -212,6 +243,7 @@ class GenerateDTRController extends Controller
                             'date_generated' => date('Y-m-d'),
                             'time_generated' => date('h:i'),
                             'code' => $code,
+                            'generatedby' => Account::ID()
                         ]);
                         Core::updatem99('dtr_sum_id',Core::get_nextincrementlimitchar($code, 8));
                     } catch (\Exception $e) {
@@ -224,7 +256,7 @@ class GenerateDTRController extends Controller
 
                     $dh = $this->LoadDTRHistory();
                     for($i=0;$i<count($dh);$i++) {
-                        $pp = Payroll::PayrollPeriod2($r->month, $dh[$i]->ppid);
+                        $pp = Payroll::PayrollPeriod2($r->month, $dh[$i]->ppid, $r->year);
                         $dh[$i]->pp = $pp->from." to ".$pp->to;
                         $dh[$i]->empname = Employee::Name($dh[$i]->empid);
                     }
@@ -245,6 +277,11 @@ class GenerateDTRController extends Controller
 
     public function SaveSummary($empid, $days_worked, $absences, $late, $undertime, $overtime, $dtr_sum_id)
     {
+        /**
+        * @return "error"
+        * @return "isgenerated"
+        * @return "ok"
+        */
         try {
             $query = DB::table('hr_dtr_sum_employees')->where('empid', $empid)->where('dtr_sum_id', $dtr_sum_id);
             $data = [
@@ -285,16 +322,38 @@ class GenerateDTRController extends Controller
 
     public function GenerateByEmployee(Request $r) //continue here
     {
+        /**
+        * From request
+        * @param $r->dtrs
+        * @param $r->ppid
+        * @param $r->ofc_id
+        * @param $r->month
+        * @param $r->year
+        */
+        
         // return dd($r->all());
         try {
-            $OfficeController = new OfficeController;
-            $employees = $OfficeController->getEmployees($r);
-            return $employees;
+            $employees = Office::OfficeEmployees($r->ofc_id);
+            $arr = [];
+            $employees = json_decode($employees);
             if (count($employees) > 0) {
-                for ($i=0; $i < count($employees); $i++) { 
+                for ($i=0; $i < count($employees); $i++) {
                     $emp = $employees[$i];
-                    $this->CheckDTR($emp->empid, $r->ppid);
+                    $pp = Payroll::PayrollPeriod2($r->month, $r->ppid, $r->year);
+                    $s = (object)[];
+                    $s->code = $emp->empid;
+                    $s->pp = $r->ppid;
+                    $s->month = $r->month;
+                    $s->year = $r->year;
+                    $t = (object)[];
+                    $t->dtrs = (array)json_decode($this->Generate($s));
+                    $t->empid = $emp->empid;
+                    $t->ppid = $r->ppid;
+                    $t->month = $r->month;
+                    $t->year = $r->year;
+                    array_push($arr, $this->Save($t));
                 }
+                return [$arr, "group"];
             } else {
                 return "no employees";
             }
@@ -304,8 +363,10 @@ class GenerateDTRController extends Controller
         }
     }
 
-    public function CheckDTR($empid, $pp, $form, $to)
+    public function CheckDTR($empid, $pp, $from, $to)
     {
-
+        $select = "SELECT b.code, b.ppid, b.date_from, b.date_to, b.date_generated, b.time_generated, a.* FROM hris.hr_dtr_sum_employees a INNER JOIN hris.hr_dtr_sum_hdr b ON a.dtr_sum_id = b.code";
+        $con = " WHERE a.isgenerated = 1 AND b.empid = '".$empid."' AND b.ppid = '".$pp."' AND b.date_from = '".$from."' AND b.date_to = '".$to."' LIMIT 1";
+        return Core::sql($select.$con);
     }
 }

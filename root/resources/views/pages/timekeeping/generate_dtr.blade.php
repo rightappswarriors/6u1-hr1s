@@ -23,6 +23,13 @@
 						<select class="form-control YearSelector" name="payroll_year" id="payroll_year" required>
 						</select>
 					</div>
+					<div class="form-group mr-2">
+						<label class="mr-1">Generate Type</label>
+						<select class="form-control" name="payroll_gen_type" id="payroll_gen_type">
+							<option Value="reg">Regular</option>
+							<option value="ot">Overtime</option>
+						</select>
+					</div>
 				</div>
 				<div class="form-inline mt-2">
 					<div class="form-group mr-2">
@@ -32,15 +39,15 @@
 							@isset($data[3])
 								@if(count($data[3]) > 0)
 									@foreach($data[3] as $ofc)
-									<option value="{{$ofc->oid}}">{{$ofc->cc_desc}}</option>
+									<option value="{{$ofc->cc_id}}">{{$ofc->cc_desc}}</option>
 									@endforeach
 								@endif
 							@endisset
 						</select>
 					</div>
 					<div class="form-group">
-						{{-- <button type="button" class="btn btn-primary btn-spin" id="btn-generate-ind">Generate</button> --}}
-						<button type="button" class="btn btn-primary btn-spin" id="btn-generate-ofc">Generate</button>
+						<button type="button" class="btn btn-primary btn-spin mr-1" id="btn-generate-ind">Generate (Individual)</button>
+						<button type="button" class="btn btn-primary btn-spin" id="btn-generate-ofc">Generate (By Office)</button>
 					</div>
 				</div>
 			</form>
@@ -49,12 +56,26 @@
 			<div class="card mb-2">
 				<div class="card-body">
 					<div class="row">
+						<div class="col-12">
+							<div class="card text-white bg-danger collapse mb-3" id="alert-generate-error">
+								<div class="card-header">
+									<i class="fa fa-exclamation"></i> Error
+								</div>
+								<div class="card-body" id="alert-generate-error-body"></div>
+								
+							</div>
+						</div>
 						<div class="col">
+							<h6 id="hdr-tbl-employee">No office selected</h6>
 							<div class="table-responsive mb-2">
 								<table class="table table-bordered table-hover" id="dataTable-employee">
+									<col width="15%">
+									<col>
+									<col width="25%">
 									<thead>
 										<th>Employee ID</th>
 										<th>Name</th>
+										<th>Job Title</th>
 									</thead>
 									<tbody>
 										{{-- @foreach($data[2] as $emp)
@@ -68,54 +89,46 @@
 							</div>
 						</div>
 						<div class="col">
+							<h6 id="hdr-tbl-employee">DTR Summary Details:</h6>
 							<div class="table-responsive mb-2">
 								<table class="table table-bordered">
 									<col width="35%">
 									<col>
 									<tr>
-										<th style="text-align: center;">Payroll Period</th>
-										<td id="pp-dates"></td>
+										<th style="text-align: center;" colspan="2">Payroll Period</th>
+										<td id="pp-dates" colspan="2"></td>
 									</tr>
 									<tr>
-										<th style="text-align: center;">Total Workdays</th>
-										<td id="sum-tw"></td>
+										<th style="text-align: center;" colspan="2">Total Workdays</th>
+										<td id="sum-tw" colspan="2"></td>
 									</tr>
 									<tr>
-										<th style="text-align: center;">Days Worked</th>
-										<td id="sum-dw"></td>
+										<th style="text-align: center;" colspan="2">Days Worked</th>
+										<td id="sum-dw" colspan="2"></td>
 									</tr>
 									<tr>
-										<th style="text-align: center;">Abscences</th>
-										<td id="sum-a"></td>
+										<th style="text-align: center;" colspan="2">Abscences</th>
+										<td id="sum-a" colspan="2"></td>
 									</tr>
 									<tr>
-										<th style="text-align: center;">Late</th>
-										<td id="sum-l"></td>
+										<th style="text-align: center;" colspan="2">Late</th>
+										<td id="sum-l" colspan="2"></td>
 									</tr>
 									<tr>
-										<th style="text-align: center;">Undertime</th>
-										<td id="sum-u"></td>
+										<th style="text-align: center;" colspan="2">Undertime</th>
+										<td id="sum-u" colspan="2"></td>
 									</tr>
-									<tr>
-										<th style="text-align: center;">Total Overtime</th>
-										<td id="sum-to"></td>
-									</tr>
+									{{-- <tr>
+										<th style="text-align: center;" colspan="2">Total Overtime</th>
+										<td id="sum-to" colspan="2"></td>
+									</tr> --}}
 									<tr>
 										<th style="text-align: center;">Generated</th>
 										<td id="sum-stat"></td>
+										<th style="text-align: center;">Flagged</th>
+										<td id="sum-flagged"></td>
 									</tr>
 								</table>
-							</div>
-						</div>
-						<div class="col-12">
-							<div class="card text-white bg-danger collapse" id="alert-generate-error">
-								<div class="card-header">
-									<i class="fa fa-exclamation"></i> Error
-								</div>
-								<div class="card-body" id="alert-generate-error-body"></div>
-								<div class="card-body">
-									<a href="{{url('timekeeping/timelog-entry')}}" style="color:white;"><i class="fa fa-hand-o-right"></i> Check missing time logs</a>
-								</div>
 							</div>
 						</div>
 					</div>
@@ -203,10 +216,15 @@
 		});
 	</script>
 	<script type="text/javascript">
-		function LoadDtrTable()
+		function hideErrorDiv()
 		{
+			$('#alert-generate-error').hide();
 			$('#alert-generate-error').collapse('hide');
 			$('#alert-generate-error-body').empty();
+		}
+		function LoadDtrTable()
+		{
+			hideErrorDiv();
 			$('#btn-generate-ind').attr('disabled', false);
 			$.ajax({
 				type : 'get',
@@ -227,6 +245,11 @@
 							for (var i=0; i<d.errors.length; i++) {
 								$('#alert-generate-error-body').append('Missing time logs on '+d.errors[i]+'<br>');
 							}
+							$('#alert-generate-error-body').append(
+								'<div class="card-body">'+
+									'<a href="{{url('timekeeping/timelog-entry')}}" style="color:white;"><i class="fa fa-hand-o-right"></i> Check missing time logs</a>'+
+								'</div>'
+							)
 							$('#btn-generate-ind').attr('disabled', true);
 							alert("DTR has errors. Cannot be saved.");
 						}
@@ -237,11 +260,6 @@
 			});
 		}
 
-		function LoadByOffice()
-		{
-
-		}
-
 		function LoadSummaryTable(data)
 		{
 			$('#sum-tw').text(data.workdays);
@@ -249,10 +267,25 @@
 			$('#sum-a').text(data.absences);
 			$('#sum-l').text(data.late);
 			$('#sum-u').text(data.undertime);
-			$('#sum-to').text(data.overtime);
+			// $('#sum-to').text(data.overtime);
 			$('#sum-stat').html((data.isgenerated==1) ? '<span class="btn btn-success">Yes</span>' : '<span class="btn btn-danger">No</span>');
+			$('#sum-flagged').html((data.flag==true) ? '<span class="btn btn-success">Yes</span>' : '<span class="btn btn-danger">No</span>');
 			dtr_summary = data;
 			$('#pp-dates').text(data.date_from2+" to "+data.date_to2);
+			hideErrorDiv();
+		}
+
+		function emptySummaryTable()
+		{
+			$('#sum-tw').text('');
+			$('#sum-dw').text('');
+			$('#sum-a').text('');
+			$('#sum-l').text('');
+			$('#sum-u').text('');
+			$('#sum-to').text('');
+			$('#sum-stat').html('');
+			$('#sum-flagged').html('');
+			$('#pp-dates').text('');
 		}
 
 		function LoadHistoryTable(data)
@@ -270,8 +303,10 @@
 		{
 			tbl_emp.row.add([
 				data.empid,
-				data.empname
+				data.empname,
+				data.jobtitle
 			]).draw();
+			hideErrorDiv();
 		}
 
 		// $('#frm-pp').on('submit', function(e) {
@@ -297,7 +332,7 @@
 
 		function onToggleSaveDTRModal_ofc()
 		{
-			$('#frm-add').attr('action', '{{url('timekeeping/generate-dtr/save-dtr/by-department')}}?ppid='+$('#payroll_period').val()+'&ofc_id='+$('#payroll_ofc').val());
+			$('#frm-add').attr('action', '{{url('timekeeping/generate-dtr/save-dtr/by-department')}}?ppid='+$('#payroll_period').val()+'&ofc_id='+$('#payroll_ofc').val()+'&month='+$('#payroll_month').val()+'&year='+$('#payroll_year').val());
 			$('#modal-add').modal('show');
 		}
 
@@ -313,32 +348,76 @@
 				data : {dtrs:dtr_summary},
 				dataTy : 'json',
 				success : function(data) {
-					if (data!="error") {
-						if (data!="existing-error") {
-							if (data!="max") {
-								if (data[1]=="isgenerated") {
-									alert("Payroll period is already generated. DTR cannot be re-generated.");
+					// console.log(data);
+					var a = data[0];
+					var b = data[1];
+					var parse = null;
+					if (b=="indv") {
+						if (a!="error") {
+							if (a!="existing-error") {
+								if (a!="max") {
+									parse = JSON.parse(a[0]);
+									if (a[1]=="isgenerated") {
+										alert("Payroll period is already generated. DTR cannot be re-generated.");
+									} else {
+										alert("DTR Generated (Individual).");
+									}
+									maintable.clear().draw();
+									for (var i = 0; i < parse.length; i++) {
+										LoadHistoryTable(parse[i]);
+									}
+									$('#sum-stat').html('<span class="btn btn-success">Yes</span>');
+									SearchTable();
 								} else {
-									alert("DTR Generated.");
+									alert("DTR is already generated. Cannot generated DTR again. Failed on saving.");
 								}
-								var parse = JSON.parse(data[0]);
-								maintable.clear().draw();
-								for (var i = 0; i < parse.length; i++) {
-									LoadHistoryTable(parse[i]);
-								}
-								$('#sum-stat').html('<span class="btn btn-success">Yes</span>');
-								SearchTable();
 							} else {
-								alert("DTR is already generated. Cannot generated DTR again.");
-								alert("Failed on saving.");
+								alert("There still errors on the timelog entry. Unable to save DTR summary.");
 							}
 						} else {
-							alert("There still errors on the timelog entry. Unable to save DTR summary.");
+							alert("Error in saving DTR.");
 						}
-					} else {
-						alert("Error in saving DTR.");
+					}
+					else if (b=="group") {
+						var error = new Array();
+						if (a.length > 0) {
+							for (var i = 0; i < a.length; i++) {
+								var c = a[i];
+								if (c!="error") {
+									if (c!="existing-error") {
+										if (c!="max") {
+											parse = JSON.parse(c[0]);
+											maintable.clear().draw();
+											for (var j = 0; j > parse.length; j++) {
+												LoadHistoryTable(parse[i]);
+											}
+										} else {
+											error.push((i+1)+".)"+"DTR is already generated. Cannot generated DTR again. Failed on saving.");
+										}
+									} else {
+										error.push((i+1)+".)"+"There still errors on the timelog entry. Unable to save DTR summary.");
+									}
+								} else {
+									error.push((i+1)+".) "+"Error on saving.");
+								}
+							}
+						}
+						if (error.length > 0) {
+							$('#alert-generate-error').show();
+							for (var i = 0; i < error.length; i++) {
+								$('#alert-generate-error-body').append(error[i]+'<br>');
+							}
+							alert("There are errors when generating.");
+						} else {
+							alert("DTR Generated (Group).");
+						}
+						emptySummaryTable();
+						// console.log(error);
 					}
 					RemoveSpinningIcon();
+				},
+				error : function() {
+					alert("Error on saving DTR. Please try again later.");
 				}
 			});
 			$('#modal-add').modal('hide');
@@ -372,38 +451,57 @@
 				LoadDtrTable();
 			}
 			$('#payroll_period').val('15D').trigger('change');
+			SearchEmployees();
 		});
 
 		$('#payroll_period').on('change', function() {
 			if (selected_row!=null) {
 				LoadDtrTable();
 			}
+			SearchEmployees();
 		});
 
 		$('#payroll_year').on('change', function() {
 			if (selected_row!=null) {
 				LoadDtrTable();
 			}
+			SearchEmployees();
 		});
 
 		$('#payroll_ofc').on('change', function() {
-			tbl_emp.clear().draw();
 			emp_count = 0;
-			$.ajax({
-				type : 'get',
-				url : '{{url('master-file/office/get-employees')}}',
-				data : {
-					ofc_id : $('#payroll_ofc').val()
-				},
-				dataTy : 'json',
-				success : function(data) {
-					var d = JSON.parse(data);
-					emp_count = d.length;
-					for (var i = 0; i < d.length; i++) {
-						LoadEmployeeTable(d[i]);
-					}
-				}
-			});
+			SearchEmployees();
 		});
+
+		function SearchEmployees()
+		{
+			tbl_emp.clear().draw();
+			hideErrorDiv();
+			if ($('#payroll_ofc').val()==null) {
+				$('#hdr-tbl-employee').text("No office selected");
+			} else {
+				$.ajax({
+					type : 'get',
+					url : '{{url('master-file/office/get-employees')}}',
+					data : {
+						ofc_id : $('#payroll_ofc').val()
+					},
+					dataTy : 'json',
+					success : function(data) {
+						// console.log(data);
+						var d = JSON.parse(data);
+						emp_count = d.length;
+						for (var i = 0; i < d.length; i++) {
+							LoadEmployeeTable(d[i]);
+						}
+						$('#hdr-tbl-employee').text('Employees in "'+$('#payroll_ofc option:selected').text().toUpperCase()+'"');
+					},
+					error : function()
+					{
+						alert('An error occured. please reload the page.');
+					}
+				});
+			}
+		}
 	</script>
 @endsection

@@ -11,6 +11,7 @@ use ErrorCode;
 use Holiday;
 use Payroll;
 use Timelog;
+use Office;
 
 /*
 |--------------------------------------------------------------------------
@@ -33,7 +34,7 @@ class PrintEmployeeDTRSummaryController extends Controller
 
     public function view()
     {
-        $data = [$this->employee, $this->ghistory];
+        $data = [$this->employee, Office::get_all()];
         // dd($data);
         return view('pages.reports.print_employee_dtr_summary', compact('data'));
     }
@@ -49,12 +50,14 @@ class PrintEmployeeDTRSummaryController extends Controller
     */
     public function find(Request $r)
     {
+        // return Office::OfficeEmployees($r->office);
         try {
             $number_of_days = cal_days_in_month(CAL_GREGORIAN, $r->month, $r->year);
 
             $day_of_the_week = array();
             $date_readable = array();
-            $employees = Employee::Load_Employees_Simple();
+            $employees = Employee::Load_Employees_Simple($r->office);
+            // return $employees;
             $dates = Payroll::PayrollPeriod2($r->month, $r->period.'D', $r->year);
             $days_worked = Core::CoveredDates($dates->from, $dates->to);
             $dates_rendered = array();
@@ -91,8 +94,11 @@ class PrintEmployeeDTRSummaryController extends Controller
                         }
 
                         if(intval(explode(":",$dates_rendered[$i][$j]->time_log)[0]) >= intval(explode(":",Timelog::ReqTimeOut())[0])) { // if overtime
-                            if($dates_rendered[$i][$j+1]->status=="0")
-                                $hours_overtime_in[$j] = Core::GET_TIME_DIFF($dates_rendered[$i][$j]->time_log,$dates_rendered[$i][$j+1]->time_log);
+                            dd($dates_rendered);
+                            if($dates_rendered[$i][$j+1] != null || $dates_rendered[$i][$j] != undefined) {
+                                if($dates_rendered[$i][$j+1]->status=="0")
+                                    $hours_overtime_in[$j] = Core::GET_TIME_DIFF($dates_rendered[$i][$j]->time_log,$dates_rendered[$i][$j+1]->time_log);
+                            }
                         }
 
                     } else if($dates_rendered[$i][$j]->status == "0") {

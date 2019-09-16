@@ -1,9 +1,29 @@
 @extends('layouts.user')
 
 @section('to-body')
+	@php 
+		$current_date = date('Y-m-d');
+		$alot_date = [
+			date('Y-m-d', strtotime("2019-08-21")),
+			date('Y-m-d', strtotime("2019-08-22")),
+			date('Y-m-d', strtotime("2019-08-23")),
+			date('Y-m-d', strtotime("2019-08-27")),
+			date('Y-m-d', strtotime("2019-08-28")),
+		];
+	@endphp
+	@for($i=0;$i<count($alot_date);$i++)
+	@if($alot_date[$i] == $current_date)
+	<div class="alert alert-success" role="alert">
+	    <h4 class="alert-heading">New Update Applied!</h4>
+	    <p>A new update is now implemented and we kindly ask you again, dear user to update once again the <u>Designation</u> and <u>Employement Status</u> of each employee because there are features that greatly involves these two fields. If you notice the words <u>"office-not-found"</u> or <u>"employee-status-not-found"</u> in any of the rows, please do update that employee.</p>
+	    <hr>
+	    <p class="mb-0">Sorry for the inconvenience. Thank you.</p>
+	</div>
+	@endif
+	@endfor
 	<div class="card">
 		<div class="card-header">
-			<i class="fa fa-users"></i> Employee
+			<i class="fa fa-users"></i> Employee <button type="button" class="btn btn-success mr-1" onclick="location.href='{{ url('master-file/employee/new2') }}';"><i class="fa fa-plus"></i> Add</button> <button type="button" class="btn btn-warning" id="opt-flag"><i class="fa fa-flag"></i> Set Flag</button>
 		</div>
 		<div class="card-body">
 			<div class="row">
@@ -11,12 +31,21 @@
 					<div class="card">
 						<div class="card-body">
 							<div class="table-responsive">
-								<table class="table table-hover" id="dataTable">
+								<table class="table table-hover table-bordered" id="dataTable">
+									<col>
+									<col>
+									<col>
+									<col>
+									<col>
+									<col width="15%">
 									<thead>
 										<tr>
 											<th>Employee ID</th>
 											<th>Name</th>
-											{{-- <th>Department</th> --}}
+											<th>Job Title</th>
+											<th>Designation</th>
+											<th>Employment Status</th>
+											<th></th>
 										</tr>
 									</thead>
 									<tbody>
@@ -36,7 +65,13 @@
 															{{$pp->firstname}} {{$pp->lastname}}
 														@endif
 													</td>
-													{{-- <td>{{$pp->dept_name}}</td> --}}
+													<td>{{$pp->jobtitle}}</td>
+													<td>{{$pp->office}}</td>
+													<td>{{$pp->emp_status}}</td>
+													<td>
+														<button type="button" class="btn btn-primary mr-1" id="opt-update" onclick="row_update(this)"><i class="fa fa-edit"></i></button>
+														<button type="button" class="btn btn-danger" id="opt-delete" onclick="row_delete(this)"><i class="fa fa-trash"></i></button>
+													</td>
 												</tr>
 												@endforeach
 											@endif
@@ -47,16 +82,13 @@
 						</div>
 					</div>
 				</div>
-				<div class="col-3">
+				{{-- <div class="col-3">
 					<div class="card">
 						<div class="card-body">
-							<button type="button" class="btn btn-success btn-block" onclick="location.href='{{ url('master-file/employee/new2') }}';"><i class="fa fa-plus"></i> Add</button>
-							<button type="button" class="btn btn-primary btn-block" id="opt-update"><i class="fa fa-edit"></i> Edit</button>
-							<button type="button" class="btn btn-danger btn-block" id="opt-delete"><i class="fa fa-trash"></i> Delete</button>
 							<button type="button" class="btn btn-info btn-block" id="opt-print"><i class="fa fa-print"></i> Print List</button>
 						</div>
 					</div>
-				</div>
+				</div> --}}
 			</div>
 		</div>
 	</div>
@@ -98,6 +130,59 @@
 				</div>
 			</div>
 		</div>
+	</div>
+	<!-- Flag Modal -->
+	<div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" id="modal-flag">
+	    <div class="modal-dialog modal-lg">
+	        <div class="modal-content">
+	            <div class="modal-header">
+					<h5 class="modal-title" id="exampleModalLabel1">Set Flag</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<form id="flag-form">
+						<input type="hidden" name="restriction_grpid" value="">
+						<div class="modal-body">
+							<div class="border-bottom mb-3">
+								<b>Check/Uncheck Employees</b> that are exempted for <b>Timekeeping</b> but still have <b>DTR</b> and <b>Payroll</b>
+							</div>
+							<div class="form-group">
+								<select class="form-control" id="flag_office" name="flag_office">
+									<option value="" disabled="" selected="">--Select Office--</option>
+									@foreach($office as $ofc)
+										<option value="{{$ofc->cc_id}}">{{$ofc->cc_desc}}</option>
+									@endforeach
+								</select>
+							</div>
+							<div class="table-responsive">
+								<table class="table table-hover table-bordered" id="dataTable-flag" width="100%">
+									<thead>
+										<tr>
+											<td>Id</td>
+											<td>Registered Employees</td>
+											<td>Position</td>
+										</tr>
+									</thead>
+									<tbody>
+										{{-- <tr>
+											<td>
+												<div class="custom-control custom-checkbox">
+													<input type="checkbox" class="custom-control-input" id="asd" value="adasd" name="restrictions[]">
+													<label class="custom-control-label" for="asd">Empasd</label>
+												</div>
+											</td>
+											<td></td>
+										</tr> --}}
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</form>
+				</div>
+	        </div>
+	    </div>
 	</div>
 @endsection
 
@@ -203,7 +288,8 @@
 	<script type="text/javascript">
 		$('#date_from').datepicker(date_option5);
 		$('#date_to').datepicker(date_option5);
-		var table = $('#dataTable').DataTable(date_option_min);
+		var table = $('#dataTable').DataTable(dataTable_config);
+		var flag_table = $('#dataTable-flag').DataTable(dataTable_short);
 	</script>
 	<script type="text/javascript">
 		$('#dataTable').on('click', 'tbody > tr', function() {
@@ -224,8 +310,45 @@
 			]).draw();
 		}
 		
+		$('#opt-flag').on('click', function() {
+			$('#modal-flag').modal('show');
+		});
 
-		$('#opt-update').on('click', function() {
+		$('#flag_office').on('change', function() {
+			flag_table.clear().draw();
+			$.ajax({
+				url: '{{url('master-file/employee/office-employee')}}',
+				method : 'post',
+				data : {_token:$('meta[name="csrf-token"]').attr('content'), id : $(this).val()},
+				success : function(data) {
+					console.log(data);
+					if (data!="empty" && data!="error") {
+						for (var i = 0; i < data.length; i++) {
+							d = data[i];
+							flag_table.row.add([
+								'<div class="custom-control custom-checkbox">'+
+									'<input type="checkbox" class="custom-control-input" id="'+d.empid+'" oninput="flagged(this)" '+d.flag+'>'+
+									'<label class="custom-control-label" for="'+d.empid+'">'+d.empid+'</label>'+
+								'</div>',
+								d.empname,
+								d.jobtitle
+							]).draw();
+						}
+					}
+				},
+				error : function() {
+					alert("An error occured. Please try again or reload  the page.");
+				}
+			});
+		});
+
+		$('#modal-flag').on('hidden.bs.modal', function (e) {
+			$('#flag_office').val('');
+			flag_table.clear().draw();
+		})
+
+		function row_update(obj) {
+			var selected_row = $($(obj).parents()[1]);
 			$('#frm-pp').attr('action', '{{url('master-file/employee')}}/update');
 			$('.T0r').attr('required', '');
 			$('input[name="txt_id"]').attr('readonly', '');
@@ -328,9 +451,10 @@
 			// $('.AddMode').show();
 			// $('.DeleteMode').hide();
 			// $('#modal-pp').modal('show');
-		});
+		};
 
-		$('#opt-delete').on('click', function() {
+		function row_delete(obj) {
+			var selected_row = $($(obj).parents()[1]);
 			$('#frm-pp').attr('action', '{{url('master-file/employee')}}/delete');
 		
 			$('input[name="txt_code"]').attr('readonly', '');
@@ -345,7 +469,7 @@
 			$('.AddMode').hide();
 			$('.DeleteMode').show();
 			$('#modal-pp').modal('show');
-		});
+		};
 		function readURL(input) {
     if (input.files && input.files[0]) {
         var reader = new FileReader();
@@ -360,5 +484,29 @@
 $("#imageUpload").change(function() {
     readURL(this);
 });
+	</script>
+	<script type="text/javascript">
+		function flagged(e)
+		{
+			var ckb = $(e).is(':checked');
+			$.ajax({
+				url : '{{url('master-file/employee/upadte-flag')}}',
+				method : 'post',
+				data : {_token:$('meta[name="csrf-token"]').attr('content'), id : $(e).attr('id'), state : ckb},
+				success : function(data) {
+					// console.log(data);
+					if (data=="error") {
+						alert("An error occured");
+					} else {
+						if (data=="missing") {
+							alert("Missing Parameters. Please Try Again.");
+						}
+					}
+				},
+				error : function() {
+					alert('An error occured while processing your request. Please reload the page.');
+				}
+			});
+		}
 	</script>
 @endsection

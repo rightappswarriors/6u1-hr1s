@@ -8,6 +8,12 @@ use Core;
 
 class Timelog extends Model
 {
+    public static $lunchbreak; // Must be in h:m:s format and 24 hours
+
+    public function __construct() {
+        self::$lunchbreak = self::get_lunch_break(); // Must be in h:m:s format and 24 hours
+    }
+
     public static function getWorkdates($empid, $date1, $date2, $con = [])
     {
     	try {
@@ -28,16 +34,17 @@ class Timelog extends Model
 
     public static function ShiftHours($empid)
     {
-        /*
-        | Returns total hours between start time and end time
-        | In double (0.00) format
+        /**
+        * Returns total hours between start time and end time
+        * In double (0.00) format
+        * @return 0.00
         */
         try {
             $time = Core::GET_TIME_DIFF(self::ReqTimeIn(), self::ReqTimeOut());
             list($hour, $minute, $seconds) = explode(":", $time);
             $minute = $minute / 60;
             $hour = $hour + $minute;
-            $hour = $hour - Core::ToHours(self::$lunchbreak);
+            $hour = $hour - Core::ToHours(self::get_lunch_break());
             return round($hour,2);
         } catch (\Exception $e) {
             return 0;
@@ -46,63 +53,91 @@ class Timelog extends Model
 
     public static function ReqTimeIn()
     {
-        /*
-        | Returns the required time in.
-        | Value returned must be in string format
+        /**
+        * Returns the required time in.
+        * Value returned must be in string format
+        * @return "00:00:00"
         */
-        return "8:00:00";
+       // return "08:00:00";
+        $fy = DB::table('hris.m99')->first()->fy;
+        $d = DB::table('hris.m99')->where('fy', $fy)->first()->req_time_in_1;
+        return ($d == null || $d == "")?"08:00:00":$d;
     }
 
     public static function ReqTimeIn_2()
     {
-        /*
-        | Returns the required time in (afternoon).
-        | Value returned must be in string format
+        /**
+        * Returns the required time in (afternoon).
+        * Value returned must be in string format
+        * @return "00:00:00"
         */
-        return "13:00:00";
+       // return "13:00:00";
+        $fy = DB::table('hris.m99')->first()->fy;
+        $d = DB::table('hris.m99')->where('fy', $fy)->first()->req_time_in_2;
+        return ($d == null || $d == "")?"13:00:00":$d;
     }
 
     public static function ReqTimeOut()
     {
-        /*
-        | Returns the required time out.
-        | Value returned must be in string format
+        /**
+        * Returns the required time out.
+        * Value returned must be in string format
+        * @return "00:00:00"
         */
-        return "17:00:00";
+       // return "17:00:00";
+        $fy = DB::table('hris.m99')->first()->fy;
+        $d = DB::table('hris.m99')->where('fy', $fy)->first()->req_time_out_1;
+        return ($d == null || $d == "")?"17:00:00":$d;
     }
 
     public static function ReqTimeOut_2()
     {
-        /*
-        | Returns the required time out (afternoon).
-        | Value returned must be in string format
+        /**
+        * Returns the required time out (afternoon).
+        * Value returned must be in string format
+        * @return "00:00:00"
         */
-        return "12:00:00";
+       // return "12:00:00";
+        $fy = DB::table('hris.m99')->first()->fy;
+        $d = DB::table('hris.m99')->where('fy', $fy)->first()->req_time_out_2;
+        return ($d == null || $d == "")?"12:00:00":$d;
     }
 
-    public static $lunchbreak = "01:00:00"; // Must be in h:m:s format and 24 hours
+    // public static $lunchbreak = self::get_lunch_break(); // Must be in h:m:s format and 24 hours
+
+    public static function get_lunch_break() 
+    {
+        /**
+        * Must be in h:m:s format and 24 hours
+        * @return "00:00:00"
+        */
+        $fy = DB::table('hris.m99')->first()->fy;
+        $d = DB::table('hris.m99')->where('fy', $fy)->first()->lunch_break;
+        return ($d == null || $d == "")?"12:00:00":$d;
+    }
 
     public static function ReqHours()
     {
-        /*
-        | Returns the time difference between start time and end time in
-        | Values must be in float format
+        /**
+        * Returns the time difference between start time and end time in
+        * @return Values must be in float format
         */
         $ti = self::ReqTimeIn();
         $to = self::ReqTimeOut();
-        $lb = self::$lunchbreak;
+        $lb = self::get_lunch_break();
         return Core::ToHours(Core::GET_TIME_DIFF($lb, Core::GET_TIME_DIFF($ti, $to)));
     }
 
     public static function ReqHours2()
     {
-        /*
-        | Returns the time difference between start time and end time in "00:00:00" format
-        | Values must be in 24 hours format
+        /**
+        * Returns the time difference between start time and end time in "00:00:00" format
+        * Values must be in 24 hours format
+        * @return "00:00:00"
         */
         list($ti_h, $ti_m, $ti_sec) = explode(":", self::ReqTimeIn());
         list($to_h, $to_m, $to_sec) = explode(":", self::ReqTimeOut());
-        list($lb_h, $lb_m, $lb_sec) = explode(":", self::$lunchbreak);
+        list($lb_h, $lb_m, $lb_sec) = explode(":", self::get_lunch_break());
 
         $ti_h = (int)$ti_h;
         $ti_m = (int)$ti_m;
@@ -139,8 +174,8 @@ class Timelog extends Model
 
     public static function GetRenHours(string $time_1, string $time_2)
     {
-        /*
-        | Returns the value of required hours
+        /**
+        * Returns the value of required hours
         */
         $r_time_in = self::ReqTimeIn();
         $r_time_out = self::ReqTimeOut();
@@ -153,7 +188,7 @@ class Timelog extends Model
         $time = Core::GET_TIME_DIFF($time_1, $time_2);
         if (Core::ToMinutes("12:00:00") > Core::ToMinutes($time_1)) {
             list($hr, $min, $sec) = explode(":", $time);
-            $hr-=Core::ToHours(self::$lunchbreak);
+            $hr-=Core::ToHours(self::get_lunch_break());
             $time = implode(":", [$hr, $min, $sec]);
         }
         return $time;
@@ -161,9 +196,9 @@ class Timelog extends Model
 
     public static function RetrieveRenHours($empid, string $date)
     {
-        /*
-        | Returns the rendered hours for the given date.
-        | Return value is in "00:00:00" format and string data type.
+        /**
+        * Returns the rendered hours for the given date.
+        * Return value is in "00:00:00" format and string data type.
         */
         $r_time = "00:00:00";
         $date = date('Y-m-d', strtotime($date));
@@ -176,10 +211,10 @@ class Timelog extends Model
 
     public static function IfPresent($empid, string $date)
     {
-        /*
-        | Returns a bolean for the given employee id and date.
-        | true if there is a time log on the given date.
-        | false if there are no timelog recorded on the given date.
+        /**
+        * Returns a bolean for the given employee id and date.
+        * true if there is a time log on the given date.
+        * false if there are no timelog recorded on the given date.
         */
         $r_time = "00:00:00";
         $date = date('Y-m-d', strtotime($date));
@@ -192,10 +227,10 @@ class Timelog extends Model
 
     public static function IfWeekdays($date)
     {
-        /*
-        | Returns bolean for dates given
-        | true if weekdays
-        | false if weekend
+        /**
+        * Returns bolean for dates given
+        * true if weekdays
+        * false if weekend
         */
         list($year, $month, $day) = explode("-", $date);
         $q_date = Core::GetMonth((int)$month).' '.$day.', '.$year;
@@ -208,10 +243,10 @@ class Timelog extends Model
 
     public static function IfWeekend($date)
     {
-        /*
-        | Returns bolean for dates given
-        | true if weekend
-        | false if weekdays
+        /**
+        * Returns bolean for dates given
+        * true if weekend
+        * false if weekdays
         */
         list($year, $month, $day) = explode("-", $date);
         $q_date = Core::GetMonth((int)$month).' '.$day.', '.$year;
@@ -224,10 +259,10 @@ class Timelog extends Model
 
     public static function IfHoliday(string $date)
     {
-        /*
-        | Returns bolean for dates given
-        | true if date is holiday
-        | false if date is not holiday
+        /**
+        * Returns bolean for dates given
+        * true if date is holiday
+        * false if date is not holiday
         */
         $find = DB::table('hr_holidays')->where('cancel', '=', null)->where('date_holiday', '=', date('Y-m-d', strtotime($date)))->first();
         if ($find!=null) {
@@ -238,10 +273,10 @@ class Timelog extends Model
 
     public static function IfLate(string $time)
     {
-        /*
-        | Returns bolean for time given
-        | true if time is late
-        | false if not
+        /**
+        * Returns bolean for time given
+        * true if time is late
+        * false if not
         */
 
         $time_in = $time;
@@ -256,10 +291,10 @@ class Timelog extends Model
 
     public static function IfEarlyOut(string $time)
     {
-        /*
-        | Returns bolean for time given
-        | true if time is early out
-        | false if not
+        /**
+        * Returns bolean for time given
+        * true if time is early out
+        * false if not
         */
 
         $time_out = $time;
@@ -273,10 +308,10 @@ class Timelog extends Model
 
     public static function IfUndertime(string $time_1, string $time_2)
     {
-        /*
-        | Returns bolean for time given
-        | true if the time is below the required hours
-        | false if the time is not below or more than the required hours
+        /**
+        * Returns bolean for time given
+        * true if the time is below the required hours
+        * false if the time is not below or more than the required hours
         */
 
         $r_time_in = self::ReqTimeIn();
@@ -305,4 +340,26 @@ class Timelog extends Model
     {
         return count($dates) * self::ReqHours();
     }
+
+    /**
+     * @param Date
+     *
+     * @return bool
+     */
+    public static function IfEmployeeAlreadyOut($empid, $date)
+    {
+        $in = 0;
+        $out = 0;
+
+        $data = DB::table('hr_tito2')->where('work_date', $date)->where('empid', $empid)->get();
+
+        foreach($data as $k => $v) {
+            if($v->status == "1") $in++;
+            else if ($v->status == "0") $out++;
+        }
+
+        return ( !($out > $in) && ($out == $in) );
+    }
+
+
 }

@@ -47,11 +47,11 @@ foreach(Notification_N::Get_Latest_Notification(Account::CURRENT()->uid) as $k =
     <li class="nav-item dropdown no-arrow mx-1">
       <a class="nav-link dropdown-toggle" href="" id="alertsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
         <i class="fa fa-bell fa-fw"></i>
-        @if(count($nav_notif_msg) > 0)
-        <span class="badge badge-danger" id="notif_count">{{(count($nav_notif_msg) > 10) ? '10+' : count($nav_notif_msg)}}</span>
-        @else
-        <span class="badge badge-danger"></span>
-        @endif
+        {{-- @if(count($nav_notif_msg) > 0) --}}
+        {{-- <span class="badge badge-danger" id="notif_count">{{(count($nav_notif_msg) > 10) ? '10+' : count($nav_notif_msg)}}</span> --}}
+        {{-- @else --}}
+        <span class="badge badge-danger" id="notif_count"></span>
+        {{-- @endif --}}
       </a>
       <div class="dropdown-menu dropdown-menu-right" aria-labelledby="alertsDropdown" style="width: 25vw !important; overflow-y: scroll; max-height: 40vh;" id="main_parent_div">
         <h6 class="dropdown-header">Notifications:</h6>

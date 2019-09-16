@@ -10,6 +10,16 @@
 		<div class="card-body">
 			<div class="form-inline mb-3" id="print_hide">
 					<div class="form-group">
+						<label for="date_month">Office: </label>
+						<select class="form-control mr-3 w-25" name="office" id="office" onchange="">
+							<option disabled selected value="">Please select an office</option>
+							@if(!empty($data[1]))
+								@foreach($data[1] as $off)
+									<option value="{{$off->cc_id}}">{{$off->cc_desc}}</option>
+								@endforeach
+							@endif
+						</select>
+
 						<label for="date_month">Month: </label>
 						<select class="form-control MonthSelector mr-3" name="date_month" id="date_month" onchange=""></select>
 
@@ -21,9 +31,9 @@
 							<option value="15">15th Day</option>
 							<option value="30">30th Day</option>
 						</select>
-						<button class="btn btn-primary mr-3" id="generate_btn">Find</button>
+						<button class="btn btn-primary mr-3" id="generate_btn" disabled>Find</button>
 
-						<button class="btn btn-primary mr-3" id="print_btn"><i class="fa fa-fw fa-print"></i></button>
+						<button class="btn btn-primary mr-3" id="print_btn" disabled><i class="fa fa-fw fa-print"></i></button>
 					</div>
 				</div>
 			<div class="table-responsive table-bordered hidden" id="dtr">
@@ -71,6 +81,7 @@
 		var date_month = 0;
 		var date_year = 0;
 		var payroll_period = 0;
+		var office = 0;
 
 		$('#generate_btn').on('click', function() {
 			$('#date_month').removeAttr('disabled');
@@ -78,7 +89,15 @@
 			date_month = $('#date_month').val();
 			date_year = $('#date_year').val();
 			payroll_period = $('#payroll_period').val();
+			office = $('#office').val();
 			process();
+		});
+
+		$('#office').on('change', function() {
+			$('#generate_btn').removeAttr('disabled');
+			if($(this).val() == null || $(this).val() == "" ||  $(this).val() == "Please select an office") {
+				$('#generate_btn').attr('disabled');
+			}
 		});
 
 
@@ -86,9 +105,10 @@
 			$.ajax({
 				type: "post",
 				url: yoarel,
-				data: {"month":date_month, "year":date_year, "period":payroll_period} ,
+				data: {"office":office, "month":date_month, "year":date_year, "period":payroll_period} ,
 				success: function(response) {
 					$('#dtr').removeClass('hidden');
+					$('#print_btn').removeAttr('disabled');
 
 					var divX = document.getElementById('dtr');
 						divX.setAttribute('style', 'overflow-x: hidden !important');

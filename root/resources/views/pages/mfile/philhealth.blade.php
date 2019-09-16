@@ -15,11 +15,11 @@
 									<thead>
 										<tr>
 											<th>Code</th>
-											<th>Bracket 1</th>
-											<th>Bracket 2</th>
+											<th>From</th>
+											<th>To</th>
 											<th>Salary Base</th>
-											<th>EmployER's Share</th>
-											<th>EmployEE's Share</th>
+											<th>Employer's(ER)<br>Share</th>
+											<th>Employee's(EE)<br>Share</th>
 										</tr>
 									</thead>
 									<tbody>

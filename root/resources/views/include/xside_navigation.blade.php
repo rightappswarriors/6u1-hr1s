@@ -47,7 +47,7 @@
     </a>
   </li>
   {{-- USER MENU --}}
-  <li class="nav-item" id="masterfile" hidden>
+  <li class="nav-item" id="masterfile">
     <a class="nav-link nav-link-collapse collapsed" data-toggle="collapse" href="#MF" aria-expanded="false">
       <i class="fa fa-fw fa-key"></i>
       <span>Master File</span>
@@ -114,13 +114,13 @@
       </li> --}}
     </ul>
   </li>
-  <li class="nav-item" id="calendar" hidden>
+  <li class="nav-item" id="calendar">
     <a class="nav-link" href="{{url('calendar/')}}">
       <i class="fa fa-calendar"></i>
       <span>Calendar</span>
     </a>
   </li>
-  <li class="nav-item" id="timekeeping" hidden>
+  <li class="nav-item" id="timekeeping">
     <a class="nav-link nav-link-collapse collapsed" data-toggle="collapse" href="#TK" aria-expanded="false">
       <i class="fa fa-fw fa-clock-o"></i>
       <span>Timekeeping</span>
@@ -129,27 +129,27 @@
       <li id="timekeepinglog-box">
         <a href="{{url('timekeeping/log-box')}}">Log Box</a>
       </li>
-      <li class="nav-separator"></li>
       <li id="timekeepingupload-dtr">
         <a href="{{url('timekeeping/upload-dtr')}}">Upload DTR</a>
       </li>
+      <li class="nav-separator"></li>
       <li id="timekeepingtimelog-entry">
         <a href="{{url('timekeeping/timelog-entry')}}">Time Log Entry</a>
       </li>
-      <li class="nav-separator"></li>
+      {{-- <li class="nav-separator"></li> --}}
       <li id="timekeepingleaves-entry">
         <a href="{{url('timekeeping/leaves-entry')}}">Leaves Entry</a>
       </li>
-      <li id="timekeepingemployee-dtr">
+      {{-- <li id="timekeepingemployee-dtr">
         <a href="{{url('timekeeping/employee-dtr')}}">Employee DTR</a>
-      </li>
+      </li> --}}
       <li class="nav-separator"></li>
       <li id="timekeepinggenerate-dtr">
         <a href="{{url('timekeeping/generate-dtr')}}">Generate DTR Summary</a>
       </li>
     </ul>
   </li>
-  <li class="nav-item" id="payroll" hidden>
+  <li class="nav-item" id="payroll">
     <a class="nav-link nav-link-collapse collapsed" data-toggle="collapse" href="#PR" aria-expanded="false">
       <i class="fa fa-fw fa-money"></i>
       <span>Payroll</span>
@@ -188,7 +188,7 @@
       </li> --}}
     </ul>
   </li>
-  <li class="nav-item" id="reps" hidden>
+  <li class="nav-item" id="reps">
     <a class="nav-link nav-link-collapse collapsed" data-toggle="collapse" href="#Reports" aria-expanded="false">
       <i class="fa fa-fw fa-file"></i>
       <span>Reports</span>
@@ -256,12 +256,12 @@
       <li>
         <a href="#">Payroll Register</a>
       </li> --}}
-      <li id="">
+      {{-- <li id="">
         <a href="#">Payslip</a>
-      </li>
+      </li> --}}
     </ul>
   </li>
-  <li class="nav-item" id="recs" hidden>
+  <li class="nav-item" id="recs">
     <a class="nav-link nav-link-collapse collapsed" data-toggle="collapse" href="#Records" aria-expanded="false">
       <i class="fa fa-fw fa-book"></i>
       <span>Records</span>
@@ -275,22 +275,22 @@
       </li> --}}
     </ul>
   </li>
-  <li class="nav-item" id="setts" hidden>
+  <li class="nav-item" id="setts">
     <a class="nav-link nav-link-collapse collapsed" data-toggle="collapse" href="#Settings" aria-expanded="false">
       <i class="fa fa-fw fa-wrench"></i>
       <span>Settings</span>
     </a>
     <ul class="sidenav-second-level collapse-menu collapse" id="Settings" data-parent="#sidebar-parent">
       <li id="">
-        <a href="#">Timekeeping Settings</a>
+        <a href="{{url('settings/timekeepingsettings')}}">Timekeeping Settings</a>
       </li>
       <li id="settingspayrollsettings">
         <a href="{{url('settings/payrollsettings')}}">Payroll Settings</a>
       </li>
       <li class="nav-separator"></li>
-      {{-- <li id="settingsgroup-rights">
+      <li id="settingsgroup-rights">
         <a href="{{url('settings/group-rights')}}">Group Rights Settings</a>
-      </li> --}}
+      </li>
       <li id="settingsuser">
         <a href="{{url('settings/user')}}">User Settings</a>
       </li>
@@ -321,36 +321,37 @@
 </ul>
 
 <script>
-  var side_par_id = [
-    'MF',
-    'TK',
-    'PR',
-    'Reports',
-    'Records',
-    'Settings',
-  ];
+    
 
-  var sidebar_parents = [
-    'master-file',
-    'timekeeping',
-    'payroll',
-    'reports',
-    'records',
-    'settings',
-  ];
+    var side_par_id = [
+      'MF',
+      'TK',
+      'PR',
+      'Reports',
+      'Records',
+      'Settings',
+    ];
 
-  var sidebar_reports_parents = [
-    ''
-  ];
+    var sidebar_parents = [
+      'master-file',
+      'timekeeping',
+      'payroll',
+      'reports',
+      'records',
+      'settings',
+    ];
+
+    var sidebar_reports_parents = [
+      ''
+    ];
 
 
-  var the_side_bar_link = window.location.href.split('/');
+    var the_side_bar_link = window.location.href.split('/');
 
-  var side_mod_name = the_side_bar_link[4];
-  var side_mod_child_name = the_side_bar_link[4]+the_side_bar_link[5];
-  var module_id = side_par_id[sidebar_parents.indexOf(side_mod_name)];
+    var side_mod_name = the_side_bar_link[4];
+    var side_mod_child_name = the_side_bar_link[4]+the_side_bar_link[5];
+    var module_id = side_par_id[sidebar_parents.indexOf(side_mod_name)];
 
-  $(document).ready(function () {
     $('#'+module_id).parent().children('a').removeClass('collapsed');
     $('#'+module_id).addClass('show');
 
@@ -364,12 +365,17 @@
       $('#'+side_mod_child_name).addClass('bg-info');
     }
 
-    @isset(Account::CURRENT()->restriction)
+  setInterval(function() {
       @foreach(X05S::Load_All() as $k => $v)
-        if('{{Account::CURRENT()->restriction}}'.split(', ').includes('{{$v->id}}')) {
-          $('#'+'{{$v->id}}')[0].removeAttribute('hidden');
-        }
+        $('#'+'{{$v->id}}')[0].setAttribute('hidden', '');
       @endforeach
-    @endisset
-  });
+
+      @isset(Account::CURRENT()->restriction)
+        @foreach(X05S::Load_All() as $k => $v)
+          if('{{Account::CURRENT()->restriction}}'.split(', ').includes('{{$v->id}}')) {
+            $('#'+'{{$v->id}}')[0].removeAttribute('hidden');
+          }
+        @endforeach
+      @endisset
+    }, 1000);
 </script>

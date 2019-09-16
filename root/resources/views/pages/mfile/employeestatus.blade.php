@@ -3,7 +3,7 @@
 @section('to-body')
 	<div class="card">
 		<div class="card-header">
-			<i class="fa fa-building"></i> Employee Status
+			<i class="fa fa-building"></i> Employee Status <button type="button" class="btn btn-success" id="opt-add"><i class="fa fa-plus"></i> Add</button>
 		</div>
 		<div class="card-body">
 			<div class="row">
@@ -12,10 +12,14 @@
 						<div class="card-body">
 							<div class="table-responsive">
 								<table class="table table-hover" id="dataTable">
+									<col>
+									<col>
+									<col width="10%">
 									<thead>
 										<tr>
 											<th>Status Code</th>
 											<th>Name</th>
+											<th></th>
 										</tr>
 									</thead>
 									<tbody>
@@ -25,6 +29,10 @@
 												<tr data_id="{{$pp->statcode}}" data_name="{{$pp->description}}">
 													<td>{{$pp->statcode}}</td>
 													<td>{{$pp->description}}</td>
+													<td>
+														<button type="button" class="btn btn-primary mr-1" id="opt-update" onclick="row_update(this)"><i class="fa fa-edit"></i></button>
+														<button type="button" class="btn btn-danger" id="opt-delete" onclick="row_delete(this)"><i class="fa fa-trash"></i></button>
+													</td>
 												</tr>
 												@endforeach
 											@endif
@@ -35,16 +43,13 @@
 						</div>
 					</div>
 				</div>
-				<div class="col-3">
+				{{-- <div class="col-3">
 					<div class="card">
 						<div class="card-body">
-							<button type="button" class="btn btn-success btn-block" id="opt-add"><i class="fa fa-plus"></i> Add</button>
-							<button type="button" class="btn btn-primary btn-block" id="opt-update"><i class="fa fa-edit"></i> Edit</button>
-							<button type="button" class="btn btn-danger btn-block" id="opt-delete"><i class="fa fa-trash"></i> Delete</button>
 							<button type="button" class="btn btn-info btn-block" id="opt-print"><i class="fa fa-print"></i> Print List</button>
 						</div>
 					</div>
-				</div>
+				</div> --}}
 			</div>
 		</div>
 	</div>
@@ -113,14 +118,6 @@
 		});
 	</script>
 	<script type="text/javascript">
-		function LoadDatable()
-		{
-			data.row.add([
-				data.pay_code,
-				data.date_from,
-				data.date_to
-			]).draw();
-		}
 		$('#opt-add').on('click', function() {
 			$('#frm-pp').attr('action', '{{url('master-file/employee-status')}}');
 
@@ -133,7 +130,8 @@
 			$('#modal-pp').modal('show');
 		});
 
-		$('#opt-update').on('click', function() {
+		function row_update(obj) {
+			var selected_row = $($(obj).parents()[1]);
 			$('#frm-pp').attr('action', '{{url('master-file/employee-status')}}/update');
 		
 			$('input[name="txt_code"]').attr('readonly', '');
@@ -143,9 +141,10 @@
 			$('.AddMode').show();
 			$('.DeleteMode').hide();
 			$('#modal-pp').modal('show');
-		});
+		};
 
-		$('#opt-delete').on('click', function() {
+		function row_delete(obj) {
+			var selected_row = $($(obj).parents()[1]);
 			$('#frm-pp').attr('action', '{{url('master-file/employee-status')}}/delete');
 		
 			$('input[name="txt_code"]').attr('readonly', '');
@@ -156,6 +155,6 @@
 			$('.AddMode').hide();
 			$('.DeleteMode').show();
 			$('#modal-pp').modal('show');
-		});
+		};
 	</script>
 @endsection

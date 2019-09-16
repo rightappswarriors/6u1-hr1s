@@ -12,7 +12,88 @@
 					<div class="row">
 						<div class="col">
 							<form method="post" action="{{url('payroll/loan-entry/find')}}" id="frm-loaddtr">
-								<div class="form-inline">
+
+								<div class="row">
+									<div class="col-4">
+										<div class="row mb-2">
+											<div class="col-3">
+												Office:
+											</div>
+											<div class="col">
+												<select class="form-control w-100" name="office" id="office" required>
+													<option disabled selected value="">Please select an office</option>
+													@if(!empty($data[2]))
+													@foreach($data[2] as $off)
+													<option value="{{$off->cc_id}}">{{$off->cc_desc}}</option>
+													@endforeach
+													@endif
+												</select>
+											</div>
+										</div>
+
+										<div class="row">
+											<div class="col-3">
+												<label>Employee:</label>
+											</div>
+											<div class="col">
+												<select class="form-control" name="tito_emp" id="tito_emp" required>
+													<option disabled selected value="">---</option>
+													{{-- @if(!empty($data[1]))
+													@foreach($data[1] as $emp)
+													<option value="{{$emp->empid}}">{{$emp->firstname." ".$emp->lastname}}</option>
+													@endforeach
+													@endif --}}
+												</select>
+											</div>
+										</div>
+									</div>
+
+									<div class="col-4">
+										<div class="row mb-2">
+											<div class="col-3">
+												From:
+											</div>
+											<div class="col">
+												<input type="text" name="date_from" id="date_from" class="form-control" value="{{date('Y-m-01')}}" required>
+											</div>
+										</div>
+
+										<div class="row">
+											<div class="col-3">
+												To:
+											</div>
+											<div class="col">
+												<input type="text" name="date_to" id="date_to" class="form-control" value="{{date('Y-m-d')}}" required>
+											</div>
+										</div>
+									</div>
+
+									<div class="col">
+										<div class="row mb-2">
+											<div class="col-4">
+												<label>Search by ID:</label>
+											</div>
+											<div class="col">
+												<input type="text" name="tito_id" id="tito_id" class="form-control float-right ml-2" placeholder="Search by ID">
+											</div>
+											{{-- <i class="fa fa-spinner fa-spin fa-2x hidden" id="frm-spinner"></i> --}}
+										</div>
+										<div class="row">
+											<div class="col-4">
+												<button type="button" class="btn btn-primary" id="opt-submit">Go</button>
+											</div>
+											<div class="col">
+												<button type="button" class="btn btn-success" id="opt-add"><i class="fa fa-plus"></i></button>
+												<button type="button" class="btn btn-primary" id="opt-update"><i class="fa fa-edit"></i></button>
+												<button type="button" class="btn btn-danger" id="opt-delete"><i class="fa fa-trash"></i></button>
+												{{-- <button type="button" class="btn btn-warning" id="opt-money"><i class="fa fa-money"></i></button> --}}
+												<button type="button" class="btn btn-info" id="opt-print"><i class="fa fa-print"></i></button>
+											</div>
+										</div>
+									</div>
+								</div>
+
+								{{-- <div class="form-inline">
 									<div class="form-group mr-2">
 										<label>Employee:</label>
 										<select class="form-control" name="tito_emp" id="tito_emp" required>
@@ -26,25 +107,17 @@
 									</div>
 									<div class="form-group mr-2">
 										<label>From:</label>
-										<input type="text" name="date_from" id="date_from" class="form-control" value="{{date('m/1/Y')}}" required>
+										<input type="text" name="date_from" id="date_from" class="form-control" value="{{date('Y-m-1')}}" required>
 									</div>
 									<div class="form-group mr-2">
 										<label>To:</label>
-										<input type="text" name="date_to" id="date_to" class="form-control" value="{{date('m/d/Y')}}" required>
-									</div>
-									<i class="fa fa-spinner fa-spin fa-2x hidden" id="frm-spinner"></i>
+										<input type="text" name="date_to" id="date_to" class="form-control" value="{{date('Y-m-d')}}" required>
+									</div> --}}
+									{{-- <i class="fa fa-spinner fa-spin fa-2x hidden" id="frm-spinner"></i> --}}
 									{{-- <button type="submit" class="btn btn-primary mr-2">Go</button> --}}
 									{{-- <button type="button" class="btn btn-primary" id="btn-print" data="#" onclick="PrintPage(this.getAttribute('data'))"><i class="fa fa-print"></i></button> --}}
 								</div>
 							</form>
-						</div>
-
-						<div class="col-3 text-right">
-							<button type="button" class="btn btn-success" id="opt-add"><i class="fa fa-plus"></i></button>
-							<button type="button" class="btn btn-primary" id="opt-update"><i class="fa fa-edit"></i></button>
-							<button type="button" class="btn btn-danger" id="opt-delete"><i class="fa fa-trash"></i></button>
-							{{-- <button type="button" class="btn btn-warning" id="opt-money"><i class="fa fa-money"></i></button> --}}
-							<button type="button" class="btn btn-info" id="opt-print"><i class="fa fa-print"></i></button>
 						</div>
 					</div>		
 				</div>
@@ -165,15 +238,6 @@
 									<b>Loan Details</b>
 									<div class="dropdown-divider"></div>
 									<div class="form-group">
-										<label>Loan Type:</label>
-										<select name="cbo_contraacct" id="" style="text-transform: uppercase;" class="form-control" required>
-											<option disabled hidden selected value="">---</option>
-											@foreach(LoanType::Load_LoanTypes() as $key => $value)
-												<option value="{{$value->code}}">{{$value->description}}</option>
-											@endforeach
-										</select>
-									</div>
-									<div class="form-group">
 										<label>Stock Location:</label>
 										<select name="cbo_stocklocation" id="" style="text-transform: uppercase;" class="form-control" required>
 											<option disabled hidden selected value="">---</option>
@@ -183,11 +247,31 @@
 										</select>
 									</div>
 									<div class="form-group">
-										<label>Period to pay:</label>
-										<select name="cbo_per_tp" style="text-transform: uppercase;" class="form-control" required>
-											<option value="" selected hidden disabled>---</option>
-											<option value="15">15th Day</option>
-											<option value="30">30th Day</option>
+										<label>Loan Type:</label>
+										<select name="cbo_contraacct" id="" style="text-transform: uppercase;" class="form-control" required>
+											<option disabled hidden selected value="">---</option>
+											@foreach(LoanType::Load_LoanTypes() as $key => $value)
+												<option value="{{$value->code}}">{{$value->description}}</option>
+											@endforeach
+											{{-- <option value="pagibig">Pag-Ibig</option> --}}
+										</select>
+									</div>
+									<div class="form-group exclusive_sub_hidden" id="pagibig_sub" hidden>
+										<label>Pag-Ibig Type:</label>
+										<select name="cbo_pagibig_sub" id="" style="text-transform: uppercase;" class="form-control" required>
+											<option disabled hidden selected value="">---</option>
+											@foreach(Pagibig::Get_All_Sub() as $key => $value)
+												<option value="{{$value->id}}">{{$value->description}}</option>
+											@endforeach
+										</select>
+									</div>
+									<div class="form-group exclusive_sub_hidden" id="sss_sub" hidden>
+										<label>SSS Type:</label>
+										<select name="cbo_sss_sub" id="" style="text-transform: uppercase;" class="form-control" required>
+											<option disabled hidden selected value="">---</option>
+											@foreach(SSS::Get_All_Sub() as $key => $value)
+												<option value="{{$value->id}}">{{$value->description}}</option>
+											@endforeach
 										</select>
 									</div>
 								</div> 
@@ -220,6 +304,14 @@
 									<div class="form-group">
 										<label>Transaction Date:</label>
 										<input type="text" name="dtp_trnxdt" class="form-control" id="trans_date" value="{{date('m/d/Y')}}" required readonly>
+									</div>
+									<div class="form-group">
+										<label>Period to pay:</label>
+										<select name="cbo_per_tp" style="text-transform: uppercase;" class="form-control" required>
+											<option value="" selected hidden disabled>---</option>
+											<option value="15">15th Day</option>
+											<option value="30">30th Day</option>
+										</select>
 									</div>
 									<div class="form-group">
 										<label>Amount of loan:</label>
@@ -270,6 +362,106 @@
 @endsection
 
 @section('to-bottom')
+	<script>
+		$('select[name="cbo_contraacct"]').on('change', function() {
+			// let div = $('#pagibig_sub');
+			// if($(this).val() == "pagibig") {
+			// 	div[0].removeAttribute('hidden');
+			// 	div[0].children[1].removeAttribute('disabled');
+
+			// 	div[0].children[1].setAttribute('required', '');
+			// } else {
+			// 	div[0].setAttribute('hidden', '');
+			// 	div[0].children[1].setAttribute('disabled', '');
+			// 	div[0].children[1].removeAttribute('required');
+			// }
+
+			switch($(this).val()) {
+				case "pagibig":
+					var divs = $('.exclusive_sub_hidden');
+					for(i=0; i<divs.length; i++) {
+						divs[i].setAttribute('hidden', '');
+						divs[i].children[1].setAttribute('disabled', '');
+						divs[i].children[1].removeAttribute('required');
+					}
+
+					var div = $('#pagibig_sub');
+					div[0].removeAttribute('hidden');
+					div[0].children[1].removeAttribute('disabled');
+
+					div[0].children[1].setAttribute('required', '');
+					break;
+				case "sss":
+					var divs = $('.exclusive_sub_hidden');
+					for(i=0; i<divs.length; i++) {
+						divs[i].setAttribute('hidden', '');
+						divs[i].children[1].setAttribute('disabled', '');
+						divs[i].children[1].removeAttribute('required');
+					}
+
+					var div = $('#sss_sub');
+					div[0].removeAttribute('hidden');
+					div[0].children[1].removeAttribute('disabled');
+
+					div[0].children[1].setAttribute('required', '');
+					break;
+				default:
+					var divs = $('.exclusive_sub_hidden');
+					for(i=0; i<divs.length; i++) {
+						divs[i].setAttribute('hidden', '');
+						divs[i].children[1].setAttribute('disabled', '');
+						divs[i].children[1].removeAttribute('required');
+					}
+					break;
+			}
+		});
+
+		$('#tito_emp').on('input', function() {
+			$('#tito_id').val('');
+		});
+
+		$('#tito_id').on('input', function() {
+
+			// $('select[name=office]').val('').trigger('change');
+
+			// if($('select[name="tito_emp"]').val($(this).val()).trigger('change').val() == null)	
+			// 	$('select[name="tito_emp"]').val('').trigger('change');
+
+			$.ajax({
+				type : 'post',
+				url : '{{url('payroll/loan-entry/find-id')}}',
+				data : {id:$(this).val(), date_start:$('#date_from').val(), date_to:$('#date_to').val()},
+				success: function(data) {
+					table.clear().draw();
+					if (data!="error") {
+						if (data!="empty") {
+							if(data.length > 0) {
+								// $('select[name=office]').val(data[0].deptid).trigger('change');
+								for(var i = 0 ; i < data.length; i++) {
+									LoadTable(data[i]);
+								}
+							} 	
+						} else {
+							
+						}
+					} else {
+						
+					}
+				},
+			});
+
+			setTimeout(function() {
+				if($('select[name=office]').val() != null) {
+					$('select[name=tito_emp]').val($('#tito_id').val()).trigger('change');
+				}
+			}, 500);
+		});
+
+		$('#opt-submit').on('click', function(e) {
+			SubmitSearchFrm(e);
+		});
+	</script>
+
 	<script type="text/javascript">
 		var selected_row = null;
 		$('#dataTable').on('click', 'tbody > tr', function() {
@@ -301,6 +493,39 @@
 	</script>
 
 	<script>
+		$('#office').on('change', function() {
+
+			while($('#tito_emp')[0].firstChild) {
+				$('#tito_emp')[0].removeChild($('#tito_emp')[0].firstChild);
+			}
+
+			var hiddenChild = document.createElement('option');
+				hiddenChild.setAttribute('selected', '');
+				hiddenChild.setAttribute('disabled', '');
+				hiddenChild.setAttribute('value', '');
+				hiddenChild.innerText='---';
+
+			$('#tito_emp')[0].appendChild(hiddenChild);
+
+			$.ajax({
+				type: 'post',
+				url: '{{url('timekeeping/timelog-entry/find-emp-office')}}',
+				data: {ofc_id: $(this).val()},
+				success: function(data) {
+					// console.log(typeof(data));
+					if(data.length > 0) {
+						for(i=0; i<data.length; i++) {
+							var option = document.createElement('option');
+								option.setAttribute('value', data[i].empid);
+								option.innerText=data[i].name;
+
+							$('#tito_emp')[0].appendChild(option);
+						}
+					}
+				},
+			});
+		});
+
 		var table = $('#dataTable').DataTable(dataTable_short);
 
 		function ValidateSearchFrm()
@@ -352,9 +577,9 @@
 			});
 		}
 
-		$('#date_from, #date_to, #tito_emp').on('change', function(e) {
-			if (ValidateSearchFrm() == true) {SubmitSearchFrm(e);}
-		});
+		// $('#date_from, #date_to, #tito_emp').on('change', function(e) {
+		// 	if (ValidateSearchFrm() == true) {SubmitSearchFrm(e);}
+		// });
 
 
 		function FillFld(data){ console.log(data);
@@ -366,11 +591,17 @@
 			$('input[name="dtp_trnxdt"]').val(data.loan_transdate);
 			$('select[name="cbo_costcenter"]').val(data.loan_cost_center_code).trigger('change');
 			$('select[name="cbo_scc"]').val(data.loan_sub_cost_center).trigger('change');
-			$('input[name="txt_mo_tbp"]').val(data.loan_amount);
+			$('input[name="txt_mo_tbp"]').val(data.months_to_be_paid);
 			$('select[name="cbo_per_tp"]').val(data.period_to_pay).trigger('change');
-			$('input[name="txt_amnt_loan"]').val(data.months_to_be_paid);
+			$('input[name="txt_amnt_loan"]').val(data.loan_amount);
 			$('input[name="txt_deduction"]').val(data.loan_deduction);
 			$('input[name="dtp_deduction"]').val(data.deduction_date);
+			switch(data.loan_type) {
+				case "pagibig": $('select[name="cbo_pagibig_sub"]').val(data.loan_sub_type); break;
+				case "sss": $('select[name="cbo_sss_sub"]').val(data.loan_sub_type); break;	
+			}
+			
+
 		}
 
 		function ClearFld() {
@@ -390,6 +621,8 @@
 			$('input[name="txt_mo_tbp"]').val(1);
 			$('input[name="txt_deduction"]').val('');
 			$('input[name="dtp_deduction"]').val('');
+			$('select[name="cbo_pagibig_sub"]').val('');
+			$('select[name="cbo_sss_sub"]').val('');
 		}
 
 		function LoadTable(data)

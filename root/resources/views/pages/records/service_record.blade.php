@@ -3,11 +3,25 @@
 @section('to-body')
 	<div class="card">
 		<div class="card-header">
-			<i class="fa fa-fw fa-book"></i> Service Record
+			<div class="row">
+				<div class="col-2">
+					<i class="fa fa-fw fa-book"></i> Service Record
+				</div>
+				<div class="col">
+					<select class="form-control w-25" name="office" id="office" required>
+						<option disabled selected value="">Please select an office</option>
+						@if(!empty($data[1]))
+						@foreach($data[1] as $off)
+						<option value="{{$off->cc_id}}">{{$off->cc_desc}}</option>
+						@endforeach
+						@endif
+					</select>
+				</div>
+			</div>
 		</div>
 		<div class="card-body mb-2">
 			<div class="table-responsive">
-				<table class="table table-bordered table-hover" id="dataTable">
+				<table class="table table-bordered table-hover" id="dataTable1">
 					<col width="9%">
 					<col width="9%">
 					<col width="8%">
@@ -32,11 +46,10 @@
 						<th>Remarks</th>
 					</thead>
 					<tbody>
-						@isset($data)
-							@foreach($data as $key => $value)
+						{{-- @isset($data[0])
+							@foreach($data[0] as $key => $value)
 								<tr>
-									{{-- <form method="post" action="#" id="frm-pp" data="#">
-										@csrf --}}
+									
 										<input type="hidden" name="txt_sr_code" value="{{$value->sr_code}}">
 										<td>{{trim(\Carbon\Carbon::parse($value->service_from)->format('M d, Y'))}}</td>
 										<td>{{trim(\Carbon\Carbon::parse($value->service_to)->format('M d, Y'))}}</td>
@@ -47,13 +60,13 @@
 										<td>{!!Core::currSign().trim($value->salary)!!}</td>
 										<td>{{Employee::GetDepartment($value->branch)}}</td>
 										<td>{{trim($value->leave_wo_pay)}}</td>
-										<td {{-- onclick="edit_remarks()" --}}>
+										<td>
 											<textarea class="form-control" name="txt_remarks" rows="3" maxlength="50" oninput="save_remark('{{$value->sr_code}}', this)" required>{{trim($value->remarks)}}</textarea>
 										</td>
-									{{-- </form> --}}
+									
 								</tr>
 							@endforeach
-						@endisset
+						@endisset --}}
 					</tbody>
 				</table>
 			</div>
@@ -63,10 +76,42 @@
 
 @section('to-bottom')
 	<script>
+		var table = $('#dataTable1').DataTable({
+			"paging": false
+		});
+
+		$('#office').on('change', function() {
+			$.ajax({
+				type: "post",
+				url: "{{url('records/service-record/find')}}",
+				data: {"ofc_id":$(this).val()},
+				success: function(response) {
+					table.clear().draw();
+					for(i=0; i<response.length; i++) {
+						FillTable(response[i]);
+					}
+				},
+			});
+		});
+
+		function FillTable(d) {
+			table.row.add([
+				d.date_from_readable,
+				d.date_to_readable,
+				d.empid,
+				d.employee_name,
+				d.designation_readable,
+				d.status,
+				d.salary,
+				d.branch_readable,
+				d.lwp_readable,
+				'<textarea class="form-control" name="txt_remarks" rows="3" maxlength="50" oninput="save_remark(\''+d.sr_code+'\', this)" required>'+d.remarks_readable+'</textarea>',
+			]).draw();
+		}
+
 		function save_remark(sr_code, remarks) {
 			remarks.style.height = "1px";
 			remarks.style.height = (25+remarks.scrollHeight)+"px";
-
 			$.ajax({
 				type: "post",
 				url: "{{url('records/service-record/')}}",

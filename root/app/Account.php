@@ -51,4 +51,13 @@ class Account extends Model
 			return null;
 		}
 	}
+
+	public static function ID()
+	{
+		try {
+			return self::CURRENT()->uid;
+		} catch (\Exception $e) {
+			return null;
+		}
+	}
 }

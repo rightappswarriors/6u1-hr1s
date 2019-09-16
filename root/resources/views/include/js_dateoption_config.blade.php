@@ -78,7 +78,8 @@
             aaSorting : [],
         }
 
-    	var dateFormat_config = 'mm-dd-yy'
+    	// var dateFormat_config = 'mm-dd-yy'
+        var dateFormat_config = 'yy-mm-dd';
 
         var date_option = {
             changeMonth: true,

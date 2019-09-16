@@ -9,33 +9,86 @@
 		</div>
 		<div class="card-body">
 			<div class="form-inline mb-3" id="print_hide">
-					<div class="form-group">
-						<label for="employee">Employee: </label>
-						<select name="" id="employee" class="form-control mr-3">
-							<option value="" disabled readonly selected>SELECT EMPLOYEE</option>
-							@isset($data[0])
-								@foreach($data[0] as $k => $v)
-									<option value="{{$v->empid}}">{{Employee::Name($v->empid)}}</option>
-								@endforeach
-							@endisset
-						</select>
 
-						<label for="date_month">Month: </label>
-						<select class="form-control MonthSelector mr-3" name="date_month" id="date_month" onchange=""></select>
+				<div class="form-group">
+					<div class="col-3 mr-3">
+						<div class="row">
+							<label for="date_month">Office: </label>
+						</div>
 
-						<label for="date_year">Year: </label>
-						<select class="form-control YearSelector mr-3" name="date_year" id="date_year" onchange=""></select>
-
-						<label for="payroll_period">Payroll Period: </label>
-						<select class="form-control mr-3" name="payroll_period" id="payroll_period" onchange="">
-							<option value="15">15th Day</option>
-							<option value="30">30th Day</option>
-						</select>
-						<button class="btn btn-primary mr-3" id="generate_btn">Find</button>
-
-						<button class="btn btn-primary mr-3" id="print_btn"><i class="fa fa-fw fa-print"></i></button>
+						<div class="row">
+							<select class="form-control mr-3 w-100" name="office" id="office" onchange="">
+								<option disabled selected value="">Please select an office</option>
+								@if(!empty($data[1]))
+									@foreach($data[1] as $off)
+										<option value="{{$off->cc_id}}">{{$off->cc_desc}}</option>
+									@endforeach
+								@endif
+							</select>
+						</div>
 					</div>
+					
+							
+					<div class="col-2 mr-3">
+						<div class="row">
+							<label for="employee">Employee: </label>
+						</div>
+
+						<div class="row">
+							<select name="" id="employee" class="form-control mr-3">
+								<option value="" disabled selected>SELECT EMPLOYEE</option>
+								{{-- @isset($data[0])
+									@foreach($data[0] as $k => $v)
+										<option value="{{$v->empid}}">{{Employee::Name($v->empid)}}</option>
+									@endforeach
+								@endisset --}}
+							</select>
+						</div>
+					</div>
+					
+							
+
+
+					<div class="col-2 mr-3">
+						<div class="row">
+							<div class="col-3">
+								<label for="date_month">Month: </label>
+							</div>
+							<div class="col">
+								<select class="form-control MonthSelector mr-3 w-100" name="date_month" id="date_month" onchange=""></select>
+							</div>
+							
+						</div>
+
+						<div class="row">
+							<div class="col-3">
+								<label for="date_year">Year: </label>
+							</div>
+							<div class="col">
+								<select class="form-control YearSelector mr-3 w-100" name="date_year" id="date_year" onchange=""></select>
+							</div>
+						</div>
+					</div>
+
+					<div class="col-2 mr-3">
+						<div class="row">
+							<label for="payroll_period">Payroll Period: </label>
+						</div>
+
+						<div class="row">
+							<select class="form-control mr-3 w-100" name="payroll_period" id="payroll_period" onchange="">
+								<option value="15">15th Day</option>
+								<option value="30">30th Day</option>
+							</select>
+						</div>
+					</div>
+					
+						
+					<button class="btn btn-primary mr-3" id="generate_btn">Find</button>
+
+					<button class="btn btn-primary mr-3" id="print_btn"><i class="fa fa-fw fa-print"></i></button>
 				</div>
+			</div>
 			<div class="table-responsive table-bordered hidden" id="dtr">
 				<table class="table table-hover" style="font-size: 13px;">
 					<thead>
@@ -71,6 +124,10 @@
 			.card {
 				border: none !important;
 			}
+
+			body {
+				margin: -8mm -8mm -8mm -8mm;
+			}
 		}
 	</style>
 
@@ -93,10 +150,178 @@
 			if($('#employee').val() == null)
 				alert('Please select an employee.');
 			else
-				process();
+				// process();
+				process2();
 		});
 
+		$('#office').on('change', function() {
 
+			while($('#employee')[0].firstChild) {
+				$('#employee')[0].removeChild($('#employee')[0].firstChild);
+			}
+
+			var hiddenChild = document.createElement('option');
+				hiddenChild.setAttribute('selected', '');
+				hiddenChild.setAttribute('disabled', '');
+				hiddenChild.setAttribute('value', '');
+				hiddenChild.innerText='SELECT EMPLOYEE';
+
+			$('#employee')[0].appendChild(hiddenChild);
+
+			$.ajax({
+				type: 'post',
+				url: '{{url('timekeeping/timelog-entry/find-emp-office')}}',
+				data: {ofc_id: $(this).val()},
+				success: function(data) {
+					// console.log(typeof(data));
+					if(data.length > 0) {
+						for(i=0; i<data.length; i++) {
+							var option = document.createElement('option');
+								option.setAttribute('value', data[i].empid);
+								option.innerText=data[i].name;
+
+							$('#employee')[0].appendChild(option);
+						}
+					}
+				},
+			});
+		});
+
+		function process2() {
+			$.ajax({
+				type: "post",
+				url: yoarel+"2",
+				data: {"empid":empid, "month":date_month, "year":date_year, "period":payroll_period} ,
+				success: function(response) {
+					$('#dtr').removeClass('hidden');
+
+					var divX = document.getElementById('dtr');
+						divX.setAttribute('style', 'overflow-x: hidden !important');
+
+					var tbody = document.getElementById('timelogs');
+
+					while(tbody.firstChild) {
+						tbody.removeChild(tbody.firstChild);
+					}
+
+					var tr1 = document.createElement('tr');
+						var td1 = document.createElement('td');
+							td1.setAttribute('colspan', '7');
+							td1.innerHTML = "Name: <b>"+response[1].Name+"</b>";
+						tr1.appendChild(td1);
+					var tr2 = document.createElement('tr');
+						var td2 = document.createElement('td');
+							td2.setAttribute('colspan', '3');
+							td2.innerHTML = "For the Month of: <b>"+response[1].Month+"</b>";
+						var td3 = document.createElement('td');
+							td3.setAttribute('colspan', '1');
+						var td4 = document.createElement('td');
+							td4.setAttribute('colspan', '3');
+							td4.innerHTML = "Year: <b>"+response[1].Year+"</b>";
+						tr2.appendChild(td2);
+						tr2.appendChild(td3);
+						tr2.appendChild(td4);
+					var tr3 = document.createElement('tr');
+						var td6 = document.createElement('td');
+							td6.setAttribute('style', 'text-align: center; width: 10%');
+							td6.innerHTML = "<b>Day</b>";
+						var td7 = document.createElement('td');
+							td7.setAttribute('colspan', '2');
+							td7.setAttribute('style', 'text-align: center; font-weight: bold');
+							td7.innerHTML = "A.M.";
+						var td8 = document.createElement('td');
+							td8.setAttribute('colspan', '2');
+							td8.setAttribute('style', 'text-align: center; font-weight: bold');
+							td8.innerHTML = "P.M.";
+						var td10 = document.createElement('td');
+							td10.setAttribute('colspan', '2');
+							td10.setAttribute('style', 'text-align: center; font-weight: bold');
+							td10.innerHTML = "Undertime";
+						tr3.appendChild(td6);
+						tr3.appendChild(td7);
+						tr3.appendChild(td8);
+						tr3.appendChild(td10);
+					var tr4 = document.createElement('tr');
+						var td12 = document.createElement('td');
+						var td13 = document.createElement('td');
+							td13.setAttribute('style', 'text-align: center; width: 10%');
+							td13.innerHTML = "Arrival";
+						var td14 = document.createElement('td');
+							td14.setAttribute('style', 'text-align: center; width: 10%');
+							td14.innerHTML = "Departure";
+						var td15 = document.createElement('td');
+							td15.setAttribute('style', 'text-align: center; width: 10%');
+							td15.innerHTML = "Arrival";
+						var td16 = document.createElement('td');
+							td16.setAttribute('style', 'text-align: center; width: 10%');
+							td16.innerHTML = "Departure";
+						var td19 = document.createElement('td');
+							td19.setAttribute('style', 'text-align: center; width: 10%');
+							td19.innerHTML = "Hours";
+						var td20 = document.createElement('td');
+							td20.setAttribute('style', 'text-align: center; width: 10%');
+							td20.innerHTML = "Minutes";
+						var td21 = document.createElement('td');
+						tr4.appendChild(td12);
+						tr4.appendChild(td13);
+						tr4.appendChild(td14);
+						tr4.appendChild(td15);
+						tr4.appendChild(td16);
+						tr4.appendChild(td19);
+						tr4.appendChild(td20);
+
+					tbody.appendChild(tr1);
+					tbody.appendChild(tr2);
+					tbody.appendChild(tr3);
+					tbody.appendChild(tr4);
+
+					for (i = 0; i < response[0].length; i++) {
+						var tr = document.createElement('tr');
+
+						var number = document.createElement('td');
+							number.innerHTML = response[0][i]['_Date'];
+
+						var in1 = document.createElement('td');
+							in1.setAttribute('style', 'text-align: center;');
+							in1.innerHTML = formatAMPM2(response[0][i]['AM']['Arrival']);
+
+						var out1 = document.createElement('td');
+							out1.setAttribute('style', 'text-align: center;');
+							out1.innerHTML = formatAMPM2(response[0][i]['AM']['Departure']);
+
+						var in2 = document.createElement('td');
+							in2.setAttribute('style', 'text-align: center;');
+							in2.innerHTML = formatAMPM2(response[0][i]['PM']['Arrival']);
+							// console.log("1 "+response[0][i]['PM']['Arrival']);
+							// console.log("2 "+formatAMPM2(response[0][i]['PM']['Arrival']));
+
+						var out2 = document.createElement('td');
+							out2.setAttribute('style', 'text-align: center;');
+							out2.innerHTML = formatAMPM2(response[0][i]['PM']['Departure']);
+
+						var undertime_in = document.createElement('td');
+							undertime_in.setAttribute('style', 'text-align: center;');
+							undertime_in.innerHTML = Math.floor(response[0][i]['_Rendered'] / 60);
+
+						var undertime_out = document.createElement('td');
+							undertime_out.setAttribute('style', 'text-align: center;');
+							undertime_out.innerHTML = Math.floor(response[0][i]['_Rendered'] % 60);
+						tr.appendChild(number);
+						tr.appendChild(in1);
+						tr.appendChild(out1);
+						tr.appendChild(in2);
+						tr.appendChild(out2);
+						tr.appendChild(undertime_in);
+						tr.appendChild(undertime_out);
+
+						tbody.appendChild(tr);
+						
+					}
+				},
+			});
+		}
+
+		/*DO NOT DELETE*/
 		function process() {
 			$.ajax({
 				type: "post",
@@ -116,17 +341,17 @@
 
 					var tr1 = document.createElement('tr');
 						var td1 = document.createElement('td');
-							td1.setAttribute('colspan', '10');
+							td1.setAttribute('colspan', '8');
 							td1.innerHTML = "Name: <b>"+response[2]+"</b>";
 						tr1.appendChild(td1);
 					var tr2 = document.createElement('tr');
 						var td2 = document.createElement('td');
-							td2.setAttribute('colspan', '4');
+							td2.setAttribute('colspan', '3');
 							td2.innerHTML = "For the Month of: <b>"+response[3]+"</b>";
 						var td3 = document.createElement('td');
 							td3.setAttribute('colspan', '1');
 						var td4 = document.createElement('td');
-							td4.setAttribute('colspan', '4');
+							td4.setAttribute('colspan', '3');
 							td4.innerHTML = "Year: <b>"+response[4]+"</b>";
 						var td5 = document.createElement('td');
 							td5.setAttribute('colspan', '1');
@@ -136,23 +361,24 @@
 						tr2.appendChild(td5);
 					var tr3 = document.createElement('tr');
 						var td6 = document.createElement('td');
+							td6.setAttribute('style', 'text-align: center; width: 10%');
 							td6.innerHTML = "<b>Day</b>";
 						var td7 = document.createElement('td');
 							td7.setAttribute('colspan', '2');
 							td7.setAttribute('style', 'text-align: center; font-weight: bold');
-							td7.innerHTML = "Morning";
+							td7.innerHTML = "A.M.";
 						var td8 = document.createElement('td');
 							td8.setAttribute('colspan', '2');
 							td8.setAttribute('style', 'text-align: center; font-weight: bold');
-							td8.innerHTML = "Afternoon";
-						var td9 = document.createElement('td');
-							td9.setAttribute('colspan', '2');
-							td9.setAttribute('style', 'text-align: center; font-weight: bold');
-							td9.innerHTML = "OT Hours";
+							td8.innerHTML = "P.M.";
+						// var td9 = document.createElement('td');
+						// 	td9.setAttribute('colspan', '2');
+						// 	td9.setAttribute('style', 'text-align: center; font-weight: bold');
+						// 	td9.innerHTML = "OT Hours";
 						var td10 = document.createElement('td');
 							td10.setAttribute('colspan', '2');
 							td10.setAttribute('style', 'text-align: center; font-weight: bold');
-							td10.innerHTML = "Signature";
+							td10.innerHTML = "Undertime";
 						var td11 = document.createElement('td');
 							td11.setAttribute('rowspan', '2');
 							td11.setAttribute('style', 'text-align: center; font-weight: bold; vertical-align: middle;');
@@ -160,43 +386,43 @@
 						tr3.appendChild(td6);
 						tr3.appendChild(td7);
 						tr3.appendChild(td8);
-						tr3.appendChild(td9);
+						// tr3.appendChild(td9);
 						tr3.appendChild(td10);
 						tr3.appendChild(td11);
 					var tr4 = document.createElement('tr');
 						var td12 = document.createElement('td');
 						var td13 = document.createElement('td');
 							td13.setAttribute('style', 'text-align: center; width: 10%');
-							td13.innerHTML = "In";
+							td13.innerHTML = "Arrival";
 						var td14 = document.createElement('td');
 							td14.setAttribute('style', 'text-align: center; width: 10%');
-							td14.innerHTML = "Out";
+							td14.innerHTML = "Departure";
 						var td15 = document.createElement('td');
 							td15.setAttribute('style', 'text-align: center; width: 10%');
-							td15.innerHTML = "In";
+							td15.innerHTML = "Arrival";
 						var td16 = document.createElement('td');
 							td16.setAttribute('style', 'text-align: center; width: 10%');
-							td16.innerHTML = "Out";
-						var td17 = document.createElement('td');
-							td17.setAttribute('style', 'text-align: center; width: 10%');
-							td17.innerHTML = "Am";
-						var td18 = document.createElement('td');
-							td18.setAttribute('style', 'text-align: center; width: 10%');
-							td18.innerHTML = "Pm";
+							td16.innerHTML = "Departure";
+						// var td17 = document.createElement('td');
+						// 	td17.setAttribute('style', 'text-align: center; width: 10%');
+						// 	td17.innerHTML = "Am";
+						// var td18 = document.createElement('td');
+						// 	td18.setAttribute('style', 'text-align: center; width: 10%');
+						// 	td18.innerHTML = "Pm";
 						var td19 = document.createElement('td');
 							td19.setAttribute('style', 'text-align: center; width: 10%');
-							td19.innerHTML = "Am";
+							td19.innerHTML = "Hours";
 						var td20 = document.createElement('td');
 							td20.setAttribute('style', 'text-align: center; width: 10%');
-							td20.innerHTML = "Pm";
+							td20.innerHTML = "Minutes";
 						var td21 = document.createElement('td');
 						tr4.appendChild(td12);
 						tr4.appendChild(td13);
 						tr4.appendChild(td14);
 						tr4.appendChild(td15);
 						tr4.appendChild(td16);
-						tr4.appendChild(td17);
-						tr4.appendChild(td18);
+						// tr4.appendChild(td17);
+						// tr4.appendChild(td18);
 						tr4.appendChild(td19);
 						tr4.appendChild(td20);
 
@@ -237,17 +463,18 @@
 							var out1 = document.createElement('td');
 								out1.setAttribute('style', 'text-align: center;');
 								if(time_log1 && time_log)
-									out1.innerHTML = (time_log1.getHours() < {{ explode(":",Timelog::ReqTimeOut_2())[0] }})?formatAMPM(timelog1):"";
+									out1.innerHTML = (time_log1.getHours() <= {{ explode(":",Timelog::ReqTimeOut_2())[0] }})?formatAMPM(time_log1):(time_log.getHours() < {{ explode(":",Timelog::ReqTimeOut_2())[0] }})?'12:00pm':"";
 
 							var in2 = document.createElement('td');
 								in2.setAttribute('style', 'text-align: center;');
 								if(time_log)
-									in2.innerHTML = (time_log.getHours() >= {{ explode(":",Timelog::ReqTimeOut_2())[0] }} && time_log.getHours() < 17 )?formatAMPM(time_log):"";
+									in2.innerHTML = (!time_log1 && time_log.getHours() >= {{ explode(":",Timelog::ReqTimeOut_2())[0] }} && time_log.getHours() < 17 )?formatAMPM(time_log):(time_log1)?"1:00pm":"";
 
 							var out2 = document.createElement('td');
 								out2.setAttribute('style', 'text-align: center;');
 								if(time_log1 && time_log)
-									out2.innerHTML = (time_log.getHours() < {{ explode(":",Timelog::ReqTimeOut())[0] }})?formatAMPM(time_log1):"";
+									out2.innerHTML = (time_log.getHours() < {{ explode(":",Timelog::ReqTimeOut())[0] }} && time_log1.getHours() > {{ explode(":",Timelog::ReqTimeOut_2())[0] }})?formatAMPM(time_log1):"<span class='text-danger'>missing</span>";
+								else if (time_log) out2.innerHTML = "<span class='text-danger'>missing</span>";
 								// if(time_log.getHours() < 17) {
 								// 	if(response[1][i] == null)
 								// 		out2.innerHTML = "";
@@ -255,17 +482,21 @@
 								// 		out2.innerHTML = formatAMPM(time_log1);
 								// }
 
-							var overtime_in = document.createElement('td');
-								overtime_in.setAttribute('style', 'text-align: center;');
-								if(time_log)
-									overtime_in.innerHTML = (time_log.getHours() >= {{ explode(":",Timelog::ReqTimeOut())[0] }})?formatAMPM(time_log):"";
-								// if(time_log.getHours() >= 17)
-								// 	overtime_in.innerHTML = formatAMPM(time_log);
+							/*  */
+							// var overtime_in = document.createElement('td');
+							// 	overtime_in.setAttribute('style', 'text-align: center;');
+							// 	if(time_log)
+							// 		overtime_in.innerHTML = (time_log.getHours() >= {{ explode(":",Timelog::ReqTimeOut())[0] }})?formatAMPM(time_log):"";
+							// 	// if(time_log.getHours() >= 17)
+							// 	// 	overtime_in.innerHTML = formatAMPM(time_log);
 
-							var overtime_out = document.createElement('td');
-								overtime_out.setAttribute('style', 'text-align: center;');
-								if(time_log1 && time_log)
-									overtime_out.innerHTML = (time_log.getHours() >= {{ explode(":",Timelog::ReqTimeOut())[0] }})?formatAMPM(time_log1):"";
+							// var overtime_out = document.createElement('td');
+							// 	overtime_out.setAttribute('style', 'text-align: center;');
+							// 	if(time_log1 && time_log)
+							// 		overtime_out.innerHTML = (time_log.getHours() >= {{ explode(":",Timelog::ReqTimeOut())[0] }})?formatAMPM(time_log1):"";
+							/*  */
+
+
 								// if(time_log.getHours() >= 17) {
 								// 	if(response[1][i] == null)
 								// 		overtime_out.innerHTML = "";
@@ -275,8 +506,16 @@
 
 							var signature_in = document.createElement('td');
 								signature_in.setAttribute('style', 'text-align: center;');
+								if(time_log1 && time_log)
+									signature_in.innerHTML = Math.floor((time_log1 - time_log) / 1000 / 60 / 60);
+								else if(time_log)
+									signature_in.innerHTML = "";
 							var signature_out = document.createElement('td');
 								signature_out.setAttribute('style', 'text-align: center;');
+								if(time_log1 && time_log)
+									signature_out.innerHTML = Math.floor((time_log1 - time_log) / 1000 / 60 % 60);
+								else if(time_log)
+									signature_out.innerHTML = "";
 							var remarks = document.createElement('td');
 								remarks.setAttribute('style', 'text-align: center;');
 
@@ -285,8 +524,8 @@
 							tr.appendChild(out1);
 							tr.appendChild(in2);
 							tr.appendChild(out2);
-							tr.appendChild(overtime_in);
-							tr.appendChild(overtime_out);
+							// tr.appendChild(overtime_in);
+							// tr.appendChild(overtime_out);
 							tr.appendChild(signature_in);
 							tr.appendChild(signature_out);
 							tr.appendChild(remarks);
@@ -297,6 +536,7 @@
 				},
 			});
 		}
+		/*DO NOT DELETE*/
 
 		$('#print_btn').on('click', function() {
 			window.print();
@@ -313,6 +553,17 @@
 			minutes = minutes < 10 ? '0'+minutes : minutes;
 			var strTime = hours + ':' + minutes + ' ' + ampm;
 			return strTime;
+		}
+
+		function formatAMPM2(time) {
+			if(time=="") return "";
+			if(time=="<span class='text-danger'>missing</span>") return "";
+			var timeString = time;
+			var H = +timeString.substr(0, 2);
+			var h = H % 12 || 12;
+			var ampm = (H < 12 || H === 24) ? "am" : "pm";
+			timeString = h + timeString.substr(2, 3) + ampm;
+			return timeString;
 		}
 	</script>
 @endsection

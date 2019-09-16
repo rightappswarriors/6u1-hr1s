@@ -6,15 +6,17 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use DB;
 use Core;
+use Account;
 use ErrorCode;
 use PayrollPeriod;
 use Employee;
+use DTR;
 use Holiday;
 use Timelog;
 use Leave;
 use Loan;
+use Office;
 use Payroll;
-use DTR;
 
 class GeneratePayrollController extends Controller
 {
@@ -23,12 +25,13 @@ class GeneratePayrollController extends Controller
     {
     	$this->ghistory = DB::table('hr_emp_payroll2')->orderBy('date_generated', 'DESC')->orderBy('time_generated', 'DESC')->get();
         $this->dtrsum = DB::table('hr_dtr_sum_hdr')->join('hr_dtr_sum_employees', 'hr_dtr_sum_hdr.code', '=', 'hr_dtr_sum_employees.dtr_sum_id')->where('isgenerated', '=', 0)->orderBy('date_generated', 'DESC')->orderBy('time_generated', 'ASC')->get();
+        $this->office = Office::get_all();
     }
 
     // Redirects to blade
     public function view()
     {
-    	$data = [$this->dtrsum,$this->ghistory];
+    	$data = [$this->office, $this->ghistory];
         // dd($data);
     	return view('pages.payroll.generate_payroll', compact('data'));
     }
@@ -38,11 +41,56 @@ class GeneratePayrollController extends Controller
     {
         try {
             $return_val = (object)[];
-            $pp = Payroll::PayrollPeriod2($r->month, $r->payroll_period);
+            $dtr_summaries = [];
+            $pp = Payroll::PayrollPeriod2($r->month, $r->payroll_period, $r->year);
+            $ofc_emp = json_decode(Office::OfficeEmployees($r->ofc));
+
+            if (count($ofc_emp) > 0) {
+                // for ($i=0; $i < count($ofc_emp); $i++) { 
+                //     $ds = DB::table('hr_dtr_sum_hdr')->select('hr_dtr_sum_hdr.*')->join('hr_dtr_sum_employees', 'hr_dtr_sum_hdr.code', '=', 'hr_dtr_sum_employees.dtr_sum_id')->where('hr_dtr_sum_hdr.empid', $ofc_emp[$i]->empid)->where('hr_dtr_sum_employees.isgenerated', 0)->toSql();
+                //     $ds->office = $ofc_emp[$i]->office;
+                //     if ($ds !=null) {
+                //         array_push($dtr_summaries, $ds);
+                //     }
+                // }
+                $ds = DB::select( // Query all payroll for with specific date 
+                    "SELECT 
+                      hr_dtr_sum_hdr.empid, 
+                      hr_dtr_sum_hdr.ppid, 
+                      hr_dtr_sum_hdr.date_from, 
+                      hr_dtr_sum_hdr.date_to, 
+                      hr_dtr_sum_hdr.date_generated, 
+                      hr_dtr_sum_hdr.code, 
+                      hr_dtr_sum_hdr.time_generated, 
+                      hr_dtr_sum_hdr.generatedby
+                    FROM 
+                      hris.hr_dtr_sum_employees, 
+                      hris.hr_dtr_sum_hdr
+                    WHERE 
+                      hr_dtr_sum_employees.isgenerated = 0 AND hr_dtr_sum_hdr.code = hr_dtr_sum_employees.dtr_sum_id AND
+                      hr_dtr_sum_hdr.date_from >= '".date('Y-m-d', strtotime($pp->from))."' AND
+                      hr_dtr_sum_hdr.date_to <= '".date('Y-m-d', strtotime($pp->to))."'
+                    "
+                );
+
+                foreach($ds as $k => $v) { // add new variable to the object, also pushes to the returning array
+                    $v->office = $ofc_emp[$k]->office;
+                    array_push($dtr_summaries, $v);
+                }
+
+            }
+            if (count($dtr_summaries) > 0) {
+                for ($i=0; $i < count($dtr_summaries); $i++) { 
+                    $dtrsum = $dtr_summaries[$i];
+                    $dtrsum->name = Employee::Name($dtrsum->empid);
+                }
+            }
             $return_val->search = date('Y-m-d', strtotime($pp->from))." to ".date('Y-m-d', strtotime($pp->to));
-            return json_encode( $return_val);
+            $return_val->dtr_summaries = $dtr_summaries;
+            return json_encode($return_val);
         } catch (\Exception $e) {
-            return "error". $e->getMessage();
+            ErrorCode::Generate('controller', 'GeneratePayrollController', '00001', $e->getMessage());
+            return "error";
         }
     }
 
@@ -64,9 +112,19 @@ class GeneratePayrollController extends Controller
             $test_arr = [];
             $return_val = (object)[];
 
+            // return dd(json_decode(Office::OfficeEmployees($r->ofc)));
+
+            $ofc_emp = json_decode(Office::OfficeEmployees($r->ofc));
+            $dtr_summaries = [];
+            if (count($ofc_emp) > 0) {
+                for ($i=0; $i < count($ofc_emp); $i++) { 
+                    array_push($dtr_summaries, DB::table('hr_dtr_sum_employees')->where('empid', $ofc_emp[$i]->empid)->first());
+                }
+            }
+
             // Get records that is not generated yet
             $pp = Payroll::PayrollPeriod2($r->month,$r->payroll_period); if ($pp =="error") { return "no pp"; }
-            $dtr_summaries = DB::table('hr_dtr_sum_employees')->where('isgenerated', 0)->get();
+            // $dtr_summaries = DB::table('hr_dtr_sum_employees')->where('isgenerated', 0)->get();
             if (count($dtr_summaries)>0) {
                 for ($i=0; $i < count($dtr_summaries); $i++) {
                     try {
@@ -232,24 +290,37 @@ class GeneratePayrollController extends Controller
                                 'a_overtime' => $amt_overtime,
                                 'a_undertime' => $amt_undertime,
                                 'a_late' => $amt_late,
-                                'a_holiday' => $holiday_info->amt
+                                'a_holiday' => $holiday_info->amt,
+                                'generatedby'=> Account::ID()
                             ],
                             'dtr_sum_id' => $dtr_summary->dtr_sum_id
                         ];
 
                         if ($this->find_payroll($empid, $pp->id, $pp->from, $pp->to)) {
-                            array_push($results, "attempt ".($i+1).":Already Generated");
+                            array_push($results, "Employee No.".$empid.": Already Generated");
                         } else {
-                            array_push($results, "attempt ".($i+1).":".$this->UpdatePayroll($cp));
+                            array_push($results, "Employee No.".$empid.": ".$this->UpdatePayroll($cp));
                         }
                     } catch (\Exception $e) {
-                        array_push($results, "Error on attempt no.".$i." (".$e->getMessage().")");
+                        array_push($results, "Error on employee ".$empid.": (".$e->getMessage().")");
                     }
                 }
                 $return_val->results = $results;
-                $return_val->ghistory = $this->ghistory;
-                $return_val->dtrsum = $this->dtrsum;
-                return $return_val;
+                $return_val->dtrsum = DB::table('hr_dtr_sum_hdr')->join('hr_dtr_sum_employees', 'hr_dtr_sum_hdr.code', '=', 'hr_dtr_sum_employees.dtr_sum_id')->where('isgenerated', '=', 0)->orderBy('date_generated', 'DESC')->orderBy('time_generated', 'ASC')->get();
+                $return_val->ghistory = DB::table('hr_emp_payroll2')->orderBy('date_generated', 'DESC')->orderBy('time_generated', 'DESC')->get();
+                if (count($return_val->dtrsum) > 0) {
+                    for ($i=0; $i < count($return_val->dtrsum); $i++) { 
+                        $dtrsum = $return_val->dtrsum[$i];
+                        $dtrsum->name = Employee::Name($dtrsum->empid);
+                    }
+                }
+                if (count($return_val->ghistory) > 0) {
+                    for ($i=0; $i < count($return_val->ghistory); $i++) { 
+                        $ghistory = $return_val->ghistory[$i];
+                        $ghistory->name = Employee::Name($ghistory->empid);
+                    }
+                }
+                return json_encode($return_val);
             } else {
                 return "no record";
             }

@@ -9,6 +9,7 @@ use DB;
 use Core;
 use ErrorCode;
 use Timelog;
+use Office;
 
 class TimeLogEntryController extends Controller
 {
@@ -23,8 +24,20 @@ class TimeLogEntryController extends Controller
 
     public function view()
     {
-    	$data = [$this->employees];
+    	$data = [$this->employees, Office::get_all()];
+        // dd($data);
     	return view($this->page, compact('data'));
+    }
+
+    public function get_emp(Request $r)
+    {
+        $new_data = array();
+        $data = json_decode(Office::OfficeEmployees($r->ofc_id), true);
+        for($i=0; $i<count($data);$i++) {
+            $new_data[$i]['empid'] = $data[$i]['empid'];
+            $new_data[$i]['name'] = Employee::Name($data[$i]['empid']);
+        }
+        return $new_data;
     }
 
     public function loadBatchTimeLogsInfo(Request $r)
@@ -39,7 +52,7 @@ class TimeLogEntryController extends Controller
 	    		'tito_dateStrt' => 'required',
 	    		'tito_dateEnd' => 'required',
 	    	],$error_msg);
-	    	$timelogs = Timelog::getWorkdates($r->tito_emp,$r->tito_dateStrt,$r->tito_dateEnd);
+	    	$timelogs = Timelog::getWorkdates($r->tito_emp,date('Y-m-d', strtotime($r->tito_dateStrt)),date('Y-m-d', strtotime($r->tito_dateEnd)));
 		    if (!empty($timelogs)) {
 		    	for($i = 0; $i < count($timelogs); $i++)
 		    	{
@@ -60,7 +73,7 @@ class TimeLogEntryController extends Controller
     {
 	    try {
 	    	$nlogs_id = Core::getm99One('logs_id')->logs_id;
-            list($d_m, $d_d, $d_y) = explode("-", $r->date_workdate);
+            list($d_y, $d_m, $d_d) = explode("-", $r->date_workdate);
             $month = Core::GetMonth((int)$d_m);
             $date = $month." ".$d_d.", ".$d_y;
 
@@ -168,6 +181,22 @@ class TimeLogEntryController extends Controller
             }
             return "error";
         } catch (\Exception $e) {
+            return "error";
+        }
+    }
+
+    public function FindID(Request $r)
+    {
+        try {
+            $data = DB::table('hr_tito2')->where('empid', $r->id)->whereBetween('work_date', [$r->date_start, $r->date_to])->get();
+            for($i = 0; $i < count($data); $i++)
+            {
+                $data[$i]->status_desc = Core::io((string)$data[$i]->status);
+                $data[$i]->source_desc = Core::source($data[$i]->source);
+                $data[$i]->deptid = Employee::GetEmployee($data[$i]->empid)->department;
+            }
+            return $data;
+        } catch (Exception $e) {
             return "error";
         }
     }

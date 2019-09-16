@@ -10,6 +10,7 @@ use DB;
 use Carbon\Carbon;
 use ErrorCode;
 use Employee;
+use Timelog;
 
 /*
 |--------------------------------------------------------------------------
@@ -36,7 +37,9 @@ class TiToController extends Controller
 
     public function view()
     {
+        // dd(Session::get('_user')[0]);
         $data = [$this->ghistoryIn];
+        // dd($data);
         return view('pages.timekeeping.timein_timeout', compact('data'));
     }
 
@@ -112,11 +115,19 @@ class TiToController extends Controller
                 return "invalid";
             }
 
-            if ($mode=="I") { 
-                if ($this->CheckTimeIn($time_strt, $time)==true) {
-                    $time = $time_strt;
-                }
-            }
+            // if ($mode=="1") { 
+            //     if ($this->CheckTimeIn($time_strt, $time)==true) {
+            //         $time = $time_strt;
+            //     }
+            //     if ($this->CheckTimeOut($r, $date)) {
+            //         return "invalid";
+            //     }
+            // }
+            // if ($mode=="0") {
+            //     if ($this->CheckTimeOut($r, $date)) {
+            //         return "invalid";
+            //     }
+            // }
 
 	  		if (DB::table('hr_tito2')->insert(['work_date' => $date, 'time_log' => $time, 'empid' => $r->acc_id, 'status' => $mode, 'source' => 'LB', 'logs_id' => $nlogs_id, ])) {
 	  			Core::updatem99('logs_id',Core::get_nextincrementlimitchar($nlogs_id, 8));
@@ -151,6 +162,11 @@ class TiToController extends Controller
                 return false;
             }
         }
+    }
+
+    public function CheckTimeOut(Request $r, $date)
+    {
+        return Timelog::IfEmployeeAlreadyOut($r->acc_id, $date);
     }
 
     public function CheckExistingLog(Request $r, $time)

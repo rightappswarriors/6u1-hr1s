@@ -9,6 +9,7 @@
   <meta name="csrf-token" content="{{ csrf_token() }}">
 
   <title>{{ config('app.name') }}</title>
+  <link rel="icon" type="image/png" href="{{asset('img/guihulngan.png')}}" sizes="32x32" />
 
   <!-- Bootstrap core CSS-->
   <link href="{{asset('vendor/bootstrap/css/bootstrap.min.css')}}" rel="stylesheet">

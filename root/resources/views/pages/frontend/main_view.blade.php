@@ -6,6 +6,8 @@
     	<link href='{{asset('css/fullcalendar.print.css')}}' rel='stylesheet' media='print' />
 		<link href="{{asset('vendor/font-awesome/css/font-awesome.min.css')}}" rel="stylesheet" type="text/css">
 		<link href="{{asset('css/sb-admin.css')}}" rel="stylesheet">
+
+		<link rel="icon" type="image/png" href="{{asset('img/guihulngan.png')}}" sizes="32x32" />
     	<style>
     		body {
     			background: rgb(58, 52, 64);

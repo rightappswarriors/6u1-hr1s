@@ -10,6 +10,10 @@ use ErrorCode;
 use RATA;
 use Position;
 use Core;
+use Office;
+
+use EmployeeEarning;
+use OtherEarnings;
 
 /*
 |--------------------------------------------------------------------------
@@ -44,24 +48,77 @@ class OtherEarningsMainController extends Controller
 
     public function view()
     {
-    	$data = [$this->ghistory, $this->employees];
+    	$data = [$this->ghistory, $this->employees, Office::get_all(), OtherEarnings::Load_List(), EmployeeEarning::Load_Earnings()];
         // dd($data[1]);
     	return view('pages.payroll.other_earnings_main', compact('data'));
     }
 
+    /* ENTRY */
+    public function add(Request $r)
+    {
+        if(EmployeeEarning::Add_Earnings($r)) {
+            Core::Set_Alert('success', 'Successfully added new Other Earning.');
+            return back();
+        } else {
+            Core::Set_Alert('danger', 'Entry not added.');
+            return back();
+        }
+    }
+
+    public function update(Request $r)
+    {
+        if(EmployeeEarning::Update_Earning($r)) {
+            Core::Set_Alert('success', 'Successfully updated new Other Earning.');
+            return back();
+        } else {
+            Core::Set_Alert('danger', 'Entry not updated.');
+            return back();
+        }
+    }
+
+    public function delete(Request $r)
+    {
+        if(EmployeeEarning::Delete_Earning($r)) {
+            Core::Set_Alert('success', 'Successfully deleted new Other Earning.');
+            return back();
+        } else {
+            Core::Set_Alert('danger', 'Entry not deleted.');
+            return back();
+        }
+    }
+
+    public function find_e(Request $r)
+    {
+        // return dd($r->all());
+        return EmployeeEarning::Find_Earning($r->month, $r->year, $r->period, $r->ofc);
+    }
+
+    public function find2_e(Request $r)
+    {
+        return EmployeeEarning::Find_Earning2($r->id);
+    }
+
+
+    /* RATA */
+
     public function find(Request $r)
     {
         try {
+            $final_data = array();
             $data = DB::table(RATA::$tbl_name)->where('date', $r->date_queried)->orderBy('rata_id', 'ASC')->get();
             for($i=0; $i<count($data); $i++) {
-                $data[$i]->count = $i+1;
-                $data[$i]->name = Employee::Name($data[$i]->empid);
-                // $data[$i]->position_readable = Position::Get_Position(Employee::GetEmployee($data[$i]->empid)->positions);
-                $data[$i]->position_readable = Employee::GetJobTitle($data[$i]->empid);
-                $data[$i]->rate_type = Employee::GetEmployee($data[$i]->empid)->rate_type;
-                $data[$i]->pay_rate = Employee::GetEmployee($data[$i]->empid)->pay_rate;
+                if(Employee::IfEmployeeInOffice($data[$i]->empid, $r->ofc_id)) {
+                    $data[$i]->count = $i+1;
+                    $data[$i]->name = Employee::Name($data[$i]->empid);
+                    // $data[$i]->position_readable = Position::Get_Position(Employee::GetEmployee($data[$i]->empid)->positions);
+                    $data[$i]->position_readable = Employee::GetJobTitle($data[$i]->empid);
+                    $data[$i]->rate_type = Employee::GetEmployee($data[$i]->empid)->rate_type;
+                    $data[$i]->pay_rate = Employee::GetEmployee($data[$i]->empid)->pay_rate;
+
+                    $final_data[] = $data[$i];
+                }
             }
-            return $data;
+            return $final_data;
         } catch (\Exception $e) {
             ErrorCode::Generate('controller', 'OtherEarningsMainController', '00001', $e->getMessage());
             Core::Set_Alert('danger', 'See latest Error Log: '.$e->getMessage());
@@ -72,7 +129,8 @@ class OtherEarningsMainController extends Controller
     {
         // dd($r->all());
         try {
-            $data = Employee::Load_Employees();
+            // $data = Employee::Load_Employees();
+            $data = Employee::Load_Employees_Office($r->ofc_id);
             for($i=0; $i<count($data); $i++) {
                 $data[$i]->count = $i+1;
                 $data[$i]->name = Employee::Name($data[$i]->empid);

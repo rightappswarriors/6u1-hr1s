@@ -18,32 +18,35 @@ class JobTitle extends Model
 
     public static function Get_JobTitle($postid)
     {
-        $jtitle_name = "undefined";
-        $a = DB::table(self::$tbl_name)->where(self::$newpk, $postid)->first()->jtitle_name;
+        $a = DB::table(self::$tbl_name)->where(self::$newpk, $postid)->first();
         if ($a != null) {
-            $jtitle_name = $a;
+            $return_val = $a->jtitle_name;
+        } else {
+            $return_val = null;
         }
-        return $jtitle_name;
+        return $return_val;
     }
 
     public static function Get_JobID($postid)
     {
-        $jtitle_name = "undefined";
-        $a = DB::table(self::$tbl_name)->where(self::$newpk, $postid)->first()->jt_cn;
+        $a = DB::table(self::$tbl_name)->where(self::$newpk, $postid)->first();
         if ($a != null) {
-            $jtitle_name = $a;
+            $return_val = $a->jt_cn;
+        } else {
+            $return_val = null;
         }
-        return $jtitle_name;
+        return $return_val;
     }
 
     public static function Get_JobTitleByCN($cn = "")
     {
-        $jtitle_name = "undefined";
-        $a = DB::table(self::$tbl_name)->where(self::$newpk, $postid)->first()->jt_cn;
+        $a = DB::table(self::$tbl_name)->where(self::$newpk, $postid)->first();
         if ($a != null) {
-            $jtitle_name = $a;
+            $return_val = $a->jt_cn;
+        } else {
+            $return_val = null;
         }
-        return $jtitle_name;
+        return $return_val;
     }
 
 }

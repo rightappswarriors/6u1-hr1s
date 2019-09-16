@@ -52,47 +52,52 @@ class EmployeeLeaveCount extends Model
     	}
     }
 
-    public static function CheckLeaveLimit($leave_type, $empid, $ampm = [])
+    public static function CheckLeaveLimit($leave_type, $empid, $ampm = [], $allow = false)
     {
         $lt = LeaveType::Find_LeaveTypes($leave_type);
         $alt = LeaveType::Load_LeaveTypes();
         $return_val = (object) [];
         $return_val->response = "error";
+        $return_val->msg = null;
         $return_val->applied_leave_count = 0;
         if ($leave_type==null) {
-    		ErrorCode::Generate('model', 'EmployeeLeaveCount', '00001', "Missing parameters.");
+            $return_val->msg = "Missing fields (Leave Type).";
+    		ErrorCode::Generate('model', 'EmployeeLeaveCount', '00001', $return_val->msg);
             return $return_val;
     	}
 
         if ($empid==null) {
-            ErrorCode::Generate('model', 'EmployeeLeaveCount', '00002', "Missing parameters.");
+            $return_val->msg = "Missing fields (Employee).";
+            ErrorCode::Generate('model', 'EmployeeLeaveCount', '00002', $return_val->msg);
             return $return_val;
         }
 
         if (count($alt)==0) {
-            ErrorCode::Generate('model', 'EmployeeLeaveCount', '00003', "No leave types available.");
+            $return_val->msg = "No leave types available. Please contact adiministrator";
+            ErrorCode::Generate('model', 'EmployeeLeaveCount', '00003', $return_val->msg);
             return $return_val;
         }
 
         if ($lt==null) {
-            ErrorCode::Generate('model', 'EmployeeLeaveCount', '00004', "Leave Type not found.");
+            $return_val->msg = "Leave Type not found.";
+            ErrorCode::Generate('model', 'EmployeeLeaveCount', '00004', $return_val->msg);
             return $return_val;
         }
         
         try {
-            $elc = self::Find_EmpLeaveCount($leave_type, $empid);
-            $return_val->applied_leave_count = self::GetLeaveCountValue($ampm);
-            if ($elc != null) {
-                // dd($elc);
-                if ($elc->count+$return_val->applied_leave_count > $elc->peak) {
-                    $return_val->response = "invalid";
-                } else {
-                    $return_val->response = "ok";
+            if ($allow) {
+                $elc = self::Find_EmpLeaveCount($leave_type, $empid);
+                $return_val->applied_leave_count = self::GetLeaveCountValue($ampm);
+                if ($elc != null) {
+                    if ($elc->count+$return_val->applied_leave_count > $elc->peak) {
+                        $return_val->response = "invalid";
+                    } else {
+                        $return_val->response = "ok";
+                    }
                 }
-            } /*else {
-                self::Create_LeaveLimit($empid);
+            } else {
                 $return_val->response = "ok";
-            }*/
+            }
             return $return_val;
         } catch (\Exception $e) {
             ErrorCode::Generate('model', 'EmployeeLeaveCount', '00005', $e->getMessage());
@@ -144,10 +149,11 @@ class EmployeeLeaveCount extends Model
             $tpm = ($ampm['tpm'] == "True") ? 0.5 : 0;
             $f = 0;
             $t = 0;
-            if ($fam == $fpm) {$f = 0;} else {$f = $fam + $fpm;}
-            if ($tam == $tpm) {$t = 0;} else {$t = $tam + $tpm;}
+            if ($fam == $fpm) {$f = 0;}
+            if ($tam == $tpm) {$f = 0;}
+            if ($fam == $fpm && $tam == $tpm) {$f = 0; $t = 0;}
 
-            $nod = Core::TotalDays($ampm['leave_from'], $ampm['leave_to']);
+            $nod = round(Core::TotalDays($ampm['leave_from'], $ampm['leave_to']), 2);
             $nod = $nod - $f - $t;
             return $nod;
         } catch (\Exception $e) {

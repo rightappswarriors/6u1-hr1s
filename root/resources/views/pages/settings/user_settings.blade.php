@@ -16,7 +16,7 @@
 										<tr>
 											<th>User</th>
 											<th>Name</th>
-											{{-- <th>Restrictions</th> --}}
+											<th>Restrictions</th>
 										</tr>
 									</thead>
 									<tbody>
@@ -32,7 +32,7 @@
 														restr="{{$value->restriction}}">
 														<td>{{$value->uid}}</td>
 														<td>{{$value->opr_name}}</td>
-														{{-- <td>{{$value->d_code}}</td> --}}
+														<td>{{$value->d_code}}</td>
 														{{-- <td>
 															<button type="button" class="btn btn-warning btn-block" onclick="openRestrictionsModal()">
 																<i class="fa fa-pencil-square-o" aria-hidden="true"></i>
@@ -84,21 +84,24 @@
 						<span class="AddMode">
 							<div class="row">
 								<div class="col"> <!-- Column 1 -->
-									<div class="form-group">
-										<label>Restrictions:</label>
-										{{-- <select name="cbo_grp" id="" style="text-transform: uppercase;" class="form-control" required>
+									<div class="form-grou">
+										<label>Group:</label>
+										<select name="cbo_grp" id="" style="text-transform: uppercase;" class="form-control" required>
 											<option disabled hidden selected value="">---</option>
 											@foreach(X07::Load_X07() as $key => $value)
 												@if($value->grp_id != "001")
 													<option value="{{$value->grp_id}}">{{$value->grp_desc}}</option>
 												@endif	
 											@endforeach
-										</select> --}}
+										</select>
+									</div>
+									{{-- <div class="form-group">
+										<label>Restrictions:</label>
 										<button type="button" class="btn btn-warning btn-block" id="btn_restr" onclick="openRestrictionsModal()">
 											<i class="fa fa-pencil-square-o" aria-hidden="true"></i>
 											Edit Restrictions
 										</button>
-									</div>
+									</div> --}}
 									<div class="form-group">
 										<label>Name:</label>
 										<input type="text" name="txt_name" class="form-control" style="text-transform: uppercase;" maxlength="100" required>
@@ -138,7 +141,7 @@
 	</div>
 
 	<!-- Restriction Modal -->
-	<div class="modal fade" id="modal-pp-r" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel1" aria-hidden="true">
+	<div class="modal fade" id="modal-pp-r" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel11" aria-hidden="true">
 		<div class="modal-dialog" role="document" style="background-color: black; width: 20vw;">
 			<div class="modal-content" style="background-color: rgb(248,248,248);">
 				<div class="modal-header">

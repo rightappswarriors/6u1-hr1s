@@ -6,14 +6,14 @@
 	switch ($page) {
 		case 1:
 			$img_path = 'images/ug-service-setup-computer.png';
-			$msg_header = 'This page is currently under maintenance';
+			$msg_header = 'The page you are trying to access is currently under maintenance';
 			$msg_subheader = 'Sorry for the inconvenince.';
 			break;
 
 		case 2:
 			$img_path = 'images/restricted.png';
 			$msg_header = 'This page is restricted';
-			$msg_subheader = 'Please contact your administrator for assistance.';
+			$msg_subheader = 'You are not allowed to access this page.';
 			break;
 
 		case 3:
@@ -61,7 +61,7 @@
 	<h2>{{$msg_header}}</h2>
 	<br>
 	<h3>{{$msg_subheader}}</h3>
-	<a href="{{url('/')}}">return</a>
+	<a href="{{url('/')}}"><i class="fa fa-hand-o-right"></i> Click here to return</a>
 </div>
 
 @endsection

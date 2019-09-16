@@ -19,12 +19,23 @@ class Employee extends Model
     	return DB::table(self::$tbl_name)->where('cancel', '=', null)->orderBy('lastname', 'ASC')->get();
     }
 
-    public static function Load_Employees_Simple()
+    public static function Load_Employees_Office($ofc_id)
+    {
+        return DB::table(self::$tbl_name)->where('cancel', '=', null)->where('department', $ofc_id)->orderBy('lastname', 'ASC')->get();
+    }
+
+    public static function Load_Employees_Simple($deptid = null)
     {
         $data = array();
-        $query = DB::table(self::$tbl_name)->select('empid')->where('cancel', '=', null)->get();
+        $query = DB::table(self::$tbl_name)->select('empid', 'department')->where('cancel', '=', null)->get();
         for($i=0; $i<count($query); $i++) {
-            $data[$i] = [$query[$i]->empid, self::Name($query[$i]->empid)];
+            if($deptid != null) {
+                if($query[$i]->department == $deptid) {
+                    $data[] = [$query[$i]->empid, self::Name($query[$i]->empid), $query[$i]->department];
+                }
+            } else {
+                $data[] = [$query[$i]->empid, self::Name($query[$i]->empid), $query[$i]->department];
+            }
         }
 
         return $data;
@@ -98,7 +109,6 @@ class Employee extends Model
         try {
             $deptid = trim($deptid);
             $data = DB::table(DB::raw('rssys.m08'))->where('rssys.m08.cc_code', '=', trim($deptid))->select('rssys.m08.cc_desc')->first()->cc_desc;
-            // $data = DB::table(DB::raw('rssys.m08'))->where('oid', $deptid)->select('rssys.m08')->first();
             return $data;
         } catch (\Exception $e) {
             return null;
@@ -125,5 +135,10 @@ class Employee extends Model
         } catch (\Exception $e) {
             return null;
         }
+    }
+
+    public static function IfEmployeeInOffice($empid, $ofc_id) {
+        $data = DB::table(self::$tbl_name)->where('empid', $empid)->first();
+        return $data->department == $ofc_id;
     }
 }

@@ -23,7 +23,7 @@ class OtherDeductionsController extends Controller
     public function add(Request $r) 
     {
         // return dd($r->all());
-    	$data = ['code'=>$r->txt_code , 'description' => $r->txt_name];
+    	$data = ['code'=>strtoupper($r->txt_code) , 'description' => $r->txt_name];
     	try {
 
     		DB::table(OtherDeductions::$tbl_name)->insert($data);
