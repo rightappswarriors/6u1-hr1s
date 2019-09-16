@@ -17,7 +17,7 @@
 									<div class="col-4">
 										<div class="row mb-2">
 											<div class="col-3">
-												Office:
+												Office: 
 											</div>
 											<div class="col">
 												<select class="form-control w-100" name="office" id="office" required>
@@ -30,6 +30,7 @@
 												</select>
 											</div>
 										</div>
+
 
 										<div class="row">
 											<div class="col-3">
