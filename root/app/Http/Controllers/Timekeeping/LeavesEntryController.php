@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use DB;
 use Core;
+use Account;
 use PayrollPeriod;
 use Employee;
 use EmployeeLeaveCount;
@@ -13,8 +14,8 @@ use Timelog;
 use Leave;
 use LeaveType;
 use Payroll;
-use Account;
 use ErrorCode;
+use Office;
 
 /*
 |--------------------------------------------------------------------------
@@ -41,7 +42,7 @@ class LeavesEntryController extends Controller
 
     public function view()
     {
-    	$data = [$this->ghistory, $this->employees];
+    	$data = [$this->ghistory, $this->employees, Office::get_all()];
     	return view('pages.timekeeping.leaves_entry', compact('data'));
     }
 
@@ -93,18 +94,15 @@ class LeavesEntryController extends Controller
 
     public function add(Request $r) 
     {
+        // return dd($r->all());
         $amount = "0.00";
-        // if(isset($r->txt_amount)) {
-        //     $amount = $r->txt_amount;
-        // }
+        $lr = null;
 
         $fam = ($r->fam == "on")?"True":"False";
         $fpm = ($r->fpm == "on")?"True":"False";
         $tam = ($r->tam == "on")?"True":"False";
         $tpm = ($r->tpm == "on")?"True":"False";
         $data = [
-            'lvcode'=>Core::getm99('lvcode'),
-            'empid'=>$r->cbo_employee,
             'd_filed'=>$r->dtp_filed,
             'leave_from'=>$r->dtp_lfrm,
             'leave_to'=>$r->dtp_lto,
@@ -116,7 +114,8 @@ class LeavesEntryController extends Controller
             'leave_pay'=>$r->cbo_leave_pay,
             'leave_type'=>$r->cbo_leave,
             'leave_amount'=>$amount,
-            'leave_reason'=>$r->txt_reason
+            'leave_reason'=>$r->txt_reason,
+            'generatedby'=>Account::ID()
         ];
         $ampm = [
             'leave_from'=>$r->dtp_lfrm,
@@ -127,131 +126,80 @@ class LeavesEntryController extends Controller
             'tpm' => $tpm,
             'no_of_days' => $r->txt_no_of_days,
         ];
-
 
         if ($r->txt_no_of_days <= 0) {
-            Core::Set_Alert('warning', 'Invalid dates.');
+            Core::Set_Alert('warning', "Invalid dates.");
             return back();
-
-            // return ['error', 'data' => ['alert_type' => 'warning', 'alert_msg' => 'Invalid dates.']];
         }
 
-        $CheckLeaveLimit = EmployeeLeaveCount::CheckLeaveLimit($r->cbo_leave, $r->cbo_employee, $ampm);
-        if ($CheckLeaveLimit->response==="error") {
-            ErrorCode::Generate('controller', 'LeavesEntryController', '00003', $CheckLeaveLimit->response);
-            Core::Set_Alert('danger', "Error LeEC00003");
-            return back();
-        } else {
-            if ($CheckLeaveLimit->response!="error") {
-                if ($CheckLeaveLimit->response=="ok") {
-                    if (EmployeeLeaveCount::Update_LeaveLimit($r->cbo_leave, $r->cbo_employee, $CheckLeaveLimit->applied_leave_count, '+')=="ok") {
-                        try {
-                            DB::table(Leave::$tbl_name)->insert($data);
-                            Core::updatem99('lvcode',Core::get_nextincrementlimitchar($data['lvcode'], 8));
-                            Core::Set_Alert('success', 'Successfully added new Leaves Entry.');
-                            return back();
-
-                        } catch (\Illuminate\Database\QueryException $e) {
-                            $emsg = $e->getMessage();
-                            Core::Set_Alert('danger', $emsg);
-                            ErrorCode::Generate('controller', 'LeavesEntryController', '00003', $emsg);
-                            return back();
-                        }
-                    } else {
-                        return back();
-                    }
-                } else {
-                    Core::Set_Alert('warning', 'Employee exceeds the allocated leave limit. Leave entry denied.');
+        $leavepay_mode = ((strtoupper($r->cbo_leave_pay) == "YES" ? true : false));
+        switch ($r->mode) {
+            case 'new':
+                if (count(Leave::GetLeaveRecord($r->cbo_employee, $r->dtp_lfrm, $r->dtp_lto)) > 0) {
+                    Core::Set_Alert('warning', "Employee is already on leave on the selected dates. Please review the records.");
                     return back();
                 }
-            } else {
-                return back();
-            }
-        }
-    }
+                $data['lvcode'] = Core::getm99('lvcode');
+                $data['empid'] = $r->cbo_employee;
 
-    public function update(Request $r) {
-        $amount = "0.00";
-        $lr = DB::table(Leave::$tbl_name)->where(Leave::$pk, $r->txt_code)->first();
-        // dd($lr);
-
-        if ($lr==null) {
-            $msg = "Leave record not found. Unable to update.";
-            Core::Set_Alert('danger', $msg);
-            return back();
-        }
-
-        // if(isset($r->txt_amount)) {
-        //     $amount = $r->txt_amount;
-        // }
-
-        $fam = ($r->fam == "on")?"True":"False";
-        $fpm = ($r->fpm == "on")?"True":"False";
-        $tam = ($r->tam == "on")?"True":"False";
-        $tpm = ($r->tpm == "on")?"True":"False";
-        $data = [
-            'lvcode'=>$r->txt_code, 
-            'empid'=>$r->cbo_employee, 
-            'd_filed'=>$r->dtp_filed, 
-            'leave_from'=>$r->dtp_lfrm, 
-            'leave_to'=>$r->dtp_lto, 
-            'frm_am'=>($r->fam == "on")?"True":"False", 
-            'frm_pm'=>($r->fpm == "on")?"True":"False", 
-            'to_am'=>($r->tam == "on")?"True":"False", 
-            'to_pm'=>($r->tpm == "on")?"True":"False", 
-            'no_of_days'=>$r->txt_no_of_days, 
-            'leave_pay'=>$r->cbo_leave_pay, 
-            'leave_type'=>$r->cbo_leave, 
-            'leave_amount'=>$amount,
-            'leave_reason'=>$r->txt_reason
-        ];
-        $ampm = [
-            'leave_from'=>$r->dtp_lfrm,
-            'leave_to'=>$r->dtp_lto,
-            'fam' => $fam,
-            'fpm' => $fpm,
-            'tam' => $tam,
-            'tpm' => $tpm,
-            'no_of_days' => $r->txt_no_of_days,
-        ];
-
-        try{
-            if (EmployeeLeaveCount::Update_LeaveLimit($lr->leave_type, $lr->empid, $lr->no_of_days, '-')!="ok") {
-                return back();
-            }
-            $CheckLeaveLimit = EmployeeLeaveCount::CheckLeaveLimit($r->cbo_leave, $r->cbo_employee, $ampm);
-            if ($CheckLeaveLimit->response==="error") {
-                ErrorCode::Generate('controller', 'LeavesEntryController', '0000X', $CheckLeaveLimit->response);
-                Core::Set_Alert('danger', "Error LeEC0000X");
-                return back();
-            } else {
-                if ($CheckLeaveLimit->response=="ok") {
-                    if (EmployeeLeaveCount::Update_LeaveLimit($r->cbo_leave, $r->cbo_employee, $CheckLeaveLimit->applied_leave_count, '+')=="ok") {
-                        try {
-                            DB::table(Leave::$tbl_name)->where(Leave::$pk, $r->txt_code)->update($data);
-                            Core::Set_Alert('success', 'Successfully update the Leaves Entry.');
-                            return back();
-
-                        } catch (\Illuminate\Database\QueryException $e) {
-                            $emsg = $e->getMessage();
-                            Core::Set_Alert('danger', $emsg);
-                            ErrorCode::Generate('controller', 'LeavesEntryController', '0000X', $emsg);
-                            return back();
+                $check_ll = EmployeeLeaveCount::CheckLeaveLimit($r->cbo_leave, $r->cbo_employee, $ampm, $leavepay_mode);
+                $response = $check_ll->response;
+                $response_msg = $check_ll->msg;
+                if ($response=="invalid") {
+                    Core::Set_Alert('warning', $response_msg);
+                    return back();
+                } else {
+                    if ($response=="ok") {
+                        if ($leavepay_mode) {
+                            EmployeeLeaveCount::Update_LeaveLimit($r->cbo_leave, $r->cbo_employee, $r->txt_no_of_days, '+');
                         }
+                        DB::table(Leave::$tbl_name)->insert($data);
+                        Core::Set_Alert('success', 'Successfully added new Leaves Entry.');
+                        Core::updatem99('lvcode',Core::get_nextincrementlimitchar($data['lvcode'], 8));
                     } else {
+                        Core::Set_Alert('warning', $response_msg);
                         return back();
                     }
-                } else {
-                    Core::Set_Alert('warning', 'Employee exceeds the allocated leave limit. Leave entry denied.');
-                    return back();
                 }
-            }
+                break;
 
-        } catch (\Illuminate\Database\QueryException $e) {
-            Core::Set_Alert('danger', $e->getMessage());
-            ErrorCode::Generate('controller', 'LeavesEntryController', '00002', $e->getMessage());
-            return back();
+            case 'update':
+                $lr = DB::table(Leave::$tbl_name)->where(Leave::$pk, $r->txt_code)->first();
+                $check_ll = EmployeeLeaveCount::CheckLeaveLimit($r->cbo_leave, $r->cbo_employee, $ampm, $leavepay_mode);
+                $response = $check_ll->response;
+                $response_msg = $check_ll->msg;
+                if ($lr==null) {
+                    Core::Set_Alert('danger', "Leave record not found. Unable to update.");
+                    return back();
+                } else {
+                    $leavepay_mode2 = ((strtoupper($lr->leave_pay) == "YES" ? true : false));
+                    if ($leavepay_mode2) {
+                        EmployeeLeaveCount::Update_LeaveLimit($lr->leave_type, $lr->empid, $lr->no_of_days, '-');
+                    }
+                }
+                if ($response=="invalid") {
+                    Core::Set_Alert('warning', $response_msg);
+                    return back();
+                } else {
+                    if ($response=="ok") {
+                        if ($leavepay_mode) {
+                            EmployeeLeaveCount::Update_LeaveLimit($r->cbo_leave, $r->cbo_employee, $r->txt_no_of_days, '+');
+                        }
+                        Core::Set_Alert('success', 'Successfully update the Leaves Entry.');
+                        DB::table(Leave::$tbl_name)->where(Leave::$pk, $r->txt_code)->update($data);
+                    } else {
+                        Core::Set_Alert('warning', $response_msg);
+                        return back();
+                    }
+                }
+                break;
+            
+            default:
+                Core::Set_Alert('danger', 'An error occured. Please contact administrator. (No mode selected)');
+                return back();
+                break;
         }
+        return back();
     }
 
     public function delete(Request $r)
@@ -259,6 +207,7 @@ class LeavesEntryController extends Controller
         try {
             $data = ['cancel'=>"Y"];
             $lr = DB::table('hr_leaves')->where('lvcode', '=', $r->txt_code)->first();
+            $leavepay_mode = ((strtoupper($lr->leave_pay) == "YES" ? true : false));
             $elc = DB::table('hr_emp_leavecount')->where('leave_type', '=', $lr->leave_type)->where('empid', $lr->empid)->first();
             if ($lr==null) {
                 $msg = 'Leave record not found.';
@@ -274,12 +223,14 @@ class LeavesEntryController extends Controller
                 return back();
             }
             DB::table(Leave::$tbl_name)->where(Leave::$pk, $r->txt_code)->update($data);
-            $Update_LeaveLimit = EmployeeLeaveCount::Update_LeaveLimit($lr->leave_type, $lr->empid, (float)$lr->no_of_days, '-');
-            if ($Update_LeaveLimit!="ok") {
-                $msg = 'An error occurred when updating leave limit.';
-                ErrorCode::Generate('controller', 'LeavesEntryController', '00007', $msg);
-                Core::Set_Alert('danger', $msg);
-                return back();
+            if ($leavepay_mode) {
+                $Update_LeaveLimit = EmployeeLeaveCount::Update_LeaveLimit($lr->leave_type, $lr->empid, (float)$lr->no_of_days, '-');
+                if ($Update_LeaveLimit!="ok") {
+                    $msg = 'An error occurred when updating leave limit.';
+                    ErrorCode::Generate('controller', 'LeavesEntryController', '00007', $msg);
+                    Core::Set_Alert('danger', $msg);
+                    return back();
+                }
             }
             Core::Set_Alert('success', 'Successfully removed a Leaves Entry.');
             return back();

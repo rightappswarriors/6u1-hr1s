@@ -96,10 +96,11 @@ class Notification_N extends Model
     	}
     }
 
-    public static function Send(array $groups, string $content = "", string $subject)
+    public static function Send(array $groups, string $content = "", string $subject, $datetime=null, $url="/home")
     {
     	$grps = array();
     	$x08 = X08::Load_X08();
+        $ntfDate = ($datetime == null)?date('Y-m-d H:i').':00':$datetime;
 
     	for($i=0; $i<count($groups); $i++) {
     		$grps[] = $groups[$i];
@@ -113,7 +114,8 @@ class Notification_N extends Model
     			'ntf_cont' => $content,
     			'grp_ids' => $ngrps,
     			'ntf_subj' => $subject,
-    			'ntf_date' => date('Y-m-d H:i').':00',
+    			'ntf_date' => $ntfDate,
+                'ntf_url' => $url,
     		];
 
     		$id = DB::table(self::$tbl_name)->insertGetId($data, self::$pk);
@@ -125,6 +127,7 @@ class Notification_N extends Model
 						'uid' => $x08[$j]->uid,
 						'ntf_id' => $id,
 						'seen' => 0,
+                        'played' => 0,
 					];
 					DB::table(self::$tbl_name_2)->insert($ndata);
 				}
@@ -135,5 +138,14 @@ class Notification_N extends Model
     	} catch (\Exception $e) {
     		return $e->getMessage();
     	}
+    }
+
+    public static function Toggle($uid, $val, $ntf_id)
+    {
+        try {
+            return DB::table(self::$tbl_name_2)->where('uid', $uid)->where('ntf_id', $ntf_id)->update(['played'=>$val]);
+        } catch (Exception $e) {
+            return $e->getMessage();
+        }
     }
 }

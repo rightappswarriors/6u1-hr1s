@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use Employee;
 use Timelog;
 use Core;
+use Office;
 
 class EmployeeDTRController extends Controller
 {
@@ -21,7 +22,7 @@ class EmployeeDTRController extends Controller
 
     public function view()
     {
-    	$data = [$this->employees];
+    	$data = [$this->employees, Office::get_all()];
     	return view($this->page, compact('data'));
     }
 

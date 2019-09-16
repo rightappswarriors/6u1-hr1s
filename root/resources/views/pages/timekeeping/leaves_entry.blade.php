@@ -16,46 +16,59 @@
 							<form method="post" action="{{url('timekeeping/leaves-entry/find')}}" id="frm-loaddtr">
 
 								<div class="row">
-									<div class="col-sm-5" style="padding: 20px 0;">
-										<div class="form-inline">
-											<div class="form-group mr-2">
-												<label>Employee:</label>
-												<select class="form-control" name="tito_emp" id="tito_emp" required>
-													<option disabled selected value="">---</option>
-													@if(!empty($data[1]))
-													@foreach($data[1] as $emp)
-													<option value="{{$emp->empid}}">{{$emp->firstname." ".$emp->lastname}}</option>
+									<div class="col-sm-7">
+
+										<div class="row p-2">
+											<div class="col-3">
+												Office:
+											</div>
+											<div class="col">
+												<select class="form-control w-100" name="office" id="office" required>
+													<option disabled selected value="">Please select an office</option>
+													@if(!empty($data[2]))
+													@foreach($data[2] as $off)
+													<option value="{{$off->cc_id}}">{{$off->cc_desc}}</option>
 													@endforeach
 													@endif
 												</select>
 											</div>
+												
+										</div>
+
+										<div class="row p-2">
+											<div class="col-3">
+												Employee:
+											</div>
+											<div class="col">
+												<select class="form-control w-100" name="tito_emp" id="tito_emp" required>
+													<option disabled selected value="">---</option>
+													{{-- @if(!empty($data[1]))
+													@foreach($data[1] as $emp)
+													<option value="{{$emp->empid}}">{{$emp->firstname." ".$emp->lastname}}</option>
+													@endforeach
+													@endif --}}
+												</select>
+											</div>
+												
 										</div>
 									</div>
 
-									<div class="col-sm-7">
-										<div class="row">
-											<div class="form-inline">
-												<div class="form-group mr-2">
-													<div class="col-2">
-														<label>From:</label>
-													</div>
-													<div class="col">
-														<input type="text" name="date_from" id="date_from" class="form-control" value="{{date('m-01-Y')}}" required>
-													</div>
-												</div>
+									<div class="col-sm-5" >
+										<div class="row p-2">
+											<div class="col-3">
+												From:
+											</div>
+											<div class="col">
+												<input type="text" name="date_from" id="date_from" class="form-control" value="{{date('m-01-Y')}}" required>
 											</div>
 										</div>
 
-										<div class="row">
-											<div class="form-inline">
-												<div class="form-group mr-2">
-													<div class="col-2 ml-1">
-														<label> To: </label>
-													</div>
-													<div class="col">
-														<input type="text" name="date_to" id="date_to" class="form-control" value="{{date('m-d-Y')}}" required>
-													</div>
-												</div>
+										<div class="row p-2">
+											<div class="col-3">
+												To:
+											</div>
+											<div class="col">
+												<input type="text" name="date_to" id="date_to" class="form-control" value="{{date('m-d-Y')}}" required>
 											</div>
 										</div>
 									</div>
@@ -63,12 +76,25 @@
 							</form>
 						</div>
 
-						<div class="col-3 text-right">
-							<button type="button" class="btn btn-success" id="opt-add"><i class="fa fa-plus"></i></button>
-							<button type="button" class="btn btn-primary" id="opt-update"><i class="fa fa-edit"></i></button>
-							<button type="button" class="btn btn-danger" id="opt-delete"><i class="fa fa-trash"></i></button>
+						<div class="col-2">
+							<div class="row p-2">
+								<div class="col text-right">
+									<button type="button" class="btn btn-success" id="opt-add"><i class="fa fa-plus"></i></button>
+								</div>
+								<div class="col text-left">
+									<button type="button" class="btn btn-primary" id="opt-update"><i class="fa fa-edit"></i></button>
+								</div>
+							</div>
+							
+							<div class="row p-2">
+								<div class="col text-right">
+									<button type="button" class="btn btn-danger" id="opt-delete"><i class="fa fa-trash"></i></button>
+								</div>
+								<div class="col text-left">
+									<button type="button" class="btn btn-info" id="opt-print"><i class="fa fa-print"></i></button>
+								</div>
+							</div>
 							{{-- <button type="button" class="btn btn-warning" id="opt-money"><i class="fa fa-money"></i></button> --}}
-							<button type="button" class="btn btn-info" id="opt-print"><i class="fa fa-print"></i></button>
 						</div>
 					</div>		
 				</div>
@@ -348,6 +374,39 @@
 		// 			break;	
 		// 	}
 		// }
+
+		$('#office').on('change', function() {
+
+			while($('#tito_emp')[0].firstChild) {
+				$('#tito_emp')[0].removeChild($('#tito_emp')[0].firstChild);
+			}
+
+			var hiddenChild = document.createElement('option');
+				hiddenChild.setAttribute('selected', '');
+				hiddenChild.setAttribute('disabled', '');
+				hiddenChild.setAttribute('value', '');
+				hiddenChild.innerText='---';
+
+			$('#tito_emp')[0].appendChild(hiddenChild);
+
+			$.ajax({
+				type: 'post',
+				url: '{{url('timekeeping/timelog-entry/find-emp-office')}}',
+				data: {ofc_id: $(this).val()},
+				success: function(data) {
+					// console.log(typeof(data));
+					if(data.length > 0) {
+						for(i=0; i<data.length; i++) {
+							var option = document.createElement('option');
+								option.setAttribute('value', data[i].empid);
+								option.innerText=data[i].name;
+
+							$('#tito_emp')[0].appendChild(option);
+						}
+					}
+				},
+			});
+		});
 	</script>
 
 	<script type="text/javascript">
@@ -480,7 +539,6 @@
 							}
 						} else {
 							table.clear().draw();
-							alert(data[0]);
 						}
 						UpdateLeaveCount(data[1]);
 					} else {
@@ -499,13 +557,17 @@
 			var tpm = ($('#tpm').prop('checked')==true) ? 0.5 : 0;
 			var f = 0;
 			var t = 0;
-			if (fam == fpm) {f = 0;} else {f = fam + fpm}
-			if (tam == tpm) {t = 0;} else {t = tam + tpm}
+			// if (fam == fpm) {f = 0;} else {f = fam + fpm}
+			// if (tam == tpm) {t = 0;} else {t = tam + tpm}
+
+			if (fam == tam) {f = 0.5;}
+			if (fpm == tpm) {f = 0.5;}
+			if (fam == fpm && tam == tpm) {f = 0; t = 0;}
 
 			var date1 = $('#dtp_lfrm').val();
 			var date2 = $('#dtp_lto').val(); /*alert(date2);*/
 
-			var nod = GetDateDiff(date1, date2);
+			var nod = Math.round(GetDateDiff(date1, date2), 2);
 			nod = nod - f - t;
 			$('#txt_no_of_days').val(nod);
 		}
@@ -580,7 +642,7 @@
 					}
 				});
 				$('#ModalLabel').text("New Leave Entry");
-				$('#frm-pp').attr('action', '{{url('timekeeping/leaves-entry')}}');
+				$('#frm-pp').attr('action', '{{url('timekeeping/leaves-entry?mode=new')}}');
 				$('#cbo_employee_txt').val($('#tito_emp option:selected').text());
 				$('#cbo_employee').val($('#tito_emp').val());
 				$('#dtp_filed, #dtp_lfrm, #dtp_lto').val('{{date('m-d-Y')}}');
@@ -600,7 +662,8 @@
 						success : function(data) {
 							if (data!="error") {
 								if (data!="No record found.") {
-									$('#frm-pp').attr('action', '{{url('timekeeping/leaves-entry/update')}}');
+									// $('#frm-pp').attr('action', '{{url('timekeeping/leaves-entry/update')}}');
+									$('#frm-pp').attr('action', '{{url('timekeeping/leaves-entry?mode=update')}}');
 									FillFld(JSON.parse(data));
 								} else {
 									table.clear().draw();

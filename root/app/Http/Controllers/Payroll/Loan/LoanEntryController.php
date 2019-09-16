@@ -15,6 +15,7 @@ use Account;
 use Loan;
 use LoanType;
 use ErrorCode;
+use Office;
 
 /*
 |--------------------------------------------------------------------------
@@ -42,7 +43,7 @@ class LoanEntryController extends Controller
 
     public function view()
     {
-    	$data = [$this->ghistory, $this->employees];
+    	$data = [$this->ghistory, $this->employees, Office::get_all()];
     	return view('pages.payroll.loan.loan_entry', compact('data'));
     }
 
@@ -52,8 +53,15 @@ class LoanEntryController extends Controller
         // dd($emp);
 
         $dpm = number_format( floatval($r->txt_amnt_loan) / floatval($r->txt_mo_tbp) , 2, '.', ''); // deduc per month
+        $loan_sub_type = "";
 
-        $data = ['loan_code'=>$r->txt_code, 'loan_desc'=>$r->txt_desc, 'loan_transdate'=>$r->dtp_trnxdt, 'loan_location'=>$r->cbo_stocklocation, 'loan_type'=>$r->cbo_contraacct, 'user_id'=>Account::CURRENT()->uid, 'whs_location_code'=>$r->cbo_stocklocation/*, 'loan_cost_center_code'=>$r->cbo_costcenter*/, 'loan_cost_center_name'=>$r->cbo_costcenter/*, 'loan_sub_cost_center'=>$r->cbo_scc*/, 'loan_amount'=>$r->txt_amnt_loan, 'loan_deduction'=>$dpm/*, 'deduction_date'=>$r->dtp_deduction*/, 'employee_no'=>$r->empid, 'employee_name'=>$emp->firstname.' '.$emp->lastname, 'months_to_be_paid'=>$r->txt_mo_tbp, 'period_to_pay'=>$r->cbo_per_tp];
+        switch($r->cbo_contraacct) {
+            case "pagibig": $loan_sub_type = $r->cbo_pagibig_sub; break;
+            case "sss": $loan_sub_type = $r->cbo_sss_sub; break;
+            default: $loan_sub_type = "";
+        }
+
+        $data = ['loan_code'=>$r->txt_code, 'loan_desc'=>$r->txt_desc, 'loan_transdate'=>$r->dtp_trnxdt, 'loan_location'=>$r->cbo_stocklocation, 'loan_type'=>$r->cbo_contraacct, 'user_id'=>Account::CURRENT()->uid, 'whs_location_code'=>$r->cbo_stocklocation/*, 'loan_cost_center_code'=>$r->cbo_costcenter*/, 'loan_cost_center_name'=>$r->cbo_costcenter/*, 'loan_sub_cost_center'=>$r->cbo_scc*/, 'loan_amount'=>$r->txt_amnt_loan, 'loan_deduction'=>$dpm/*, 'deduction_date'=>$r->dtp_deduction*/, 'employee_no'=>$r->empid, 'employee_name'=>$emp->firstname.' '.$emp->lastname, 'months_to_be_paid'=>$r->txt_mo_tbp, 'period_to_pay'=>$r->cbo_per_tp, 'loan_sub_type'=>$loan_sub_type];
         try {
 
             DB::table(Loan::$tbl_name)->insert($data);
@@ -73,7 +81,7 @@ class LoanEntryController extends Controller
             $sql = Core::sql("SELECT * FROM hris.hr_loanhdr WHERE hr_loanhdr.employee_no = '".$r->tito_emp."' AND hr_loanhdr.loan_transdate >='".$r->date_from."' AND hr_loanhdr.loan_transdate <= '".$r->date_to."' AND hr_loanhdr.cancel IS NULL ORDER BY hr_loanhdr.loan_transdate DESC");
             if ($sql!=null) {
                 for($i=0;$i<count($sql);$i++) {
-                    $sql[$i]->type_readable = LoanType::Get_LoanType($sql[$i]->loan_type);
+                    $sql[$i]->type_readable = LoanType::Get_LoanType($sql[$i]->loan_type, $sql[$i]->loan_sub_type);
                     $sql[$i]->loan_transdate = \Carbon\Carbon::parse($sql[$i]->loan_transdate)->format('M d, Y');
                     $sql[$i]->emp_name = Employee::GetEmployee($sql[$i]->employee_no)->lastname.', '.Employee::GetEmployee($sql[$i]->employee_no)->firstname.' '.Employee::GetEmployee($sql[$i]->employee_no)->mi;
                     $sql[$i]->deduction_date = \Carbon\Carbon::parse($sql[$i]->deduction_date)->format('M d, Y');
@@ -94,8 +102,15 @@ class LoanEntryController extends Controller
         $emp=Employee::GetEmployee($r->cbo_employee);
 
         $dpm = number_format( floatval($r->txt_amnt_loan) / floatval($r->txt_mo_tbp) , 2, '.', ''); // deduc per month
+        $loan_sub_type = "";
 
-        $data = ['loan_code'=>$r->txt_code, 'loan_desc'=>$r->txt_desc, 'loan_transdate'=>$r->dtp_trnxdt, 'loan_location'=>$r->cbo_stocklocation, 'loan_type'=>$r->cbo_contraacct, 'user_id'=>Account::CURRENT()->uid, 'whs_location_code'=>$r->cbo_stocklocation/*, 'loan_cost_center_code'=>$r->cbo_costcenter*/, 'loan_cost_center_name'=>$r->cbo_costcenter/*, 'loan_sub_cost_center'=>$r->cbo_scc*/, 'loan_amount'=>$r->txt_amnt_loan, 'loan_deduction'=>$dpm/*, 'deduction_date'=>$r->dtp_deduction*/, 'employee_no'=>$r->empid, 'employee_name'=>$emp->firstname.' '.$emp->lastname, 'months_to_be_paid'=>$r->txt_mo_tbp, 'period_to_pay'=>$r->cbo_per_tp];
+        switch($r->cbo_contraacct) {
+            case "pagibig": $loan_sub_type = $r->cbo_pagibig_sub; break;
+            case "sss": $loan_sub_type = $r->cbo_sss_sub; break;
+            default: $loan_sub_type = "";
+        }
+
+        $data = ['loan_code'=>$r->txt_code, 'loan_desc'=>$r->txt_desc, 'loan_transdate'=>$r->dtp_trnxdt, 'loan_location'=>$r->cbo_stocklocation, 'loan_type'=>$r->cbo_contraacct, 'user_id'=>Account::CURRENT()->uid, 'whs_location_code'=>$r->cbo_stocklocation/*, 'loan_cost_center_code'=>$r->cbo_costcenter*/, 'loan_cost_center_name'=>$r->cbo_costcenter/*, 'loan_sub_cost_center'=>$r->cbo_scc*/, 'loan_amount'=>$r->txt_amnt_loan, 'loan_deduction'=>$dpm/*, 'deduction_date'=>$r->dtp_deduction*/, 'employee_no'=>$r->empid, 'employee_name'=>$emp->firstname.' '.$emp->lastname, 'months_to_be_paid'=>$r->txt_mo_tbp, 'period_to_pay'=>$r->cbo_per_tp, 'loan_sub_type'=>$loan_sub_type];
         try {
             DB::table(Loan::$tbl_name)->where(Loan::$pk, $r->txt_code)->update($data);
             Core::Set_Alert('success', 'Successfully modified a Loan Entry.');
@@ -129,4 +144,37 @@ class LoanEntryController extends Controller
         $table->name = Employee::Name($table->employee_no);
         return json_encode($table);
     }
+
+    public function FindID(Request $r)
+    {
+        try {
+            // return $r->all();
+            $data = DB::table('hr_loanhdr')->where('employee_no', $r->id)->/*whereBetween('loan_transdate', [$r->date_start, $r->date_to])->*/get();
+            for($i = 0; $i < count($data); $i++)
+            {
+                $data[$i]->deptid = Employee::GetEmployee($data[$i]->employee_no)->department;
+                $data[$i]->type_readable = LoanType::Get_LoanType($data[$i]->loan_type, $data[$i]->loan_sub_type);
+                $data[$i]->loan_transdate = \Carbon\Carbon::parse($data[$i]->loan_transdate)->format('M d, Y');
+                $data[$i]->emp_name = Employee::GetEmployee($data[$i]->employee_no)->lastname.', '.Employee::GetEmployee($data[$i]->employee_no)->firstname.' '.Employee::GetEmployee($data[$i]->employee_no)->mi;
+                $data[$i]->deduction_date = \Carbon\Carbon::parse($data[$i]->deduction_date)->format('M d, Y');
+                $data[$i]->period_readable = ($data[$i]->period_to_pay == "30")?"30th day":"15th day";
+            }
+            return $data;
+        } catch (Exception $e) {
+            return "error";
+        }
+        // try {
+        //     $data = DB::table('hr_tito2')->where('empid', $r->id)->whereBetween('work_date', [$r->date_start, $r->date_to])->get();
+        //     for($i = 0; $i < count($data); $i++)
+        //     {
+        //         $data[$i]->status_desc = Core::io((string)$data[$i]->status);
+        //         $data[$i]->source_desc = Core::source($data[$i]->source);
+        //         $data[$i]->deptid = Employee::GetEmployee($data[$i]->empid)->department;
+        //     }
+        //     return $data;
+        // } catch (Exception $e) {
+        //     return "error";
+        // }
+    }
+
 }

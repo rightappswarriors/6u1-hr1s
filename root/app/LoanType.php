@@ -4,6 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use DB;
+use Pagibig;
 
 class LoanType extends Model
 {
@@ -20,10 +21,15 @@ class LoanType extends Model
     	}
     }
 
-    public static function Get_LoanType($id)
+    public static function Get_LoanType($id, $sub)
     {
     	try {
-    		return DB::table(self::$tbl_name)->where(self::$cancel, '=', null)->where('code', $id)->first()->description;
+            $data = DB::table(self::$tbl_name)->where(self::$cancel, '=', null)->where('code', $id)->first()/*->description*/;
+            if($data != null) {
+                return $data->description;
+            } else {
+                return Pagibig::Get_Sub_ById($sub)->description;
+            }
     	} catch (Exception $e) {
     		return $e;
     	}

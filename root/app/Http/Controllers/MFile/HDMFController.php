@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use Core;
 use HDMF;
 use DB;
+use Pagibig;
 
 class HDMFController extends Controller
 {
@@ -87,6 +88,45 @@ class HDMFController extends Controller
     	} catch (\Illuminate\Database\QueryException $e) {
     		Core::Set_Alert('danger', $e->getMessage());
     		return back();
+    	}
+	}
+
+	public function pagibig_add(Request $r)
+	{
+		$data = ['description' => $r->desc];
+		try {
+			Pagibig::Add($data);
+			Core::Set_Alert('success', 'Successfully added a Pag-ibig Loan Type.');
+    		return "Okay";
+		} catch (\Illuminate\Database\QueryException $e) {
+    		Core::Set_Alert('danger', $e->getMessage());
+    		return "Error";
+    	}
+	}
+
+	public function pagibig_edit(Request $r)
+	{
+		$data = ['description' => $r->desc];
+		try {
+			Pagibig::Edit($r->pagibig_sub_id, $data);
+			Core::Set_Alert('success', 'Successfully edited a Pag-ibig Loan Type.');
+    		return "Okay";
+		} catch (\Illuminate\Database\QueryException $e) {
+    		Core::Set_Alert('danger', $e->getMessage());
+    		return "Error";
+    	}
+	}
+
+	public function pagibig_del(Request $r)
+	{
+		$data = ['cancel' => true];
+		try {
+			Pagibig::Del($r->pagibig_sub_id, $data);
+			Core::Set_Alert('success', 'Successfully deleted a Pag-ibig Loan Type.');
+    		return "Okay";
+		} catch (\Illuminate\Database\QueryException $e) {
+    		Core::Set_Alert('danger', $e->getMessage());
+    		return "Error";
     	}
 	}
 }

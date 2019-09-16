@@ -9,6 +9,8 @@ use Core;
 use ServiceRecord;
 use Employee;
 use ErrorCode;
+use Office;
+use JobTitle;
 
 /*
 |--------------------------------------------------------------------------
@@ -32,13 +34,14 @@ class ServiceRecordController extends Controller
     public function view()
     {
         $data = $this->ghistory;
-        
         // Add the name of the employee
         foreach($data as $key => $value) {
             // dd(Employee::GetDepartment($value->branch));
             $employee = Employee::GetEmployee($value->empid);
             $data[$key]->employee_name = $employee->firstname.' '.$employee->mi.(($employee->mi == null)?'':' ').$employee->lastname;
         }
+
+        $data = [$data, Office::get_all()];
 
         return view('pages.records.service_record', compact('data'));
     }
@@ -49,7 +52,7 @@ class ServiceRecordController extends Controller
         try {
             $data = ['remarks'=>$r->remarks];
 
-            DB::table(ServiceRecord::$tbl_name)->where(ServiceRecord::$pk, '=', $r->sr_code)->update($data);
+            $d = DB::table(ServiceRecord::$tbl_name)->where(ServiceRecord::$pk, '=', $r->sr_code)->update($data);
             // Core::Set_Alert('success', 'Successfully added new Loan Entry.');
 
         } catch (\Illuminate\Database\QueryException $e) {
@@ -57,5 +60,25 @@ class ServiceRecordController extends Controller
             ErrorCode::Generate('controller', 'ServiceRecordController', '00000', $e->getMessage());
             // return back();
         }
+    }
+
+    public function find(Request $r)
+    {
+        $data = $this->ghistory;
+        $final_data = array();
+        foreach($data as $k => $v) {
+            if(Employee::IfEmployeeInOffice($v->empid, $r->ofc_id)) {
+                $employee = Employee::GetEmployee($v->empid);
+                $data[$k]->employee_name = $employee->firstname.' '.$employee->mi.(($employee->mi == null)?'':' ').$employee->lastname;
+                $data[$k]->date_from_readable = \Carbon\Carbon::parse($data[$k]->service_from)->format('M d, Y');
+                $data[$k]->date_to_readable = \Carbon\Carbon::parse($data[$k]->service_to)->format('M d, Y');
+                $data[$k]->designation_readable = JobTitle::Get_JobTitle(trim($data[$k]->designation));
+                $data[$k]->branch_readable = Employee::GetDepartment($data[$k]->branch);
+                $data[$k]->lwp_readable = trim($data[$k]->leave_wo_pay);
+                $data[$k]->remarks_readable = trim($data[$k]->remarks);
+                $final_data[] = $data[$k];
+            }
+        }
+        return $final_data;
     }
 }

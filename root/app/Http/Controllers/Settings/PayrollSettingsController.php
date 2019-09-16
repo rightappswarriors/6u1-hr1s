@@ -9,10 +9,17 @@ use Core;
 
 class PayrollSettingsController extends Controller
 {
+	public function __construct()
+	{
+		$this->data = DB::table('hris.m99')->first();
+	}
+
     public function view()
     {
-        return view('pages.settings.payroll_settings');
-    }
+    	$data = [
+    		$this->data
+    	];
 
-    // public function 
+        return view('pages.settings.payroll_settings', compact('data'));
+    }
 }

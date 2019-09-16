@@ -13,7 +13,7 @@ class OfficeController extends Controller
 {
 	public function __construct()
     {
-        $SQLOffice = "SELECT oid,* FROM rssys.m08 WHERE active = TRUE ORDER BY cc_desc ASC";
+        $SQLOffice = "SELECT * FROM rssys.m08 WHERE active = TRUE ORDER BY cc_desc ASC";
         $this->office = DB::select($SQLOffice);;
     }
     public function view()
@@ -68,22 +68,15 @@ class OfficeController extends Controller
             return back();
         }
     }
-    public function check($oid, $cc_code)
+    public function check($id, $cc_code)
     {
-        if (DB::table(Office::$tbl_name)->where(Office::$oid, '!=', $oid)->where(Office::$pk, '=', $cc_code)->first()) {
+        if (DB::table(Office::$tbl_name)->where(Office::$id, '!=', $id)->where(Office::$pk, '=', $cc_code)->first()) {
             return true;
         }
         return false;
     }
     public function getEmployees(Request $r)
     {
-        $employees = DB::table('hr_employee')->where('department', '=', $r->ofc_id)->get();
-        if (count($employees) > 0) {
-            for ($i=0; $i < count($employees); $i++) { 
-                $emp = $employees[$i];
-                $emp->empname = Employee::name($emp->empid);
-            }
-        }
-        return json_encode($employees);
+        return Office::OfficeEmployees($r->ofc_id);
     }
 }

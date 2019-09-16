@@ -14,7 +14,7 @@ class X07 extends Model
 
     public static function Load_X07()
     {
-        return DB::table(self::$tbl_name)->get();
+        return DB::table(self::$tbl_name)->where('grp_id', '<>', '001')->where('cancel', null)->orderBy('grp_id', 'ASC')->get();
     }
 
     public static function GetGroup($id) 

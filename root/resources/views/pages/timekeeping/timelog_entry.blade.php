@@ -24,8 +24,8 @@
 						{{csrf_field()}}
 						<div class="form-group form-inline">
 							<label>Work Dates</label>
-							<input type="input" name="tito_dateStrt" id="tito_dateStrt" class="form-control ml-2" value="{{date('m/d/Y')}}" required> <span class="ml-2">to</span> 
-							<input type="input" name="tito_dateEnd" id="tito_dateEnd" class="form-control ml-2" value="{{date('m/d/Y')}}" required>
+							<input type="input" name="tito_dateStrt" id="tito_dateStrt" class="form-control ml-2" value="{{date('Y-m-1')}}" required> <span class="ml-2">to</span> 
+							<input type="input" name="tito_dateEnd" id="tito_dateEnd" class="form-control ml-2" value="{{date('Y-m-d')}}" required>
 							@if ($errors->has('tito_dateStrt'))
 				            <div class="error-span ml-2">
 				                {{ ucfirst(strtolower("tito_dateStrt")) }}
@@ -36,18 +36,43 @@
 				                {{ ucfirst(strtolower("tito_dateEnd")) }}
 				            </div>
 				            @endif
+
+			            	<label class="ml-5">Search by ID:</label>
+							<input type="text" name="tito_id" id="tito_id" class="form-control float-right ml-2" placeholder="Search by ID">
+						</div>
+
+						<div class="form-group form-inline">
+							<label>Search Filters:</label>
 						</div>
 						<div class="form-group form-inline">
-							<label>Employee</label>
-							<select class="form-control ml-2" name="tito_emp" id="tito_emp" required>
-								<option disabled selected>Please select an employee</option>
-								@if(!empty($data[0]))
-								@foreach($data[0] as $emp)
-								<option value="{{$emp->empid}}">{{$emp->firstname." ".$emp->lastname}}</option>
-								@endforeach
-								@endif
-							</select>
-							<button type="submit" class="btn btn-primary ml-2">Go</button>
+							<div class="row w-75">
+								<div class="col">
+									<select class="form-control w-100" name="office" id="office" required>
+										<option disabled selected value="">Please select an office</option>
+										@if(!empty($data[1]))
+										@foreach($data[1] as $off)
+										<option value="{{$off->cc_id}}">{{$off->cc_desc}}</option>
+										@endforeach
+										@endif
+									</select>
+								</div>
+								<div class="col">
+									<select class="form-control w-100" name="tito_emp" id="tito_emp" required>
+										<option disabled selected value="">Please select an employee</option>
+										{{-- @if(!empty($data[0]))
+										@foreach($data[0] as $emp)
+										<option value="{{$emp->empid}}">{{$emp->firstname." ".$emp->lastname}}</option>
+										@endforeach
+										@endif --}}
+									</select>
+									{{-- <div class="row">
+										<div class="col">
+											<input type="text" name="tito_id" id="tito_id" class="form-control w-100" placeholder="Search by ID">
+										</div>
+									</div> --}}
+								</div>
+								<button type="submit" class="btn btn-primary ml-3">Go</button>
+							</div>
 						</div>
 					</form>
 				</div>
@@ -105,7 +130,7 @@
 					<form method="post" action="#" id="frm-addlog">
 						<div class="form-group">
 							<label>Work Date</label>
-							<input type="text" class="form-control" name="date_workdate" id="date_workdate" value="{{date('m-d-Y')}}" required>
+							<input type="text" class="form-control" name="date_workdate" id="date_workdate" value="{{date('Y-m-d')}}" required>
 						</div>
 						<div class="form-group">
 							<label>Time Log</label>
@@ -226,8 +251,85 @@
 			selected_row = $(this).parents('tr');
 		});
 
+		$('#tito_emp').on('input', function() {
+			$('#tito_id').val('');
+		});
+
+		$('#office').on('change', function() {
+
+			while($('#tito_emp')[0].firstChild) {
+				$('#tito_emp')[0].removeChild($('#tito_emp')[0].firstChild);
+			}
+
+			var hiddenChild = document.createElement('option');
+				hiddenChild.setAttribute('selected', '');
+				hiddenChild.setAttribute('disabled', '');
+				hiddenChild.setAttribute('value', '');
+				hiddenChild.innerText='Please select an employee';
+
+			$('#tito_emp')[0].appendChild(hiddenChild);
+
+			$.ajax({
+				type: 'post',
+				url: '{{url('timekeeping/timelog-entry/find-emp-office')}}',
+				data: {ofc_id: $(this).val()},
+				success: function(data) {
+					// console.log(typeof(data));
+					if(data.length > 0) {
+						for(i=0; i<data.length; i++) {
+							var option = document.createElement('option');
+								option.setAttribute('value', data[i].empid);
+								option.innerText=data[i].name;
+
+							$('#tito_emp')[0].appendChild(option);
+						}
+					}
+				},
+			});
+		});
+
+		$('#tito_id').on('input', function() {
+
+			$('#empid').text('');
+			$('select[name=office]').val('').trigger('change');
+
+			if($('select[name="tito_emp"]').val($(this).val()).trigger('change').val() == null)	
+				$('select[name="tito_emp"]').val('').trigger('change')
+
+			$.ajax({
+				type : 'post',
+				url : '{{url('timekeeping/timelog-entry/find-id')}}',
+				data : {id:$(this).val(), date_start:$('#tito_dateStrt').val(), date_to:$('#tito_dateEnd').val()},
+				success: function(data) {
+					table.clear().draw();
+					if (data!="error") {
+						if (data!="empty") {
+							if(data.length > 0) {
+								$('#empid').text('(Employee ID: '+data[0].empid+' )');
+								$('select[name=office]').val(data[0].deptid).trigger('change');
+								for(var i = 0 ; i < data.length; i++) {
+									LoadTable(data[i]);
+								}
+							} 	
+						} else {
+							
+						}
+					} else {
+						
+					}
+				},
+			});
+
+			setTimeout(function() {
+				if($('select[name=office]').val() != null) {
+					$('select[name=tito_emp]').val($('#tito_id').val()).trigger('change');
+				}
+			}, 500);
+		});
+
 		$('#dataTable').on('click', '.btn-edit', function() {
 			var emp = $('#tito_emp').val();
+
 			selected_row = $(this).parents('tr');
 			$.ajax({
 				type : 'post',
@@ -420,7 +522,7 @@
 		{
 			// Add Modal
 			$('#frm-addlog').attr('action','#');
-			$('#date_workdate').val('{{date('m/d/Y')}}');
+			$('#date_workdate').val('{{date('Y-m-d')}}');
 			$('#time_timelog').val('{{date('H:i:s')}}');
 			$('#sel_status').val('');
 

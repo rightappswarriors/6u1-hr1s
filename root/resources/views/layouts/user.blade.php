@@ -8,6 +8,8 @@
     <!-- CSRF Token-->
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <?php define("token", Session::token());?>
+    <link rel="icon" type="image/png" href="{{asset('img/guihulngan.png')}}" sizes="32x32" />
+
 
     <title>{{ config('app.name') }}</title>
 
@@ -33,6 +35,16 @@
     
     <!-- Croppic -->
     <link rel="stylesheet" href="{{asset('css/croppic.css')}}">
+
+    <!-- Custome Loader -->
+    <link rel="stylesheet" href="{{asset('css/custom-loader.css')}}">
+
+    <!-- Custome Multiple Select -->
+    <link rel="stylesheet" href="{{asset('css/multiple-select.css')}}">
+
+    <!-- Custom Time Picker -->
+    <link rel="stylesheet" href="{{asset('css/bootstrap-timepicker.css')}}">
+
     <style>
         .parsley-errors-list {
             color:red;
@@ -70,6 +82,13 @@
 
 </head>
 <body id="page-top">
+   
+    <div id='preloader'>
+        <div class='spinner'>
+            <span class='loader'><span class='loader-inner'></span></span>
+        </div>
+    </div> 
+
     <div id="wrapper">
         @include('include.xside_navigation')
         <div id="content-wrapper" style="padding-top: 0!important;">
@@ -143,13 +162,22 @@
     <script type="text/javascript" src="{{asset('js/simple-math.js')}}"></script>
     <script type="text/javascript" src="{{asset('js/croppic.min.js')}}"></script>
     <script type="text/javascript" src="{{asset('js/exif.js')}}"></script>
+    <script type="text/javascript" src="{{asset('js/multiple-select.js')}}"></script>
+    <script type="text/javascript" src="{{asset('js/bootstrap-timepicker.js')}}"></script>
+    
     @include('include.js_dateoption_config')
     <script type="text/javascript">
+        let preloader_timeinseconds_before_gone = .85; // in seconds
 
         $(document).ready(function(){
             // Update the current year in copyright
             $('.is-current-year').text(new Date().getFullYear());
+            // Hide the preloader once the page is loaded
+            setTimeout(function() {
+                $('#preloader').hide();
+            }, preloader_timeinseconds_before_gone * 1000);
         });
+        
 
         $("#hris-alert").fadeTo(10000, 500).slideUp(500, function(){
             $("#hris-alert").slideUp(10000);
@@ -182,6 +210,12 @@
         function NoSelectedRow()
         {
             alert("Please select a row.");
+        }
+    </script>
+    <script type="text/javascript">
+        function togglePreloader() //for toggling the preloader for ajax and other javascripts
+        {
+            $('#preloader').show();
         }
     </script>
     @yield('to-bottom')

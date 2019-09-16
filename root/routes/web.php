@@ -94,9 +94,13 @@
 				Route::post('/getOne', 'MFile\EmployeeController@getOneEmployee');
 				Route::post('/update', 'MFile\EmployeeController@update');
 				Route::post('/delete', 'MFile\EmployeeController@delete');
-				//prototype
+				/*new crud 4 employee*/
 				Route::get('/new2', 'MFile\EmployeeController@new2');
 				Route::post('/add2', 'MFile\EmployeeController@add2');
+				/*new crud 4 employee*/
+				Route::post('/office-employee', 'MFile\EmployeeController@get_employees');
+				Route::post('/upadte-flag', 'MFile\EmployeeController@updateFlag');
+
 			});
 			/* EMPLOYEE */
 			/* SHIFT SCHEDULE */
@@ -264,6 +268,9 @@
 				Route::post('/delete-all-log', 'Timekeeping\TimeLogEntryController@deleteLog_All');
 				Route::post('/get-log', 'Timekeeping\TimeLogEntryController@GetLog');
 				Route::post('/edit-log', 'Timekeeping\TimeLogEntryController@EditLog');
+
+				Route::post('/find-id', 'Timekeeping\TimeLogEntryController@FindID');
+				Route::post('/find-emp-office', 'Timekeeping\TimeLogEntryController@get_emp');
 			});
 			/* TIMELOG ENTRY */
 			/* LEAVES ENTRY */
@@ -271,7 +278,7 @@
 				Route::get('/', 'Timekeeping\LeavesEntryController@view');
 				Route::post('/getType', 'Timekeeping\LeavesEntryController@getType');
 				Route::post('/', 'Timekeeping\LeavesEntryController@add');
-				Route::post('/update', 'Timekeeping\LeavesEntryController@update');
+				// Route::post('/update', 'Timekeeping\LeavesEntryController@add');
 				Route::post('/delete', 'Timekeeping\LeavesEntryController@delete');
 				Route::post('/find', 'Timekeeping\LeavesEntryController@find');
 				Route::get('/get-entry', 'Timekeeping\LeavesEntryController@get_entry');
@@ -310,6 +317,8 @@
 				Route::post('/find', 'Payroll\Loan\LoanEntryController@find');
 				Route::get('/get-entry', 'Payroll\Loan\LoanEntryController@get_entry');
 				Route::post('/delete', 'Payroll\Loan\LoanEntryController@delete');
+
+				Route::post('/find-id', 'Payroll\Loan\LoanEntryController@FindID');
 			});
 			/* LOAN ENTRY */
 			/* LOAN HISTORY*/
@@ -335,6 +344,13 @@
 				Route::post('/amount-paid', 'Payroll\OtherEarningsMainController@amount_paid');
 				Route::post('/absence-w-pay', 'Payroll\OtherEarningsMainController@absence_w_pay');
 
+				//entry
+				Route::post('/add', 'Payroll\OtherEarningsMainController@add');
+				Route::post('/update', 'Payroll\OtherEarningsMainController@update');
+				Route::post('/delete', 'Payroll\OtherEarningsMainController@delete');
+				Route::post('/find_e', 'Payroll\OtherEarningsMainController@find_e');
+				Route::post('/find2_e', 'Payroll\OtherEarningsMainController@find2_e');
+
 				// new page
 				Route::prefix('print')->group(function() {
 					Route::get('/{month}', 'Payroll\OtherEarningsMainController@print_view');
@@ -344,6 +360,11 @@
 			/* OTHER DEDUCTIONS */
 			Route::prefix('other-deductions')->group(function() {
 				Route::get('/', 'Payroll\OtherDeductionMainController@view')->name('odhome');
+				Route::post('/', 'Payroll\OtherDeductionMainController@add');
+				Route::post('/update', 'Payroll\OtherDeductionMainController@update');
+				Route::post('/delete', 'Payroll\OtherDeductionMainController@delete');
+				Route::post('/find', 'Payroll\OtherDeductionMainController@find');
+				Route::post('/find2', 'Payroll\OtherDeductionMainController@find2');
 			});
 			/* OTHER DEDUCTIONS*/
 			/* GENERATE PAYROLL */
@@ -383,6 +404,7 @@
 				Route::prefix('EmployeeDTR')->group(function() {
 					Route::get('/', 'Reports\PrintEmployeeDTRController@view');
 					Route::post('/find', 'Reports\PrintEmployeeDTRController@find');
+					Route::post('/find2', 'Reports\PrintEmployeeDTRController@find2');
 				});
 				Route::prefix('EmployeeDTRSummary')->group(function() {
 					Route::get('/', 'Reports\PrintEmployeeDTRSummaryController@view');
@@ -391,6 +413,7 @@
 				Route::prefix('DailyTimelogRecord')->group(function() {
 					Route::get('/', 'Reports\PrintDailyTimelogRecordController@view');
 					Route::post('/find', 'Reports\PrintDailyTimelogRecordController@find');
+					Route::post('/find2', 'Reports\PrintDailyTimelogRecordController@find2');
 					Route::get('/print', 'Reports\PrintDailyTimelogRecordController@print');
 				});
 			});
@@ -399,6 +422,7 @@
 					Route::get('/', 'Reports\Payroll\PayrollSummaryReportController@view');
 					Route::get('/export', 'Reports\Payroll\PayrollSummaryReportController@export');
 					Route::get('/print', 'Reports\Payroll\PayrollSummaryReportController@print');
+					Route::post('/get-dates', 'Reports\Payroll\PayrollSummaryReportController@getDates');
 				});
 			// });
 		});
@@ -411,6 +435,7 @@
 			Route::prefix('service-record')->group(function(){
 				Route::get('/', 'Records\ServiceRecordController@view');
 				Route::post('/', 'Records\ServiceRecordController@add_remark');
+				Route::post('/find', 'Records\ServiceRecordController@find');
 			});
 			/* SERVICE RECORD */
 		});
@@ -420,6 +445,11 @@
 		Route::group(['prefix'=>'settings', 'middleware'=>'restrictions', 'restriction'=>'setts'], function() {
 			// Route::get('/maintenance-mode/{var}', 'WebsiteController@MaintenanceMode')->name('website.maintenancemode');
 		// Route::prefix('settings')->group(function() {
+			Route::prefix('timekeepingsettings')->group(function() {
+				Route::get('', 'Settings\TimekeepingSettingsController@view');
+
+				Route::post('update/{column}', 'Settings\TimekeepingSettingsController@update');
+			});
 			/* SYSTEM DATA UPDATE */
 			Route::prefix('payrollsettings')->group(function() {
 				Route::get('', 'Settings\PayrollSettingsController@view');
@@ -430,6 +460,10 @@
 				Route::get('', 'Settings\GroupRightsSettingsController@viewUserGroup');
 				Route::get('info', 'Settings\GroupRightsSettingsController@LoadLevel2');
 				Route::post('add-rights', 'Settings\GroupRightsSettingsController@AddRights');
+
+				Route::post('/edit-rights', 'Settings\GroupRightsSettingsController@EditRights');
+				Route::post('/add-rights-new', 'Settings\GroupRightsSettingsController@AddRights_New');
+				Route::post('/delete-rights-new', 'Settings\GroupRightsSettingsController@DeleteRights');
 			});
 			/* GROUP RIGHTS SETTINGS */
 			/* USER SETTINGS */
@@ -443,6 +477,7 @@
 			/* NOTIFICATION SETTINGS */
 			Route::prefix('notification')->group(function() {
 				Route::get('', 'Settings\NotificationSettingsController@view');
+				Route::post('', 'Settings\NotificationSettingsController@send');
 			});
 			/* NOTIFICATION SETTINGS */
 			/* SYSTEM SETTINGS */
@@ -480,14 +515,6 @@
 			});
 		});
 		/* SETTINGS */
-
-		/* NOTIFICATION */
-		Route::prefix('notification')->group(function() {
-			Route::get('/', 'Notification\NotificationController@view');
-			Route::post('/send', 'Notification\NotificationController@send');
-			Route::post('/find', 'Notification\NotificationController@find');
-		});
-		/* NOTIFICATION */
 	});
 /* AUTHENTICATED ROUTES */
 
@@ -502,8 +529,52 @@
 		    die("Could not connect to the database.  Please check your configuration. error:" . $e );
 		}
 	});
-	/* VIEW SESSIONS */
-	Route::get('/sessions', function () { dd(Session::all()); });
+	Route::group(['middleware'=>'restrictions', 'restriction'=>'admin'], function() {
+
+
+		/* VIEW SESSIONS */
+		Route::get('/sessions', function () { dd(Session::all()); });
+		
+		Route::get('/test/', function () {
+			// $excel = new PHPExcel();
+   //          header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+   //          header('Content-Disposition: attachment; filename=download.xlsx');
+
+			$emp = Employee::Load_Employees();
+
+			foreach ($emp as $key) {
+				$ofc = DB::table('rssys.m08')->where('oid', $key->department)->first();
+				$es = DB::table('hr_emp_status')->where('oid', $key->empstatus)->first();
+				$arr = [];
+				if ($ofc!=null) {
+					DB::table('hr_employee')->where(Employee::$pk, $key->empid)->update(['department'=>$ofc->cc_id]);
+					array_push($arr, "ok");
+				} else {array_push($arr, "error"."|".$ofc);}
+				if ($es!=null) {
+					DB::table('hr_employee')->where(Employee::$pk, $key->empid)->update(['empstatus'=>$es->status_id]);
+					array_push($arr, "ok");
+				} else {array_push($arr, "error"."|".$es);}
+
+				dd($arr);
+			}
+		});
+
+		/* NOTIFICATION */
+		Route::prefix('notification')->group(function() {
+			Route::get('/', 'Notification\NotificationController@view');
+			Route::post('/send', 'Notification\NotificationController@send');
+			// Route::post('/find', 'Notification\NotificationController@find');
+		});
+		/* NOTIFICATION */
+	});
+
+	/* NOTIFICATION */
+	Route::prefix('notification')->group(function() {
+		Route::post('/find', 'Notification\NotificationController@find');
+		Route::post('/toggle', 'Notification\NotificationController@toggle');
+	});
+	/* NOTIFICATION */
+
 	Route::get('/sessions/check', function() {
 		if (Session::exists('_user')) {
 			return "ok"; 
@@ -511,12 +582,8 @@
 			return "no user"; 
 		}
 	});
-	Route::get('/restricted', 'WebsiteController@Restricted');
-	Route::get('/test/', function () {
-		return Excel::download(new TestExport(), 'general-payroll-'.date('ymdhis').'.xlsx');
-		// return url("storage/app/public/profile_images");
-	});
 
 	/* REDIRECT | Important Note: The following routes MUST ALWAYS BE AT THE BOTTOM OF THIS FILE. */
+	Route::get('/restricted', 'WebsiteController@Restricted');
 	Route::get('/error/{page}', 'MyRedirectController@redirect')->name('redirect'); // Interface needs to be fixed
 /* OTHERS */

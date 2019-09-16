@@ -74,9 +74,9 @@ class UserSettingsController extends Controller
             Core::Set_Alert('danger', 'Password do not match.');
             return back();
         } else {
-            // $group = X07::GetGroup($r->cbo_grp)->grp_desc;
+            $group = X07::GetGroup($r->cbo_grp)->grp_desc;
             
-            $data = ['uid'=>$r->txt_user, 'opr_name'=>$r->txt_name, 'pwd'=>$r->txt_pass/*, 'grp_id'=>$r->cbo_grp, 'd_code'=>$group*/, 'approve_disc'=>'y', 'restriction'=>$restrictions];
+            $data = ['uid'=>$r->txt_user, 'opr_name'=>$r->txt_name, 'pwd'=>$r->txt_pass, 'grp_id'=>$r->cbo_grp, 'd_code'=>$group, 'approve_disc'=>'y', 'restriction'=>$restrictions];
             
             try {
 
@@ -110,10 +110,10 @@ class UserSettingsController extends Controller
             Core::Set_Alert('danger', 'Password do not match.');
             return back();
         } else {
-            // $group = X07::GetGroup($r->cbo_grp)->grp_desc;
+            $group = X07::GetGroup($r->cbo_grp)->grp_desc;
             $r->txt_name = strtoupper($r->txt_name);
             $r->txt_user = strtoupper($r->txt_user);
-            $data = ['uid'=>$r->txt_user, 'opr_name'=>$r->txt_name, 'pwd'=>$r->txt_pass/*, 'grp_id'=>$r->cbo_grp, 'd_code'=>$group*/, 'restriction'=>$restrictions];
+            $data = ['uid'=>$r->txt_user, 'opr_name'=>$r->txt_name, 'pwd'=>$r->txt_pass, 'grp_id'=>$r->cbo_grp, 'd_code'=>$group, 'restriction'=>$restrictions];
             try {
                 DB::table(X08::$tbl_name)->where(X08::$pk, $r->txt_user)->update($data);
                 Core::Set_Alert('success', 'Successfully modified a User.');

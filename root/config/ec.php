@@ -52,6 +52,7 @@ return [
         'ShiftScheduleController' => 'SSC',
         'SSSController' => 'SSSC',
         'WtaxController' => 'WC',
+        'TimekeepingSettingsController' => 'TSC',
         'TimeLogEntryController' => 'TLEC',
         'TiToController' => 'TTC',
         'ServiceRecordController' => 'SRC',

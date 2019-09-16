@@ -7,6 +7,12 @@
 		</div>
 		<div class="card-body">
 			<form method="post" action="{{$url}}" id="frm-pp" data="#" data-parsley-validate novalidate>
+				<div class="border-bottom mb-3">
+					<div class="mb-2 text-right">
+						<button type="button" class="btn btn-primary" name="nxBTN" onclick="ChangeTab($('#ADD_TAB'), event)">Next</button>
+						<button type="submit" form="frm-pp" class="btn btn-success" {{-- onclick="checkCurrentTab(4)" --}} style="display:none" name="svBTN">Save</button>
+					</div>
+				</div>
 				@csrf
 				<ul class="nav nav-tabs" id="myTab" role="tablist">
 				  <li class="nav-item">
@@ -62,7 +68,7 @@
 							      	@isset($office)
 							      		<option value="">Select Office...</option>
 							      		@foreach ($office as $d)
-							      			<option value="{{$d->oid}}" @isset($MYDATA){{($MYDATA->department == $d->oid) ? "selected" : ""}}@endisset>{{$d->cc_desc}}</option>
+							      			<option value="{{$d->cc_id}}" @isset($MYDATA){{($MYDATA->department == $d->cc_id) ? "selected" : ""}}@endisset>{{$d->cc_desc}}</option>
 							      		@endforeach
 							      	@else
 							      		<option value="">No Office registered..</option>
@@ -182,7 +188,7 @@
 							      		@isset($emp_status)
 											<option value="">Select Employement Status...</option>
 											@foreach ($emp_status as $d)
-												<option value="{{$d->oid}}" @isset($MYDATA){{($MYDATA->empstatus == $d->oid) ? "selected" : ""}}@endisset>{{$d->description}}</option>
+												<option value="{{$d->status_id}}" @isset($MYDATA){{($MYDATA->empstatus == $d->status_id) ? "selected" : ""}}@endisset>{{$d->description}}</option>
 											@endforeach
 										@else
 											<option value="">No Employement Status registered...</option>
@@ -624,10 +630,6 @@
 					  	</div>
 					</div>
 					{{-- EDUCATIONAL BACKGROUND TAB --}}
-				</div>
-				<div class="modal-footer">
-					<button type="button" class="btn btn-primary" name="nxBTN" onclick="ChangeTab($('#ADD_TAB'), event)">Next</button>
-					<button type="submit" form="frm-pp" class="btn btn-success" {{-- onclick="checkCurrentTab(4)" --}} style="display:none" name="svBTN">Save</button>
 				</div>
 			</form>
 		</div>

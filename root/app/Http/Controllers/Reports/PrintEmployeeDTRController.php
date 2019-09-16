@@ -10,6 +10,9 @@ use Employee;
 use ErrorCode;
 use Holiday;
 use Payroll;
+use Timelog;
+use DateTime;
+use Office;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,6 +21,7 @@ use Payroll;
 | Prefix - PEDC
 |
 | 00000 - find
+| 00001 - find2
 | 
 |--------------------------------------------------------------------------
 */
@@ -32,7 +36,7 @@ class PrintEmployeeDTRController extends Controller
 
     public function view()
     {
-        $data = [$this->employee, $this->ghistory];
+        $data = [$this->employee, Office::get_all()];
         // dd($data);
         return view('pages.reports.print_employee_dtr', compact('data'));
     }
@@ -75,11 +79,131 @@ class PrintEmployeeDTRController extends Controller
             $empName = Employee::Name($r->empid);
 
             $data = [$dataIn1, $dataOut2, $empName, Holiday::GetMonth($r->month), $r->year, $date_readable, $day_of_the_week, $r->period, $days_worked];
+
             return $data;
         } catch (\Illuminate\Database\QueryException $e) {
             Core::Set_Alert('danger', $e->getMessage());
             ErrorCode::Generate('controller', 'PrintEmployeeDTRController', '00000', $e->getMessage());
             return back();
         } 
+    }
+
+    public function find2(Request $r)
+    {
+        try {
+            $payroll_period = Payroll::PayrollPeriod2($r->month, $r->period.'D', $r->year);
+            $covered_dates = Core::CoveredDates($payroll_period->from, $payroll_period->to);
+
+            $dataIn1 = array();
+            $dataOut2 = array();
+            $covered_dates_strtotime = array();
+
+            $data = array();
+
+            $external_data = [
+                "Name" => Employee::Name($r->empid),
+                "Month" => Holiday::GetMonth($r->month),
+                "Year" => $r->year,
+                "HoursRequired" => intval(explode(':', Timelog::ReqTimeOut())[0]) - intval(explode(':', Timelog::ReqTimeIn())[0]) - 1,
+            ];
+
+            foreach($covered_dates as $k => $v) {
+                $covered_dates_strtotime[] = date('Y-m-d', strtotime($covered_dates[$k]));
+
+                if( date('l', strtotime($covered_dates_strtotime[$k])) != "Sunday" ) {
+                    if( date('l', strtotime($covered_dates_strtotime[$k])) != "Saturday" ) {
+                        $dataIn1[$k] = DB::table('hr_tito2')->where('empid', $r->empid)->where('status', '1')->where('work_date', $covered_dates_strtotime[$k])->orderBy('work_date', 'ASC')->orderBy('time_log', 'ASC')->first();
+
+                        $dataOut2[$k] = DB::table('hr_tito2')->where('empid', $r->empid)->where('status', '0')->where('work_date', $covered_dates_strtotime[$k])->orderBy('work_date', 'ASC')->orderBy('time_log', 'ASC')->first();
+
+                        $data[$k]['_Date'] = $covered_dates[$k];
+
+                        /* CALC */
+                        if($dataIn1[$k] != null) {
+
+                            if( $dataIn1[$k]->time_log < substr(Timelog::ReqTimeOut_2(), 0, 5) ) {
+                                /* AM */
+
+                                $data[$k]['AM']['Arrival'] = $dataIn1[$k]->time_log;
+
+                                if( $dataOut2[$k] != null ) {
+                                    if( ($dataOut2[$k]->time_log > substr(Timelog::ReqTimeOut_2(), 0, 5)) ) {
+                                        $data[$k]['AM']['Departure'] = /*"12:00pm"*/"12:00";
+
+                                        $data[$k]['PM']['Arrival'] = /*"1:00pm"*/"13:00";
+                                        $data[$k]['PM']['Departure'] = $dataOut2[$k]->time_log;
+                                    } else {
+                                        $data[$k]['AM']['Departure'] = $dataOut2[$k]->time_log;
+
+                                        $data[$k]['PM']['Arrival'] = "";
+                                        $data[$k]['PM']['Departure'] = "";
+                                    }
+                                } else {
+                                    $data[$k]['AM']['Departure'] = "<span class='text-danger'>missing</span>";
+
+                                    $data[$k]['PM']['Arrival'] = "";
+                                    $data[$k]['PM']['Departure'] = "";
+                                }
+
+                            } else if( $dataIn1[$k]->time_log >= substr(Timelog::ReqTimeOut_2(), 0, 5) ) {
+                                /* PM */
+
+                                $data[$k]['AM']['Arrival'] = "";
+                                $data[$k]['AM']['Departure'] = "";
+
+                                $data[$k]['PM']['Arrival'] = $dataIn1[$k]->time_log;
+                                if( $dataOut2[$k] != null ) {
+                                    $data[$k]['PM']['Departure'] = $dataOut2[$k]->time_log;
+                                } else {
+                                    $data[$k]['PM']['Departure'] = "<span class='text-danger'>missing</span>";
+                                }
+                            }
+
+
+                            if($dataOut2[$k] != null) {
+                                $in = new DateTime($dataIn1[$k]->time_log);
+                                $out = new DateTime($dataOut2[$k]->time_log);
+
+                                $diff = date_diff($in, $out);
+                                $diff->h -= 1;
+
+                                $minutes_required = ((intval(explode(":", Timelog::ReqTimeOut())[0]) - intval(explode(":", Timelog::ReqTimeIn())[0])) - 1) * 60;
+
+                                $minutes_rendered = $diff->h * 60;
+                                $minutes_rendered += $diff->i;
+
+
+
+                                $data[$k]['_Rendered'] = ($minutes_rendered >= $minutes_required)?0:$minutes_required-$minutes_rendered;
+                                ;
+
+                                // $data[$k]['_Rendered'] = ($dataIn1[$k]->time_log < intval(explode(":", Timelog::ReqTimeOut())[0]) && $dataOut2[$k]->time_log > intval(explode(":", Timelog::ReqTimeIn_2())[0]))?$data[$k]['_Rendered']-60:$data[$k]['_Rendered'];
+
+                                $data[$k]['_Rendered'] = ($data[$k]['_Rendered'] < 0)?0:$data[$k]['_Rendered'];
+                            } else {
+                                $data[$k]['_Rendered'] = "";
+                            }
+
+                        } else {
+                            $data[$k]['AM']['Arrival'] = "";
+                            $data[$k]['AM']['Departure'] = "";
+                            $data[$k]['PM']['Arrival'] = "";
+                            $data[$k]['PM']['Departure'] = "";
+
+                            $data[$k]['_Rendered'] = "";
+                        }
+                    }
+                } 
+            }
+
+            $data = array_values($data);
+
+            return [$data, $external_data];
+
+        } catch (Exception $e) {
+            Core::Set_Alert('danger', $e->getMessage());
+            ErrorCode::Generate('controller', 'PrintEmployeeDTRController', '00001', $e->getMessage());
+            return back();
+        }
     }
 }

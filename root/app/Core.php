@@ -9,6 +9,13 @@ use Carbon\Carbon;
 
 class Core extends Model
 {
+    public static function company_name()
+    {
+    	/**
+    	* Returns name of the company
+    	*/
+    	return env('APP_COMPANY', '-no-company-name-');
+    }
     // Use raw SQL when retrieving data
 	public static function sql($sql)
 	{	
@@ -588,7 +595,7 @@ class Core extends Model
                 $msg = "There was an error.";
                 break;
             case 'warning':
-                $msg = "Warning! The action contain some errors.";
+                $msg = "The action contain some errors.";
                 break;
             case 'info':
                 $msg = "New Update!";

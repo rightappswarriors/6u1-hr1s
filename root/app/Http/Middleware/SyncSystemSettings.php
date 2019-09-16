@@ -24,13 +24,17 @@ class SyncSystemSettings
 
     public function CheckSystemDates()
     {
-        try {
-            if ($this->m99->hy != date('Y') || $this->m99->hm != date('m')) {
-                $this->AutomaticMaintenance();
-                $this->UpdateSystemDates();
+        if ($this->Check_DBConnection()=="connected") {
+            try {
+                if ($this->m99->hy != date('Y') || $this->m99->hm != date('m')) {
+                    $this->AutomaticMaintenance();
+                    $this->UpdateSystemDates();
+                }
+            } catch (\Exception $e) {
+                ErrorCode::Generate('middleware', 'SyncSystemSettings', '00001', $e->getMessage());
             }
-        } catch (\Exception $e) {
-            ErrorCode::Generate('middleware', 'SyncSystemSettings', '00001', $e->getMessage());
+        } else {
+            return redirect()->url('error/0');
         }
     }
 
@@ -98,6 +102,17 @@ class SyncSystemSettings
             }
         } catch (\Exception $e) {
             ErrorCode::Generate('middleware', 'SyncSystemSettings', '00005', $e->getMessage());
+        }
+    }
+
+    public function Check_DBConnection()
+    {
+        try {
+            // dd(Carbon\Carbon::now()->format('h:i'));
+            DB::connection()->getPdo();
+            return "connected";
+        } catch (\Exception $e) {
+            die("Could not connect to the database.  Please check your configuration. error:" . $e );
         }
     }
 

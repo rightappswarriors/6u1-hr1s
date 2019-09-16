@@ -17,14 +17,31 @@
 	    	data: {"uid":'{{Account::CURRENT()->uid}}'} ,
 	    	success: function(response) {
 	    		generate_notif(response);
-
-	        	let noti_count = response[2];
-
-        		$('#notif_count').html( (noti_count > 10) ? "10+" : noti_count );
+	    		
+        		let noti_count = response[2];
+	    		
+	    		if(noti_count > 0) {
+        			$('#notif_count').html( (noti_count > 10) ? "10+" : noti_count );
+	    			$('#notif_count').show();
+	    		} else {
+	    			$('#notif_count').hide();
+	    		}
 	    	}
 	    });
 	}
 	@endisset
+
+	function toggleAudio(uid, val, ntf) {
+		console.log(uid);
+		$.ajax({
+			type: "post",
+			url: '{{url('notification/toggle')}}',
+			data: {"x_uid":uid, "val":val, "x_ntf_id":ntf},
+			success: function(data){
+
+			}
+		});
+	}
 
 	function generate_notif(response) {
 		if(response[2] > 0) {
@@ -49,8 +66,14 @@
 
 	    if(response[1].length > 0) {
 	      for(i=0; i<response[1].length; i++) {
+	      	if(!response[0][i].played) {
+				notif_audio.play(); // plays the audio
+				toggleAudio(response[0][i].uid, true, response[0][i].ntf_id);
+			}
+
 	        let data = response[1][i];
 	        let data1 = response[0][i];
+
 	        var a = document.createElement('a');
 	            a.setAttribute('class', 'dropdown-item');
 	            if(!data1.seen) a.setAttribute('style', 'background: rgb(227,232,240)');
@@ -102,6 +125,8 @@
 	    div.appendChild(div1);
 	    div.appendChild(a1);
   	}
+
+  	var notif_audio = new Audio('{{asset('audio/plucky.mp3')}}');
 </script>
 
 <script>

@@ -1,0 +1,78 @@
+/* https://codepen.io/starhiep/pen/PgGXqq */
+
+#preloader {
+    overflow: hidden;
+    background: #000;
+    opacity: 0.5;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    position: fixed;
+    z-index: 9999
+}
+
+.spinner {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.loader {
+    display: inline-block;
+    width: 100px;
+    height: 100px;
+    position: relative;
+    border: 8px solid #0040ff;
+    /*border-radius: 5px;*/
+    top: 50%;
+    animation: loader 2s infinite ease
+}
+
+.loader-inner {
+    vertical-align: top;
+    display: inline-block;
+    width: 100%;
+    background-color: #0040ff;
+    animation: loader-inner 2s infinite ease-in
+}
+
+@keyframes loader {
+    0% {
+        transform: rotate(0deg)
+    }
+    25% {
+        transform: rotate(180deg)
+    }
+    50% {
+        transform: rotate(180deg)
+    }
+    75% {
+        transform: rotate(360deg)
+    }
+    100% {
+        transform: rotate(360deg)
+    }
+}
+
+@keyframes loader-inner {
+    0% {
+        height: 0%
+    }
+    25% {
+        height: 0%
+    }
+    50% {
+        height: 100%
+    }
+    75% {
+        height: 100%
+    }
+    100% {
+        height: 0%
+    }
+}

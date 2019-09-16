@@ -4,8 +4,8 @@
 	<table>
 		<thead>
 			<tr><th colspan="44">GENERAL PAYROLL</th></tr>
-			<tr><th colspan="44">CITY OF GUIHULNGAN</th></tr>
-			<tr><th colspan="44">LGU</th></tr>
+			<tr><th colspan="44">{{Core::company_name()}}</th></tr>
+			<tr><th colspan="44">{{$data->ofc}}</th></tr>
 			<tr><th colspan="44">{{date('F j, Y', strtotime($data->pp->from))}} - {{date('F j, Y', strtotime($data->pp->to))}}</th></tr>
 			<tr>
 				<th rowspan="4">ITEM NO.</th>
@@ -13,7 +13,7 @@
 				<th rowspan="4">No.</th>
 				<th rowspan="4">POSITION</th>
 				<th rowspan="4">Rate</th>
-				<th rowspan="4">No. of >Absences w/o Pay</th>
+				<th rowspan="4">No. of Absences w/o Pay</th>
 				<th rowspan="4">Rate- Computed Absences</th>
 				<th rowspan="4">ALLOWANCE (PERA)</th>
 				<th rowspan="4">HAZARD DUTY PAY</th>
@@ -31,16 +31,16 @@
 				<th rowspan="3">PhilHealth</th>
 
 				<th colspan="3">PAG-IBIG</th>
-
-				<th rowspan="3">JGM</th>
-				<th rowspan="3">LBP</th>
-				<th rowspan="3">CFI</th>
-				<th rowspan="3">DCCCO</th>
+				@php
+					$pd = ['JGM', 'LBP', 'CFI', 'DCCCO', 'PEI 2014 REFUND', 'REFUND for Cash Advance'];
+				@endphp
+				@if(count($pd) > 0)
+					@for($i=0;$i<count($pd);$i++)
+						<th rowspan="3">{{$pd[$i]}}</th>					
+					@endfor
+				@endif
 
 				<th colspan="10">GSIS</th>
-
-				<th rowspan="3">PEI 2014 REFUND</th>
-				<th rowspan="3">REFUND for Cash Advance</th>
 				<th rowspan="3">TOTAL DEDUCTIONS</th>
 
 				<th rowspan="3">PhilHealth</th>
@@ -101,10 +101,14 @@
 				<td>{{($row->pd_pagibig_a!=0) ? $row->pd_pagibig_a : "-"}}</td>
 				<td>{{($row->pd_pagibig_b!=0) ? $row->pd_pagibig_b : "-"}}</td>
 				<td>{{($row->pd_pagibig_c!=0) ? $row->pd_pagibig_c : "-"}}</td>
-				<td>{{($row->pd_jgm!=0) ? $row->pd_jgm : "-"}}</td>
-				<td>{{($row->pd_lbp!=0) ? $row->pd_lbp : "-"}}</td>
-				<td>{{($row->pd_lbp!=0) ? $row->pd_lbp : "-"}}</td>
-				<td>{{($row->pd_dccco!=0) ? $row->pd_dccco : "-"}}</td>
+				@php
+					$pd_content = [$row->pd_jgm, $row->pd_lbp, $row->pd_lbp, $row->pd_dccco, $row->pd_pei_refund, $row->pd_ca_refund];
+				@endphp
+				@if(count($pd_content) > 0)
+					@for($j = 0; $j < count($pd_content); $j++)
+						<td>{{($pd_content[$j]!=0) ? $pd_content[$j] : "-"}}</td>
+					@endfor
+				@endif
 				<td>{{($row->pd_gsis_a!=0) ? $row->pd_gsis_a : "-"}}</td>
 				<td>{{($row->pd_gsis_b!=0) ? $row->pd_gsis_b : "-"}}</td>
 				<td>{{($row->pd_gsis_c!=0) ? $row->pd_gsis_c : "-"}}</td>
@@ -115,8 +119,6 @@
 				<td>{{($row->pd_gsis_h!=0) ? $row->pd_gsis_h : "-"}}</td>
 				<td>{{($row->pd_gsis_i!=0) ? $row->pd_gsis_i : "-"}}</td>
 				<td>{{($row->pd_gsis_j!=0) ? $row->pd_gsis_j : "-"}}</td>
-				<td>{{($row->pd_pei_refund!=0) ? $row->pd_pei_refund : "-"}}</td>
-				<td>{{($row->pd_ca_refund!=0) ? $row->pd_ca_refund : "-"}}</td>
 				<td>{{($row->pd_total_deductions!=0) ? $row->pd_total_deductions : "-"}}</td>
 				<td>{{($row->gs_philhealth!=0) ? $row->gs_philhealth : "-"}}</td>
 				<td>{{($row->gs_life_ins!=0) ? $row->gs_life_ins : "-"}}</td>

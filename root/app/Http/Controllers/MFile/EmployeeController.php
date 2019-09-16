@@ -6,20 +6,25 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Core;
 use DB;
+use Account;
 use Employee;
+use EmployeeStatus;
+use ErrorCode;
+use JobTitle;
+use Office;
 use ServiceRecord;
 
 class EmployeeController extends Controller
 {
     public function __construct()
     {
-        $SQLOffice = "SELECT oid,* FROM rssys.m08 WHERE active = TRUE ORDER BY cc_desc ASC";
-        $this->office= DB::select($SQLOffice);
+        $SQLOffice = "SELECT * FROM rssys.m08 WHERE active = TRUE ORDER BY cc_desc ASC";
+        $this->office = DB::select($SQLOffice);
         $SQLDept = "SELECT * FROM hris.hr_department WHERE COALESCE(cancel, cancel, '')<>'Y' ORDER BY dept_name ASC";
         $this->dept = DB::select($SQLDept);
         $SQLPosition = "SELECT * FROM hris.hr_jobtitle WHERE COALESCE(cancel, cancel, '')<>'Y' ORDER BY jtitle_name ASC";
         $this->position = DB::select($SQLPosition);
-        $SQLEmpStatus = "SELECT oid,* FROM hris.hr_emp_status WHERE COALESCE(cancel, cancel, '')<>'Y'";
+        $SQLEmpStatus = "SELECT * FROM hris.hr_emp_status WHERE COALESCE(cancel, cancel, '')<>'Y'";
         $this->emp_status = DB::select($SQLEmpStatus);
         $SQLRate = "SELECT * FROM hris.hr_rate_type";
         $this->rate_type = DB::select($SQLRate);
@@ -36,8 +41,14 @@ class EmployeeController extends Controller
     }
     public function view()
     {
+        for ($i=0; $i < count($this->employee); $i++) { 
+            $emp = $this->employee[$i];
+            $emp->office = (Office::GetOffice($emp->department)!=null) ? Office::GetOffice($emp->department)->cc_desc : "office-not-found";
+            $emp->jobtitle = JobTitle::Get_JobTitle($emp->positions);
+            $emp->emp_status = (EmployeeStatus::find($emp->empstatus)!=null) ? EmployeeStatus::find($emp->empstatus)->description : "employee-status-not-found";
+        }
         // return dd($this->employee);
-        return view('pages.mfile.employee', ['dept' => $this->dept, 'position' => $this->position, 'emp_status' => $this->emp_status, 'tax' => $this->tax, 'rate' => $this->rate_type, 'sss' => $this->sss, 'day' => $this->days, 'civil_stat' => $this->civil_stat, 'employee' => $this->employee] );
+        return view('pages.mfile.employee', ['dept' => $this->dept, 'position' => $this->position, 'emp_status' => $this->emp_status, 'tax' => $this->tax, 'rate' => $this->rate_type, 'sss' => $this->sss, 'day' => $this->days, 'civil_stat' => $this->civil_stat, 'employee' => $this->employee, 'office' => $this->office] );
     }
     public function new()
     {
@@ -145,6 +156,7 @@ class EmployeeController extends Controller
             return redirect('master-file/employee');
 
         } catch (\Illuminate\Database\QueryException $e) {
+            ErrorCode::Generate('controller', 'EmployeeController', '00001', $e->getMessage());
             Core::Set_Alert('danger', $e->getMessage());
             return back();
         }
@@ -423,4 +435,71 @@ class EmployeeController extends Controller
         return view('pages.frontend.employee_online_application', compact('data'));
     }
     /* ONLINE APPLICATION */
+
+    public function get_employees(Request $r)
+    {
+        $ofc_emp = json_decode(Office::OfficeEmployees($r->id));
+        if (count($ofc_emp) <= 0) {
+            return "empty";
+        } else {
+            for ($i=0; $i < count($ofc_emp); $i++) { 
+                $oe = $ofc_emp[$i];
+                $flag = DB::table('hr_emp_flag')->where('empid', '=', $oe->empid)->first();
+                if ($flag==null) {
+                    $status = 0;
+                } else {
+                    $status = $flag->status;
+                }
+                $oe->flag = ($status==1) ? "checked" : "";
+            }
+        }
+        return $ofc_emp;
+    }
+
+    public function updateFlag(Request $r)
+    {
+        // return dd($r->all());
+        if ($r->id==null) {
+            ErrorCode::Generate('controller', 'EmployeeController', '00002', "Missing Parameters (Employee).");
+            return "missing";
+        }
+
+        if ($r->state==null) {
+            ErrorCode::Generate('controller', 'EmployeeController', '00003', "Missing Parameters (State).");
+            return "missing";
+        }
+
+        $flag = DB::table('hr_emp_flag')->where('empid', '=', $r->id)->first();
+        $state = ($r->state == "true") ? 1 : 0;
+        // return dd($flag, $state);
+
+        if ($flag==null) {
+            try {
+                DB::table('hr_emp_flag')->insert([
+                    'empid' => $r->id,
+                    'status' => $state,
+                    'generatedby' => Account::ID()
+                ]);
+                return "ok";
+            } catch (\Exception $e) {
+                ErrorCode::Generate('controller', 'EmployeeController', '00004', $e->getMessage());
+                return "error";
+            }
+        }
+        else {
+            $id = DB::table('hr_emp_flag')->where('empid', $flag->empid)->first();
+            if ($id!=null) {
+                $id = $id->flag_id;
+                DB::table('hr_emp_flag')->where('empid', $flag->empid)->update([
+                    'status' => $state,
+                    'generatedby' => Account::ID()
+                ]);
+                return "ok";
+            } else {
+                ErrorCode::Generate('controller', 'EmployeeController', '00005', "Employee not found.");
+                return "not-found";
+            }
+        }
+
+    }
 }

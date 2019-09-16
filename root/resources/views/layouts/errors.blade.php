@@ -44,13 +44,13 @@
 				No Header.
 				@endif
 			</p>
-			<p class="error-subheader">
+			{{-- <p class="error-subheader">
 				@if(View::hasSection('message'))
 				@yield('message')
 				@else
 				No message.
 				@endif
-			</p>
+			</p> --}}
 			<a href="{{url('/')}}">Back</a>
 		</div>
 	</div>

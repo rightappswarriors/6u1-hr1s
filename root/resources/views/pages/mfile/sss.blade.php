@@ -15,12 +15,12 @@
 									<thead>
 										<tr>
 											<th>Code</th>
-											<th>Bracket 1</th>
-											<th>Bracket 2</th>
+											<th>From</th>
+											<th>To</th>
 											<th>Salary Credit</th>
-											<th>EmployER's Share</th>
+											<th>Employer's(ER)<br>Share</th>
 											<th>E.C.</th>
-											<th>EmployEE's Share</th>
+											<th>Employee's(EE)<br>Share</th>
 											<th>Total Count</th>
 										</tr>
 									</thead>
@@ -51,6 +51,7 @@
 					<div class="card">
 						<div class="card-body">
 							<button type="button" class="btn btn-success btn-block" id="opt-add"><i class="fa fa-plus"></i> Add</button>
+							<button type="button" class="btn btn-warning btn-block" id="opt-add-loan"><i class="fa fa-plus"></i> GSIS:Loan Types</button>
 							<button type="button" class="btn btn-primary btn-block" id="opt-update"><i class="fa fa-edit"></i> Edit</button>
 							<button type="button" class="btn btn-danger btn-block" id="opt-delete"><i class="fa fa-trash"></i> Delete</button>
 							<button type="button" class="btn btn-info btn-block" id="opt-print"><i class="fa fa-print"></i> Print List</button>
@@ -63,6 +64,160 @@
 @endsection
 
 @section('to-modal')
+	<!-- Pag-ibig Loan Types -->
+	<div class="modal fade" id="modal-pp_gsis" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+		<div class="modal-dialog modal-lg" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">
+						Info 
+						<button class="btn btn-success" id="opt-sss-add"><i class="fa fa-plus"></i></button>
+					</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<div class="row">
+						<div class="col">
+							<div class="table-responsive">
+								<table class="table table-hover" id="dataTable1">
+									<thead>
+										<tr>
+											<th>ID</th>
+											<th>DESCRIPTION</th>
+											<th>OPTIONS</th>
+										</tr>
+									</thead>
+									<tbody>
+										@foreach(SSS::Get_All_Sub() as $k => $v)
+										<tr>
+											<td>{{$v->id}}</td>
+											<td>{{$v->description}}</td>
+											<td>
+												<button class="btn btn-warning exclusive_edit_btn" defid="{{$v->id}}" defdesc="{{$v->description}}"><i class="fa fa-edit"></i></button>
+												<button class="btn btn-danger exclusive_del_btn" defid="{{$v->id}}" defdesc="{{$v->description}}"><i class="fa fa-trash"></i></button>
+											</td>
+										</tr>
+										@endforeach
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Modal Pagibig Loan Types -->
+	<div class="modal fade mt-3" id="modal-pp_gsis_modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content" style="background-color: #f1f1f1">
+				<div class="modal-header">
+					<h5 class="modal-title" id="sss_modal_label">
+						 
+					</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<form id="frm-sss-modal">
+					<div class="modal-body">
+						<span class="P_AddMode">
+							<div class="row">
+								<div class="col-3">Description:</div>
+								<div class="col">
+									<input type="hidden" name="sss_sub_id">
+									<input type="text" class="form-control" name="desc" required>
+								</div>
+							</div>
+						</span>
+						<span class="P_DeleteMode">
+							<div class="row">
+								<div class="col">
+									Are you sure you want to delete <b><span class="text-danger" id="toBeDelName"></span></b> ?
+								</div>
+							</div>
+						</span>
+					</div>
+					<div class="modal-footer">
+						<button class="btn btn-success" type="button" id="frm-sss-modal-submit">
+							<span class="P_AddMode">
+								Submit
+							</span>
+							<span class="P_DeleteMode">
+								Delete
+							</span>
+						</button>
+						<button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		$('#frm-sss-modal-submit').on('click', function() {
+			if($('input[name="desc"]').val() == "" || $('input[name="desc"]').val() == null) {
+				alert('Cannot add empty description');
+			} else {
+				$.ajax({
+					type : 'post',
+					url: $('#frm-sss-modal').attr('action'),
+					data : $('#frm-sss-modal').serialize(),
+					success: function(data) {
+						if(data == "Okay") {
+							location.reload();
+						}
+					},
+				});
+			}
+		});
+
+		$('#opt-sss-add').on('click', function() {
+			$('#frm-sss-modal').attr('action', '{{url("master-file/sss/sss-add")}}');
+			$('.P_AddMode').show();
+			$('.P_DeleteMode').hide();
+
+			$('#toBeDelName').text('');
+
+			$('input[name="sss_sub_id"]').val('');
+			$('input[name="desc"]').val('');
+
+			$('#sss_modal_label').text('Add');
+			$('#modal-pp_gsis_modal').modal('show');
+		});
+
+		$('.exclusive_edit_btn').on('click', function() {
+			$('#frm-sss-modal').attr('action', '{{url("master-file/sss/sss-edit")}}');
+			$('.P_AddMode').show();
+			$('.P_DeleteMode').hide();
+
+			$('#toBeDelName').text('');
+
+			$('input[name="sss_sub_id"]').val($(this).attr('defid'));
+			$('input[name="desc"]').val($(this).attr('defdesc'));
+
+			$('#sss_modal_label').text('Edit');
+			$('#modal-pp_gsis_modal').modal('show');
+		});
+
+		$('.exclusive_del_btn').on('click', function() {
+			$('#frm-sss-modal').attr('action', '{{url("master-file/sss/sss-del")}}');
+			$('.P_AddMode').hide();
+			$('.P_DeleteMode').show();
+
+			$('#toBeDelName').text($(this).attr('defdesc'));
+
+			$('input[name="sss_sub_id"]').val($(this).attr('defid'));
+			$('input[name="desc"]').val($(this).attr('defdesc'));
+
+			$('#sss_modal_label').text('Delete');
+			$('#modal-pp_gsis_modal').modal('show');
+		});
+	</script>
+
 	<!-- Add Modal -->
 	<div class="modal fade" id="modal-pp" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
 		<div id="TESTDOCU" class="modal-dialog modal-lg" role="document">
@@ -212,13 +367,19 @@
 	<script type="text/javascript">
 		$('#date_from').datepicker(date_option5);
 		$('#date_to').datepicker(date_option5);
-		var table = $('#dataTable').DataTable(date_option_min);
+		var table = $('#dataTable').DataTable(/*date_option_min*/);
+		var table1 = $('#dataTable1').DataTable(/*date_option_min*/);
 	</script>
 	<script type="text/javascript">
 		$('#dataTable').on('click', 'tbody > tr', function() {
 			$(this).parents('tbody').find('.table-active').removeClass('table-active');
 			selected_row = $(this);
 			$(this).toggleClass('table-active');
+		});
+	</script>
+	<script>
+		$('#opt-add-loan').on('click', function() {
+			$('#modal-pp_gsis').modal('show');
 		});
 	</script>
 	<script type="text/javascript">

@@ -3,7 +3,7 @@
 @section('to-body')
 	<div class="card">
 		<div class="card-header">
-			<i class="fa fa-suitcase"></i> Job Title
+			<i class="fa fa-suitcase"></i> Job Title <button type="button" class="btn btn-success" id="opt-add"><i class="fa fa-plus"></i> Add</button>
 		</div>
 		<div class="card-body">
 			<div class="row">
@@ -12,10 +12,14 @@
 						<div class="card-body">
 							<div class="table-responsive">
 								<table class="table table-hover" id="dataTable">
+									<col>
+									<col>
+									<col width="10%">
 									<thead>
 										<tr>
 											<th>Job Code</th>
 											<th>Description</th>
+											<th></th>
 											{{-- <th>Job Title</th> --}}
 										</tr>
 									</thead>
@@ -26,6 +30,10 @@
 												<tr data_id="{{$pp->jt_cn}}" data_code="{{$pp->jtid}}" data_name="{{$pp->jtitle_name}}">
 													<td>{{$pp->jtid}}</td>
 													<td>{{$pp->jtitle_name}}</td>
+													<td>
+														<button type="button" class="btn btn-primary mr-1" onclick="row_update(this)"><i class="fa fa-edit"></i></button>
+														<button type="button" class="btn btn-danger" onclick="row_delete(this)"><i class="fa fa-trash"></i></button>
+													</td>
 													{{-- <td>{{$pp->dept_name}}</td> --}}
 												</tr>
 												@endforeach
@@ -37,16 +45,13 @@
 						</div>
 					</div>
 				</div>
-				<div class="col-3">
+				{{-- <div class="col-3">
 					<div class="card">
 						<div class="card-body">
-							<button type="button" class="btn btn-success btn-block" id="opt-add"><i class="fa fa-plus"></i> Add</button>
-							<button type="button" class="btn btn-primary btn-block" id="opt-update"><i class="fa fa-edit"></i> Edit</button>
-							<button type="button" class="btn btn-danger btn-block" id="opt-delete"><i class="fa fa-trash"></i> Delete</button>
 							<button type="button" class="btn btn-info btn-block" id="opt-print"><i class="fa fa-print"></i> Print List</button>
 						</div>
 					</div>
-				</div>
+				</div> --}}
 			</div>
 		</div>
 	</div>
@@ -109,23 +114,15 @@
 		$('#date_to').datepicker(date_option5);
 		var table = $('#dataTable').DataTable(dataTable_short_ordered);
 	</script>
-	<script type="text/javascript">
+	{{-- <script type="text/javascript">
 		$('#dataTable').on('click', 'tbody > tr', function() {
 			$(this).parents('tbody').find('.table-active').removeClass('table-active');
 			selected_row = $(this);
 			$(this).toggleClass('table-active');
 		});
-	</script>
+	</script> --}}
 	<script type="text/javascript">
-		function LoadDatable()
-		{
-			data.row.add([
-				data.pay_code,
-				data.date_from,
-				data.date_to
-			]).draw();
-		}
-		$('#opt-add').on('click', function() {
+		$('#opt-add').on('click', function(){
 			$('#frm-pp').attr('action', '{{url('master-file/job-title')}}');
 
 			// $('input[name="txt_code"]').removeAttr('readonly');
@@ -139,7 +136,8 @@
 			$('#modal-pp').modal('show');
 		});
 
-		$('#opt-update').on('click', function() {
+		function row_update(obj) {
+			var selected_row = $($(obj).parents()[1]);
 			$('#frm-pp').attr('action', '{{url('master-file/job-title')}}/update');
 		
 			// $('input[name="txt_code"]').attr('readonly', '');
@@ -151,9 +149,10 @@
 			$('.AddMode').show();
 			$('.DeleteMode').hide();
 			$('#modal-pp').modal('show');
-		});
+		};
 
-		$('#opt-delete').on('click', function() {
+		function row_delete(obj) {
+			var selected_row = $($(obj).parents()[1]);
 			$('#frm-pp').attr('action', '{{url('master-file/job-title')}}/delete');
 		
 			// $('input[name="txt_code"]').attr('readonly', '');
@@ -166,7 +165,7 @@
 			$('.AddMode').hide();
 			$('.DeleteMode').show();
 			$('#modal-pp').modal('show');
-		});
+		};
 
 		$('input[name="txt_code"]').on('input', function() {
 			$.ajax({
