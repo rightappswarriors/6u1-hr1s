@@ -43,6 +43,14 @@
 							      	<input type="text" name="txt_id" style="text-transform: uppercase;" class="form-control T0r" maxlength="8" placeholder="Employee Number" value="@isset($MYDATA){{$MYDATA->empid}}@endisset" {{($mode == "edit") ? "readonly" : ""}} required>
 							      </div>
 							    </div>
+							    <!-- Account Number -->
+							    <div class="form-group row">
+							      <label class="col-sm-4 col-form-label">Account Number <strong style="color:red">*</strong></label>
+							      <div class="col-sm-8">
+							      	<input type="text" class="form-control T0 T0r" name="txt_accountnumber" placeholder="ACCOUNT NUMBER" value="@isset($MYDATA){{$MYDATA->accountnumber}}@endisset" required>
+							      </div>
+							    </div>
+							    <!-- Account Number -->
 							    <div class="form-group row">
 							      <label class="col-sm-4 col-form-label">Last Name <strong style="color:red">*</strong></label>
 							      <div class="col-sm-8">
@@ -801,12 +809,14 @@
 			}
 			if (ctab == "GEN_TAB") {
 				// return true;
+				$('input[name="txt_accountnumber"]').parsley().validate();
 				$('input[name="txt_lname"]').parsley().validate();
 				$('input[name="txt_fname"]').parsley().validate();
 				$('select[name="txt_dept"]').parsley().validate();
 				$('input[name="txt_id"]').parsley().validate();
 				$('select[name="txt_jobdesc"]').parsley().validate();
 				if(
+					$('input[name="txt_accountnumber"]').parsley().validate() == true &&
 					$('input[name="txt_lname"]').parsley().validate() == true &&
 					$('input[name="txt_fname"]').parsley().validate() == true &&
 					$('select[name="txt_dept"]').parsley().validate() == true &&

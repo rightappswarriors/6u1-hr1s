@@ -140,9 +140,9 @@
       <li id="timekeepingleaves-entry">
         <a href="{{url('timekeeping/leaves-entry')}}">Leaves Entry</a>
       </li>
-      {{-- <li id="timekeepingemployee-dtr">
+      <li id="timekeepingemployee-dtr">
         <a href="{{url('timekeeping/employee-dtr')}}">Employee DTR</a>
-      </li> --}}
+      </li>
       <li class="nav-separator"></li>
       <li id="timekeepinggenerate-dtr">
         <a href="{{url('timekeeping/generate-dtr')}}">Generate DTR Summary</a>
@@ -198,7 +198,8 @@
         <a class="nav-link-collapse collapsed" data-toggle="collapse" href="#Reports_TK" aria-expanded="false">Timekeeping</a>
         <ul class="sidenav-third-level collapse" id="Reports_TK" data-parent="#Reports">
           <li id="reportstimekeepingEmployeeDTR">
-            <a href="{{url('reports/timekeeping/EmployeeDTR')}}">Print Employee DTR</a>
+            {{-- <a href="{{url('reports/timekeeping/EmployeeDTR')}}">Print Employee DTR</a> --}}
+            <a href="{{url('reports/timekeeping/employee-dtr')}}">Print Employee DTR</a>
           </li>
           <li id="reportstimekeepingEmployeeDTRSummary">
             <a href="{{url('reports/timekeeping/EmployeeDTRSummary')}}">Print Employee DTR Summary</a>
