@@ -495,8 +495,8 @@
 			/* SYSTEM DATA UPDATE */
 			Route::prefix('error-log')->group(function() {
 				Route::get('', function() {
-					$errorlogs = Core::READ_FILE('errorlog.txt', 'txt', $folder = 'logs/system');
-					unset($errorlogs[0]); /*dd($errorlogs);*/
+					$errorlogs = Core::READ_FILE('errorlog.txt', 'txt', $folder = 'logs/system');/* dd($errorlogs);*/
+					unset($errorlogs[0]);
 					$logs = [];
 
 					if (count($errorlogs)!=0) {
@@ -537,26 +537,14 @@
 		
 		Route::get('/test/', function () {
 			// $excel = new PHPExcel();
-   //          header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-   //          header('Content-Disposition: attachment; filename=download.xlsx');
+            // header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            // header('Content-Disposition: attachment; filename=download.xlsx');
 
-			$emp = Employee::Load_Employees();
+			// $time1 = strtotime("09:01");
+			// $time2 = strtotime("09:00");
+			// dd($time1 > $time2, $time1, $time2);
 
-			foreach ($emp as $key) {
-				$ofc = DB::table('rssys.m08')->where('oid', $key->department)->first();
-				$es = DB::table('hr_emp_status')->where('oid', $key->empstatus)->first();
-				$arr = [];
-				if ($ofc!=null) {
-					DB::table('hr_employee')->where(Employee::$pk, $key->empid)->update(['department'=>$ofc->cc_id]);
-					array_push($arr, "ok");
-				} else {array_push($arr, "error"."|".$ofc);}
-				if ($es!=null) {
-					DB::table('hr_employee')->where(Employee::$pk, $key->empid)->update(['empstatus'=>$es->status_id]);
-					array_push($arr, "ok");
-				} else {array_push($arr, "error"."|".$es);}
-
-				dd($arr);
-			}
+			dd(Timelog::GetRenHours("8:00", "15:00", "am"));
 		});
 
 		/* NOTIFICATION */

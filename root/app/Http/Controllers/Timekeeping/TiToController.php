@@ -89,7 +89,7 @@ class TiToController extends Controller
             }
 
             if ($log=="invalid") {
-                Core::Set_Alert('warning','You already have timed in/out.');
+                Core::Set_Alert('warning','You already have '.$msg);
                 return back();
             }
 
@@ -111,7 +111,7 @@ class TiToController extends Controller
             $time_strt = "07:00";
 
             // dd($this->CheckExistingLog($r, $time));
-            if ($this->CheckExistingLog($r, $time)==true) {
+            if ($this->CheckExistingLog($r, $time)) {
                 return "invalid";
             }
 

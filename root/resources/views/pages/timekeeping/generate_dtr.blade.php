@@ -233,7 +233,8 @@
 					code:selected_row.children()[0].innerText,
 					pp:$('#payroll_period').val(),
 					month: $('#payroll_month').val(),
-					year: $('#payroll_year').val()
+					year: $('#payroll_year').val(),
+					gtype : $('#payroll_gen_type').val()
 				},
 				dataTy : 'json',
 				success : function(data) {
@@ -286,6 +287,7 @@
 			$('#sum-stat').html('');
 			$('#sum-flagged').html('');
 			$('#pp-dates').text('');
+			selected_row = null;
 		}
 
 		function LoadHistoryTable(data)
@@ -447,30 +449,34 @@
 		});
 
 		$('#payroll_month').on('change', function() {
-			if (selected_row!=null) {
-				LoadDtrTable();
-			}
+			// if (selected_row!=null) {
+			// 	LoadDtrTable();
+			// }
 			$('#payroll_period').val('15D').trigger('change');
 			SearchEmployees();
+			emptySummaryTable();
 		});
 
 		$('#payroll_period').on('change', function() {
-			if (selected_row!=null) {
-				LoadDtrTable();
-			}
+			// if (selected_row!=null) {
+			// 	LoadDtrTable();
+			// }
 			SearchEmployees();
+			emptySummaryTable();
 		});
 
 		$('#payroll_year').on('change', function() {
-			if (selected_row!=null) {
-				LoadDtrTable();
-			}
+			// if (selected_row!=null) {
+			// 	LoadDtrTable();
+			// }
 			SearchEmployees();
+			emptySummaryTable();
 		});
 
 		$('#payroll_ofc').on('change', function() {
 			emp_count = 0;
 			SearchEmployees();
+			emptySummaryTable();
 		});
 
 		function SearchEmployees()

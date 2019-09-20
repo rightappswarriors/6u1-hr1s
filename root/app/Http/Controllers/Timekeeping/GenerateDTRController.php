@@ -24,36 +24,36 @@ class GenerateDTRController extends Controller
 
     public function __construct()
     {
-    	$this->employees = Employee::Load_Employees();
-    	$this->payrollperiod = PayrollPeriod::Load_PayrollPeriod();
+        $this->employees = Employee::Load_Employees();
+        $this->payrollperiod = PayrollPeriod::Load_PayrollPeriod();
         $this->office = Office::get_all();
     }
 
     public function view()
     {
-    	$dh = $this->LoadDTRHistory();
-    	$emp = $this->employees;
+        $dh = $this->LoadDTRHistory();
+        $emp = $this->employees;
         $ofc = $this->office;/* dd($ofc);*/
-    	for($i=0;$i<count($dh);$i++) {
-    		$pp = /*PayrollPeriod::getPayrollPeriod($dh[$i]->ppid)*/ null;
-    		$dh[$i]->pp = $pp[0]." to ".$pp[1];
-    		$dh[$i]->empname = Employee::Name($dh[$i]->empid);
-    	}
-    	for ($i=0; $i < count($emp); $i++) { 
-    		$emp[$i]->name = Employee::Name($emp[$i]->empid);
-    	}
-    	$data = [$dh, $this->payrollperiod, $emp, $ofc];
-    	return view('pages.timekeeping.generate_dtr', compact('data'));
+        for($i=0;$i<count($dh);$i++) {
+            $pp = /*PayrollPeriod::getPayrollPeriod($dh[$i]->ppid)*/ null;
+            $dh[$i]->pp = $pp[0]." to ".$pp[1];
+            $dh[$i]->empname = Employee::Name($dh[$i]->empid);
+        }
+        for ($i=0; $i < count($emp); $i++) { 
+            $emp[$i]->name = Employee::Name($emp[$i]->empid);
+        }
+        $data = [$dh, $this->payrollperiod, $emp, $ofc];
+        return view('pages.timekeeping.generate_dtr', compact('data'));
     }
 
     public function LoadDTRHistory()
     {
-    	return DB::table('hr_dtr_sum_hdr')->orderBy('date_generated', 'DESC')->orderBy('time_generated', 'ASC')->get();
+        return DB::table('hr_dtr_sum_hdr')->orderBy('date_generated', 'DESC')->orderBy('time_generated', 'ASC')->get();
     }
 
     public function GenerateDTR(Request $r)
     {
-	    return $this->Generate($r);
+        return $this->Generate($r);
     }
 
     public function Generate($r)
@@ -69,6 +69,7 @@ class GenerateDTRController extends Controller
         * @param $r->pp
         * @param $r->month
         * @param $r->year
+        * @param $r->gtype
         */
         try {
             $late = "00:00";
@@ -102,7 +103,85 @@ class GenerateDTRController extends Controller
                 $date = date('Y-m-d', strtotime($workdays[$i]));
                 $record = DB::table('hr_tito2')->distinct('work_date')->where('work_date', '=', $date)->where('empid', $employee->empid)->orderby('work_date', 'ASC')->get();
 
-                if (Timelog::IfWeekdays($date)) {
+                if (Timelog::IfWorkdays($date)) {
+                    $sql_p1 = "SELECT work_date, string_agg(time_log, ',') time_log, empid, status FROM hris.hr_tito2 WHERE empid = '".$employee->empid."' AND work_date = '".$date."'";
+                    $sql_p2 = " GROUP BY work_date, empid, status ORDER BY work_date DESC, status DESC";
+
+                    $rec_ti = "";
+                    $sql_ti = " AND status = '1'";
+                    $sql_ti = $sql_p1.$sql_ti.$sql_p2;
+                    $rec_ti = Core::sql($sql_ti);
+
+                    $rec_to = "";
+                    $sql_to = " AND status = '0'";
+                    $sql_to = $sql_p1.$sql_to.$sql_p2;
+                    $rec_to = Core::sql($sql_to);
+
+                    $tl_in_am = "00:00";
+                    $tl_in_pm = "00:00";
+                    $tl_in_trsh = [];
+                    $tl_in_ot = [];
+                    $tl_out_am = "00:00";
+                    $tl_out_pm = "00:00";
+                    $tl_out_trsh = [];
+                    $tl_out_ot = [];
+
+                    /*array_push($errors2, [count($rec_ti) > 0, count($rec_to) > 0]);*/
+
+                    // if (count($rec_ti) > 0) {
+                    //     if (count($rec_to) > 0) {
+                    //         $rec_ti = explode(",", $rec_ti[0]->time_log);
+                    //         $rec_to = explode(",", $rec_to[0]->time_log);
+
+                    //         $tl_ti = "";
+                    //         if (count($rec_ti) > 0) {
+                    //             for ($j=0; $j < count($rec_ti); $j++) { 
+                    //                 $tl_ti = $rec_ti[$j];
+                    //                 if (Timelog::ValidateLog_AM($tl_ti) && $tl_in_am = "00:00") {
+                    //                     $tl_in_am = $tl_ti;
+                    //                 } elseif (Timelog::ValidateLog_PM($tl_ti) && $tl_in_pm = "00:00") {
+                    //                     $tl_in_pm = $tl_ti;
+                    //                 } elseif(Timelog::ValidateLog_OTHrs($tl_ti)) {
+                    //                     array_push($tl_in_ot, $tl_ti);
+                    //                 } else {
+                    //                     array_push($tl_in_trsh, $tl_ti);
+                    //                 }
+                    //             }
+                    //         }
+
+                    //         $tl_ti = "";
+                    //         if (count($rec_to) > 0) {
+                    //             for ($j=0; $j < count($rec_to); $j++) { 
+                    //                 $tl_ti = $rec_to[$j];
+                    //                 if (Timelog::ValidateLog_AM($tl_ti) && $tl_out_am = "00:00") {
+                    //                     $tl_out_am = $tl_ti;
+                    //                 } elseif (Timelog::ValidateLog_PM($tl_ti) && $tl_out_pm = "00:00") {
+                    //                     $tl_out_pm = $tl_ti;
+                    //                 } elseif(Timelog::ValidateLog_OTHrs($tl_ti)) {
+                    //                     array_push($tl_out_ot, $tl_ti);
+                    //                 } else {
+                    //                     array_push($tl_out_trsh, $tl_ti);
+                    //                 }
+                    //             }
+                    //         }
+                    //     } else {
+                    //         // missing logs
+                    //     }
+                    // } else {
+                    //     // absent
+                    // } 
+                    /*array_push($errors2, [$tl_in_am, $tl_in_pm, $tl_in_ot, $tl_in_trsh, '--------', $tl_out_am, $tl_out_pm, $tl_out_trsh, $tl_out_trsh, '--------', $rec_ti, $rec_to]);*/
+
+                    // if (($tl_in_am != "00:00" && $tl_out_am != "00:00") || ($tl_in_pm != "00:00" && $tl_out_pm != "00:00")) {
+                    //     $r_time_am = Timelog::GetRenHours($tl_in_am, $tl_out_am);
+                    //     $r_time_pm = Timelog::GetRenHours($tl_in_pm, $tl_out_pm);
+                    //     $r_time_total = Core::GET_TIME_TOTAL([$r_time_am, $r_time_pm]);
+
+
+                    // } else {
+                    //     // missing logs
+                    // }
+
                     if (count($record)<=0) {
                         $totalabsent+=1;
                     } else {
@@ -110,37 +189,37 @@ class GenerateDTRController extends Controller
                             array_push($errors, $date);
                             $totalabsent+=1;
                         } else {
-                            $r_time = Timelog::GetRenHours($record[0]->time_log, $record[1]->time_log);
+                            $time_in = $record[0]->time_log; $time_out = $record[1]->time_log;
+                            $r_time = Timelog::GetRenHours($time_in, $time_out);
                             // $a_time = Core::GET_TIME_DIFF($req_hrs2, $r_time); dd($r_time);
                             if (Timelog::IfHoliday($date)) {
                                 array_push($arr_overtime, $r_time);
                                 $totalholiday+=1;
                             } else {
-                                if (Timelog::IfLate($record[0]->time_log)) {
+                                if (Timelog::IfLate($time_in)) {
                                     $z = "";
-                                    $z = Core::GET_TIME_DIFF(Timelog::ReqTimeIn(),$record[0]->time_log);
+                                    $z = Core::GET_TIME_DIFF(Timelog::ReqTimeIn(), $time_in);
                                     array_push($arr_late, $z);
                                     // array_push($arr_undertime, $z);
                                 }
-                                if (Timelog::IfUndertime($record[0]->time_log, $record[1]->time_log)) {
+                                if (Timelog::IfUndertime($r_time, $req_hrs2)) {
                                     $z = "";
                                     $z = Core::GET_TIME_DIFF($r_time, $req_hrs2);
-                                    array_push($arr_undertime, $z);
+                                    array_push($arr_undertime, $z); 
                                 }
                                 // if (Core::ToMinutes($r_time) > ($req_hrs * 60)) {
                                 //     $z = Core::GET_TIME_DIFF(Timelog::ReqTimeOut(),$record[1]->time_log);
                                 //     array_push($arr_overtime, $z);
                                 //     $z = "";
                                 // }
-                                if (Core::ToMinutes($r_time) > Core::ToMinutes($req_hrs2)) {
-                                    $z = Core::GET_TIME_DIFF(Timelog::ReqTimeIn(),$record[0]->time_log);
-                                    $y = Core::GET_TIME_DIFF(Timelog::ReqTimeOut(),$record[1]->time_log);
-
-                                    array_push($arr_overtime, $z);
-                                    array_push($arr_overtime, $y);
-                                }
+                                // if (Core::ToMinutes($r_time) > Core::ToMinutes($req_hrs2)) {
+                                //     $z = Core::GET_TIME_DIFF(Timelog::ReqTimeIn(),$record[0]->time_log);
+                                //     $y = Core::GET_TIME_DIFF(Timelog::ReqTimeOut(),$record[1]->time_log);
+                                //     array_push($arr_overtime, $z);
+                                //     array_push($arr_overtime, $y);
+                                // }
                                 $totalpresent+=1;
-                                array_push($errors2, [$i, "H"=>Timelog::IfHoliday($date), "L"=>Timelog::IfLate($record[0]->time_log), "U"=>Timelog::IfUndertime($record[0]->time_log, $record[1]->time_log), "O"=>Core::ToMinutes($r_time) > Core::ToMinutes($req_hrs2)]);
+                                // array_push($errors2, [$i, "H"=>Timelog::IfHoliday($date), "L"=>Timelog::IfLate($record[0]->time_log), "U"=>Timelog::IfUndertime($record[0]->time_log, $record[1]->time_log), "O"=>Core::ToMinutes($r_time) > Core::ToMinutes($req_hrs2)]);
                             }
                         }
                     }
@@ -192,6 +271,7 @@ class GenerateDTRController extends Controller
             ];
 
             if ($flag) {
+                $data['daysworked'] = $data['workdays'];
                 $data['absences'] = 0;
                 $data['holidays'] = 0;
                 $data['late'] = "00:00:00";
@@ -199,9 +279,13 @@ class GenerateDTRController extends Controller
                 $data['overtime'] = "00:00:00";
             }
 
+            // Session::forget('dtr_summary');
+            // Session::put('dtr_summary', $data);
+
             return json_encode($data);
         } catch (\Exception $e) {
             ErrorCode::Generate('controller', 'GenerateDTRController', '00002', $e->getMessage());
+            // return $e->getMessage();
             return "error";
         }
     }
@@ -219,9 +303,6 @@ class GenerateDTRController extends Controller
         * @param $r->ppid
         * @param $r->month
         * @param $r->year
-        *
-        * @return "error"
-        * @return "max"
         */
         try {
             if (isset($r->dtrs['errors'])) {
@@ -277,11 +358,6 @@ class GenerateDTRController extends Controller
 
     public function SaveSummary($empid, $days_worked, $absences, $late, $undertime, $overtime, $dtr_sum_id)
     {
-        /**
-        * @return "error"
-        * @return "isgenerated"
-        * @return "ok"
-        */
         try {
             $query = DB::table('hr_dtr_sum_employees')->where('empid', $empid)->where('dtr_sum_id', $dtr_sum_id);
             $data = [

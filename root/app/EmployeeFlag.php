@@ -21,11 +21,11 @@ class EmployeeFlag extends Model
 	public static function chk_flagged($empid)
 	{
 		$flag = DB::table(self::$tbl_name)->where('empid', $empid)->where('cancel', '=', null)->first();
-		if ($flag==null) {
-			return "not-found";
-		}
-		if ($flag->status==1) {
-			return true;
+		if ($flag!=null) {
+			// return "not-found";
+			if ($flag->status==1) {
+				return true;
+			}
 		}
 		return false;
 	}

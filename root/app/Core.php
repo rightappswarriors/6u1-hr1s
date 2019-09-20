@@ -760,6 +760,9 @@ class Core extends Model
 
     public static function ToMinutes(string $time)
     {
+    	/**
+    	* @param string "00:00:00 format
+    	*/
     	try {
     		list($hour, $minute, $second) = explode(":", $time);
     		$minute += $hour * 60;
