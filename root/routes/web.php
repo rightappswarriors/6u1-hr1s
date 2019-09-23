@@ -543,8 +543,9 @@
 			// $time1 = strtotime("09:01");
 			// $time2 = strtotime("09:00");
 			// dd($time1 > $time2, $time1, $time2);
-
-			dd(Timelog::GetRenHours("8:00", "15:00", "am"));
+			// dd(Core::ToMinutes("8:00"), Core::ToMinutes("13:00"));
+			dd(Timelog::GetRenHours("8:00", "18:30", "pm"));
+			// dd(Timelog::ReqTimeIn_2());
 		});
 
 		/* NOTIFICATION */

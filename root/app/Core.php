@@ -633,21 +633,29 @@ class Core extends Model
         return $msg;
     }
 
-    // Convert number from 0 - 6 into week names
-    public static function WeekVal($number = null)
+    // Convert number from 1 - 7 into week names
+    public static function WeekVal($number)
     {
-    	$week = array(1 => 'MONDAY', 2 => 'TUESDAY', 3 => 'WEDNESDAY', 4 =>'THURSDAY', 5 => 'FRIDAY', 6 => 'SATURDAY', 7 => 'SUNDAY');
-    	return $week[$number];
+    	if ($number <= 7) {
+    		$week = array(1 => 'MONDAY', 2 => 'TUESDAY', 3 => 'WEDNESDAY', 4 =>'THURSDAY', 5 => 'FRIDAY', 6 => 'SATURDAY', 7 => 'SUNDAY');
+	    	return $week[$number];
+    	} else {
+    		return "NULL";
+    	}
     }
 
     // Convert number from 1 - 7 into week shortnames
-    public static function WeekValShort($number = null)
+    public static function WeekValShort($number)
     {
-        $week = array(1 => 'mon', 2 => 'tue', 3 => 'wed', 4 =>'thu', 5 => 'fri', 6 => 'sat', 7 => 'sun');
-        return $week[$number];
+        if ($number <= 7) {
+        	$week = array(1 => 'mon', 2 => 'tue', 3 => 'wed', 4 =>'thu', 5 => 'fri', 6 => 'sat', 7 => 'sun');
+	        return $week[$number];
+        } else {
+        	return "NULL";
+        }
     }
 
-    // Convert number from 1 - 7 into week names
+    // Convert week name into numbers from 1 - 7
     public static function WeekValRev($weekval)
     {
 
@@ -681,7 +689,7 @@ class Core extends Model
     			break;
     		
     		default:
-    			return 1;
+    			return "NULL";
     			break;
     	}
     }
@@ -748,12 +756,16 @@ class Core extends Model
 
     public static function ToHours(string $time)
     {
+    	/**
+    	* @param string "00:00:00 format
+    	* @return float "0.0000.."
+    	*/
     	try {
-    		list($hour, $minute, $second) = explode(":", $time);
+    		list($hour, $minute) = explode(":", $time);
     		$hour += $minute / 60;
     		return round($hour,2);
     	} catch (\Exception $e) {
-    		return $e->getMessage();
+    		// return $e->getMessage();
     		return 0;
     	}
     }
@@ -762,12 +774,14 @@ class Core extends Model
     {
     	/**
     	* @param string "00:00:00 format
+    	* @return float "0.0000.."
     	*/
     	try {
-    		list($hour, $minute, $second) = explode(":", $time);
-    		$minute += $hour * 60;
+    		list($hour, $minute) = explode(":", $time);
+    		$minute += ($hour * 60);
     		return $minute;
     	} catch (\Exception $e) {
+    		// return $e->getMessage();
     		return 0;
     	}
     }

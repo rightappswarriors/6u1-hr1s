@@ -56,7 +56,7 @@ class Timelog extends Model
         /**
         * Returns the required time in (morning).
         * Value returned must be in string format
-        * @return "00:00:00"
+        * @return "hh:mm:ss"
         */
         // return "08:00:00";
         $fy = DB::table('hris.m99')->first()->fy;
@@ -69,7 +69,7 @@ class Timelog extends Model
         /**
         * Returns the required time in (afternoon).
         * Value returned must be in string format
-        * @return "00:00:00"
+        * @return "hh:mm:ss"
         */
         // return "13:00:00";
         // $fy = DB::table('hris.m99')->first()->fy;
@@ -86,7 +86,7 @@ class Timelog extends Model
         /**
         * Returns the required time out (morning).
         * Value returned must be in string format
-        * @return "00:00:00"
+        * @return "hh:mm:ss"
         */
        // return "12:00:00";
         $fy = DB::table('hris.m99')->first()->fy;
@@ -99,7 +99,7 @@ class Timelog extends Model
         /**
         * Returns the required time out (afternoon).
         * Value returned must be in string format
-        * @return "00:00:00"
+        * @return "hh:mm:ss"
         */
        // return "17:40:00";
         $fy = DB::table('hris.m99')->first()->fy;
@@ -114,7 +114,7 @@ class Timelog extends Model
         /* --------- OLD --------- */
         /**
         * Must be in h:m:s format and 24 hours
-        * @return "00:00:00"
+        * @return "hh:mm:ss"
         */
         // $fy = DB::table('hris.m99')->first()->fy;
         // $d = DB::table('hris.m99')->where('fy', $fy)->first()->lunch_break;
@@ -124,7 +124,7 @@ class Timelog extends Model
         /**
         * Returns the duration of the lunch break
         * Must be in h:m:s format and 24 hours
-        * @return "00:00:00"
+        * @return "hh:mm:ss"
         */
         return "01:00:00";
     }
@@ -132,7 +132,7 @@ class Timelog extends Model
     public static function ValidateLog_AM(string $time)
     {
         /**
-        * @param string "00:00:00" format
+        * @param string "hh:mm:ss" format
         * Validates a log if it is within ReqTimeIn() and ReqTimeOut() range
         * @return bolean true / false
         */ 
@@ -147,7 +147,7 @@ class Timelog extends Model
     public static function ValidateLog_PM(string $time)
     {
         /**
-        * @param string "00:00:00" format
+        * @param string "hh:mm:ss" format
         * Validates a log if it is within ReqTimeIn_2() and ReqTimeOut_2() range
         * @return bolean true / false
         */
@@ -177,7 +177,8 @@ class Timelog extends Model
     {
         /**
         * Returns the time difference between start time and end time in
-        * @return Values must be in float format
+        * Values must be in float format
+        * @return 0.0000...
         */
         $ti = self::ReqTimeIn();
         $to = self::ReqTimeOut();
@@ -190,7 +191,7 @@ class Timelog extends Model
         /**
         * Returns the time difference between start time and end time in "00:00:00" format
         * Values must be in 24 hours format
-        * @return "00:00:00"
+        * @return "hh:mm:ss"
         */
         list($ti_h, $ti_m/*, $ti_sec*/) = explode(":", self::ReqTimeIn());
         list($to_h, $to_m/*, $to_sec*/) = explode(":", self::ReqTimeOut());
@@ -229,24 +230,18 @@ class Timelog extends Model
         return $hour_2.":".$min_2.":00";
     }
 
-    public static function GetRenHours(string $time_1, string $time_2)
+    public static function GetRenHours(string $time_1, string $time_2, string $type)
     {
         /**
-        * @return the value of required hours
+        * @param string $time_1 timed in or time start "hh:mm"
+        * @param string $time_2 timed out or time end "hh:mm"
+        * @param string $type "am" or "pm"
+        * Returns the value of required hours in timestamp format "hh:mm"
+        * @return "hh:mm"
         */
-        $r_time_in = self::ReqTimeIn();
-        $r_time_out = self::ReqTimeOut();
-        if (Core::ToMinutes($time_1) > Core::ToMinutes($r_time_in)) {
-            $time_1 = $r_time_in;
-        }
-        if (Core::ToMinutes($time_2) > Core::ToMinutes($r_time_out)) {
-            $time_2 = $r_time_out;
-        }
         $time = Core::GET_TIME_DIFF($time_1, $time_2);
-        if (Core::ToMinutes("12:00:00") > Core::ToMinutes($time_1)) {
-            list($hr, $min, $sec) = explode(":", $time);
-            $hr-=Core::ToHours(self::get_lunch_break());
-            $time = implode(":", [$hr, $min, $sec]);
+        if ((Core::ToMinutes($time_2) > Core::ToMinutes("12:00:00")) && $type == "am") {
+            $time = Core::GET_TIME_DIFF(self::get_lunch_break(), $time);
         }
         return $time;
     }
@@ -255,7 +250,8 @@ class Timelog extends Model
     {
         /**
         * Returns the rendered hours for the given date.
-        * Return value is in "00:00:00" format and string data type.
+        * Return value is in "hh:mm::ss" format and string data type.
+        * @return "hh:mm::ss"
         */
         $r_time = "00:00:00";
         $date = date('Y-m-d', strtotime($date));

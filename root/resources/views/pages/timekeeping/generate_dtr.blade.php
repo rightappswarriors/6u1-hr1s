@@ -118,10 +118,10 @@
 										<th style="text-align: center;" colspan="2">Undertime</th>
 										<td id="sum-u" colspan="2"></td>
 									</tr>
-									{{-- <tr>
-										<th style="text-align: center;" colspan="2">Total Overtime</th>
+									<tr>
+										<th style="text-align: center;" colspan="2">{{-- Total Overtime --}} Generate Type</th>
 										<td id="sum-to" colspan="2"></td>
-									</tr> --}}
+									</tr>
 									<tr>
 										<th style="text-align: center;">Generated</th>
 										<td id="sum-stat"></td>
@@ -268,7 +268,7 @@
 			$('#sum-a').text(data.absences);
 			$('#sum-l').text(data.late);
 			$('#sum-u').text(data.undertime);
-			// $('#sum-to').text(data.overtime);
+			$('#sum-to').text(/*data.overtime*/ $('#payroll_gen_type').val());
 			$('#sum-stat').html((data.isgenerated==1) ? '<span class="btn btn-success">Yes</span>' : '<span class="btn btn-danger">No</span>');
 			$('#sum-flagged').html((data.flag==true) ? '<span class="btn btn-success">Yes</span>' : '<span class="btn btn-danger">No</span>');
 			dtr_summary = data;
