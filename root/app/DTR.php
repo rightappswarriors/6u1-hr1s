@@ -9,6 +9,11 @@ use ErrorCode;
 
 class DTR extends Model
 {
+    public static $tbl_name = "hr_dtr_sum_hdr";
+    public static $tbl_name2 = "hr_dtr_sum_employees";
+    public static $pk = "code";
+    public static $pk2 = "dtr_sum_id";
+
     public static function GetTimedInToday()
     {
     	try {
@@ -23,10 +28,31 @@ class DTR extends Model
     public static function Get_HDR($id)
     {
     	try {
-    		return DB::table('hr_dtr_sum_hdr')->where('code', '=', $id)->first();
+    		return DB::table(self::$tbl_name)->where(self::$pk, '=', $id)->first();
     	} catch (\Exception $e) {
     		ErrorCode::Generate('model', 'DTR', '00001', $e->getMessage());
     		return "error";
     	}
+    }
+
+    public static function GetAllHDRPeriods()
+    {
+        try {
+            // return DB::table(self::$tbl_name)->distinct('date_from')->get();
+            return DB::select("SELECT DISTINCT date_from, date_to FROM hris.hr_dtr_sum_hdr");
+        } catch (\Exception $e) {
+            ErrorCode::Generate('model', 'DTR', '00002', $e->getMessage());
+            return "error";
+        }
+    }
+
+    public static function GetAllHDRSummaryByDateFrom($date_from)
+    {
+        try {
+            // return DB::table(self::$tbl_name2)->where('date_from', $date_from)->get();
+        } catch (\Exception $e) {
+            ErrorCode::Generate('model', 'DTR', '00004', $e->getMessage());
+            return "error";
+        }
     }
 }

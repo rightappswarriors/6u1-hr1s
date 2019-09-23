@@ -128,6 +128,7 @@ class EmployeeController extends Controller
             'post_graduate' => $r->txt_edu_post_grad,
             // 'sss_bracket' => $r->txt_ss_brac,
             'fixed_sched' => ($r->txt_fx_sched == 'Yes') ? "Y": "N",
+            'accountnumber' => ($r->txt_accountnumber != '') ? $r->txt_accountnumber : '',
         ];
         $status = 'JO';
         $service_record_data = [
@@ -232,6 +233,7 @@ class EmployeeController extends Controller
                 'post_graduate' => $r->txt_edu_post_grad,
                 'sss_bracket' => $r->txt_ss_brac,
                 'fixed_sched' => ($r->txt_fx_sched == 'Yes') ? "Y": "N",
+                'accountnumber' => ($r->txt_accountnumber != '') ? $r->txt_accountnumber : '',
             ];
         // return dd($data);
 
@@ -351,6 +353,7 @@ class EmployeeController extends Controller
             'post_graduate' => $r->txt_edu_post_grad,
             // 'sss_bracket' => $r->txt_ss_brac,
             'fixed_sched' => ($r->txt_fx_sched == 'Yes') ? "Y": "N",
+            'accountnumber' => ($r->txt_accountnumber != '') ? $r->txt_accountnumber : '',
         ];
         // dd(Core::get_nextincrementlimitchar(Core::getm99One('sr_code')->sr_code, 8));
         // dd($data);

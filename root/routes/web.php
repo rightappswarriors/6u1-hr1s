@@ -400,7 +400,15 @@
 		/* REPORTS */
 		Route::group(['prefix'=>'reports', 'middleware'=>'restrictions', 'restriction'=>'reps'], function() {
 		// Route::prefix('reports')->group(function() {
+
 			Route::prefix('timekeeping')->group(function() {
+				/*TIMEKEEPING NEW*/
+				Route::prefix('employee-dtr')->group(function() {
+					Route::get('/', 'Reports\PrintEmployeeDTRController@view2');
+
+					Route::post('/findnew', 'Reports\PrintEmployeeDTRController@findnew');
+				});
+				/*TIMEKEEPING NEW*/
 				Route::prefix('EmployeeDTR')->group(function() {
 					Route::get('/', 'Reports\PrintEmployeeDTRController@view');
 					Route::post('/find', 'Reports\PrintEmployeeDTRController@find');
