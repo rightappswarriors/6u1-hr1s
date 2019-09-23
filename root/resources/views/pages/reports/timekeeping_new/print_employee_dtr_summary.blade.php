@@ -4,7 +4,7 @@
 	<div class="card">
 		<div class="card-header" id="print_name_hide">
 			<div class="form-inline">
-				<i class="fa fa-fw fa-clock-o"></i>Print Employee DTR<br>
+				<i class="fa fa-fw fa-clock-o"></i>Print Employee DTR Summary<br>
 			</div>
 		</div>
 		<div class="card-body">
@@ -42,12 +42,13 @@
 				<table class="table table-hover" style="font-size: 13px;" id="table">
 					<thead>
 						<tr>
-							<th>Day</th>
-							<th>AM Arrival</th>
-							<th>AM Departure</th>
-							<th>PM Arrival</th>
-							<th>PM Departure</th>
+							<th>Employee</th>
+							<th>Days Worked</th>
+							<th>Absences</th>
+							<th>Late</th>
 							<th>Undertime</th>
+							<th>Total Undertime</th>
+							{{-- <th>Total Hours Rendered</th> --}}
 						</tr>
 					</thead>
 					<tbody></tbody>
@@ -81,11 +82,24 @@
 				type: 'post',
 				url: '{{url('reports/timekeeping/employee-dtr/')}}/findnew',
 				data: {"code":$('#payroll_period').val()},
-				success: function() {
-					
+				success: function(data) {
+					for(i=0; i<data.length; i++) {
+						FillTable(data[i]);
+					}
 				},
 			});
 		});
+
+		function FillTable(data) {
+			table.row.add([
+				data.employee_readable,
+				data.days_worked,
+				data.absences,
+				data.late,
+				data.undertime,
+				data.total_overtime
+			]).draw();
+		}
 
 		function setPeriods(data) {
 			let select = $('#payroll_period');

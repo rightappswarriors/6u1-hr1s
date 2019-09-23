@@ -407,7 +407,16 @@
 					Route::get('/', 'Reports\PrintEmployeeDTRController@view2');
 
 					Route::post('/findnew', 'Reports\PrintEmployeeDTRController@findnew');
+					Route::post('/getperiods', 'Reports\PrintEmployeeDTRController@getperiods');
 				});
+
+				Route::prefix('employee-dtr-summary')->group(function() {
+					Route::get('/', 'Reports\PrintEmployeeDTRSummaryController@view2');
+
+					Route::post('/findnew', 'Reports\PrintEmployeeDTRSummaryController@findnew');
+					Route::post('/getperiods', 'Reports\PrintEmployeeDTRSummaryController@getperiods');
+				});
+
 				/*TIMEKEEPING NEW*/
 				Route::prefix('EmployeeDTR')->group(function() {
 					Route::get('/', 'Reports\PrintEmployeeDTRController@view');

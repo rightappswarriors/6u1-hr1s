@@ -374,7 +374,6 @@
 		}
 
 		function formatAMPM2(time) {
-			console.log(time);
 			if(time=="") return "";
 			if(time=="<span class='text-danger'>missing</span>") return "<span class='text-danger'>missing</span>";
 			var timeString = time;
