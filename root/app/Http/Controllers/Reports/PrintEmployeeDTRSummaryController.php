@@ -13,6 +13,10 @@ use Payroll;
 use Timelog;
 use Office;
 
+// NEW imports //
+use DTR;
+// NEW imports //
+
 /*
 |--------------------------------------------------------------------------
 | Error Code
@@ -32,6 +36,19 @@ class PrintEmployeeDTRSummaryController extends Controller
         $this->ghistory = DB::table('hr_tito2')->where('cancel', '=', null)->orderBy('work_date', 'ASC')->orderBy('time_log', 'DESC')->take(6)->get();
     }
 
+    ////////////////////////////////////////////////////////// NEW //////////////////////////////////////////////////////////
+    public function view2()
+    {
+        $data = [
+            array(),
+            Office::get_all()
+        ];
+        // dd($data);
+        return view('pages.reports.timekeeping_new.print_employee_dtr_summary', compact('data'));
+    }
+    ////////////////////////////////////////////////////////// NEW //////////////////////////////////////////////////////////
+
+    ////////////////////////////////////////////////////////// OLD //////////////////////////////////////////////////////////
     public function view()
     {
         $data = [$this->employee, Office::get_all()];
@@ -163,4 +180,5 @@ class PrintEmployeeDTRSummaryController extends Controller
             return back();
         } 
     }
+    ////////////////////////////////////////////////////////// OLD //////////////////////////////////////////////////////////
 }

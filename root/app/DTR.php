@@ -46,10 +46,26 @@ class DTR extends Model
         }
     }
 
-    public static function GetAllHDRSummaryByDateFrom($date_from)
+    public static function GetAllHDRSummaryByCode($code)
     {
         try {
-            // return DB::table(self::$tbl_name2)->where('date_from', $date_from)->get();
+            return DB::table(self::$tbl_name2)->where('dtr_sum_id', $code)->get();
+        } catch (\Exception $e) {
+            ErrorCode::Generate('model', 'DTR', '00004', $e->getMessage());
+            return "error";
+        }
+    }
+
+    public static function GetAllHDRSumarryByOffice($office)
+    {
+        try {
+            $data = DB::table(self::$tbl_name)
+                    ->select('hr_dtr_sum_hdr.*', 'hr_employee.department')
+                    ->leftJoin('hr_employee', 'hr_employee.empid', '=', 'hr_dtr_sum_hdr.empid')
+                    ->where('hr_employee.department', '=', $office)
+                    ->get();
+
+            return $data;
         } catch (\Exception $e) {
             ErrorCode::Generate('model', 'DTR', '00004', $e->getMessage());
             return "error";

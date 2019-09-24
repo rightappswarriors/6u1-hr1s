@@ -51,7 +51,16 @@ class PrintEmployeeDTRController extends Controller
 
     public function findnew(Request $r)
     {
-        // return DTR::GetAllHDRSummaryByDateFrom($r->date);
+        $data = DTR::GetAllHDRSummaryByCode($r->code);
+        foreach($data as $k => $v) {
+            $v->employee_readable = Employee::Name($v->empid);
+        }
+        return $data;
+    }
+
+    public function getperiods(Request $r)
+    {
+        return DTR::GetAllHDRSumarryByOffice($r->office);
     }
     ////////////////////////////////////////////////////////// NEW //////////////////////////////////////////////////////////
 
