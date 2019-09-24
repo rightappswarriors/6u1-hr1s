@@ -129,6 +129,16 @@ class Timelog extends Model
         return "01:00:00";
     }
 
+    public static function MinReqOTHrs()
+    {
+        /**
+        * Minimum OT Hours
+        * Must be in h:m:s format and 24 hours
+        * @return "hh:mm:ss"
+        */
+        return "01:00:00";
+    }
+
     public static function ValidateLog_AM(string $time)
     {
         /**
@@ -137,7 +147,7 @@ class Timelog extends Model
         * @return bolean true / false
         */ 
 
-        if (strtotime(self::ReqTimeIn()) > strtotime($time) && strtotime($time) <= strtotime(self::ReqTimeOut())) {
+        if (strtotime(self::ReqTimeIn()) <= strtotime($time) && strtotime($time) <= strtotime(self::ReqTimeOut())) {
             return true;
         } else {
             return false;
@@ -194,7 +204,7 @@ class Timelog extends Model
         * @return "hh:mm:ss"
         */
         list($ti_h, $ti_m/*, $ti_sec*/) = explode(":", self::ReqTimeIn());
-        list($to_h, $to_m/*, $to_sec*/) = explode(":", self::ReqTimeOut());
+        list($to_h, $to_m/*, $to_sec*/) = explode(":", self::ReqTimeOut_2());
         list($lb_h, $lb_m/*, $lb_sec*/) = explode(":", self::get_lunch_break());
 
         $ti_h = (int)$ti_h;
@@ -313,6 +323,7 @@ class Timelog extends Model
     public static function IfWorkdays($date)
     {
         /**
+        * Mix of IfWeekdays() and IfWeekend() functions
         * Returns bolean for date given
         * @return true if day of week is set to true
         * @return false if day of week is set to false
@@ -426,6 +437,14 @@ class Timelog extends Model
         // $time = Core::GET_TIME_DIFF($time_1, $time_2);
 
         if (Core::ToMinutes($required_time) > Core::ToMinutes($rendered_time)) {
+            return true;
+        }
+        return false;
+    }
+
+    public static function IfOvertime(string $rendered_time)
+    {
+        if (Core::ToMinutes(self::MinReqOTHrs()) <= Core::ToMinutes($rendered_time)) {
             return true;
         }
         return false;

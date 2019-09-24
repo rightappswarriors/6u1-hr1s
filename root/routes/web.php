@@ -50,15 +50,16 @@
 			// 	Route::post('/delete', 'MFile\DepartmentController@delete');
 			// });
 			/* DEPARTMENT */
-			/* DEPARTMENT */
+			/* DEPARTMENT/OFFICE */
 			Route::prefix('office')->group(function() {
 				Route::get('/', 'MFile\OfficeController@view');
 				Route::post('/', 'MFile\OfficeController@add');
 				Route::post('/update', 'MFile\OfficeController@update');
 				Route::post('/delete', 'MFile\OfficeController@delete');
-				Route::get('/get-employees', 'MFile\OfficeController@getEmployees');
+				// Route::get('/get-employees', 'MFile\OfficeController@getEmployees');
+				Route::get('/get-employees', 'MFile\OfficeController@getEmployees_byEmpStat');
 			});
-			/* DEPARTMENT */
+			/* DEPARTMENT/OFFICE */
 			/* DEPARTMENT SECTION */
 			Route::prefix('department-section')->group(function() {
 				Route::get('/', 'MFile\DepartmentSectionController@view');
@@ -552,8 +553,9 @@
 			// $time2 = strtotime("09:00");
 			// dd($time1 > $time2, $time1, $time2);
 			// dd(Core::ToMinutes("8:00"), Core::ToMinutes("13:00"));
-			dd(Timelog::GetRenHours("8:00", "18:30", "pm"));
+			// dd(Timelog::GetRenHours("8:00", "18:30", "pm"));
 			// dd(Timelog::ReqTimeIn_2());
+			dd(Timelog::IfUndertime("06:15:00",Timelog::ReqHours2()), Timelog::ReqHours2());
 		});
 
 		/* NOTIFICATION */

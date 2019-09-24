@@ -7,6 +7,33 @@
 		</div>
 		<div class="card-body">
 			<form method="post" action="{{url('timekeeping/generate-dtr/generate-dtr')}}" id="frm-pp" class="mb-2">
+				<div class="form-inline mb-2">
+					<div class="form-group mr-2">
+						<label class="mr-1">Select Office:</label>
+						<select class="form-control" name="payroll_dep" id="payroll_ofc">
+							<option value="" selected="" disabled="">-no office selected-</option>
+							@isset($data[3])
+								@if(count($data[3]) > 0)
+									@foreach($data[3] as $ofc)
+									<option value="{{$ofc->cc_id}}">{{$ofc->cc_desc}}</option>
+									@endforeach
+								@endif
+							@endisset
+						</select>
+					</div>
+					<div class="form-group mr-2">
+						<label class="mr-1">Employee Status</label>
+						<select class="form-control" name="payroll_emp_stat" id="payroll_emp_stat">
+							@isset($data[4])
+								@if(count($data[4]) > 0)
+									@foreach($data[4] as $empstatus)
+									<option value="{{$empstatus->status_id}}">{{$empstatus->description}}</option>
+									@endforeach
+								@endif
+							@endisset
+						</select>
+					</div>
+				</div>
 				<div class="form-inline">
 					<div class="form-group mr-2">
 						<label class="mr-1">Month:</label>
@@ -24,30 +51,15 @@
 						</select>
 					</div>
 					<div class="form-group mr-2">
-						<label class="mr-1">Generate Type</label>
+						<label class="mr-1">Generation Type</label>
 						<select class="form-control" name="payroll_gen_type" id="payroll_gen_type">
-							<option Value="reg">Regular</option>
-							<option value="ot">Overtime</option>
-						</select>
-					</div>
-				</div>
-				<div class="form-inline mt-2">
-					<div class="form-group mr-2">
-						<label class="mr-1">Select Office:</label>
-						<select class="form-control" name="payroll_dep" id="payroll_ofc">
-							<option value="" selected="" disabled="">-no office selected-</option>
-							@isset($data[3])
-								@if(count($data[3]) > 0)
-									@foreach($data[3] as $ofc)
-									<option value="{{$ofc->cc_id}}">{{$ofc->cc_desc}}</option>
-									@endforeach
-								@endif
-							@endisset
+							<option Value="BASIC">Basic</option>
+							<option value="OVERTIME">Overtime</option>
 						</select>
 					</div>
 					<div class="form-group">
-						<button type="button" class="btn btn-primary btn-spin mr-1" id="btn-generate-ind">Generate (Individual)</button>
-						<button type="button" class="btn btn-primary btn-spin" id="btn-generate-ofc">Generate (By Office)</button>
+						<button type="button" class="btn btn-primary btn-spin mr-1" id="btn-generate-ind" disabled="">Generate (Individual)</button>
+						<button type="button" class="btn btn-primary btn-spin" id="btn-generate-ofc" disabled="">Generate (By Office)</button>
 					</div>
 				</div>
 			</form>
@@ -89,7 +101,7 @@
 							</div>
 						</div>
 						<div class="col">
-							<h6 id="hdr-tbl-employee">DTR Summary Details:</h6>
+							<h6 id="hdr-tbl-employee">DTR Summary Details: <span id="dtr_summary_loader" style="display: none;">Refreshing table. Please wait. <i class="fa fa-spin fa-spinner"></i></span></h6>
 							<div class="table-responsive mb-2">
 								<table class="table table-bordered">
 									<col width="35%">
@@ -97,6 +109,10 @@
 									<tr>
 										<th style="text-align: center;" colspan="2">Payroll Period</th>
 										<td id="pp-dates" colspan="2"></td>
+									</tr>
+									<tr>
+										<th style="text-align: center;" colspan="2">{{-- Total Overtime --}} Generate Type</th>
+										<td id="sum-to" colspan="2"></td>
 									</tr>
 									<tr>
 										<th style="text-align: center;" colspan="2">Total Workdays</th>
@@ -111,16 +127,16 @@
 										<td id="sum-a" colspan="2"></td>
 									</tr>
 									<tr>
+										<th style="text-align: center;" colspan="2">Total Hours</th>
+										<td id="sum-th" colspan="2"></td>
+									</tr>
+									<tr>
 										<th style="text-align: center;" colspan="2">Late</th>
 										<td id="sum-l" colspan="2"></td>
 									</tr>
 									<tr>
 										<th style="text-align: center;" colspan="2">Undertime</th>
 										<td id="sum-u" colspan="2"></td>
-									</tr>
-									<tr>
-										<th style="text-align: center;" colspan="2">{{-- Total Overtime --}} Generate Type</th>
-										<td id="sum-to" colspan="2"></td>
 									</tr>
 									<tr>
 										<th style="text-align: center;">Generated</th>
@@ -237,6 +253,9 @@
 					gtype : $('#payroll_gen_type').val()
 				},
 				dataTy : 'json',
+				beforeSend : function() {
+					$('#dtr_summary_loader').show();
+				},
 				success : function(data) {
 					if (data!="error") {
 						var d = JSON.parse(data);
@@ -251,13 +270,17 @@
 									'<a href="{{url('timekeeping/timelog-entry')}}" style="color:white;"><i class="fa fa-hand-o-right"></i> Check missing time logs</a>'+
 								'</div>'
 							)
-							$('#btn-generate-ind').attr('disabled', true);
+							// $('#btn-generate-ind').attr('disabled', true);
 							alert("DTR has errors. Cannot be saved.");
 						}
 					} else {
 						alert("Error in generating DTR.");
 					}
-				}
+				},
+				complete : function()
+				{
+					$('#dtr_summary_loader').hide();
+				},
 			});
 		}
 
@@ -268,7 +291,9 @@
 			$('#sum-a').text(data.absences);
 			$('#sum-l').text(data.late);
 			$('#sum-u').text(data.undertime);
-			$('#sum-to').text(/*data.overtime*/ $('#payroll_gen_type').val());
+			$('#sum-th').text(data.weekhrs);
+			var pt = $('#payroll_gen_type').val().toLowerCase();
+			$('#sum-to').text(/*data.overtime*/ pt.charAt(0).toUpperCase() + pt.slice(1));
 			$('#sum-stat').html((data.isgenerated==1) ? '<span class="btn btn-success">Yes</span>' : '<span class="btn btn-danger">No</span>');
 			$('#sum-flagged').html((data.flag==true) ? '<span class="btn btn-success">Yes</span>' : '<span class="btn btn-danger">No</span>');
 			dtr_summary = data;
@@ -284,6 +309,7 @@
 			$('#sum-l').text('');
 			$('#sum-u').text('');
 			$('#sum-to').text('');
+			$('#sum-th').text('');
 			$('#sum-stat').html('');
 			$('#sum-flagged').html('');
 			$('#pp-dates').text('');
@@ -435,7 +461,7 @@
 		});
 
 		$('#btn-generate-ofc').on('click', function() {
-			if ($('#payroll_ofc').val()!=null) {
+			if ($('#payroll_ofc').val()!=null && $('#payroll_emp_stat').val()!=null) {
 				if (emp_count > 0) {
 					onToggleSaveDTRModal_ofc();
 				} else {
@@ -479,20 +505,37 @@
 			emptySummaryTable();
 		});
 
+		$('#payroll_emp_stat').on('change', function() {
+			emp_count = 0;
+			SearchEmployees();
+			emptySummaryTable();
+		});
+
+		$('#payroll_gen_type').on('change', function() {
+			emp_count = 0;
+			SearchEmployees();
+			emptySummaryTable();
+		});
+
 		function SearchEmployees()
 		{
 			tbl_emp.clear().draw();
 			hideErrorDiv();
-			if ($('#payroll_ofc').val()==null) {
+			if ($('#payroll_ofc').val()==null || $('#payroll_emp_stat').val()==null) {
 				$('#hdr-tbl-employee').text("No office selected");
 			} else {
 				$.ajax({
 					type : 'get',
 					url : '{{url('master-file/office/get-employees')}}',
 					data : {
-						ofc_id : $('#payroll_ofc').val()
+						ofc_id : $('#payroll_ofc').val(),
+						emp_status : $('#payroll_emp_stat').val()
 					},
 					dataTy : 'json',
+					beforeSend : function()
+					{
+						$('#hdr-tbl-employee').html('Loading Employees <i class="fa fa-spin fa-spinner"></i>');
+					},
 					success : function(data) {
 						// console.log(data);
 						var d = JSON.parse(data);
@@ -500,12 +543,16 @@
 						for (var i = 0; i < d.length; i++) {
 							LoadEmployeeTable(d[i]);
 						}
-						$('#hdr-tbl-employee').text('Employees in "'+$('#payroll_ofc option:selected').text().toUpperCase()+'"');
 					},
 					error : function()
 					{
+						$('#hdr-tbl-employee').html('Unable to retrieve employees.');
 						alert('An error occured. please reload the page.');
-					}
+					},
+					complete : function()
+					{
+						$('#hdr-tbl-employee').html('Employees in "'+$('#payroll_ofc option:selected').text().toUpperCase()+'"');
+					},
 				});
 			}
 		}

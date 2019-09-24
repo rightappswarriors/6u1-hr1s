@@ -9,6 +9,7 @@ use Core;
 use DB;
 use Account;
 use Employee;
+use EmployeeStatus;
 use EmployeeFlag;
 use ErrorCode;
 use Office;
@@ -27,6 +28,7 @@ class GenerateDTRController extends Controller
         $this->employees = Employee::Load_Employees();
         $this->payrollperiod = PayrollPeriod::Load_PayrollPeriod();
         $this->office = Office::get_all();
+        $this->empstatus = EmployeeStatus::get_all();
     }
 
     public function view()
@@ -42,7 +44,7 @@ class GenerateDTRController extends Controller
         for ($i=0; $i < count($emp); $i++) { 
             $emp[$i]->name = Employee::Name($emp[$i]->empid);
         }
-        $data = [$dh, $this->payrollperiod, $emp, $ofc];
+        $data = [$dh, $this->payrollperiod, $emp, $ofc, $this->empstatus];
         return view('pages.timekeeping.generate_dtr', compact('data'));
     }
 
@@ -76,17 +78,21 @@ class GenerateDTRController extends Controller
             $arr_late = [];
             $undertime = "00:00";
             $arr_undertime = [];
-            $totalovertime = "00:00";
+            $overtime = "00:00";
             $arr_overtime = [];
             $arr_leavedates = [];
+            $weekhrs = "00:00";
+            $arr_weekhrs = [];
+            $weekendhrs = "00:00";
+            $arr_weekendhrs = [];
 
             $req_hrs = Timelog::ReqHours();
             $req_hrs2 = Timelog::ReqHours2();
             $employee = Employee::GetEmployee($r->code);
             $name = Employee::Name($r->code);
             $pp = Payroll::PayrollPeriod2($r->month,$r->pp, $r->year);
-            // $workdays = Core::TotalDays($pp->from, $pp->to);
-            $workdays = Core::CoveredDates($pp->from, $pp->to);
+            // $covereddates = Core::TotalDays($pp->from, $pp->to);
+            $covereddates = Core::CoveredDates($pp->from, $pp->to);
 
             $totaldays = 0;
             $totalpresent = 0;
@@ -94,160 +100,172 @@ class GenerateDTRController extends Controller
             $totalweekend = 0;
             $totalholiday = 0;
             $totalleave = 0;
+            $totalovertime = 0;
             $errors = [];
             $errors2 = [];
 
-            for ($i=0; $i < count($workdays); $i++) { 
+            for ($i=0; $i < count($covereddates); $i++) {
                 // $day = $pp->start+$i;
                 // $date = date('Y-m-d', strtotime(Core::GetMonth((int)$r->month)." ".$day.", ".date('Y')));
-                $date = date('Y-m-d', strtotime($workdays[$i]));
-                $record = DB::table('hr_tito2')->distinct('work_date')->where('work_date', '=', $date)->where('empid', $employee->empid)->orderby('work_date', 'ASC')->get();
+                $date = date('Y-m-d', strtotime($covereddates[$i]));
+                // $record = DB::table('hr_tito2')->distinct('work_date')->where('work_date', '=', $date)->where('empid', $employee->empid)->orderby('work_date', 'ASC')->get();
 
-                if (Timelog::IfWorkdays($date)) {
-                    $sql_p1 = "SELECT work_date, string_agg(time_log, ',') time_log, empid, status FROM hris.hr_tito2 WHERE empid = '".$employee->empid."' AND work_date = '".$date."'";
-                    $sql_p2 = " GROUP BY work_date, empid, status ORDER BY work_date DESC, status DESC";
+                $sql_p1 = "SELECT work_date, string_agg(time_log, ',') time_log, empid, status FROM hris.hr_tito2 WHERE empid = '".$employee->empid."' AND work_date = '".$date."'";
+                $sql_p2 = " GROUP BY work_date, empid, status ORDER BY work_date DESC, status DESC";
 
-                    $rec_ti = "";
-                    $sql_ti = " AND status = '1'";
-                    $sql_ti = $sql_p1.$sql_ti.$sql_p2;
-                    $rec_ti = Core::sql($sql_ti);
+                $rec_ti = "";
+                $sql_ti = " AND status = '1'";
+                $sql_ti = $sql_p1.$sql_ti.$sql_p2;
+                $rec_ti = Core::sql($sql_ti);
 
-                    $rec_to = "";
-                    $sql_to = " AND status = '0'";
-                    $sql_to = $sql_p1.$sql_to.$sql_p2;
-                    $rec_to = Core::sql($sql_to);
+                $rec_to = "";
+                $sql_to = " AND status = '0'";
+                $sql_to = $sql_p1.$sql_to.$sql_p2;
+                $rec_to = Core::sql($sql_to);
 
-                    $tl_in_am = "00:00";
-                    $tl_in_pm = "00:00";
-                    $tl_in_trsh = [];
-                    $tl_in_ot = [];
-                    $tl_out_am = "00:00";
-                    $tl_out_pm = "00:00";
-                    $tl_out_trsh = [];
-                    $tl_out_ot = [];
+                $tl_in_am = "00:00";
+                $tl_in_pm = "00:00";
+                $tl_in_trsh = [];
+                $tl_in_ot = [];
+                $tl_out_am = "00:00";
+                $tl_out_pm = "00:00";
+                $tl_out_trsh = [];
+                $tl_out_ot = [];
 
-                    $r_time_total = "00:00:00";
-                    $r_time_am = "00:00:00";
-                    $r_time_pm = "00:00:00";
+                $r_time_total = "00:00:00";
+                $r_time_am = "00:00:00";
+                $r_time_pm = "00:00:00";
 
-                    /*array_push($errors2, [count($rec_ti) > 0, count($rec_to) > 0]);*/
+                $r_time_ot_total = "00:00:00";
+                $r_time_ot_total_arr = [];
+                $r_time_ot_arr = [];
 
-                    if (count($rec_ti) > 0) {
+                /*array_push($errors2, [count($rec_ti) > 0, count($rec_to) > 0]);*/
+
+                if (count($rec_ti) > 0) {
+                    if (count($rec_to) > 0) {
+                        $rec_ti = explode(",", $rec_ti[0]->time_log);
+                        $rec_to = explode(",", $rec_to[0]->time_log);
+
+                        $tl_ti = "";
+                        if (count($rec_ti) > 0) {
+                            for ($j=0; $j < count($rec_ti); $j++) { 
+                                $tl_ti = $rec_ti[$j];
+                                if (Timelog::ValidateLog_AM($tl_ti) && $tl_in_am = "00:00") {
+                                    $tl_in_am = $tl_ti;
+                                } elseif (Timelog::ValidateLog_PM($tl_ti) && $tl_in_pm = "00:00") {
+                                    $tl_in_pm = $tl_ti;
+                                } elseif(Timelog::ValidateLog_OTHrs($tl_ti)) {
+                                    array_push($tl_in_ot, $j."|".$tl_ti);
+                                } else {
+                                    array_push($tl_in_trsh, $tl_ti);
+                                }
+                            }
+                        }
+
+                        $tl_ti = "";
                         if (count($rec_to) > 0) {
-                            $rec_ti = explode(",", $rec_ti[0]->time_log);
-                            $rec_to = explode(",", $rec_to[0]->time_log);
-
-                            $tl_ti = "";
-                            if (count($rec_ti) > 0) {
-                                for ($j=0; $j < count($rec_ti); $j++) { 
-                                    $tl_ti = $rec_ti[$j];
-                                    if (Timelog::ValidateLog_AM($tl_ti) && $tl_in_am = "00:00") {
-                                        $tl_in_am = $tl_ti;
-                                    } elseif (Timelog::ValidateLog_PM($tl_ti) && $tl_in_pm = "00:00") {
-                                        $tl_in_pm = $tl_ti;
-                                    } elseif(Timelog::ValidateLog_OTHrs($tl_ti)) {
-                                        array_push($tl_in_ot, $tl_ti);
-                                    } else {
-                                        array_push($tl_in_trsh, $tl_ti);
-                                    }
+                            for ($j=0; $j < count($rec_to); $j++) { 
+                                $tl_ti = $rec_to[$j];
+                                if (Timelog::ValidateLog_AM($tl_ti) && $tl_out_am = "00:00") {
+                                    $tl_out_am = $tl_ti;
+                                } elseif (Timelog::ValidateLog_PM($tl_ti) && $tl_out_pm = "00:00") {
+                                    $tl_out_pm = $tl_ti;
+                                } elseif(Timelog::ValidateLog_OTHrs($tl_ti)) {
+                                    array_push($tl_out_ot, $j."|".$tl_ti);
+                                } else {
+                                    array_push($tl_out_trsh, $tl_ti);
                                 }
                             }
+                        }
 
-                            $tl_ti = "";
-                            if (count($rec_to) > 0) {
-                                for ($j=0; $j < count($rec_to); $j++) { 
-                                    $tl_ti = $rec_to[$j];
-                                    if (Timelog::ValidateLog_AM($tl_ti) && $tl_out_am = "00:00") {
-                                        $tl_out_am = $tl_ti;
-                                    } elseif (Timelog::ValidateLog_PM($tl_ti) && $tl_out_pm = "00:00") {
-                                        $tl_out_pm = $tl_ti;
-                                    } elseif(Timelog::ValidateLog_OTHrs($tl_ti)) {
-                                        array_push($tl_out_ot, $tl_ti);
-                                    } else {
-                                        array_push($tl_out_trsh, $tl_ti);
-                                    }
+                        if ($tl_in_am != "00:00" && $tl_out_am != "00:00") { // ami = 1, amo = 1
+                            if ($tl_in_pm != "00:00" && $tl_out_pm != "00:00") { // pmi = 1, pmo = 1
+                                $r_time_am = Timelog::GetRenHours($tl_in_am, $tl_out_am, "am");
+                                $r_time_pm = Timelog::GetRenHours($tl_in_pm, $tl_out_pm, "pm");
+                                $r_time_total = Core::GET_TIME_TOTAL([$r_time_am, $r_time_pm]);
+                                // IfLate
+                                if (Timelog::IfLate($tl_in_am)) {
+                                    array_push($arr_late, Core::GET_TIME_DIFF(Timelog::ReqTimeIn(), $tl_in_am));
                                 }
-                            }
-
-                            if ($tl_in_am != "00:00" && $tl_out_am != "00:00") { // ami = 1, amo = 1
-                                if ($tl_in_pm != "00:00" && $tl_out_pm != "00:00") { // pmi = 1, pmo = 1
-                                    $r_time_am = Timelog::GetRenHours($tl_in_am, $tl_out_am, "am");
-                                    $r_time_pm = Timelog::GetRenHours($tl_in_pm, $tl_out_pm, "pm");
-                                    $r_time_total = Core::GET_TIME_TOTAL([$r_time_am, $r_time_pm]);
-                                    // IfLate
-                                    // IfUndertime
-                                } elseif ($tl_in_am != "00:00" && $tl_out_pm != "00:00") { // ami = 1, pmo = 1
-                                    $r_time_total = Timelog::GetRenHours($tl_in_am, $tl_out_pm, "am");
-                                    // IfLate
-                                    // IfUndertime
+                                // IfUndertime
+                                if (Timelog::IfUndertime($r_time_total, $req_hrs2)) {
+                                    array_push($arr_undertime, Core::GET_TIME_DIFF($r_time_total, $req_hrs2)); 
                                 }
+                                $totalpresent+=1;
                             } elseif ($tl_in_am != "00:00" && $tl_out_pm != "00:00") { // ami = 1, pmo = 1
                                 $r_time_total = Timelog::GetRenHours($tl_in_am, $tl_out_pm, "am");
-                                // IfLate
                                 // IfUndertime
-                            }
-
-                            array_push($errors2, [$r_time_am, $r_time_pm, $r_time_total]);
-                        } else {
-                            // missing logs
-                            array_push($errors, $date);
-                            $totalabsent+=1;
-                        }
-                    } else {
-                        // absent
-                    } array_push($errors2, ["AM_I" => $tl_in_am, "AM_O" => $tl_out_am, "PM_I" => $tl_in_pm, "PM_O" => $tl_out_pm]);
-
-                    if (count($record)<=0) {
-                        $totalabsent+=1;
-                    } else {
-                        if (count($record)<=1) {
-                            array_push($errors, $date);
-                            $totalabsent+=1;
-                        } else {
-                            $time_in = $record[0]->time_log; $time_out = $record[1]->time_log;
-                            $r_time = Timelog::GetRenHours($time_in, $time_out, "am");
-                            // $a_time = Core::GET_TIME_DIFF($req_hrs2, $r_time); dd($r_time);
-                            if (Timelog::IfHoliday($date)) {
-                                array_push($arr_overtime, $r_time);
-                                $totalholiday+=1;
-                            } else {
-                                if (Timelog::IfLate($time_in)) {
-                                    $z = "";
-                                    $z = Core::GET_TIME_DIFF(Timelog::ReqTimeIn(), $time_in);
-                                    array_push($arr_late, $z);
-                                    // array_push($arr_undertime, $z);
+                                if (Timelog::IfUndertime($r_time_total, $req_hrs2)) {
+                                    array_push($arr_undertime, Core::GET_TIME_DIFF($r_time_total, $req_hrs2)); 
                                 }
-                                if (Timelog::IfUndertime($r_time, $req_hrs2)) {
-                                    $z = "";
-                                    $z = Core::GET_TIME_DIFF($r_time, $req_hrs2);
-                                    array_push($arr_undertime, $z); 
-                                }
-                                // if (Core::ToMinutes($r_time) > ($req_hrs * 60)) {
-                                //     $z = Core::GET_TIME_DIFF(Timelog::ReqTimeOut(),$record[1]->time_log);
-                                //     array_push($arr_overtime, $z);
-                                //     $z = "";
-                                // }
-                                // if (Core::ToMinutes($r_time) > Core::ToMinutes($req_hrs2)) {
-                                //     $z = Core::GET_TIME_DIFF(Timelog::ReqTimeIn(),$record[0]->time_log);
-                                //     $y = Core::GET_TIME_DIFF(Timelog::ReqTimeOut(),$record[1]->time_log);
-                                //     array_push($arr_overtime, $z);
-                                //     array_push($arr_overtime, $y);
-                                // }
                                 $totalpresent+=1;
-                                // array_push($errors2, [$i, "H"=>Timelog::IfHoliday($date), "L"=>Timelog::IfLate($record[0]->time_log), "U"=>Timelog::IfUndertime($record[0]->time_log, $record[1]->time_log), "O"=>Core::ToMinutes($r_time) > Core::ToMinutes($req_hrs2)]);
+                            }
+                        } elseif ($tl_in_am != "00:00" && $tl_out_pm != "00:00") { // ami = 1, pmo = 1
+                            $r_time_total = Timelog::GetRenHours($tl_in_am, $tl_out_pm, "am"); 
+                            // IfLate
+                            if (Timelog::IfLate($tl_in_am)) {
+                                array_push($arr_late, Core::GET_TIME_DIFF(Timelog::ReqTimeIn(), $tl_in_am));
+                            }
+                            // IfUndertime
+                            if (Timelog::IfUndertime($r_time_total, $req_hrs2)) {
+                                array_push($arr_undertime, Core::GET_TIME_DIFF($r_time_total, $req_hrs2)); 
+                            }
+                            $totalpresent+=1;
+                        }
+
+                        if (count($tl_in_ot) > 0) {
+                            for ($j=0; $j < count($tl_in_ot); $j++) {
+                                list($ja, $jb) = explode("|", $tl_in_ot[$j]);
+                                for ($k=0; $k < count($tl_out_ot); $k++) {
+                                    list($ka, $kb) = explode("|", $tl_out_ot[$k]);
+                                    if ($ja == $ka) {
+                                        $jk = Timelog::GetRenHours($jb, $kb, "pm");
+                                        if (Timelog::IfOvertime($jk)) {
+                                            array_push($r_time_ot_arr, [$jb, $kb]); // OT Time In, OT Time Out
+                                            array_push($r_time_ot_total_arr, $jk); // OT Rendered Time
+                                        }
+                                    }
+                                }
                             }
                         }
+
+                        if (count($r_time_ot_arr) > 0) {
+                            $r_time_ot_total = Core::GET_TIME_TOTAL($r_time_ot_total_arr);
+                            array_push($arr_overtime, $r_time_ot_total);
+                            $totalovertime+=1;
+                        }
+                    } else {
+                        // missing logs
+                        array_push($errors, $date);
                     }
                 } else {
+                    // absent
+                } array_push($errors2, [$date, "AM_I" => $tl_in_am, "AM_O" => $tl_out_am, "PM_I" => $tl_in_pm, "PM_O" => $tl_out_pm, "OT_T" => $r_time_ot_arr, "OT" => $r_time_ot_total]);
+
+
+                if (Timelog::IfWorkdays($date)) {
+                    array_push($arr_weekhrs, $r_time_total);
+                } else {
+                    array_push($arr_weekendhrs, $r_time_total);
                     $totalweekend+=1;
                 }
             }
 
-            $workdays = count($workdays) - $totalweekend;
+            $workdays = count($covereddates) - $totalweekend;
             $totaldays = $totalpresent + $totalholiday;
+            $totalabsent = $workdays - $totalpresent;
             $late = Core::GET_TIME_TOTAL($arr_late);
             $undertime = Core::GET_TIME_TOTAL($arr_undertime);
-            $totalovertime = Core::GET_TIME_TOTAL($arr_overtime);
+            $overtime = Core::GET_TIME_TOTAL($arr_overtime);
+            $weekhrs = Core::GET_TIME_TOTAL($arr_weekhrs);
+            $weekendhrs = Core::GET_TIME_TOTAL($arr_weekendhrs);
+
+            if ($r->gtype == "OVERTIME") {
+                $totaldays = $totalovertime;
+                $weekhrs = Core::GET_TIME_TOTAL([$overtime, $weekendhrs]);
+                $totalabsent = 0;
+            }
 
             $record = null;
             if (DB::table('hr_dtr_sum_hdr')->where('empid', $employee->empid)->where('date_from', $pp->from)->where('date_to', $pp->to)->first()!=null) {
@@ -261,6 +279,7 @@ class GenerateDTRController extends Controller
                 // 'empid'=>$employee->empid,
                 // 'ppid' => $r->pp,
                 'empname'=>$name,
+                'generateType' => $r->gtype,
 
                 'month'=>$r->month,
                 'year'=>$r->year,
@@ -268,11 +287,17 @@ class GenerateDTRController extends Controller
                 'workdays'=> $workdays,
                 'daysworked'=>$totaldays,
                 'absences'=>$totalabsent,
-                'holidays'=>0,
+                'weekhrs' => $weekhrs,
+                'weekendhrs' => $weekendhrs,
 
                 'late'=>$late,
                 'undertime'=>$undertime,
-                'overtime'=>$totalovertime,
+                'overtime'=>$overtime,
+                'holidays'=>0,
+
+                'arr_late' => $arr_late,
+                'arr_undertime' => $arr_undertime,
+                'arr_overtime' => $arr_overtime,
 
                 'date_from'=>$pp->from,
                 'date_from2'=>date('M d, Y', strtotime($pp->from)),

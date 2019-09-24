@@ -79,4 +79,8 @@ class OfficeController extends Controller
     {
         return Office::OfficeEmployees($r->ofc_id);
     }
+    public function getEmployees_byEmpStat(Request $r)
+    {
+        return Office::OfficeEmployees_byEmpStat($r->ofc_id, $r->emp_status);
+    }
 }
