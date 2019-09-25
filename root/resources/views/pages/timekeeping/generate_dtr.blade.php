@@ -241,7 +241,7 @@
 		function LoadDtrTable()
 		{
 			hideErrorDiv();
-			$('#btn-generate-ind').attr('disabled', false);
+			// $('#btn-generate-ind').attr('disabled', false);
 			$.ajax({
 				type : 'get',
 				url : '{{url('timekeeping/generate-dtr/partial-generation')}}',
@@ -286,12 +286,13 @@
 
 		function LoadSummaryTable(data)
 		{
-			$('#sum-tw').text(data.workdays);
+			
+			$('#sum-tw').text(data.workdays+((data.req_hrs!=null) ? " ("+data.req_hrs+" hrs/day)" : ""));
 			$('#sum-dw').text(data.daysworked);
 			$('#sum-a').text(data.absences);
 			$('#sum-l').text(data.late);
 			$('#sum-u').text(data.undertime);
-			$('#sum-th').text(data.weekhrs);
+			$('#sum-th').text(data.weekdayhrs);
 			var pt = $('#payroll_gen_type').val().toLowerCase();
 			$('#sum-to').text(/*data.overtime*/ pt.charAt(0).toUpperCase() + pt.slice(1));
 			$('#sum-stat').html((data.isgenerated==1) ? '<span class="btn btn-success">Yes</span>' : '<span class="btn btn-danger">No</span>');

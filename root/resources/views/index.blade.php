@@ -168,7 +168,7 @@
                         <i class="fa fa-clock-o fa-5x"></i>
                       </div>
                       <div class="dashboard-menu-footer">
-                        <a href="{{url('timekeeping/employee-dtr')}}" style="color:white;">View Monthly Daily Time Record</a>
+                        <a href="#" style="color:white;">View Monthly Daily Time Record</a>
                       </div>
                     </div>
                   </div>
