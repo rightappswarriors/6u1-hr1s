@@ -139,6 +139,10 @@
 										<td id="sum-u" colspan="2"></td>
 									</tr>
 									<tr>
+										<th style="text-align: center;" colspan="2">Holiday</th>
+										<td id="sum-h" colspan="2"></td>
+									</tr>
+									<tr>
 										<th style="text-align: center;">Generated</th>
 										<td id="sum-stat"></td>
 										<th style="text-align: center;">Flagged</th>
@@ -297,6 +301,7 @@
 			$('#sum-l').text(data.late);
 			$('#sum-u').text(data.undertime);
 			$('#sum-th').text(data.weekdayhrs);
+			$('#sum-h').text(data.holidays);
 			var pt = $('#payroll_gen_type').val().toLowerCase();
 			$('#sum-to').text(/*data.overtime*/ pt.charAt(0).toUpperCase() + pt.slice(1));
 			$('#sum-stat').html((data.isgenerated==1) ? '<span class="btn btn-success">Yes</span>' : '<span class="btn btn-danger">No</span>');
@@ -315,6 +320,7 @@
 			$('#sum-u').text('');
 			$('#sum-to').text('');
 			$('#sum-th').text('');
+			$('#sum-h').text('');
 			$('#sum-stat').html('');
 			$('#sum-flagged').html('');
 			$('#pp-dates').text('');

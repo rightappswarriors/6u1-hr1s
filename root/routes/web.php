@@ -570,7 +570,7 @@
 			// dd(Timelog::GetRenHours("8:00", "18:30", "pm"));
 			// dd(Timelog::ReqTimeIn_2());
 			// dd(Timelog::IfUndertime("06:15:00",Timelog::ReqHours2()), Timelog::ReqHours2());
-			dd(Timelog::ReqHours2());
+			dd(Timelog::IfHoliday("2019-09-25"));
 		});
 
 		/* NOTIFICATION */

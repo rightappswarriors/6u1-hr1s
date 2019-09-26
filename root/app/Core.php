@@ -144,7 +144,7 @@ class Core extends Model
 		$minutes = $time2_m - $time1_m;
 
 		// return $hours.":".$minutes;
-		return sprintf('%02d:%02d:00', $hours, $minutes);
+		return sprintf('%02d:%02d', $hours, $minutes);
 	}
 
 	public static function GET_TIME_TOTAL(Array $times)
@@ -161,7 +161,7 @@ class Core extends Model
 	    $minutes -= $hours * 60;
 
 	    // returns the time already formatted
-	    return sprintf('%02d:%02d:00', $hours, $minutes);
+	    return sprintf('%02d:%02d', $hours, $minutes);
 	}
 
 	// Handle File Upload
@@ -757,7 +757,7 @@ class Core extends Model
     public static function ToHours(string $time)
     {
     	/**
-    	* @param string "00:00:00 format
+    	* @param string "00:00 format
     	* @return float "0.0000.."
     	*/
     	try {
@@ -773,7 +773,7 @@ class Core extends Model
     public static function ToMinutes(string $time)
     {
     	/**
-    	* @param string "00:00:00 format
+    	* @param string "00:00 format
     	* @return float "0.0000.."
     	*/
     	try {

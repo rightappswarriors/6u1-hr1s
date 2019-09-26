@@ -86,6 +86,8 @@ class GenerateDTRController extends Controller
             $weekendhrs = "00:00";
             $arr_weekendhrs = [];
             $arr_daysworked = [];
+            $arr_holidays = [];
+            $arr_holidayDates = [];
 
             $req_hrs = Timelog::ReqHours();
             $req_hrs2 = Timelog::ReqHours2();
@@ -134,11 +136,11 @@ class GenerateDTRController extends Controller
                 $tl_out_trsh = [];
                 $tl_out_ot = [];
 
-                $r_time_total = "00:00:00";
-                $r_time_am = "00:00:00";
-                $r_time_pm = "00:00:00";
+                $r_time_total = "00:00";
+                $r_time_am = "00:00";
+                $r_time_pm = "00:00";
 
-                $r_time_ot_total = "00:00:00";
+                $r_time_ot_total = "00:00";
                 $r_time_ot_total_arr = [];
                 $r_time_ot_arr = [];
 
@@ -208,8 +210,12 @@ class GenerateDTRController extends Controller
                                         array_push($arr_undertime, [$date, [$tl_in_am, $tl_out_am, $tl_in_pm, $tl_out_pm], Core::GET_TIME_DIFF($r_time_total, $req_hrs2)]); 
                                     }
                                     // To Array
-                                    array_push($arr_daysworked, [$date, [$tl_in_am, $tl_out_am, $tl_in_pm, $tl_out_pm], $r_time_total]);
-                                    $totalpresent+=1;
+                                    if (Timelog::IfHoliday($date)) {
+                                        array_push($arr_holidays, [$date, [$tl_in_am, $tl_out_am, $tl_in_pm, $tl_out_pm], $r_time_total]);
+                                    } else {
+                                        array_push($arr_daysworked, [$date, [$tl_in_am, $tl_out_am, $tl_in_pm, $tl_out_pm], $r_time_total]);
+                                        $totalpresent+=1;
+                                    }
                                 } elseif ($tl_in_am != "00:00" && $tl_out_pm != "00:00") { // ami = 1, pmo = 1
                                     $r_time_total = Timelog::GetRenHours($tl_in_am, $tl_out_pm, "am");
                                     // IfUndertime
@@ -217,8 +223,12 @@ class GenerateDTRController extends Controller
                                         array_push($arr_undertime, [$date, [$tl_in_am, $tl_out_pm], Core::GET_TIME_DIFF($r_time_total, $req_hrs2)]); 
                                     }
                                     // To Array
-                                    array_push($arr_daysworked, [$date, [$tl_in_am, $tl_out_pm], $r_time_total]);
-                                    $totalpresent+=1;
+                                    if (Timelog::IfHoliday($date)) {
+                                        array_push($arr_holidays, [$date, [$tl_in_am, $tl_out_pm], $r_time_total]);
+                                    } else {
+                                        array_push($arr_daysworked, [$date, [$tl_in_am, $tl_out_pm], $r_time_total]);
+                                        $totalpresent+=1;
+                                    }
                                 }
                             } elseif ($tl_in_am != "00:00" && $tl_out_pm != "00:00") { // ami = 1, pmo = 1
                                 $r_time_total = Timelog::GetRenHours($tl_in_am, $tl_out_pm, "am"); 
@@ -231,8 +241,12 @@ class GenerateDTRController extends Controller
                                     array_push($arr_undertime, [$date, [$tl_in_am, $tl_out_pm], Core::GET_TIME_DIFF($r_time_total, $req_hrs2)]); 
                                 }
                                 // To Array
-                                array_push($arr_daysworked, [$date, [$tl_in_am, $tl_out_pm], $r_time_total]);
-                                $totalpresent+=1;
+                                if (Timelog::IfHoliday($date)) {
+                                    array_push($arr_holidays, [$date, [$tl_in_am, $tl_out_pm], $r_time_total]);
+                                } else {
+                                    array_push($arr_daysworked, [$date, [$tl_in_am, $tl_out_pm], $r_time_total]);
+                                    $totalpresent+=1;
+                                }
                             }
                             if (count($tl_in_ot) > 0) {
                                 for ($j=0; $j < count($tl_in_ot); $j++) {
@@ -260,6 +274,9 @@ class GenerateDTRController extends Controller
                                 }
                                 $totalovertime+=1;
                             }
+                            if (Timelog::IfHoliday($date)) {
+                                $totalholiday+=1;
+                            }
                         } catch (\Exception $e) {
                             ErrorCode::Generate('controller', 'GenerateDTRController', 'A00002', $e->getMessage());
                             return "error";
@@ -286,8 +303,8 @@ class GenerateDTRController extends Controller
                 * Time Counting Method
                 */
                 $workdays = count($covereddates) - $totalweekend;
-                $totaldays = $totalpresent + $totalholiday;
-                $totalabsent = $workdays - $totalpresent;
+                $totaldays = $totalpresent + ((count($arr_holidays) > 0) ? count($arr_holidays) : 0);
+                $totalabsent = $workdays - $totaldays;
                 if (count($arr_late) > 0) {
                     $tmp = [];
                     for ($i=0; $i < count($arr_late); $i++) { 
@@ -316,8 +333,15 @@ class GenerateDTRController extends Controller
                 $weekendhrs = Core::GET_TIME_TOTAL($arr_weekendhrs);
 
                 if ($r->gtype == "OVERTIME") {
+                    $tmp = [];
+                    for ($i=0; $i < count($arr_holidays); $i++) { 
+                        list($ia, $ib, $ic) = $arr_holidays[$i];
+                        array_push($tmp, $ic);
+                        $totalovertime+=1;
+                    }
                     $totaldays = $totalovertime;
-                    $weekdayhrs = Core::GET_TIME_TOTAL([$overtime, $weekendhrs]);
+                    $tmp = Core::GET_TIME_TOTAL($tmp);
+                    $weekdayhrs = Core::GET_TIME_TOTAL([$overtime, $weekendhrs, $tmp]);
                     $totalabsent = 0;
                 }
             } catch (\Exception $e) {
@@ -381,9 +405,9 @@ class GenerateDTRController extends Controller
                 'total_overtime_arr'=> $arr_overtime,
                 'weekdayhrs' => $weekdayhrs,
                 'weekendhrs' => $weekendhrs,
-                'holidays'=>0,
+                'holidays'=>$totalholiday,
                 // holiday_dates
-                // holiday_arr
+                'holiday_arr' => $arr_holidays,
                 // lnsum_no
 
 
@@ -396,9 +420,9 @@ class GenerateDTRController extends Controller
                 $data['daysworked'] = $data['workdays'];
                 $data['absences'] = 0;
                 $data['holidays'] = 0;
-                $data['late'] = "00:00:00";
-                $data['undertime'] = "00:00:00";
-                $data['overtime'] = "00:00:00";
+                $data['late'] = "00:00";
+                $data['undertime'] = "00:00";
+                $data['overtime'] = "00:00";
             }
 
             if ($r->gtype == "OVERTIME") {
