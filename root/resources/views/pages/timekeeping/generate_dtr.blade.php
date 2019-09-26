@@ -258,20 +258,24 @@
 				},
 				success : function(data) {
 					if (data!="error") {
-						var d = JSON.parse(data);
-						LoadSummaryTable(d);
-						if (d.errors.length>0) {
-							$('#alert-generate-error').collapse('show');
-							for (var i=0; i<d.errors.length; i++) {
-								$('#alert-generate-error-body').append('Missing time logs on '+d.errors[i]+'<br>');
+						if (data!="noemp") {
+							var d = JSON.parse(data);
+							LoadSummaryTable(d);
+							if (d.errors.length>0) {
+								$('#alert-generate-error').collapse('show');
+								for (var i=0; i<d.errors.length; i++) {
+									$('#alert-generate-error-body').append('Missing time logs on '+d.errors[i]+'<br>');
+								}
+								$('#alert-generate-error-body').append(
+									'<div class="card-body">'+
+										'<a href="{{url('timekeeping/timelog-entry')}}" style="color:white;"><i class="fa fa-hand-o-right"></i> Check missing time logs</a>'+
+									'</div>'
+								)
+								// $('#btn-generate-ind').attr('disabled', true);
+								alert("DTR has errors. Cannot be saved.");
 							}
-							$('#alert-generate-error-body').append(
-								'<div class="card-body">'+
-									'<a href="{{url('timekeeping/timelog-entry')}}" style="color:white;"><i class="fa fa-hand-o-right"></i> Check missing time logs</a>'+
-								'</div>'
-							)
-							// $('#btn-generate-ind').attr('disabled', true);
-							alert("DTR has errors. Cannot be saved.");
+						} else {
+							alert("No employee selected.");
 						}
 					} else {
 						alert("Error in generating DTR.");

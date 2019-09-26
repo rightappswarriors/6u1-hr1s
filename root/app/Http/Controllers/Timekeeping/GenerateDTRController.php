@@ -95,6 +95,10 @@ class GenerateDTRController extends Controller
             // $covereddates = Core::TotalDays($pp->from, $pp->to);
             $covereddates = Core::CoveredDates($pp->from, $pp->to);
 
+            if ($employee == null) {
+                return "noemp";
+            }
+
             $totaldays = 0;
             $totalpresent = 0;
             $totalabsent = 0;
