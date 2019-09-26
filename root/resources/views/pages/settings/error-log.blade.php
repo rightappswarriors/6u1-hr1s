@@ -58,5 +58,8 @@
 		{
 			$('#dataTable').DataTable().search("{{date('m-d-Y')}}").draw();
 		}
+		$(document).ready(function() {
+			$('#dataTable').DataTable().search("{{date('m-d-Y')}}").draw();
+		});
 	</script>
 @endsection
