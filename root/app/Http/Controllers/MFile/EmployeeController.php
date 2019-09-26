@@ -47,6 +47,7 @@ class EmployeeController extends Controller
             $emp->jobtitle = JobTitle::Get_JobTitle($emp->positions);
             $emp->emp_status = (EmployeeStatus::find($emp->empstatus)!=null) ? EmployeeStatus::find($emp->empstatus)->description : "employee-status-not-found";
         }
+        // dd($this->emp_status);
         // return dd($this->employee);
         return view('pages.mfile.employee', ['dept' => $this->dept, 'position' => $this->position, 'emp_status' => $this->emp_status, 'tax' => $this->tax, 'rate' => $this->rate_type, 'sss' => $this->sss, 'day' => $this->days, 'civil_stat' => $this->civil_stat, 'employee' => $this->employee, 'office' => $this->office] );
     }
@@ -77,6 +78,7 @@ class EmployeeController extends Controller
             'prohibition_date' => (isset($r->txt_prob_chk)) ? $r->txt_prob_dt : null,
             'date_regular' => (isset($r->txt_reg_chk)) ? $r->txt_reg_dt : null,
             'empstatus' => $r->txt_emp_stat,
+            'emptype' => $r->txt_emp_type,
             'contract_days' => ($r->txt_contract != '') ? (int)$r->txt_contract : 0,
             'prc' => ($r->txt_prc != '') ? $r->txt_prc : '',
             'ctc' => ($r->txt_ctc != '') ? $r->txt_ctc : '',
@@ -182,6 +184,7 @@ class EmployeeController extends Controller
                 'prohibition_date' => (isset($r->txt_prob_chk)) ? $r->txt_prob_dt : null,
                 'date_regular' => (isset($r->txt_reg_chk)) ? $r->txt_reg_dt : null,
                 'empstatus' => $r->txt_emp_stat,
+                'emptype' => $r->txt_emp_type,
                 'contract_days' => ($r->txt_contract != '') ? (int)$r->txt_contract : 0,
                 'prc' => ($r->txt_prc != '') ? $r->txt_prc : '',
                 'ctc' => ($r->txt_ctc != '') ? $r->txt_ctc : '',
@@ -302,6 +305,7 @@ class EmployeeController extends Controller
             'prohibition_date' => (isset($r->txt_prob_chk)) ? $r->txt_prob_dt : null,
             'date_regular' => (isset($r->txt_reg_chk)) ? $r->txt_reg_dt : null,
             'empstatus' => $r->txt_emp_stat,
+            'emptype' => $r->txt_emp_type,
             'contract_days' => ($r->txt_contract != '') ? (int)$r->txt_contract : 0,
             'prc' => ($r->txt_prc != '') ? $r->txt_prc : '',
             'ctc' => ($r->txt_ctc != '') ? $r->txt_ctc : '',

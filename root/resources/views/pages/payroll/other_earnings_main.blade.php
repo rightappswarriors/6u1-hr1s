@@ -26,6 +26,14 @@
 				{{-- <div class="float-right">
 					<button class="btn btn-success" onclick="GenerateRata($('#date_from').val())">Generate</button>
 				</div> --}}
+				<span class="OtherEarnings">
+					<button type="button" class="btn btn-success" id="opt-add">
+						<i class="fa fa-plus"></i> Add
+					</button>
+					<button type="button" class="btn btn-info" id="opt-print">
+						<i class="fa fa-print"></i> Print List
+					</button>
+				</span>
 			</div>
 		</div>
 		<div class="card-body">
@@ -75,6 +83,13 @@
 						<div class="row">
 							<div class="col">
 								<table class="table table-bordered table-hover" id="dataTable1">
+									<col>
+									<col>
+									<col>
+									<col>
+									<col>
+									<col>
+									<col width="10%">
 									<thead>
 										<tr>
 											<th>Code</th>
@@ -83,13 +98,14 @@
 											<th>Amount</th>
 											<th>Period</th>
 											<th>Earnings</th>
+											<th></th>
 										</tr>
 									</thead>
 									<tbody>
 									</tbody>
 								</table>
 							</div>
-							<div class="col-3">
+							{{-- <div class="col-3">
 								<div class="card">
 									<div class="card-body">
 										<button type="button" class="btn btn-success btn-block" id="opt-add"><i class="fa fa-plus"></i> Add</button>
@@ -97,7 +113,7 @@
 										<button type="button" class="btn btn-danger btn-block" id="opt-delete"><i class="fa fa-trash"></i> Delete</button>
 									</div>
 								</div>
-							</div>
+							</div> --}}
 						</div>	
 					</div>
 				</div>
@@ -351,7 +367,17 @@
 			}
 		});
 
-		$('#opt-update').on('click', function() {
+		$('.nav-link').on('click', function() {
+			if($(this).attr('href') == '#home1') {
+				$('.OtherEarnings').show();
+			} else {
+				$('.OtherEarnings').hide();
+			}
+		});
+
+		// $('#opt-update').on('click', function() {
+		function row_update(obj) {
+			selected_row = $($(obj).parents()[1]);
 			if(selected_row != null) {
 				$('#cbo_employee_view')[0].removeAttribute('hidden');
 				$('select[name="cbo_employee"]')[0].setAttribute('hidden', '');
@@ -375,9 +401,12 @@
 			} else {
 				alert('No data selected');
 			}
-		});
+		// });
+		}
 
-		$('#opt-delete').on('click', function() {
+		// $('#opt-delete').on('click', function() {
+		function row_delete(obj) {
+			selected_row = $($(obj).parents()[1]);
 			if(selected_row != null) {
 				$('#txt_hidden_id').val(selected_row.children()[0].innerText);
 				$('#exampleModalLabel').text("Delete Other Deductions");
@@ -398,7 +427,8 @@
 			} else {
 				alert('No data selected');
 			}
-		});
+		// });
+		}
 
 		$('#f_find').on('click', function() {
 		// $('#date_month, #date_year, #search_period, #ofc').on('change', function() {
@@ -443,6 +473,12 @@
 				data.amount,
 				data.date_from_readable + " to " + data.date_to_readable,
 				data.earning_readable,
+				'<button type="button" class="btn btn-primary" id="opt-update" onclick="row_update(this)">'+
+				'	<i class="fa fa-edit"></i>'+
+				'</button>'+
+				'<button type="button" class="btn btn-danger" id="opt-delete" onclick="row_delete(this)">'+
+				'	<i class="fa fa-trash"></i>'+
+				'</button',
 
 			]).draw();
 		}

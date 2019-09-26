@@ -4,6 +4,12 @@
 	<div class="card">
 		<div class="card-header">
 			<i class="fa fa-money" aria-hidden="true"></i> Loan Entry
+			<button type="button" class="btn btn-success" id="opt-add">
+				<i class="fa fa-plus"></i> Add
+			</button>
+			<button type="button" class="btn btn-info" id="opt-print">
+				<i class="fa fa-print"></i> Print List
+			</button>
 		</div>
 		<div class="card-body">
 
@@ -84,11 +90,11 @@
 												<button type="button" class="btn btn-primary" id="opt-submit">Go</button>
 											</div>
 											<div class="col">
-												<button type="button" class="btn btn-success" id="opt-add"><i class="fa fa-plus"></i></button>
+												{{-- <button type="button" class="btn btn-success" id="opt-add"><i class="fa fa-plus"></i></button>
 												<button type="button" class="btn btn-primary" id="opt-update"><i class="fa fa-edit"></i></button>
 												<button type="button" class="btn btn-danger" id="opt-delete"><i class="fa fa-trash"></i></button>
-												{{-- <button type="button" class="btn btn-warning" id="opt-money"><i class="fa fa-money"></i></button> --}}
-												<button type="button" class="btn btn-info" id="opt-print"><i class="fa fa-print"></i></button>
+												<button type="button" class="btn btn-warning" id="opt-money"><i class="fa fa-money"></i></button>
+												<button type="button" class="btn btn-info" id="opt-print"><i class="fa fa-print"></i></button> --}}
 											</div>
 										</div>
 									</div>
@@ -129,7 +135,17 @@
 					<div class="card">
 						<div class="card-body">
 							<div class="table-responsive">
-								<table class="table table-hover" id="dataTable">
+								<table class="table table-hover table-bordered" id="dataTable">
+									<col>
+									<col>
+									<col>
+									<col>
+									<col>
+									<col>
+									<col>
+									<col>
+									<col>
+									<col width="10%">
 									<thead>
 										<tr>
 											<th>Code</th>
@@ -145,6 +161,7 @@
 											<th>Months to <br> be Paid</th>
 											<th>Reason</th>
 											{{-- <th>Deduction Date</th> --}}
+											<th></th>
 										</tr>
 									</thead>
 									<tbody>
@@ -639,6 +656,12 @@
 				data.months_to_be_paid,
 				data.loan_desc,
 				// data.deduction_date,
+				'<button type="button" class="btn btn-primary" id="opt-update" onclick="row_update(this)">'+
+				'	<i class="fa fa-edit"></i>'+
+				'</button>'+
+				'<button type="button" class="btn btn-danger" id="opt-delete" onclick="row_delete(this)">'+
+				'	<i class="fa fa-trash"></i>'+
+				'</button',
 			]).draw();
 		}
 
@@ -683,7 +706,9 @@
 			}
 		});
 
-		$('#opt-update').on('click', function() {
+		// $('#opt-update').on('click', function() {
+		function row_update(obj) {
+			selected_row = $($(obj).parents()[1]);
 			$('input[name="txt_code"]').attr('readonly', '');
 			// $('input[name="txt_code"]').val(selected_row.attr('data_id'));
 			// $('input[name="txt_name"]').val(selected_row.attr('data_name'));
@@ -734,9 +759,12 @@
 
 			$('.AddMode').show();
 			$('.DeleteMode').hide();
-		});
+		// });
+		}
 
-		$('#opt-delete').on('click', function() {
+		// $('#opt-delete').on('click', function() {
+		function row_delete(obj) {
+			selected_row = $($(obj).parents()[1]);
 
 			if (ValidateSearchFrm()) {
 				if (selected_row!=null) {
@@ -775,6 +803,7 @@
 			// $('.AddMode').hide();
 			// $('.DeleteMode').show();
 			// $('#modal-pp').modal('show');
-		});
+		// });
+		}
 	</script>
 @endsection
