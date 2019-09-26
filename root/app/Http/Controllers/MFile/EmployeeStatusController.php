@@ -22,7 +22,7 @@ class EmployeeStatusController extends Controller
     }
     public function add(Request $r)
     {
-    	$data = ['statcode'=>strtoupper($r->txt_code) , 'description' => strtoupper($r->txt_name)];
+    	$data = ['statcode'=>strtoupper($r->txt_code) , 'description' => strtoupper($r->txt_name), 'type'=>/*$r->cbo_type*/'es'];
     	try {
 
     		DB::table(EmployeeStatus::$tbl_name)->insert($data);
@@ -36,7 +36,7 @@ class EmployeeStatusController extends Controller
     }
     public function update(Request $r)
     {
-    	$data = ['description' => strtoupper($r->txt_name)];
+    	$data = ['description' => strtoupper($r->txt_name), 'type'=>/*$r->cbo_type*/'es'];
     	try {
 
     		DB::table(EmployeeStatus::$tbl_name)->where(EmployeeStatus::$pk, $r->txt_code)->update($data);

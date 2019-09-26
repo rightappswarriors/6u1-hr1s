@@ -4,6 +4,12 @@
 	<div class="card">
 		<div class="card-header">
 			<i class="fa fa-clock-o"></i> Philhealth
+			<button type="button" class="btn btn-success" id="opt-add">
+				<i class="fa fa-plus"></i> Add
+			</button>
+			<button type="button" class="btn btn-info" id="opt-print">
+				<i class="fa fa-print"></i> Print List
+			</button>
 		</div>
 		<div class="card-body">
 			<div class="row">
@@ -11,7 +17,7 @@
 					<div class="card">
 						<div class="card-body">
 							<div class="table-responsive">
-								<table class="table table-hover" id="dataTable">
+								<table class="table table-hover table-bordered" id="dataTable">
 									<thead>
 										<tr>
 											<th>Code</th>
@@ -20,6 +26,7 @@
 											<th>Salary Base</th>
 											<th>Employer's(ER)<br>Share</th>
 											<th>Employee's(EE)<br>Share</th>
+											<th></th>
 										</tr>
 									</thead>
 									<tbody>
@@ -33,6 +40,14 @@
 													<td>{!!Core::currSign()!!}{{number_format($pp->salary_base, 2, ".", ", ")}}</td>
 													<td>{!!Core::currSign()!!}{{number_format($pp->emp_er, 2, ".", ", ")}}</td>
 													<td>{!!Core::currSign()!!}{{number_format($pp->emp_ee, 2, ".", ", ")}}</td>
+													<td>
+														<button type="button" class="btn btn-primary mr-1" id="opt-update" onclick="row_update(this)">
+															<i class="fa fa-edit"></i>
+														</button>
+														<button type="button" class="btn btn-danger" id="opt-delete" onclick="row_delete(this)">
+															<i class="fa fa-trash"></i>
+														</button>
+													</td>
 												</tr>
 												@endforeach
 											@endif
@@ -43,7 +58,7 @@
 						</div>
 					</div>
 				</div>
-				<div class="col-3">
+				{{-- <div class="col-3">
 					<div class="card">
 						<div class="card-body">
 							<button type="button" class="btn btn-success btn-block" id="opt-add"><i class="fa fa-plus"></i> Add</button>
@@ -52,7 +67,7 @@
 							<button type="button" class="btn btn-info btn-block" id="opt-print"><i class="fa fa-print"></i> Print List</button>
 						</div>
 					</div>
-				</div>
+				</div> --}}
 			</div>
 		</div>
 	</div>
@@ -249,7 +264,9 @@
 			$('#modal-pp').modal('show');
 		});
 
-		$('#opt-update').on('click', function() {
+		// $('#opt-update').on('click', function() {
+		function row_update(obj) {
+			selected_row = $($(obj).parents()[1]);
 			$('#frm-pp').attr('action', '{{url('master-file/philhealth')}}/update');
 			$('input[name="txt_code"]').attr('readonly', '');
 			$.ajax({
@@ -281,9 +298,12 @@
 			$('.AddMode').show();
 			$('.DeleteMode').hide();
 			$('#modal-pp').modal('show');
-		});
+		// });
+		}
 
-		$('#opt-delete').on('click', function() {
+		// $('#opt-delete').on('click', function() {
+		function row_delete(obj) {
+			selected_row = $($(obj).parents()[1]);
 			$('#frm-pp').attr('action', '{{url('master-file/philhealth')}}/delete');
 		
 			$('input[name="txt_code"]').attr('readonly', '');
@@ -296,6 +316,7 @@
 			$('.AddMode').hide();
 			$('.DeleteMode').show();
 			$('#modal-pp').modal('show');
-		});
+		// });
+		}
 	</script>
 @endsection

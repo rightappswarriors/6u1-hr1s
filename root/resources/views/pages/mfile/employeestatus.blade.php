@@ -14,11 +14,13 @@
 								<table class="table table-hover" id="dataTable">
 									<col>
 									<col>
+									{{-- <col> --}}
 									<col width="10%">
 									<thead>
 										<tr>
 											<th>Status Code</th>
 											<th>Name</th>
+											{{-- <th>Type</th> --}}
 											<th></th>
 										</tr>
 									</thead>
@@ -26,9 +28,10 @@
 										@isset($dept)
 											@if(count($dept)>0)
 												@foreach($dept as $pp)
-												<tr data_id="{{$pp->statcode}}" data_name="{{$pp->description}}">
+												<tr data_id="{{$pp->statcode}}" data_name="{{$pp->description}}" data_type="{{$pp->type}}">
 													<td>{{$pp->statcode}}</td>
 													<td>{{$pp->description}}</td>
+													{{-- <td>{{$pp->type}}</td> --}}
 													<td>
 														<button type="button" class="btn btn-primary mr-1" id="opt-update" onclick="row_update(this)"><i class="fa fa-edit"></i></button>
 														<button type="button" class="btn btn-danger" id="opt-delete" onclick="row_delete(this)"><i class="fa fa-trash"></i></button>
@@ -74,12 +77,20 @@
 								<div class="col"> <!-- Column 1 -->
 									<div class="form-group">
 										<label>Status Code:</label>
-										<input type="text" name="txt_code" style="text-transform: uppercase;" class="form-control" maxlength="8" placeholder="XXX" required>
+										<input type="text" name="txt_code" style="text-transform: uppercase;" class="form-control" maxlength="3" placeholder="XXX" required>
 									</div>
 									<div class="form-group">
 										<label>Name:</label>
 										<input type="text" name="txt_name" style="text-transform: uppercase;" class="form-control" placeholder="DESCRIPTION" required>
 									</div>
+									{{-- <div class="form-group">
+										<label>Type:</label>
+										<select name="cbo_type" class="form-control" required>
+											<option value="" disabled readonly selected>-- Select a Type --</option>
+											<option value="es">Employee Status</option>
+											<option value="et">Employee Type</option>
+										</select>
+									</div> --}}
 								</div>
 							</div>
 						</span>
@@ -124,6 +135,7 @@
 			$('input[name="txt_code"]').removeAttr('readonly');
 			$('input[name="txt_code"]').val('');
 			$('input[name="txt_name"]').val('');
+			$('select[name="cbo_type"]').val('').trigger('change');
 
 			$('.AddMode').show();
 			$('.DeleteMode').hide();
@@ -137,6 +149,7 @@
 			$('input[name="txt_code"]').attr('readonly', '');
 			$('input[name="txt_code"]').val(selected_row.attr('data_id'));
 			$('input[name="txt_name"]').val(selected_row.attr('data_name'));
+			$('select[name="cbo_type"]').val(selected_row.attr('data_type')).trigger('change');
 
 			$('.AddMode').show();
 			$('.DeleteMode').hide();
@@ -150,6 +163,7 @@
 			$('input[name="txt_code"]').attr('readonly', '');
 			$('input[name="txt_code"]').val(selected_row.attr('data_id'));
 			$('input[name="txt_name"]').val(selected_row.attr('data_name'));
+			$('select[name="cbo_type"]').val(selected_row.attr('data_type')).trigger('change');
 			$('#TOBEDELETED').text(selected_row.attr('data_name'));
 
 			$('.AddMode').hide();

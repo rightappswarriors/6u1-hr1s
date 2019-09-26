@@ -196,7 +196,9 @@
 							      		@isset($emp_status)
 											<option value="">Select Employement Status...</option>
 											@foreach ($emp_status as $d)
+												{{-- @if($d->type=="es") --}}
 												<option value="{{$d->status_id}}" @isset($MYDATA){{($MYDATA->empstatus == $d->status_id) ? "selected" : ""}}@endisset>{{$d->description}}</option>
+												{{-- @endif --}}
 											@endforeach
 										@else
 											<option value="">No Employement Status registered...</option>
@@ -204,6 +206,23 @@
 							      	</select>
 							      </div>
 							    </div>
+							    {{-- <div class="form-group row">
+							      <label class="col-sm-3 col-form-label">Employement Type <strong style="color:red">*</strong></label>
+							      <div class="col-sm-9">
+							      	<select class="form-control T0r" name="txt_emp_type" required="">
+							      		@isset($emp_status)
+											<option value="">Select Employement Type...</option>
+											@foreach ($emp_status as $d)
+												@if($d->type=="et")
+												<option value="{{$d->status_id}}" @isset($MYDATA){{($MYDATA->emptype == $d->status_id) ? "selected" : ""}}@endisset>{{$d->description}}</option>
+												@endif
+											@endforeach
+										@else
+											<option value="">No Employement Type registered...</option>
+							      		@endisset
+							      	</select>
+							      </div>
+							    </div> --}}
 							    {{-- <div class="row">
 							    	<div class="col">
 							    		<div class="form-group row">
@@ -835,6 +854,7 @@
 				// return true;
 				$('input[name="txt_hired"]').parsley().validate();
 				$('select[name="txt_emp_stat"]').parsley().validate();
+				// $('select[name="txt_emp_type"]').parsley().validate();
 				$('select[name="txt_rate_typ"]').parsley().validate();
 				$('input[name="txt_py_rate"]').parsley().validate();
 				$('select[name="txt_tax_brac"]').parsley().validate();
@@ -849,6 +869,7 @@
 				if (
 					$('input[name="txt_hired"]').parsley().validate() == true &&
 					$('select[name="txt_emp_stat"]').parsley().validate() == true &&
+					// $('select[name="txt_emp_type"]').parsley().validate() == true &&
 					$('select[name="txt_rate_typ"]').parsley().validate() == true &&
 					$('input[name="txt_py_rate"]').parsley().validate() == true &&
 					$('select[name="txt_tax_brac"]').parsley().validate() == true /*&&

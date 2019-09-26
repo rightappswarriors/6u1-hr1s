@@ -4,6 +4,15 @@
 	<div class="card">
 		<div class="card-header">
 			<i class="fa fa-clock-o"></i> SSS
+			<button type="button" class="btn btn-success" id="opt-add">
+				<i class="fa fa-plus"></i> Add
+			</button>
+			<button type="button" class="btn btn-warning" id="opt-add-loan">
+				<i class="fa fa-plus"></i> GSIS:Loan Types
+			</button>
+			<button type="button" class="btn btn-info" id="opt-print">
+				<i class="fa fa-print"></i> Print List
+			</button>
 		</div>
 		<div class="card-body">
 			<div class="row">
@@ -11,7 +20,16 @@
 					<div class="card">
 						<div class="card-body">
 							<div class="table-responsive">
-								<table class="table table-hover" id="dataTable">
+								<table class="table table-hover table-bordered" id="dataTable">
+									<col>
+									<col>
+									<col>
+									<col>
+									<col>
+									<col>
+									<col>
+									<col>
+									<col>
 									<thead>
 										<tr>
 											<th>Code</th>
@@ -22,6 +40,7 @@
 											<th>E.C.</th>
 											<th>Employee's(EE)<br>Share</th>
 											<th>Total Count</th>
+											<th></th>
 										</tr>
 									</thead>
 									<tbody>
@@ -37,6 +56,14 @@
 													<td>{!!Core::currSign()!!}{{number_format($pp->s_ec, 2, ".", ", ")}}</td>
 													<td>{!!Core::currSign()!!}{{number_format($pp->empshare_ec, 2, ".", ", ")}}</td>
 													<td>{!!Core::currSign()!!}{{number_format((floatval($pp->empshare_sc) + floatval($pp->empshare_ec) + floatval($pp->s_ec)), 2, ".", ", ")}}</td>
+													<td>
+														<button type="button" class="btn btn-primary mr-1" id="opt-update" onclick="row_update(this)">
+															<i class="fa fa-edit"></i>
+														</button>
+														<button type="button" class="btn btn-danger" id="opt-delete" onclick="row_delete(this)">
+															<i class="fa fa-trash"></i>
+														</button>
+													</td>
 												</tr>
 												@endforeach
 											@endif
@@ -47,7 +74,7 @@
 						</div>
 					</div>
 				</div>
-				<div class="col-3">
+				{{-- <div class="col-3">
 					<div class="card">
 						<div class="card-body">
 							<button type="button" class="btn btn-success btn-block" id="opt-add"><i class="fa fa-plus"></i> Add</button>
@@ -56,7 +83,7 @@
 							<button type="button" class="btn btn-danger btn-block" id="opt-delete"><i class="fa fa-trash"></i> Delete</button>
 							<button type="button" class="btn btn-info btn-block" id="opt-print"><i class="fa fa-print"></i> Print List</button>
 						</div>
-					</div>
+					</div> --}}
 				</div>
 			</div>
 		</div>
@@ -414,7 +441,9 @@
 			$('#modal-pp').modal('show');
 		});
 
-		$('#opt-update').on('click', function() {
+		// $('#opt-update').on('click', function() {
+		function row_update(obj) {
+			selected_row = $($(obj).parents()[1]);
 			$('#frm-pp').attr('action', '{{url('master-file/sss')}}/update');
 			$('input[name="txt_code"]').attr('readonly', '');
 			$.ajax({
@@ -447,9 +476,12 @@
 			$('.AddMode').show();
 			$('.DeleteMode').hide();
 			$('#modal-pp').modal('show');
-		});
+		// });
+		}
 
-		$('#opt-delete').on('click', function() {
+		// $('#opt-delete').on('click', function() {
+		function row_delete(obj) {
+			selected_row = $($(obj).parents()[1]);
 			$('#frm-pp').attr('action', '{{url('master-file/sss')}}/delete');
 		
 			$('input[name="txt_code"]').attr('readonly', '');
@@ -462,6 +494,7 @@
 			$('.AddMode').hide();
 			$('.DeleteMode').show();
 			$('#modal-pp').modal('show');
-		});
+		// });
+		}
 	</script>
 @endsection

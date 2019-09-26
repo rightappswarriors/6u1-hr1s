@@ -4,6 +4,12 @@
 	<div class="card">
 		<div class="card-header">
 			<i class="fa fa-calendar"></i> Leaves Entry
+			<button type="button" class="btn btn-success" id="opt-add">
+				<i class="fa fa-plus"></i> Add
+			</button>
+			<button type="button" class="btn btn-info" id="opt-print">
+				<i class="fa fa-print"></i> Print List
+			</button>
 			<div class="float-right">
 				<a href="{{ url('master-file/leave-types') }}" class="btn btn-default btn-sm"><i class="fa fa-cogs"></i></a>
 			</div>
@@ -77,7 +83,7 @@
 						</div>
 
 						<div class="col-2">
-							<div class="row p-2">
+							{{-- <div class="row p-2">
 								<div class="col text-right">
 									<button type="button" class="btn btn-success" id="opt-add"><i class="fa fa-plus"></i></button>
 								</div>
@@ -94,7 +100,7 @@
 									<button type="button" class="btn btn-info" id="opt-print"><i class="fa fa-print"></i></button>
 								</div>
 							</div>
-							{{-- <button type="button" class="btn btn-warning" id="opt-money"><i class="fa fa-money"></i></button> --}}
+							<button type="button" class="btn btn-warning" id="opt-money"><i class="fa fa-money"></i></button> --}}
 						</div>
 					</div>		
 				</div>
@@ -134,6 +140,7 @@
 											<th>No of days</th>
 											<th>With pay</th>
 											{{-- <th>Amount</th> --}}
+											<th></th>
 										</tr>
 									</thead>
 									<tbody class="text-center"></tbody>
@@ -329,7 +336,7 @@
 				display: none;
 			}
 
-			#print_hide, #print_name_hide, .card-header, #dataTable_info, .pagination, .dataTables_empty, #dataTable_filter {
+			#print_hide, #print_name_hide, .card-header, #dataTable_info, .pagination, .dataTables_empty, #dataTable_filter, #opt-update, #opt-delete {
 				display: none !important;
 			}
 
@@ -450,6 +457,12 @@
 				data.no_of_days,
 				data.leave_pay,
 				// data.leave_amount
+				'<button type="button" class="btn btn-primary" id="opt-update" onclick="row_update(this)">'+
+				'	<i class="fa fa-edit"></i>'+
+				'</button>'+
+				'<button type="button" class="btn btn-danger" id="opt-delete" onclick="row_delete(this)">'+
+				'	<i class="fa fa-trash"></i>'+
+				'</button',
 
 			]).draw();
 		}
@@ -651,7 +664,9 @@
 			}
 		});
 
-		$('#opt-update').on('click', function() {
+		// $('#opt-update').on('click', function() {
+		function row_update(obj) {
+			selected_row = $($(obj).parents()[1]);
 			if (ValidateSearchFrm()) {
 				if (selected_row!=null) {
 					$.ajax({
@@ -684,9 +699,12 @@
 					NoSelectedRow();
 				}
 			}
-		});
+		// });
+		}
 
-		$('#opt-delete').on('click', function() {
+		// $('#opt-delete').on('click', function() {
+		function row_delete(obj) {
+			selected_row = $($(obj).parents()[1]);
 			if (ValidateSearchFrm()) {
 				if (selected_row!=null) {
 					$('#ModalLabel').text("Delete Leave Entry");
@@ -697,7 +715,8 @@
 					NoSelectedRow();
 				}
 			}
-		});
+		// });
+		}
 
 		$('#dtp_lfrm, #dtp_lto').on('change', function() {
 			GetNOD();
