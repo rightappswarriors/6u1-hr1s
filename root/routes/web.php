@@ -513,20 +513,25 @@
 			/* SYSTEM DATA UPDATE */
 			Route::prefix('error-log')->group(function() {
 				Route::get('', function() {
-					$errorlogs = Core::READ_FILE('errorlog.txt', 'txt', $folder = 'logs/system');/* dd($errorlogs);*/
-					unset($errorlogs[0]);
-					$logs = [];
+					$errorlogs = storage_path('logs\errorlog.txt');
+					if (file_exists($errorlogs)) {
+						$errorlogs = Core::READ_FILE('errorlog.txt', 'txt', $folder = 'logs');/* dd($errorlogs);*/
+						// unset($errorlogs[0]);
+						$logs = [];
 
-					if (count($errorlogs)!=0) {
-						foreach($errorlogs as $log) {
-							$a = explode(" | ", $log);
-							$n = [];
-							$n['date'] = $a[0];
-							$n['module'] = $a[1];
-							$n['msg'] = $a[2];
-							array_push($logs, $n);
+						if (count($errorlogs)>0) {
+							foreach($errorlogs as $log) {
+								$a = explode(" | ", $log);
+								$n = [];
+								$n['date'] = $a[0];
+								$n['module'] = $a[1];
+								$n['msg'] = $a[2];
+								array_push($logs, $n);
+							}
 						}
-					} /*dd($logs);*/
+					} else {
+						$logs = null;
+					}
 					
 					return view('pages.settings.error-log', compact('logs'));
 				});
@@ -564,7 +569,8 @@
 			// dd(Core::ToMinutes("8:00"), Core::ToMinutes("13:00"));
 			// dd(Timelog::GetRenHours("8:00", "18:30", "pm"));
 			// dd(Timelog::ReqTimeIn_2());
-			dd(Timelog::IfUndertime("06:15:00",Timelog::ReqHours2()), Timelog::ReqHours2());
+			// dd(Timelog::IfUndertime("06:15:00",Timelog::ReqHours2()), Timelog::ReqHours2());
+			dd(Timelog::ReqHours2());
 		});
 
 		/* NOTIFICATION */

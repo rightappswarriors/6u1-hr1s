@@ -26,15 +26,25 @@
 						<th>Details</th>
 					</thead>
 					<tbody>
-						@if(count($logs) != 0)
-							@foreach($logs as $log)
+						@if($logs!=null)
+							@if(count($logs) > 0)
+								@foreach($logs as $log)
+								<tr>
+									<td>{{$log['date']}}</td>
+									<td>{{$log['module']}}</td>
+									<td>{{$log['msg']}}</td>
+								</tr>
+								@endforeach
+							@else
 							<tr>
-								<td>{{$log['date']}}</td>
-								<td>{{$log['module']}}</td>
-								<td>{{$log['msg']}}</td>
+								<td colspan="3">No errors.</td>
 							</tr>
-							@endforeach
-						@endif
+							@endif
+						@else
+						<tr>
+							<td colspan="3">Some files are missing.</td>
+						</tr>
+						@endisset
 					</tbody>
 				</table>
 			</div>
