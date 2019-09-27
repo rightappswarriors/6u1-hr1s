@@ -5,6 +5,7 @@ namespace App;
 use Illuminate\Database\Eloquent\Model;
 use DB;
 use Core;
+use Leave;
 
 class Timelog extends Model
 {
@@ -154,11 +155,12 @@ class Timelog extends Model
     {
         /**
         * @param string "hh:mm:ss" format
-        * Validates a log if it is within ReqTimeIn_2() and ReqTimeOut_2() range
+        * Validates a log if it is within ReqTimeIn_2() and ReqTimeOut_2()+MinReqOTHrs() range
+        * MinReqOTHrs() is added to ReqTimeOut_2() is because the minimum required overtime hours is stated in MinReqOTHrs()
         * @return bolean true / false
         */
 
-        if (strtotime(self::ReqTimeIn_2()) <= strtotime($time) && strtotime($time) <= strtotime(self::ReqTimeOut_2())) {
+        if (strtotime(self::ReqTimeIn_2()) <= strtotime($time) && strtotime($time) <= strtotime(Core::GET_TIME_TOTAL([self::ReqTimeOut_2(), self::MinReqOTHrs()]))) {
             return true;
         } else {
             return false;
@@ -169,10 +171,10 @@ class Timelog extends Model
     {
         /**
         * @param string "00:00" format
-        * Validates a log if it is Over ReqTimeOut_2()(PM time out)
+        * Validates a log if it is Over ReqTimeOut_2()(PM time out) + MinReqOTHrs() (Minimum OT Hrs)
         * @return bolean true / false
         */
-        if (strtotime(self::ReqTimeOut_2()) < strtotime($time)) {
+        if (strtotime(Core::GET_TIME_TOTAL([self::ReqTimeOut_2(), self::MinReqOTHrs()])) <= strtotime($time)) {
             return true;
         } else {
             return false;
@@ -197,7 +199,7 @@ class Timelog extends Model
         /**
         * Returns the time difference between start time and end time in "00:00" format
         * Values must be in 24 hours format
-        * @return "hh:mm:ss"
+        * @return "hh:mm"
         */
         list($ti_h, $ti_m/*, $ti_sec*/) = explode(":", self::ReqTimeIn());
         list($to_h, $to_m/*, $to_sec*/) = explode(":", self::ReqTimeOut_2());
@@ -282,6 +284,25 @@ class Timelog extends Model
             return true;
         }
         return false;
+    }
+
+    public static function IfLeave($empid, string $date)
+    {
+        /**
+        * Returns a bolean for the given employee id and date.
+        * @return true if employee is on leave.
+        * @return false if employee is not on leave.
+        */
+        $tmp = Leave::GetLeaveRecord2($empid, $date, true);
+        if ($tmp!=null) {
+            if ($tmp->leave_pay == "YES") {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
     }
 
     public static function IfWeekdays($date)
@@ -374,11 +395,6 @@ class Timelog extends Model
             return true;
         }
         return false;
-    }
-
-    public static function IfLeave(string $date, $empid)
-    {
-        
     }
 
     public static function IfLate(string $time)

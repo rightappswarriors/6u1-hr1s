@@ -63,6 +63,9 @@ class Employee extends Model
 
     public static function GetEmployee($empid)
     {
+        /**
+        * @return employee info
+        */
         try {
             return DB::table(self::$tbl_name)->where('empid', $empid)->first();
         } catch (\Exception $e) {

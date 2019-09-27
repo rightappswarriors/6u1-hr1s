@@ -1,1 +1,2 @@
 09-26-2019 11:50 | GenerateDTRController | Trying to get property 'empid' of non-object (GDTRCA00000)
+09-27-2019 13:02 | CalendarMainController | SQLSTATE[23502]: Not null violation: 7 ERROR:  null value in column "date_holiday" violates not-null constraint DETAIL:  Failing row contains (null, 123, RH, 33, null). (SQL: insert into "hr_holidays" ("date_holiday", "description", "holiday_type") values (, 123, RH)) (CMC00000)

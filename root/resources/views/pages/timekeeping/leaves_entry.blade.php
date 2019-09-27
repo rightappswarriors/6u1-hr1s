@@ -65,7 +65,7 @@
 												From:
 											</div>
 											<div class="col">
-												<input type="text" name="date_from" id="date_from" class="form-control" value="{{date('m-01-Y')}}" required>
+												<input type="text" name="date_from" id="date_from" class="form-control" value="{{date('Y-m-01')}}" required>
 											</div>
 										</div>
 
@@ -74,7 +74,7 @@
 												To:
 											</div>
 											<div class="col">
-												<input type="text" name="date_to" id="date_to" class="form-control" value="{{date('m-d-Y')}}" required>
+												<input type="text" name="date_to" id="date_to" class="form-control" value="{{date('Y-m-d')}}" required>
 											</div>
 										</div>
 									</div>
@@ -199,7 +199,7 @@
 											</div>
 											<div class="col-4">
 												<label>Date Filed:</label>
-												<input type="text" name="dtp_filed" id="dtp_filed" class="form-control" id="dtp_filed" value="{{date('m-d-Y')}}" readonly>
+												<input type="text" name="dtp_filed" id="dtp_filed" class="form-control" id="dtp_filed" value="{{date('Y-m-d')}}" readonly>
 											</div>
 										</div>
 									</div>
@@ -234,7 +234,7 @@
 										</div>
 										<div class="row">
 											<div class="col-4">
-												<input type="text" name="dtp_lfrm" id="dtp_lfrm" class="form-control" value="{{date('m-d-Y')}}">
+												<input type="text" name="dtp_lfrm" id="dtp_lfrm" class="form-control" value="{{date('Y-m-d')}}">
 											</div>
 											<div class="col-2">
 												<input type="checkbox" class="form-control" name="fam" id="fam">
@@ -264,7 +264,7 @@
 										</div>
 										<div class="row">
 											<div class="col-4">
-												<input type="text" name="dtp_lto" id="dtp_lto" class="form-control" value="{{date('m-d-Y')}}" required>
+												<input type="text" name="dtp_lto" id="dtp_lto" class="form-control" value="{{date('Y-m-d')}}" required>
 											</div>
 											<div class="col-2">
 												<input type="checkbox" class="form-control" name="tam" id="tam">

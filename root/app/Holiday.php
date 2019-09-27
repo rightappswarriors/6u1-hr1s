@@ -33,11 +33,29 @@ class Holiday extends Model
 
     public static function HolidayType($id)
     {
-        /*
-        | Returns Holiday Type
+        /**
+        * @param $id Holiday row ID on database table
+        * @return Holiday Type
         */
         try {
             $day = DB::table(self::$tbl_name)->where('cancel', '=', null)->where('id', '=', $id)->first();
+            if ($day == null) {
+                return null;
+            }
+            return $day->holiday_type;
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
+    public static function HolidayType2(String $date)
+    {
+        /**
+        * @param $date - selected date
+        * @return Holiday Type
+        */
+        try {
+            $day = DB::table(self::$tbl_name)->where('cancel', '=', null)->where('date_holiday', '=', $date)->first();
             if ($day == null) {
                 return null;
             }

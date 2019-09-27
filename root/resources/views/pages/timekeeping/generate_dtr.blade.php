@@ -127,6 +127,14 @@
 										<td id="sum-a" colspan="2"></td>
 									</tr>
 									<tr>
+										<th style="text-align: center;" colspan="2">Leave</th>
+										<td id="sum-le" colspan="2"></td>
+									</tr>
+									<tr>
+										<th style="text-align: center;" colspan="2">Holiday</th>
+										<td id="sum-h" colspan="2"></td>
+									</tr>
+									<tr>
 										<th style="text-align: center;" colspan="2">Total Hours</th>
 										<td id="sum-th" colspan="2"></td>
 									</tr>
@@ -137,10 +145,6 @@
 									<tr>
 										<th style="text-align: center;" colspan="2">Undertime</th>
 										<td id="sum-u" colspan="2"></td>
-									</tr>
-									<tr>
-										<th style="text-align: center;" colspan="2">Holiday</th>
-										<td id="sum-h" colspan="2"></td>
 									</tr>
 									<tr>
 										<th style="text-align: center;">Generated</th>
@@ -245,7 +249,7 @@
 		function LoadDtrTable()
 		{
 			hideErrorDiv();
-			// $('#btn-generate-ind').attr('disabled', false);
+			$('#btn-generate-ind').attr('disabled', false);
 			$.ajax({
 				type : 'get',
 				url : '{{url('timekeeping/generate-dtr/partial-generation')}}',
@@ -275,7 +279,7 @@
 										'<a href="{{url('timekeeping/timelog-entry')}}" style="color:white;"><i class="fa fa-hand-o-right"></i> Check missing time logs</a>'+
 									'</div>'
 								)
-								// $('#btn-generate-ind').attr('disabled', true);
+								$('#btn-generate-ind').attr('disabled', true);
 								alert("DTR has errors. Cannot be saved.");
 							}
 						} else {
@@ -302,6 +306,7 @@
 			$('#sum-u').text(data.undertime);
 			$('#sum-th').text(data.weekdayhrs);
 			$('#sum-h').text(data.holidays);
+			$('#sum-le').text(data.leaves);
 			var pt = $('#payroll_gen_type').val().toLowerCase();
 			$('#sum-to').text(/*data.overtime*/ pt.charAt(0).toUpperCase() + pt.slice(1));
 			$('#sum-stat').html((data.isgenerated==1) ? '<span class="btn btn-success">Yes</span>' : '<span class="btn btn-danger">No</span>');
@@ -321,6 +326,7 @@
 			$('#sum-to').text('');
 			$('#sum-th').text('');
 			$('#sum-h').text('');
+			$('#sum-le').text('');
 			$('#sum-stat').html('');
 			$('#sum-flagged').html('');
 			$('#pp-dates').text('');
@@ -387,72 +393,74 @@
 				data : {dtrs:dtr_summary},
 				dataTy : 'json',
 				success : function(data) {
-					// console.log(data);
-					var a = data[0];
-					var b = data[1];
-					var parse = null;
-					if (b=="indv") {
-						if (a!="error") {
-							if (a!="existing-error") {
-								if (a!="max") {
-									parse = JSON.parse(a[0]);
-									if (a[1]=="isgenerated") {
-										alert("Payroll period is already generated. DTR cannot be re-generated.");
-									} else {
-										alert("DTR Generated (Individual).");
-									}
-									maintable.clear().draw();
-									for (var i = 0; i < parse.length; i++) {
-										LoadHistoryTable(parse[i]);
-									}
-									$('#sum-stat').html('<span class="btn btn-success">Yes</span>');
-									SearchTable();
-								} else {
-									alert("DTR is already generated. Cannot generated DTR again. Failed on saving.");
-								}
-							} else {
-								alert("There still errors on the timelog entry. Unable to save DTR summary.");
-							}
-						} else {
-							alert("Error in saving DTR.");
-						}
-					}
-					else if (b=="group") {
-						var error = new Array();
-						if (a.length > 0) {
-							for (var i = 0; i < a.length; i++) {
-								var c = a[i];
-								if (c!="error") {
-									if (c!="existing-error") {
-										if (c!="max") {
-											parse = JSON.parse(c[0]);
-											maintable.clear().draw();
-											for (var j = 0; j > parse.length; j++) {
-												LoadHistoryTable(parse[i]);
-											}
-										} else {
-											error.push((i+1)+".)"+"DTR is already generated. Cannot generated DTR again. Failed on saving.");
-										}
-									} else {
-										error.push((i+1)+".)"+"There still errors on the timelog entry. Unable to save DTR summary.");
-									}
-								} else {
-									error.push((i+1)+".) "+"Error on saving.");
-								}
-							}
-						}
-						if (error.length > 0) {
-							$('#alert-generate-error').show();
-							for (var i = 0; i < error.length; i++) {
-								$('#alert-generate-error-body').append(error[i]+'<br>');
-							}
-							alert("There are errors when generating.");
-						} else {
-							alert("DTR Generated (Group).");
-						}
-						emptySummaryTable();
-						// console.log(error);
-					}
+					console.log(data);
+					// var a = data[0];
+					// var b = data[1];
+					// var parse = null;
+					// if (b=="indv") {
+					// 	if (a!="error") {
+					// 		if (a!="existing-error") {
+					// 			if (a!="max") {
+					// 				parse = JSON.parse(a[0]);
+					// 				if (a[1]=="isgenerated") {
+					// 					alert("Payroll period is already generated. DTR cannot be re-generated.");
+					// 				} else {
+					// 					alert("DTR Generated (Individual).");
+					// 				}
+					// 				maintable.clear().draw();
+					// 				for (var i = 0; i < parse.length; i++) {
+					// 					LoadHistoryTable(parse[i]);
+					// 				}
+					// 				$('#sum-stat').html('<span class="btn btn-success">Yes</span>');
+					// 				SearchTable();
+					// 			} else {
+					// 				alert("DTR is already generated. Cannot generated DTR again. Failed on saving.");
+					// 			}
+					// 		} else {
+					// 			alert("There still errors on the timelog entry. Unable to save DTR summary.");
+					// 		}
+					// 	} else {
+					// 		alert("Error in saving DTR.");
+					// 	}
+					// }
+					// else if (b=="group") {
+					// 	var error = new Array();
+					// 	if (a.length > 0) {
+					// 		for (var i = 0; i < a.length; i++) {
+					// 			var c = a[i];
+					// 			if (c!="error") {
+					// 				if (c!="existing-error") {
+					// 					if (c!="max") {
+					// 						parse = JSON.parse(c[0]);
+					// 						maintable.clear().draw();
+					// 						for (var j = 0; j > parse.length; j++) {
+					// 							LoadHistoryTable(parse[i]);
+					// 						}
+					// 					} else {
+					// 						error.push((i+1)+".)"+"DTR is already generated. Cannot generated DTR again. Failed on saving.");
+					// 					}
+					// 				} else {
+					// 					error.push((i+1)+".)"+"There still errors on the timelog entry. Unable to save DTR summary.");
+					// 				}
+					// 			} else {
+					// 				error.push((i+1)+".) "+"Error on saving.");
+					// 			}
+					// 		}
+					// 	}
+					// 	if (error.length > 0) {
+					// 		$('#alert-generate-error').show();
+					// 		for (var i = 0; i < error.length; i++) {
+					// 			$('#alert-generate-error-body').append(error[i]+'<br>');
+					// 		}
+					// 		alert("There are errors when generating.");
+					// 	} else {
+					// 		alert("DTR Generated (Group).");
+					// 	}
+					// 	emptySummaryTable();
+					// }
+				},
+				complete : function()
+				{
 					RemoveSpinningIcon();
 				},
 				error : function() {

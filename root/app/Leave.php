@@ -58,6 +58,26 @@ class Leave extends Model
     	}
     }
 
+    public static function GetLeaveRecord2($empid, String $date, $onleave = false)
+    {
+        /**
+        * @param $empid - employee id
+        * @param $date - selected date
+        * @param $onleave - by default false; true if on leave
+        * @return leave record(s)
+        */
+        try {
+            if ($onleave) {
+                $onleave = "YES";
+            } else {
+                $onleave = "NO";
+            }
+            return DB::table(self::$tbl_name)->where('empid', '=', $empid)->where('cancel', '=', null)->whereDate('leave_from', '<=', $date)->whereDate('leave_to', '>=', $date)->where('leave_pay', '=', $onleave)->first();
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
     public static function GetLeaveName($lvcode) {
     	try {
     		return DB::table('hr_leave_type')->where('code', '=', $lvcode)->where('cancel', '=', null)->first();
@@ -97,4 +117,6 @@ class Leave extends Model
             return null;
         }
     }
+
+
 }

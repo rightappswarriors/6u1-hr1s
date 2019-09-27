@@ -563,14 +563,7 @@
             // header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
             // header('Content-Disposition: attachment; filename=download.xlsx');
 
-			// $time1 = strtotime("09:01");
-			// $time2 = strtotime("09:00");
-			// dd($time1 > $time2, $time1, $time2);
-			// dd(Core::ToMinutes("8:00"), Core::ToMinutes("13:00"));
-			// dd(Timelog::GetRenHours("8:00", "18:30", "pm"));
-			// dd(Timelog::ReqTimeIn_2());
-			// dd(Timelog::IfUndertime("06:15:00",Timelog::ReqHours2()), Timelog::ReqHours2());
-			dd(Timelog::IfHoliday("2019-09-25"));
+			
 		});
 
 		/* NOTIFICATION */

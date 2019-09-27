@@ -116,8 +116,8 @@
   </li>
   <li class="nav-item" id="calendar">
     <a class="nav-link" href="{{url('calendar/')}}">
-      <i class="fa fa-calendar"></i>
-      <span>Calendar</span>
+      <i class="fa fa-fw fa-calendar"></i>
+      <span> Holidays</span>
     </a>
   </li>
   <li class="nav-item" id="timekeeping">

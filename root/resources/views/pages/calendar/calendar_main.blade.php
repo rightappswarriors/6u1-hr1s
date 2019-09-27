@@ -3,7 +3,7 @@
 @section('to-body')
 	<div class="card">
 		<div class="card-header">
-			<i class="fa fa-calendar" aria-hidden="true"></i> Calendar
+			<i class="fa fa-calendar" aria-hidden="true"></i> Holiday Calendar
 		</div>
 		<div class="card-body">
 			{{-- <div id="top">

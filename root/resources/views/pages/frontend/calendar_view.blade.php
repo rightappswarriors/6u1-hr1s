@@ -5,7 +5,7 @@
         <div class="card mx-auto big-card">
             <div class="card-header" align="center">
         		<button class="float-left btn btn-primary" name="back" onclick="window.location = '{{url('/')}}'">Back</button>
-                <h2>CALENDAR</h2>
+                <h2>HOLIDAY CALENDAR</h2>
             </div>
             <div class="card-body row">
             	<div class="col-sm-2">
