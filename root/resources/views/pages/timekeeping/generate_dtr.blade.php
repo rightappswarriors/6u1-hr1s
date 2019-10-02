@@ -4,6 +4,9 @@
 	<div class="card">
 		<div class="card-header">
 			<i class="fa fa-calendar"></i> Generate DTR 
+			<div class="float-right">
+				<a href="{{ url('timekeeping/timelog-entry') }}" class="btn btn-default btn-sm"><i class="fa fa-clock-o"></i> View Timelogs</a>
+			</div>
 		</div>
 		<div class="card-body">
 			<form method="post" action="{{url('timekeeping/generate-dtr/generate-dtr')}}" id="frm-pp" class="mb-2">
@@ -58,8 +61,8 @@
 						</select>
 					</div>
 					<div class="form-group">
-						<button type="button" class="btn btn-primary btn-spin mr-1" id="btn-generate-ind" disabled="">Generate (Individual)</button>
-						<button type="button" class="btn btn-primary btn-spin" id="btn-generate-ofc" disabled="">Generate (By Office)</button>
+						{{-- <button type="button" class="btn btn-primary btn-spin mr-1" id="btn-generate-ind" disabled="">Generate (Individual)</button> --}}
+						<button type="button" class="btn btn-primary" id="btn-generate-ofc"><i class="fa fa-share"></i> <i class="fa fa-server"></i> Generate (By Office)</button>
 					</div>
 				</div>
 			</form>
@@ -84,10 +87,12 @@
 									<col width="15%">
 									<col>
 									<col width="25%">
+									<col width="10%">
 									<thead>
 										<th>Employee ID</th>
 										<th>Name</th>
 										<th>Job Title</th>
+										<th>Option</th>
 									</thead>
 									<tbody>
 										{{-- @foreach($data[2] as $emp)
@@ -213,7 +218,7 @@
 				<div class="modal-footer">
 					<form method="post" action="#" id="frm-add">
 						<button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="ClearFld()">No</button>
-						<button type="submit" class="btn btn-primary">Yes</button>
+						<button type="submit" class="btn btn-primary" id="modal-add-submitbtn">Yes <i class="fa fa-spin fa-spinner" id="modal-add-submitbtn-loader" style="display: none;"></i></button>
 					</form>
 				</div>
 			</div>
@@ -249,7 +254,6 @@
 		function LoadDtrTable()
 		{
 			hideErrorDiv();
-			$('#btn-generate-ind').attr('disabled', false);
 			$.ajax({
 				type : 'get',
 				url : '{{url('timekeeping/generate-dtr/partial-generation')}}',
@@ -263,6 +267,8 @@
 				dataTy : 'json',
 				beforeSend : function() {
 					$('#dtr_summary_loader').show();
+					$('#modal-add-submitbtn').attr('disabled', true);
+					$('#modal-add-submitbtn-loader').show();
 				},
 				success : function(data) {
 					if (data!="error") {
@@ -279,7 +285,6 @@
 										'<a href="{{url('timekeeping/timelog-entry')}}" style="color:white;"><i class="fa fa-hand-o-right"></i> Check missing time logs</a>'+
 									'</div>'
 								)
-								$('#btn-generate-ind').attr('disabled', true);
 								alert("DTR has errors. Cannot be saved.");
 							}
 						} else {
@@ -292,6 +297,8 @@
 				complete : function()
 				{
 					$('#dtr_summary_loader').hide();
+					$('#modal-add-submitbtn').removeAttr('disabled');
+					$('#modal-add-submitbtn-loader').hide();
 				},
 			});
 		}
@@ -349,7 +356,8 @@
 			tbl_emp.row.add([
 				data.empid,
 				data.empname,
-				data.jobtitle
+				data.jobtitle,
+				'<button type="button" class="btn btn-primary btn-spin mr-1" onclick="GenerateIndv(this)"><i class="fa fa-share"></i> <i class="fa fa-server"></i></button>'
 			]).draw();
 			hideErrorDiv();
 		}
@@ -377,107 +385,120 @@
 
 		function onToggleSaveDTRModal_ofc()
 		{
-			$('#frm-add').attr('action', '{{url('timekeeping/generate-dtr/save-dtr/by-department')}}?ppid='+$('#payroll_period').val()+'&ofc_id='+$('#payroll_ofc').val()+'&month='+$('#payroll_month').val()+'&year='+$('#payroll_year').val());
+			$('#frm-add').attr('action', '{{url('timekeeping/generate-dtr/save-dtr/by-department')}}?ppid='+$('#payroll_period').val()+'&ofc_id='+$('#payroll_ofc').val()+'&month='+$('#payroll_month').val()+'&year='+$('#payroll_year').val()+'&empstat='+$('#payroll_emp_stat').val()+'&gtype='+$('#payroll_gen_type').val());
 			$('#modal-add').modal('show');
 		}
 
-		$('#modal-add').on('hidden.bs.modal', function() {
-			RemoveSpinningIcon();
-		});
+		// $('#modal-add').on('hidden.bs.modal', function() {
+		// 	RemoveSpinningIcon();
+		// });
 
 		$('#frm-add').on('submit', function(e) {
 			e.preventDefault();
+			$('#modal-add').modal('hide');
 			$.ajax({
 				type : $(this).attr('method'),
 				url : $(this).attr('action'),
 				data : {dtrs:dtr_summary},
 				dataTy : 'json',
+				beforeSend : function()
+				{
+					togglePreloader();
+				},
 				success : function(data) {
 					console.log(data);
-					// var a = data[0];
-					// var b = data[1];
-					// var parse = null;
-					// if (b=="indv") {
-					// 	if (a!="error") {
-					// 		if (a!="existing-error") {
-					// 			if (a!="max") {
-					// 				parse = JSON.parse(a[0]);
-					// 				if (a[1]=="isgenerated") {
-					// 					alert("Payroll period is already generated. DTR cannot be re-generated.");
-					// 				} else {
-					// 					alert("DTR Generated (Individual).");
-					// 				}
-					// 				maintable.clear().draw();
-					// 				for (var i = 0; i < parse.length; i++) {
-					// 					LoadHistoryTable(parse[i]);
-					// 				}
-					// 				$('#sum-stat').html('<span class="btn btn-success">Yes</span>');
-					// 				SearchTable();
-					// 			} else {
-					// 				alert("DTR is already generated. Cannot generated DTR again. Failed on saving.");
-					// 			}
-					// 		} else {
-					// 			alert("There still errors on the timelog entry. Unable to save DTR summary.");
-					// 		}
-					// 	} else {
-					// 		alert("Error in saving DTR.");
-					// 	}
-					// }
-					// else if (b=="group") {
-					// 	var error = new Array();
-					// 	if (a.length > 0) {
-					// 		for (var i = 0; i < a.length; i++) {
-					// 			var c = a[i];
-					// 			if (c!="error") {
-					// 				if (c!="existing-error") {
-					// 					if (c!="max") {
-					// 						parse = JSON.parse(c[0]);
-					// 						maintable.clear().draw();
-					// 						for (var j = 0; j > parse.length; j++) {
-					// 							LoadHistoryTable(parse[i]);
-					// 						}
-					// 					} else {
-					// 						error.push((i+1)+".)"+"DTR is already generated. Cannot generated DTR again. Failed on saving.");
-					// 					}
-					// 				} else {
-					// 					error.push((i+1)+".)"+"There still errors on the timelog entry. Unable to save DTR summary.");
-					// 				}
-					// 			} else {
-					// 				error.push((i+1)+".) "+"Error on saving.");
-					// 			}
-					// 		}
-					// 	}
-					// 	if (error.length > 0) {
-					// 		$('#alert-generate-error').show();
-					// 		for (var i = 0; i < error.length; i++) {
-					// 			$('#alert-generate-error-body').append(error[i]+'<br>');
-					// 		}
-					// 		alert("There are errors when generating.");
-					// 	} else {
-					// 		alert("DTR Generated (Group).");
-					// 	}
-					// 	emptySummaryTable();
-					// }
-				},
-				complete : function()
-				{
-					RemoveSpinningIcon();
+					var a = data[0];
+					var b = data[1];
+					var parse = null;
+					emptySummaryTable();
+					togglePreloader();
+					if (b=="indv") {
+						if (a!="error") {
+							if (a!="existing-error") {
+								if (a!="max") {
+									parse = JSON.parse(a[0]);
+									if (a[1]=="isgenerated") {
+										alert("Payroll period is already generated. DTR cannot be re-generated.");
+									} else {
+										alert("DTR Generated (Individual).");
+									}
+									maintable.clear().draw();
+									for (var i = 0; i < parse.length; i++) {
+										LoadHistoryTable(parse[i]);
+									}
+									$('#sum-stat').html('<span class="btn btn-success">Yes</span>');
+									SearchTable();
+								} else {
+									alert("DTR is already generated. Cannot generated DTR again. Failed on saving.");
+								}
+							} else {
+								alert("There still errors on the timelog entry. Unable to save DTR summary.");
+							}
+						} else {
+							alert("Error in saving DTR.");
+						}
+					}
+					else if (b=="group") {
+						var error = new Array();
+						var e_num = 0;
+						console.log(Array.isArray(a));
+						if (Array.isArray(a)) {
+							if (a.length > 0) {
+								for (var i = 0; i < a.length; i++) {
+									var c = a[i]; e_num++;
+									if (c=="error") {
+										error.push((e_num)+".) "+"Error on saving. (Line no."+i+")");
+									} else if (c=="existing-error") {
+										error.push((e_num)+".)"+"There still errors on the timelog entry. Unable to save DTR summary. (Line no."+i+")");
+									} else if (c=="max") {
+										error.push((e_num)+".)"+"DTR is already generated. Cannot generated DTR again. Failed on saving. (Line no."+i+")");
+									} else if (Array.isArray(c)) {
+										d = c[1];
+										if (d != "ok") {
+											error.push((e_num)+".) "+"An error occured. Cannot save DTR. (Line no."+i+")");
+										}
+									}
+								}
+							}
+						} else {
+							if (a=='error') {
+								alert("Error on saving.");
+							} else if(a=="no-employees") {
+								alert("There are no employees on the selected office/employee status.");
+							}
+						}
+						if (error.length > 0) {
+							$('#alert-generate-error').show();
+							for (var i = 0; i < error.length; i++) {
+								$('#alert-generate-error-body').append(error[i]+'<br>');
+							}
+							alert("There are errors when generating.");
+						} else {
+							alert("DTR Generated (Group).");
+						}
+					}
 				},
 				error : function() {
+					togglePreloader();
 					alert("Error on saving DTR. Please try again later.");
 				}
 			});
-			$('#modal-add').modal('hide');
 		});
 
 		$('#btn-generate-ind').on('click', function() {
+			
+		});
+
+		function GenerateIndv(obj)
+		{
+			selected_row = $($(obj).parents()[1]);
 			if (selected_row!=null) {
 				onToggleSaveDTRModal_ind();
 			} else {
 				$('#spinning-icon').hide();
 				alert("Please select an employee.");
 			}
-		});
+		}
 
 		$('#btn-generate-ofc').on('click', function() {
 			if ($('#payroll_ofc').val()!=null && $('#payroll_emp_stat').val()!=null) {

@@ -6,10 +6,26 @@
 			<i class="fa fa-money"></i> Generate Payroll
 		</div>
 		<div class="card-body">
-			<div class="form-inline">
+			<form method="post" action="{{url('payroll/generate-payroll/find-dtr')}}" id="frm-gp">
+				{{csrf_field()}}
 				<div class="form-group">
-					<form method="post" action="{{url('payroll/generate-payroll/find-dtr')}}" id="frm-gp">
-						{{csrf_field()}}
+					<div class="form-inline">
+						<select class="form-control mr-2" id="ofc" name="ofc">
+							<option value="" selected="" disabled="">-Select Office-</option>
+							@foreach($data[0] as $office)
+							<option value="{{$office->cc_id}}">{{$office->cc_desc}}</option>
+							@endforeach
+						</select>
+						<select class="form-control mr-2" id="empstatus" name="empstatus">
+							<option value="" selected="" disabled="">-Select Employee Status-</option>
+							@foreach($data[2] as $empstatus)
+							<option value="{{$empstatus->status_id}}">{{$empstatus->description}}</option>
+							@endforeach
+						</select>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="form-inline">
 						<select class="form-control mr-2" id="month" name="month">
 							@foreach(Core::Months() as $key => $value)
 							<option value="{{$key}}" {{($key == date('m')) ? 'selected' : ''}}>{{$value}}</option>
@@ -21,18 +37,12 @@
 						</select>
 						<select class="form-control mr-2 YearSelector" id="year" name="year">
 						</select>
-						<select class="form-control mr-2" id="ofc" name="ofc">
-							<option value="" selected="" disabled="">-Select office to generate-</option>
-							@foreach($data[0] as $office)
-							<option value="{{$office->cc_id}}">{{$office->cc_desc}}</option>
-							@endforeach
-						</select>
-						<button type="submit" class="btn btn-primary"><i class="fa fa-search"></i></button>
-						<button type="button" class="btn btn-primary" onclick="ClearSearch()"><i class="fa fa-eraser"></i></button>
-						<button type="button" class="btn btn-primary" onclick="GeneratePayroll()">Generate</button>
-					</form>
+						<button type="submit" class="btn btn-primary mr-2"><i class="fa fa-search"></i> Search</button>
+						<button type="button" class="btn btn-primary mr-2" onclick="ClearSearch()"><i class="fa fa-eraser"></i></button>
+						<button type="button" class="btn btn-primary mr-2" onclick="GeneratePayroll()" disabled="">Generate</button>
+					</div>
 				</div>
-			</div>
+			</form>
 		</div>
 		<div class="card-header">
 			<div class="row">
@@ -115,6 +125,9 @@
 		var dataTable_gdh = $('#dt-gph').DataTable(dataTable_config6);
 	</script>
 	<script type="text/javascript">
+		$('#ofc, #empstatus, #month, #payroll_period, #year').on('change', function() {
+			ClearSearch();
+		});
 		$("#frm-gp").on('submit', function(e)
 		{
 			e.preventDefault();
@@ -124,6 +137,14 @@
 					url : $(this).attr('action'),
 					data : $(this).serialize(),
 					dataTy : 'json',
+					beforeSend : function()
+					{
+						togglePreloader();
+					},
+					complete : function()
+					{
+						togglePreloader();
+					},
 					success : function(data)
 					{
 						// console.log(data);
@@ -154,6 +175,9 @@
 			if ($('#ofc').val()==null || $('#ofc').val()=="") {
 				alert("No office selected");
 				return false;
+			} else if ($('#empstatus').val()==null || $('#empstatus').val()=="") {
+				alert("No employee status selected");
+				return false;
 			}
 			return true;
 		}
@@ -161,6 +185,7 @@
 		function ClearSearch()
 		{
 			dataTable_gds.search('').draw();
+			dataTable_gds.clear().draw();
 			dataTable_gdh.search('').draw();
 		}
 
@@ -194,14 +219,14 @@
 							if (data.dtrsum.length > 0) {
 								dtrsum = data.dtrsum;
 								for (var i = 0; i < dtrsum.length; i++) {
-									LoadTable_gds(dtrsum[i]);
+									// LoadTable_gds(dtrsum[i]);
 								}
 							}
 							dataTable_gdh.clear().draw();
 							if (data.ghistory.length > 0) {
 								ghistory = data.ghistory;
 								for (var i = 0; i < ghistory.length; i++) {
-									LoadTable_gdh(ghistory[i]);
+									// LoadTable_gdh(ghistory[i]);
 								}
 							}
 							alert("Payroll Generated.");
@@ -216,9 +241,8 @@
 			dataTable_gds.row.add([
 				data.date_generated+"<br>"+data.time_generated,
 				data.date_from+" to "+data.date_to,
-				data.name,
-				// "-office-goes-here-",
-				data.office,
+				data.empname,
+				data.cc_desc,
 				data.empid,
 			]).draw();
 		}
@@ -229,7 +253,7 @@
 				data.date_generated,
 				data.time_generated,
 				data.date_from+" to "+data.date_to,
-				data.name,
+				data.empname,
 				data.empid,
 			]).draw();
 		}

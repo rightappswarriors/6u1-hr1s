@@ -562,8 +562,44 @@
 			// $excel = new PHPExcel();
             // header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
             // header('Content-Disposition: attachment; filename=download.xlsx');
+			// $data = [
+			// 	'column1' => 'data1',
+			// 	'column2' => 'data2',
+			// 	'column3' => 'data3'
+			// ];
+			// $data = json_encode($data);
+			// dd(json_decode($data));
+			// dd(json_decode(Office::OfficeEmployees_byEmpStat(97, 3)));
 
-			
+			/*KEEP THESE*/
+			$data = [
+				'a',
+				'b',
+				'c',
+				'd',
+				'e',
+				'f',
+				'g',
+				'h',
+				'i',
+				'j'
+			];
+			$condata = [];
+			$tmp = [];
+
+			$j = 0;
+			for ($i=0; $i < count($data); $i++) { 
+				if ($j < 2) {
+					array_push($tmp, $data[$i]);
+					$j++;
+				} else {
+					array_push($condata, $tmp);
+					$tmp = [];
+					$j = 0;
+				}
+			}
+			dd($condata);
+			/*KEEP THESE*/
 		});
 
 		/* NOTIFICATION */

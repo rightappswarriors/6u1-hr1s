@@ -52,7 +52,8 @@ class GenerateDTRController extends Controller
 
     public function LoadDTRHistory()
     {
-        return DB::table('hr_dtr_sum_hdr')->orderBy('date_generated', 'DESC')->orderBy('time_generated', 'ASC')->get();
+        // return DB::table('hr_dtr_sum_hdr')->orderBy('date_generated', 'DESC')->orderBy('time_generated', 'ASC')->get();
+        return Core::sql("SELECT b.empid , ppid, date_from, date_to, CONCAT(date_from, ' to ', date_to) AS pp, date_generated, time_generated, code, generatedby, generationtype, empname,  mi, positions, jobtitle FROM hris.hr_dtr_sum_hdr a INNER JOIN (SELECT empid, CONCAT(firstname, ' ',lastname) AS empname, mi, CAST(positions AS INTEGER) positions, COALESCE(b.jtitle_name, 'office-not-found') jobtitle, CAST(department AS INTEGER) department, rate_type, pay_rate, biometric, empstatus, COALESCE(c.description, 'employee status-not-found') empstatus_desc, sss, sss_bracket, pagibig, pagibig_bracket, philhealth, philhealth_bracket, payroll_account, tin, tax_bracket, accountnumber, emptype, fixed_sched FROM hris.hr_employee a LEFT JOIN (SELECT jtid, jtitle_name, jt_cn FROM hris.hr_jobtitle WHERE cancel IS NULL) b ON a.positions = b.jt_cn LEFT JOIN (SELECT statcode, description, CAST(status_id AS TEXT) status_id, type FROM hris.hr_emp_status WHERE cancel IS NULL) c ON a.empstatus = c.status_id WHERE a.cancel IS NULL ORDER BY empname ASC) b ON a.empid = b.empid");
     }
 
     public function GenerateDTR(Request $r)
@@ -63,10 +64,9 @@ class GenerateDTRController extends Controller
     public function Generate($r)
     {
         /*
-        | *Retrieves timelog info and computes the total time of late, overtime, and undertime
-        | *Some values are from different models
-        | *Be wary when changing values that came from other models/controllers for some of them
-        | are connected to other models/controllers as well
+        * Retrieves timelog info (time in / time out of selected employee)
+        * Computes the total time of late, overtime, and undertime. Also sorts the records for other reports to use
+        * Some values are from different models so be wary when changing values that came from other models/controllers for some of them are ALSO connected to other models/controllers as well
         */
         /**
         * @param $r->code
@@ -432,7 +432,7 @@ class GenerateDTRController extends Controller
                 'weekdayhrs' => $weekdayhrs,
                 'weekendhrs' => $weekendhrs,
                 'holidays'=>$totalholiday,
-                // holiday_dates
+                'holiday_dates' => $arr_holidayDates,
                 'holiday_arr' => $arr_holidays,
                 'leaves'=> $totalleave,
                 'leaves_arr'=> $arr_leavedates,
@@ -467,26 +467,103 @@ class GenerateDTRController extends Controller
         }
     }
 
-    public function SaveDTR(Request $r)
-    {
-        return [$this->Save($r), "indv"];
-    }
-
     public function Save($r)
     {
         /**
-        * @param $r->dtrs
-        * @param $r->empid
-        * @param $r->ppid
-        * @param $r->month
-        * @param $r->year
+        * @param $r->dtrs - From Generate()
         */
-        return dd($r->all());
+        // return dd($r->late_arr);
         try {
             if (isset($r->dtrs['errors'])) {
                 if (count($r->dtrs['errors']) > 0) {
                     return "existing-error";
                 }
+            }
+            if ($r->dtrs == null) {
+                ErrorCode::Generate('controller', 'GenerateDTRController', 'B00001', "Missing Parameter (DTRS)");
+                return "error";
+            }
+
+            $dtrs = $r->dtrs;
+
+            $record = DB::table('hr_dtr_sum_hdr')->where('empid', $dtrs['empid'])->where('date_from', $dtrs['date_from'])->where('date_to', $dtrs['date_to'])->first();
+            if ($record == null) {
+                try {
+                    $code = Core::getm99('dtr_sum_id');
+                    $reply = false;
+                    try {
+                        DB::table('hr_dtr_sum_hdr')->insert([
+                            'empid' => $dtrs['empid'],
+                            'ppid' => $dtrs['ppid'],
+                            'date_from' => $dtrs['date_from'],
+                            'date_to' => $dtrs['date_to'],
+                            'date_generated' => date('Y-m-d'),
+                            'time_generated' => date('H:m:s'),
+                            'code'=> $code,
+                            'generatedby'=> Account::ID(),
+                            'generationtype'=> $dtrs['generateType'],
+                        ]);
+                        $reply = true;
+                    } catch (\Exception $e) {
+                        ErrorCode::Generate('controller', 'GenerateDTRController', 'B00003', $e->getMessage());
+                        return "error";
+                    }
+                    if ($reply) {
+                        Core::updatem99('dtr_sum_id',Core::get_nextincrementlimitchar($code, 8));
+                        $sql = DB::table('hr_dtr_sum_employees');
+                        $record = $sql->where('xempid', $dtrs['empid'])->where('dtr_sum_id', $code);
+                        $data = [
+                            'xempid' => $dtrs['empid'],
+                            'dtr_sum_id' => $code,
+                            'isgenerated' => 0,
+                            // 'cancel' => , // Set to blank
+                            // 'lnsum_no', // Auto increment
+                            'workdays' => $dtrs['workdays'],
+                            'weekends' => $dtrs['weekends'],
+                            'days_worked' => $dtrs['daysworked'],
+                            'days_worked_arr' => ((isset($dtrs['days_worked_arr'])) ? json_encode($dtrs['days_worked_arr']) : null),
+                            'days_absent' => $dtrs['absences'],
+                            'late' => $dtrs['late'],
+                            'late_arr' => ((isset($dtrs['late_arr'])) ? json_encode($dtrs['late_arr']) : null),
+                            'undertime' => $dtrs['undertime'],
+                            'undertime_arr' => ((isset($dtrs['undertime_arr'])) ? json_encode($dtrs['undertime_arr']) : null),
+                            'total_overtime' => $dtrs['overtime'],
+                            'total_overtime_arr' => ((isset($dtrs['total_overtime_arr'])) ? json_encode($dtrs['total_overtime_arr']) : null),
+                            'weekdayhrs' => $dtrs['weekdayhrs'],
+                            'weekendhrs' => $dtrs['weekendhrs'],
+                            'holiday' => $dtrs['holidays'],
+                            'holiday_dates' => ((isset($dtrs['holiday_dates'])) ? json_encode($dtrs['holiday_dates']) : null),
+                            'holiday_arr' => ((isset($dtrs['holiday_arr'])) ? json_encode($dtrs['holiday_arr']) : null),
+                            'leaves' => $dtrs['leaves'],
+                            'leaves_arr' => ((isset($dtrs['leaves_arr'])) ? json_encode($dtrs['leaves_arr']) : null),
+                        ];
+                        if ($record->first()==null) {
+                            try {
+                                $sql->insert($data);
+                            } catch (\Exception $e) {
+                                ErrorCode::Generate('controller', 'GenerateDTRController', 'B00004', $e->getMessage());
+                                return "error";
+                            }
+                        } else {
+                            if ($record->first()->isgenerated==0) {
+                                try {
+                                    $record->update($data);
+                                } catch (\Exception $e) {
+                                    ErrorCode::Generate('controller', 'GenerateDTRController', 'B00005', $e->getMessage());
+                                    return "error";
+                                }
+                            } else {
+                                return "isgenerated";
+                            }
+                        }
+                    }
+                    return [json_encode($this->LoadDTRHistory()), "ok"];
+                } catch (\Exception $e) {
+                    ErrorCode::Generate('controller', 'GenerateDTRController', 'B00002', $e->getMessage());
+                    return "error";
+                }
+            } else {
+                return "max";
             }
         } catch (\Exception $e) {
             ErrorCode::Generate('controller', 'GenerateDTRController', 'B00000', $e->getMessage());
@@ -494,87 +571,55 @@ class GenerateDTRController extends Controller
         }
     }
 
-    public function SaveSummary($empid, $days_worked, $absences, $late, $undertime, $overtime, $dtr_sum_id)
+    public function SaveDTR(Request $r)
     {
-        try {
-            $query = DB::table('hr_dtr_sum_employees')->where('empid', $empid)->where('dtr_sum_id', $dtr_sum_id);
-            $data = [
-                'empid' => $empid,
-                'days_worked' => $days_worked,
-                'absences' => $absences,
-                'late' => $late,
-                'undertime' => $undertime,
-                'total_overtime' => $overtime,
-                'dtr_sum_id' => $dtr_sum_id,
-                'isgenerated' => 0,
-            ];
-            if ($query->first()==null) {
-                try {
-                    $query->insert($data);
-                } catch (\Exception $e) {
-                    ErrorCode::Generate('controller', 'GenerateDTRController', '00006', $e->getMessage());
-                    return "error";
-                }
-            } else {
-                if ($query->first()->isgenerated==0) {
-                    try {
-                        $query->update($data);
-                    } catch (\Exception $e) {
-                        ErrorCode::Generate('controller', 'GenerateDTRController', '00007', $e->getMessage());
-                        return "error";
-                    }
-                } else {
-                    return "isgenerated";
-                }
-            }
-            return "ok";
-        } catch (\Exception $e) {
-            ErrorCode::Generate('controller', 'GenerateDTRController', '00005', $e->getMessage());
-            return "error";
-        }
+        return [$this->Save($r), "indv"];
     }
 
     public function GenerateByEmployee(Request $r) //continue here
     {
         /**
         * From request
-        * @param $r->dtrs
         * @param $r->ppid
         * @param $r->ofc_id
         * @param $r->month
         * @param $r->year
+        * @param $r->gtype
+        * @param $r->empstat
         */
-        
-        // return dd($r->all());
         try {
-            $employees = Office::OfficeEmployees($r->ofc_id);
-            $arr = [];
+            $reply = "error";
+            $employees = Office::OfficeEmployees_byEmpStat($r->ofc_id, $r->empstat);
+            $return_arr = [];
             $employees = json_decode($employees);
             if (count($employees) > 0) {
+                // $pp = Payroll::PayrollPeriod2($r->month, $r->ppid, $r->year);
                 for ($i=0; $i < count($employees); $i++) {
-                    $emp = $employees[$i];
-                    $pp = Payroll::PayrollPeriod2($r->month, $r->ppid, $r->year);
-                    $s = (object)[];
-                    $s->code = $emp->empid;
-                    $s->pp = $r->ppid;
-                    $s->month = $r->month;
-                    $s->year = $r->year;
-                    $t = (object)[];
-                    $t->dtrs = (array)json_decode($this->Generate($s));
-                    $t->empid = $emp->empid;
-                    $t->ppid = $r->ppid;
-                    $t->month = $r->month;
-                    $t->year = $r->year;
-                    array_push($arr, $this->Save($t));
+                    try {
+                        $emp = $employees[$i];
+                        $s = (object)[];
+                        $s->code = $emp->empid;
+                        $s->pp = $r->ppid;
+                        $s->month = $r->month;
+                        $s->year = $r->year;
+                        $s->gtype = $r->gtype;
+                        $t = (object)[];
+                        $t->dtrs = (array)json_decode($this->Generate($s));
+                        array_push($return_arr, $this->Save($t));
+                    } catch (\Exception $e) {
+                        ErrorCode::Generate('controller', 'GenerateDTRController', 'C00001', $e->getMessage());
+                        array_push($return_arr, $e->getMessage());
+                    }
                 }
-                return [$arr, "group"];
-            } else {
-                return "no employees";
+                $reply = $return_arr;
+            } else{
+                $reply = "no-employees";
             }
         } catch (\Exception $e) {
-            ErrorCode::Generate('controller', 'GenerateDTRController', '00006', $e->getMessage());
-            return "error";
+            ErrorCode::Generate('controller', 'GenerateDTRController', 'C00000', $e->getMessage());
+            $reply = "error";
         }
+        return [$reply, "group"];
     }
 
     public function CheckDTR($empid, $pp, $from, $to)

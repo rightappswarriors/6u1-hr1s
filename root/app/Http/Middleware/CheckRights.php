@@ -18,13 +18,16 @@ class CheckRights
     {
         $currAction = $request->route()->getAction();
         $req = $currAction['restriction'];
-
-        $arr_rest = explode(', ', Session::get('_user')[0]->restriction);
-
-        if(!in_array($req, $arr_rest)) {
+        
+        if (Session::get('_user')!=null) {
+            $arr_rest = explode(', ', Session::get('_user')[0]->restriction);
+            if(!in_array($req, $arr_rest)) {
+                return redirect('/error/2');
+            }
+            return $next($request);
+        } else {
             return redirect('/error/2');
         }
 
-        return $next($request);
     }
 }

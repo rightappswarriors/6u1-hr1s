@@ -215,7 +215,11 @@
     <script type="text/javascript">
         function togglePreloader() //for toggling the preloader for ajax and other javascripts
         {
-            $('#preloader').show();
+            if ($('#preloader').is(":hidden")) {
+                $('#preloader').show();
+            } else {
+                $('#preloader').hide();
+            }
         }
     </script>
     @yield('to-bottom')

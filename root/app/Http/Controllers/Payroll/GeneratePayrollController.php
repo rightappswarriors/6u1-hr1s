@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use DB;
 use Core;
 use Account;
+use EmployeeStatus;
 use ErrorCode;
 use PayrollPeriod;
 use Employee;
@@ -24,14 +25,16 @@ class GeneratePayrollController extends Controller
     public function __construct()
     {
     	$this->ghistory = DB::table('hr_emp_payroll2')->orderBy('date_generated', 'DESC')->orderBy('time_generated', 'DESC')->get();
-        $this->dtrsum = DB::table('hr_dtr_sum_hdr')->join('hr_dtr_sum_employees', 'hr_dtr_sum_hdr.code', '=', 'hr_dtr_sum_employees.dtr_sum_id')->where('isgenerated', '=', 0)->orderBy('date_generated', 'DESC')->orderBy('time_generated', 'ASC')->get();
+        // $this->dtrsum = DB::table('hr_dtr_sum_hdr')->join('hr_dtr_sum_employees', 'hr_dtr_sum_hdr.code', '=', 'hr_dtr_sum_employees.dtr_sum_id')->where('isgenerated', '=', 0)->orderBy('date_generated', 'DESC')->orderBy('time_generated', 'ASC')->get();
+        $this->dtrsum = Core::sql("SELECT a.empid, ppid, date_from, date_to, date_generated, time_generated, dtr_sum_id, generatedby, generationtype, isgenerated, lnsum_no, workdays, days_worked, days_worked_arr, days_absent, undertime, undertime_arr, total_overtime, total_overtime, total_overtime_arr, weekdayhrs, weekendhrs, holiday, holiday_arr, leaves leaves_arr FROM hris.hr_dtr_sum_hdr a INNER JOIN (SELECT * FROM hris.hr_dtr_sum_employees WHERE cancel IS NULL) b ON a.code = b.dtr_sum_id WHERE isgenerated IS FALSE");
         $this->office = Office::get_all();
+        $this->empstatus = EmployeeStatus::get_all();
     }
 
     // Redirects to blade
     public function view()
     {
-    	$data = [$this->office, $this->ghistory];
+    	$data = [$this->office, $this->ghistory, $this->empstatus];
         // dd($data);
     	return view('pages.payroll.generate_payroll', compact('data'));
     }
@@ -43,9 +46,9 @@ class GeneratePayrollController extends Controller
             $return_val = (object)[];
             $dtr_summaries = [];
             $pp = Payroll::PayrollPeriod2($r->month, $r->payroll_period, $r->year);
-            $ofc_emp = json_decode(Office::OfficeEmployees($r->ofc));
+            // $ofc_emp = json_decode(Office::OfficeEmployees($r->ofc));
 
-            if (count($ofc_emp) > 0) {
+            // if (count($ofc_emp) > 0) {
                 // for ($i=0; $i < count($ofc_emp); $i++) { 
                 //     $ds = DB::table('hr_dtr_sum_hdr')->select('hr_dtr_sum_hdr.*')->join('hr_dtr_sum_employees', 'hr_dtr_sum_hdr.code', '=', 'hr_dtr_sum_employees.dtr_sum_id')->where('hr_dtr_sum_hdr.empid', $ofc_emp[$i]->empid)->where('hr_dtr_sum_employees.isgenerated', 0)->toSql();
                 //     $ds->office = $ofc_emp[$i]->office;
@@ -53,40 +56,37 @@ class GeneratePayrollController extends Controller
                 //         array_push($dtr_summaries, $ds);
                 //     }
                 // }
-                $ds = DB::select( // Query all payroll for with specific date 
-                    "SELECT 
-                      hr_dtr_sum_hdr.empid, 
-                      hr_dtr_sum_hdr.ppid, 
-                      hr_dtr_sum_hdr.date_from, 
-                      hr_dtr_sum_hdr.date_to, 
-                      hr_dtr_sum_hdr.date_generated, 
-                      hr_dtr_sum_hdr.code, 
-                      hr_dtr_sum_hdr.time_generated, 
-                      hr_dtr_sum_hdr.generatedby
-                    FROM 
-                      hris.hr_dtr_sum_employees, 
-                      hris.hr_dtr_sum_hdr
-                    WHERE 
-                      hr_dtr_sum_employees.isgenerated = 0 AND hr_dtr_sum_hdr.code = hr_dtr_sum_employees.dtr_sum_id AND
-                      hr_dtr_sum_hdr.date_from >= '".date('Y-m-d', strtotime($pp->from))."' AND
-                      hr_dtr_sum_hdr.date_to <= '".date('Y-m-d', strtotime($pp->to))."'
-                    "
-                );
+                // $ds = DB::select( // Query all payroll for with specific date 
+                //     "SELECT 
+                //       hr_dtr_sum_hdr.empid, 
+                //       hr_dtr_sum_hdr.ppid, 
+                //       hr_dtr_sum_hdr.date_from, 
+                //       hr_dtr_sum_hdr.date_to, 
+                //       hr_dtr_sum_hdr.date_generated, 
+                //       hr_dtr_sum_hdr.code, 
+                //       hr_dtr_sum_hdr.time_generated, 
+                //       hr_dtr_sum_hdr.generatedby
+                //     FROM 
+                //       hris.hr_dtr_sum_employees, 
+                //       hris.hr_dtr_sum_hdr
+                //     WHERE 
+                //       hr_dtr_sum_employees.isgenerated = 0 AND hr_dtr_sum_hdr.code = hr_dtr_sum_employees.dtr_sum_id AND
+                //       hr_dtr_sum_hdr.date_from >= '".date('Y-m-d', strtotime($pp->from))."' AND
+                //       hr_dtr_sum_hdr.date_to <= '".date('Y-m-d', strtotime($pp->to))."'
+                //     "
+                // );
 
-                foreach($ds as $k => $v) { // add new variable to the object, also pushes to the returning array
-                    $v->office = $ofc_emp[$k]->office;
-                    array_push($dtr_summaries, $v);
-                }
+                // foreach($ds as $k => $v) { // add new variable to the object, also pushes to the returning array
+                //     $v->office = $ofc_emp[$k]->office;
+                //     array_push($dtr_summaries, $v);
+                // }
 
-            }
-            if (count($dtr_summaries) > 0) {
-                for ($i=0; $i < count($dtr_summaries); $i++) { 
-                    $dtrsum = $dtr_summaries[$i];
-                    $dtrsum->name = Employee::Name($dtrsum->empid);
-                }
-            }
+            // }
+            $sql = "SELECT a.*, b.empname, b.cc_desc FROM (SELECT * FROM hris.hr_dtr_sum_hdr a LEFT JOIN (SELECT * FROM hris.hr_dtr_sum_employees WHERE isgenerated IS FALSE) b ON a.code = b.dtr_sum_id) a INNER JOIN (".Employee::$emp_sql.") b ON a.empid = b.empid";
+                $con = " WHERE date_from >= '".date('Y-m-d', strtotime($pp->from))."' AND date_to <= '".date('Y-m-d', strtotime($pp->to))."' AND empstatus = '".$r->empstatus."'";
             $return_val->search = date('Y-m-d', strtotime($pp->from))." to ".date('Y-m-d', strtotime($pp->to));
-            $return_val->dtr_summaries = $dtr_summaries;
+            $return_val->parameters = $r->all();
+            $return_val->dtr_summaries = Core::sql($sql.$con);
             return json_encode($return_val);
         } catch (\Exception $e) {
             ErrorCode::Generate('controller', 'GeneratePayrollController', '00001', $e->getMessage());
