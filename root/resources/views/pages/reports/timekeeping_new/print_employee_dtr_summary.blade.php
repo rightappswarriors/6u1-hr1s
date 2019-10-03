@@ -83,6 +83,7 @@
 				url: '{{url('reports/timekeeping/employee-dtr/')}}/findnew',
 				data: {"code":$('#payroll_period').val()},
 				success: function(data) {
+					table.clear().draw();
 					for(i=0; i<data.length; i++) {
 						FillTable(data[i]);
 					}
@@ -94,7 +95,7 @@
 			table.row.add([
 				data.employee_readable,
 				data.days_worked,
-				data.absences,
+				data.days_absent,
 				data.late,
 				data.undertime,
 				data.total_overtime
@@ -102,6 +103,11 @@
 		}
 
 		function setPeriods(data) {
+			data = Object.keys(data).map(function(key) {
+				return [key, data[key]];
+			});
+
+			// console.log(data);
 			let select = $('#payroll_period');
 
 			while(select[0].firstChild) {
@@ -109,10 +115,18 @@
 			}
 
 			if(data.length > 0) {
+				// for(i=0; i<data.length; i++) {
+				// 	var option = document.createElement('option');
+				// 		option.setAttribute('value', data[i].code);
+				// 		option.innerText = data[i].date_from+' to '+data[i].date_to;
+
+				// 	select[0].appendChild(option);
+				// }
+
 				for(i=0; i<data.length; i++) {
 					var option = document.createElement('option');
-						option.setAttribute('value', data[i].code);
-						option.innerText = data[i].date_from+' to '+data[i].date_to;
+						option.setAttribute('value', data[i][1]);
+						option.innerText = data[i][1]+' to '+data[i][0];
 
 					select[0].appendChild(option);
 				}

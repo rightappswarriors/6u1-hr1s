@@ -14,6 +14,12 @@ class DTR extends Model
     public static $pk = "code";
     public static $pk2 = "dtr_sum_id";
 
+    /**
+    * 
+    * @param 
+    *
+    * @return Object|null
+    */
     public static function GetTimedInToday()
     {
     	try {
@@ -25,6 +31,12 @@ class DTR extends Model
 		}	
     }
 
+    /**
+    * Gets the header via ID
+    * @param string
+    *
+    * @return Object|null|string
+    */
     public static function Get_HDR($id)
     {
     	try {
@@ -35,6 +47,12 @@ class DTR extends Model
     	}
     }
 
+    /**
+    * Gets all the header periods, distinct
+    * @param
+    *
+    * @return Object|null|string
+    */
     public static function GetAllHDRPeriods()
     {
         try {
@@ -46,6 +64,13 @@ class DTR extends Model
         }
     }
 
+    /**
+    * Gets all the Summary via code
+    * @param string
+    *
+    * @return Object|null|string
+    *
+    */
     public static function GetAllHDRSummaryByCode($code)
     {
         try {
@@ -56,6 +81,33 @@ class DTR extends Model
         }
     }
 
+    /**
+    * Gets all Summary via date_from
+    * @param string
+    *
+    * @return Object|null|string
+    */
+    public static function GetAllHDRSummaryByDate($date_from)
+    {
+        try {
+            // return DB::table(self::$tbl_name)->where('date_from', $date_from)/*->where('date_to', $date_to)*/->get();
+            return DB::table(self::$tbl_name2)
+                        ->select('hr_dtr_sum_hdr.*', 'hr_dtr_sum_employees.*')
+                        ->leftJoin('hr_dtr_sum_hdr', 'hr_dtr_sum_hdr.code', '=', 'hr_dtr_sum_employees.dtr_sum_id')
+                        ->where('hr_dtr_sum_hdr.date_from', $date_from)
+                        ->get();
+        } catch (\Exception $e) {
+            ErrorCode::Generate('model', 'DTR', '00004', $e->getMessage());
+            return "error";
+        }
+    }
+
+    /**
+    * Gets All Summary via office
+    * @param string
+    *
+    * @return Object|null|string
+    */
     public static function GetAllHDRSumarryByOffice($office)
     {
         try {
@@ -63,12 +115,13 @@ class DTR extends Model
                     ->select('hr_dtr_sum_hdr.*', 'hr_employee.department')
                     ->leftJoin('hr_employee', 'hr_employee.empid', '=', 'hr_dtr_sum_hdr.empid')
                     ->where('hr_employee.department', '=', $office)
-                    ->get();
+                    ->distinct('hr_dtr_sum_hdr.date_from', 'hr_dtr_sum_hdr.date_to')
+                    ->pluck('hr_dtr_sum_hdr.date_from', 'hr_dtr_sum_hdr.date_to');
 
             return $data;
         } catch (\Exception $e) {
             ErrorCode::Generate('model', 'DTR', '00004', $e->getMessage());
-            return "error";
+            return $e->getMessage();
         }
     }
 }

@@ -97,7 +97,7 @@
                     {{-- <div class="card-header"></div> --}}
                     <div class="mb-2 main-card-body bg-success" style="min-height: 94vh;">
 
-                        {{-- <div class="row mb-3">
+                        <div class="row mb-3">
                             <div class="col">
                                 <button class="btn btn-white w-100 h-100 exclusive_filter_button" id="in">TIME IN</button>
                             </div>
@@ -105,7 +105,7 @@
                             <div class="col">
                                 <button class="btn btn-white w-100 h-100 exclusive_filter_button" id="out">TIME OUT</button>
                             </div>
-                        </div> --}}
+                        </div>
 
                         <div class="row" id="data_row">
                             @isset($data[0])
@@ -172,9 +172,9 @@
     
 @endsection
 
-{{-- @section('to-bottom')
+@section('to-bottom')
     <script type="text/javascript" src="{{asset('js/disable-enter-key.js')}}"></script>
-    <script type="text/javascript" src="{{asset('js/reload-on-idle.js')}}"></script>
+    {{-- <script type="text/javascript" src="{{asset('js/reload-on-idle.js')}}"></script> --}}
 
     <script>
         var asset1 = {!! json_encode(url('/')) !!} + '/images/profile-imgs/';
@@ -267,4 +267,4 @@
             addCards();
         }, time_in_seconds * 500);
     </script>
-@endsection --}}
+@endsection

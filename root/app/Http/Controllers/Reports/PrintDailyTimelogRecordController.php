@@ -45,6 +45,8 @@ class PrintDailyTimelogRecordController extends Controller
     *           -> [[Date], [Employee::Load_Employees_Simple], [timein_timeout]]
     * --------------------------------------
     * This function will find employees' timelogs with specif date
+    * --------------------------------------
+    * PLEASE REFER TO `function find2` as the current find function for this module
     */
     public function find(Request $r)
     {
@@ -76,6 +78,32 @@ class PrintDailyTimelogRecordController extends Controller
         } 
     }
 
+    /**
+    * @param Request
+    *           -> all(); (array) [empid, month, year, period];
+    *
+    * @return Array
+    *           -> [
+    *               0: <array> => [
+    *                               <index>: <object> => {
+    *                                                       AM: <object> => {
+    *                                                                           Arrival: <string>,
+    *                                                                           Departure: <string>,
+    *                                                                       },
+    *                                                       PM: <object> => {
+    *                                                                           Arrival: <string>,
+    *                                                                           Departure: <string>,
+    *                                                                       },
+    *                                                       _Date: <string>,
+    *                                                       _Rendered: <number>,
+    *                                                    },
+    *                             ],
+    *               1 <object> => {
+    *                               Date: <string>,
+    *                               HoursRequired: <number>,
+    *                             },
+    *              ]
+    */
     public function find2(Request $r)
     {
         try {

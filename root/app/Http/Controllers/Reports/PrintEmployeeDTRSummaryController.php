@@ -64,6 +64,8 @@ class PrintEmployeeDTRSummaryController extends Controller
     *                   [[employee_full_data]], xx, yy]
     * --------------------------------------
     * This function will find employees' timelogs with selected month, year and payroll period
+    * --------------------------------------
+    * This function is not used, the current find function for this module can be found in PrintEmpolyeeDTRController@findnew
     */
     public function find(Request $r)
     {
