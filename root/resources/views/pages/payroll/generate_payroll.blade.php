@@ -39,7 +39,7 @@
 						</select>
 						<button type="submit" class="btn btn-primary mr-2"><i class="fa fa-search"></i> Search</button>
 						<button type="button" class="btn btn-primary mr-2" onclick="ClearSearch()"><i class="fa fa-eraser"></i></button>
-						<button type="button" class="btn btn-primary mr-2" onclick="GeneratePayroll()" disabled="">Generate</button>
+						<button type="button" class="btn btn-primary mr-2" onclick="GeneratePayroll()">Generate</button>
 					</div>
 				</div>
 			</form>
@@ -199,38 +199,38 @@
 					dataTy : 'json',
 					success : function(data)
 					{
-						// console.log(data);
-						if (data == "no record") {
-							alert("No generated DTR available.");
-						} else {
-							// console.log(data);
-							data = JSON.parse(data);
-							if (data.results.length > 0) {
-								var results = data.results;
-								for (var i = 0; i < results.length; i++) {
-									var d = results[i];
-									var e = d.split(":");
-									if (e[1]=="ok") {
-										alert(d);
-									}
-								}
-							}
-							dataTable_gds.clear().draw();
-							if (data.dtrsum.length > 0) {
-								dtrsum = data.dtrsum;
-								for (var i = 0; i < dtrsum.length; i++) {
-									// LoadTable_gds(dtrsum[i]);
-								}
-							}
-							dataTable_gdh.clear().draw();
-							if (data.ghistory.length > 0) {
-								ghistory = data.ghistory;
-								for (var i = 0; i < ghistory.length; i++) {
-									// LoadTable_gdh(ghistory[i]);
-								}
-							}
-							alert("Payroll Generated.");
-						}
+						console.log(data);
+						// if (data == "no record") {
+						// 	alert("No generated DTR available.");
+						// } else {
+						// 	// console.log(data);
+						// 	data = JSON.parse(data);
+						// 	if (data.results.length > 0) {
+						// 		var results = data.results;
+						// 		for (var i = 0; i < results.length; i++) {
+						// 			var d = results[i];
+						// 			var e = d.split(":");
+						// 			if (e[1]=="ok") {
+						// 				alert(d);
+						// 			}
+						// 		}
+						// 	}
+						// 	dataTable_gds.clear().draw();
+						// 	if (data.dtrsum.length > 0) {
+						// 		dtrsum = data.dtrsum;
+						// 		for (var i = 0; i < dtrsum.length; i++) {
+						// 			// LoadTable_gds(dtrsum[i]);
+						// 		}
+						// 	}
+						// 	dataTable_gdh.clear().draw();
+						// 	if (data.ghistory.length > 0) {
+						// 		ghistory = data.ghistory;
+						// 		for (var i = 0; i < ghistory.length; i++) {
+						// 			// LoadTable_gdh(ghistory[i]);
+						// 		}
+						// 	}
+						// 	alert("Payroll Generated.");
+						// }
 					}
 				});
 			}
