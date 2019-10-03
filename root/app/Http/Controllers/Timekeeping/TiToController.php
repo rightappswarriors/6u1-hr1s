@@ -191,6 +191,14 @@ class TiToController extends Controller
 
     public function getLastestTimeIn(Request $r) {
         $data = $this->ghistoryIn;
+
+        if($r->office != null || $r->office != "") {
+            if($r->employee != null || $r->employee != "") {
+                $data = DB::table('hr_tito2')->where('cancel', '=', null)->whereDate('work_date', date('Y-m-d'))->where('status', '=', '1')->where('empid', $r->employee)->orderBy('work_date', 'DESC')->orderBy('time_log', 'DESC')->orderBy('logs_id', 'DESC')->take(6)->get();
+            }
+        }
+
+        $new_data = array();
         for($i=0; $i<count($data); $i++) {
             $data[$i]->name = Employee::Name($data[$i]->empid);
             $data[$i]->work_date_readable = \Carbon\Carbon::parse($data[$i]->work_date)->format('M d, Y');
@@ -198,13 +206,25 @@ class TiToController extends Controller
             // $data[$i]->position_readable = Position::Get_Position(Employee::GetEmployee($data[$i]->empid)->positions);
             $data[$i]->position_readable = Employee::GetJobTitle($data[$i]->empid);
             $data[$i]->picture_readable = Employee::GetEmployee($data[$i]->empid)->picture;
+            
+            if(!Timelog::IfEmployeeAlreadyOut($data[$i]->empid, date('Y-m-d'))) {
+                $new_data[] = $data[$i];
+            }
         }
 
-        return $data;
+        // return $data;
+        return $new_data;
     }
 
     public function getLastestTimeOut(Request $r) {
         $data = $this->ghistoryOut;
+
+        if($r->office != null || $r->office != "") {
+            if($r->employee != null || $r->employee != "") {
+                $data = DB::table('hr_tito2')->where('cancel', '=', null)->whereDate('work_date', date('Y-m-d'))->where('status', '=', '0')->where('empid', $r->employee)->orderBy('work_date', 'DESC')->orderBy('time_log', 'DESC')->orderBy('logs_id', 'DESC')->take(6)->get();
+            }
+        }
+
         for($i=0; $i<count($data); $i++) {
             $data[$i]->name = Employee::Name($data[$i]->empid);
             $data[$i]->work_date_readable = \Carbon\Carbon::parse($data[$i]->work_date)->format('M d, Y');

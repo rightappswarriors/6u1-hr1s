@@ -29,6 +29,21 @@
 				<div class="col-4">
 					<div class="card">
 						<div class="card-header">
+							Required Time In (Afternoon)
+							<span class="float-right text-warning">
+								<i class="fa fa-link" aria-hidden="true"></i>
+							</span>
+						</div>
+						<div class="card-body">
+							{{-- <textarea readonly placeholder="HH:MM:SS"name="req_in_2" class="form-control">{{$data[0]->req_time_in_2}}</textarea> --}}
+							<input type="time" class="form-control" readonly name="req_in_2" step="1" value="{{$data[0]->req_time_in_2}}" readonly>
+						</div>
+					</div>
+				</div>
+
+				<div class="col-4">
+					<div class="card">
+						<div class="card-header">
 							Lunch Break Duration
 							<span class="float-right text-danger">
 								<i class="fa fa-lock exclusive_lock" aria-hidden="true"></i>
@@ -59,21 +74,6 @@
 						</div>
 					</div>
 				</div>
-
-				<div class="col-4">
-					<div class="card">
-						<div class="card-header">
-							Required Time In (Afternoon)
-							<span class="float-right text-warning">
-								<i class="fa fa-link" aria-hidden="true"></i>
-							</span>
-						</div>
-						<div class="card-body">
-							{{-- <textarea readonly placeholder="HH:MM:SS"name="req_in_2" class="form-control">{{$data[0]->req_time_in_2}}</textarea> --}}
-							<input type="time" class="form-control" readonly name="req_in_2" step="1" value="{{$data[0]->req_time_in_2}}" readonly>
-						</div>
-					</div>
-				</div>
 			</div>
 
 			<div class="row mb-2">
@@ -88,6 +88,21 @@
 						<div class="card-body">
 							{{-- <textarea readonly placeholder="HH:MM:SS"name="req_out_2" class="form-control">{{$data[0]->req_time_out_2}}</textarea> --}}
 							<input type="time" class="form-control" readonly name="req_out_1" step="1" value="{{$data[0]->req_time_out_1}}">
+						</div>
+					</div>
+				</div>
+
+				<div class="col-4">
+					<div class="card">
+						<div class="card-header">
+							Required Time Out (Afternoon)
+							<span class="float-right text-danger">
+								<i class="fa fa-lock exclusive_lock" aria-hidden="true"></i>
+							</span>
+						</div>
+						<div class="card-body">
+							{{-- <textarea readonly placeholder="HH:MM:SS"name="req_out_1" class="form-control">{{$data[0]->req_time_out_1}}</textarea> --}}
+							<input type="time" class="form-control" readonly name="req_out_2" step="1" value="{{$data[0]->req_time_out_2}}">
 						</div>
 					</div>
 				</div>
@@ -126,20 +141,6 @@
 					</div>
 				</div>
 
-				<div class="col-4">
-					<div class="card">
-						<div class="card-header">
-							Required Time Out (Afternoon)
-							<span class="float-right text-danger">
-								<i class="fa fa-lock exclusive_lock" aria-hidden="true"></i>
-							</span>
-						</div>
-						<div class="card-body">
-							{{-- <textarea readonly placeholder="HH:MM:SS"name="req_out_1" class="form-control">{{$data[0]->req_time_out_1}}</textarea> --}}
-							<input type="time" class="form-control" readonly name="req_out_2" step="1" value="{{$data[0]->req_time_out_2}}">
-						</div>
-					</div>
-				</div>
 			</div>
 
 			<div class="row">
@@ -161,21 +162,6 @@
 				<div class="col-4">
 					<div class="card">
 						<div class="card-header">
-							Total Required Hours
-							<span class="float-right text-warning">
-								<i class="fa fa-link" aria-hidden="true"></i>
-							</span>
-						</div>
-						<div class="card-body">
-							{{-- <textarea class="form-control" readonly id="req_hours"></textarea> --}}
-							<input type="text" class="form-control" readonly id="tot_req_hours">
-						</div>
-					</div>
-				</div>
-
-				<div class="col-4">
-					<div class="card">
-						<div class="card-header">
 							Required Hours (Afternoon)
 							<span class="float-right text-warning">
 								<i class="fa fa-link" aria-hidden="true"></i>
@@ -184,6 +170,21 @@
 						<div class="card-body">
 							{{-- <textarea class="form-control" readonly id="req_hours_aft"></textarea> --}}
 							<input type="text" class="form-control" readonly id="req_hours_aft">
+						</div>
+					</div>
+				</div>
+				
+				<div class="col-4">
+					<div class="card">
+						<div class="card-header">
+							Total Required Hours
+							<span class="float-right text-warning">
+								<i class="fa fa-link" aria-hidden="true"></i>
+							</span>
+						</div>
+						<div class="card-body">
+							{{-- <textarea class="form-control" readonly id="req_hours"></textarea> --}}
+							<input type="text" class="form-control" readonly id="tot_req_hours">
 						</div>
 					</div>
 				</div>

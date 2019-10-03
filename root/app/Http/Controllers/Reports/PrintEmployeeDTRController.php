@@ -39,6 +39,9 @@ class PrintEmployeeDTRController extends Controller
     }
 
     ////////////////////////////////////////////////////////// NEW //////////////////////////////////////////////////////////
+    /*
+    * New functions for the new timekeeping reports blade, but is currently unused because
+    */
     public function view2()
     {
         $data = [
@@ -51,7 +54,9 @@ class PrintEmployeeDTRController extends Controller
 
     public function findnew(Request $r)
     {
-        $data = DTR::GetAllHDRSummaryByCode($r->code);
+        // $data = DTR::GetAllHDRSummaryByCode($r->code);
+        $data = DTR::GetAllHDRSummaryByDate($r->code);
+        // dd($data);
         foreach($data as $k => $v) {
             $v->employee_readable = Employee::Name($v->empid);
         }
@@ -60,6 +65,7 @@ class PrintEmployeeDTRController extends Controller
 
     public function getperiods(Request $r)
     {
+        // return DTR::GetAllHDRPeriods();
         return DTR::GetAllHDRSumarryByOffice($r->office);
     }
     ////////////////////////////////////////////////////////// NEW //////////////////////////////////////////////////////////
@@ -81,6 +87,8 @@ class PrintEmployeeDTRController extends Controller
     *                   [days_worked]]
     * --------------------------------------
     * This function will find employee's timelogs with selected employee, month, year and payroll period
+    * --------------------------------------
+    * PLEASE REFER TO `function find2` as the current find function for this module
     */
     public function find(Request $r)
     {
@@ -120,6 +128,34 @@ class PrintEmployeeDTRController extends Controller
         } 
     }
 
+    /**
+    * @param Request
+    *           -> all(); (array) [empid, month, year, period];
+    *
+    * @return Array
+    *           -> [
+    *               0: <array> => [
+    *                               <index>: <object> => {
+    *                                                       AM: <object> => {
+    *                                                                           Arrival: <string>,
+    *                                                                           Departure: <string>,
+    *                                                                       },
+    *                                                       PM: <object> => {
+    *                                                                           Arrival: <string>,
+    *                                                                           Departure: <string>,
+    *                                                                       },
+    *                                                       _Date: <string>,
+    *                                                       _Rendered: <number>,
+    *                                                    },
+    *                             ],
+    *               1 <object> => {
+    *                               HoursRendered: <number>,
+    *                               Month: <string>,
+    *                               Name: <string>,
+    *                               Year: <string>,
+    *                             },
+    *              ]
+    */
     public function find2(Request $r)
     {
         try {

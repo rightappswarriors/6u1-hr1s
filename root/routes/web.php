@@ -417,8 +417,9 @@
 					Route::post('/findnew', 'Reports\PrintEmployeeDTRSummaryController@findnew');
 					Route::post('/getperiods', 'Reports\PrintEmployeeDTRSummaryController@getperiods');
 				});
-
 				/*TIMEKEEPING NEW*/
+
+				/*TIMEKEEPING OLD*/
 				Route::prefix('EmployeeDTR')->group(function() {
 					Route::get('/', 'Reports\PrintEmployeeDTRController@view');
 					Route::post('/find', 'Reports\PrintEmployeeDTRController@find');
@@ -434,6 +435,7 @@
 					Route::post('/find2', 'Reports\PrintDailyTimelogRecordController@find2');
 					Route::get('/print', 'Reports\PrintDailyTimelogRecordController@print');
 				});
+				/*TIMEKEEPING OLD*/
 			});
 			// Route::prefix('payroll')->group(function() {
 				Route::prefix('payroll-summary-report')->group(function() {

@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use DB;
 use Employee;
 use Position;
+use Office;
 
 class LogBoxController extends Controller
 {
@@ -20,7 +21,7 @@ class LogBoxController extends Controller
 
     public function view()
     {
-        $data = [$this->ghistoryIn];
+        $data = [$this->ghistoryIn, Office::get_all()];
         // $data = $data[0];
         // dd($data);
         // dd(Employee::GetEmployee($data[0][0]->empid)->positions);

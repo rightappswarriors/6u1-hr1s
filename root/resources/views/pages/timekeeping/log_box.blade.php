@@ -4,7 +4,7 @@
 	<div class="card">
 		<div class="card-header">
 			<div class="row">
-				<div class="col">
+				<div class="col-2">
 					<i class="fa fa-fw fa-lock"></i>Log Box <br>
 				</div>
 				<div class="col">
@@ -14,6 +14,45 @@
 				</div>
 			</div>
 		</div>
+
+		<div class="row m-2">
+			<div class="col-3 mr-3">
+				<div class="row">
+					Office:
+				</div>
+				<div class="row">
+					<select class="form-control w-100" name="office" id="office" onchange="">
+						<option disabled selected value="">Please select an office</option>
+						@if(!empty($data[1]))
+							@foreach($data[1] as $off)
+								<option value="{{$off->cc_id}}">{{$off->cc_desc}}</option>
+							@endforeach
+						@endif
+					</select>
+				</div>
+			</div>
+
+			<div class="col-3">
+				<div class="row">
+					Employee:
+				</div>
+				<div class="row">
+					<select name="" id="employee" class="form-control mr-3">
+						<option value="" disabled selected>SELECT EMPLOYEE</option>
+					</select>
+				</div>
+			</div>
+
+			<div class="col-3 mr-3">
+				<div class="row">
+					&nbsp;
+				</div>
+				<div class="row">
+					<button class="btn btn-primary" title="Refresh" id="btn_refresh" style="transform: rotateY(180deg)"><i class="fa fa-repeat" aria-hidden="true"></i></button>
+				</div>
+			</div>
+		</div>
+
 		<div class="card-body mb-2 main-card-body bg-success">
 
 			<div class="row mb-3">
@@ -70,9 +109,59 @@
 		var asset2 = {!! json_encode(url('/')) !!} + '/images/profile-imgs/profile_user2.jpg';
 		var yoarel ='{{url('timekeeping/log-box/in')}}';
 		var time_in_seconds = 10;
+
+		let office = "";
+		let employee = "";
 		// online version - obsolete
 		// var asset1 = window.location.origin + '/images/profile-imgs/';
 		// var asset2 = window.location.origin + '/images/profile-imgs/profile_user2.jpg';
+
+		$('#btn_refresh').on('click', function() {
+			$('#office').val('').trigger('change');
+			$('#employee').val('').trigger('change');
+			addCards();
+		});
+
+		$('#office').on('change', function() {
+			employee = $(this).val();
+			addCards();
+		});
+
+		$('#office').on('change', function() {
+
+			while($('#employee')[0].firstChild) {
+				$('#employee')[0].removeChild($('#employee')[0].firstChild);
+			}
+
+			var hiddenChild = document.createElement('option');
+				hiddenChild.setAttribute('selected', '');
+				hiddenChild.setAttribute('disabled', '');
+				hiddenChild.setAttribute('value', '');
+				hiddenChild.innerText='SELECT EMPLOYEE';
+
+			$('#employee')[0].appendChild(hiddenChild);
+
+			$.ajax({
+				type: 'post',
+				url: '{{url('timekeeping/timelog-entry/find-emp-office')}}',
+				data: {ofc_id: $(this).val()},
+				success: function(data) {
+					// console.log(typeof(data));
+					if(data.length > 0) {
+						for(i=0; i<data.length; i++) {
+							var option = document.createElement('option');
+								option.setAttribute('value', data[i].empid);
+								option.innerText=data[i].name;
+
+							$('#employee')[0].appendChild(option);
+						}
+					}
+				},
+			});
+
+			office = $(this).val();
+			employee = "";
+		});
 
 		$('.exclusive_filter_button').on('click', function() {
 			yoarel = '{{url('timekeeping/log-box/')}}/'+$(this).attr('id');
@@ -84,6 +173,7 @@
 			$.ajax({
 				type: "post",
 				url: yoarel,
+				data: {"office": office, "employee": employee},
 				success: function(response) {
 					if (yoarel.split('/')[yoarel.split('/').length-1] == 'in') {
 						$('.main-card-body').removeClass('bg-danger');

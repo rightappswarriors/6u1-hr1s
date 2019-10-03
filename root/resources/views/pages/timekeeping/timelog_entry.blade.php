@@ -324,7 +324,7 @@
 				if($('select[name=office]').val() != null) {
 					$('select[name=tito_emp]').val($('#tito_id').val()).trigger('change');
 				}
-			}, 500);
+			}, 600);
 		});
 
 		$('#dataTable').on('click', '.btn-edit', function() {
