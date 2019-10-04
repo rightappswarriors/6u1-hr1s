@@ -87,7 +87,7 @@ class DTR extends Model
     *
     * @return Object|null|string
     */
-    public static function GetAllHDRSummaryByDate($date_from)
+    public static function GetAllHDRSummaryByDate($date_from, $type)
     {
         try {
             // return DB::table(self::$tbl_name)->where('date_from', $date_from)/*->where('date_to', $date_to)*/->get();
@@ -95,10 +95,48 @@ class DTR extends Model
                         ->select('hr_dtr_sum_hdr.*', 'hr_dtr_sum_employees.*')
                         ->leftJoin('hr_dtr_sum_hdr', 'hr_dtr_sum_hdr.code', '=', 'hr_dtr_sum_employees.dtr_sum_id')
                         ->where('hr_dtr_sum_hdr.date_from', $date_from)
+                        ->where('hr_dtr_sum_hdr.generationtype', $type)
                         ->get();
         } catch (\Exception $e) {
             ErrorCode::Generate('model', 'DTR', '00004', $e->getMessage());
             return "error";
+        }
+    }
+
+    /**
+    * Gets all Summary via date_from
+    * @param string
+    *
+    * @return Object|null|string
+    */
+    public static function GetAllHDRSummaryByDateWithEmployee($date_from, $type, $emp)
+    {
+        try {
+            // return DB::table(self::$tbl_name)->where('date_from', $date_from)/*->where('date_to', $date_to)*/->get();
+            $data = DB::table(self::$tbl_name2)
+                        ->select('hr_dtr_sum_hdr.*', 'hr_dtr_sum_employees.*')
+                        ->leftJoin('hr_dtr_sum_hdr', 'hr_dtr_sum_hdr.code', '=', 'hr_dtr_sum_employees.dtr_sum_id')
+                        ->where('hr_dtr_sum_hdr.date_from', $date_from)
+                        ->where('hr_dtr_sum_hdr.generationtype', $type)
+                        ->where('hr_dtr_sum_hdr.empid', $emp)
+                        ->get();
+
+            foreach($data as $k => $v) {
+                $data[$k]->days_worked_readable = json_decode($data[$k]->days_worked_arr);
+                $data[$k]->undertime_readable = json_decode($data[$k]->undertime_arr);
+                if(count($data[$k]->days_worked_readable) > 0)
+                    $data[$k]->days_worked_readable[0][3] = \Carbon\Carbon::parse($data[$k]->days_worked_readable[0][0])->format('M d, Y');
+                if(count($data[$k]->undertime_readable) > 0)
+                    $data[$k]->undertime_readable[0][3] = \Carbon\Carbon::parse($data[$k]->undertime_readable[0][0])->format('M d, Y');
+            }
+
+            return $data;
+            // foreach($data as $k => $v) {
+            //     $data[$k]->date_readable = \Carbon\Carbon::parse($data[$k]->service_from)->format('M d, Y');
+            // }
+        } catch (\Exception $e) {
+            ErrorCode::Generate('model', 'DTR', '00004', $e->getMessage());
+            return $e->getMessage();
         }
     }
 
