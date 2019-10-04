@@ -375,7 +375,7 @@ class GenerateDTRController extends Controller
             }
 
             $record = null;
-            if (DB::table('hr_dtr_sum_hdr')->where('empid', $employee->empid)->where('date_from', $pp->from)->where('date_to', $pp->to)->first()!=null) {
+            if (DB::table('hr_dtr_sum_hdr')->where('empid', $employee->empid)->where('date_from', $pp->from)->where('date_to', $pp->to)->where('generationtype', $r->gtype)->first()!=null) {
                 $record = 1;
             }
 
@@ -486,8 +486,8 @@ class GenerateDTRController extends Controller
 
             $dtrs = $r->dtrs;
 
-            $record = DB::table('hr_dtr_sum_hdr')->where('empid', $dtrs['empid'])->where('date_from', $dtrs['date_from'])->where('date_to', $dtrs['date_to'])->first();
-            if ($record == null) {
+            // $record = DB::table('hr_dtr_sum_hdr')->where('empid', $dtrs['empid'])->where('date_from', $dtrs['date_from'])->where('date_to', $dtrs['date_to'])->where('generationtype', $data['generateType'])->first();
+            if (/*$record == null*/ $dtrs['isgenerated'] == null) {
                 try {
                     $code = Core::getm99('dtr_sum_id');
                     $reply = false;
@@ -576,7 +576,7 @@ class GenerateDTRController extends Controller
         return [$this->Save($r), "indv"];
     }
 
-    public function GenerateByEmployee(Request $r) //continue here
+    public function GenerateByEmployee(Request $r)
     {
         /**
         * From request

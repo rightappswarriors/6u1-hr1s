@@ -56,7 +56,7 @@
 					<div class="form-group mr-2">
 						<label class="mr-1">Generation Type</label>
 						<select class="form-control" name="payroll_gen_type" id="payroll_gen_type">
-							<option Value="BASIC">Basic</option>
+							<option Value="BASIC" selected>Basic</option>
 							<option value="OVERTIME">Overtime</option>
 						</select>
 					</div>

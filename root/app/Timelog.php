@@ -33,7 +33,7 @@ class Timelog extends Model
     	
     }
 
-    public static function ShiftHours($empid)
+    public static function ShiftHours()
     {
         /**
         * Returns total hours between start time and end time

@@ -47,19 +47,21 @@ class GeneratePayrollController extends Controller
         * @param $r->payroll_period
         * @param $r->year
         * @param $r->empstatus
+        * @param $r->gen_type
+        * @param $r->ofc
         */
         try {
             $return_val = (object)[];
             $dtr_summaries = [];
             $pp = Payroll::PayrollPeriod2($r->month, $r->payroll_period, $r->year);
-            $sql = "SELECT a.*, b.empname, b.cc_desc FROM (SELECT * FROM hris.hr_dtr_sum_hdr a LEFT JOIN (SELECT * FROM hris.hr_dtr_sum_employees WHERE isgenerated IS FALSE) b ON a.code = b.dtr_sum_id) a INNER JOIN (".Employee::$emp_sql.") b ON a.empid = b.empid";
-                $con = " WHERE date_from >= '".date('Y-m-d', strtotime($pp->from))."' AND date_to <= '".date('Y-m-d', strtotime($pp->to))."' AND empstatus = '".$r->empstatus."'";
+            $sql = "SELECT dtr.*, emp.* FROM (SELECT * FROM hris.hr_dtr_sum_hdr a LEFT JOIN (SELECT * FROM hris.hr_dtr_sum_employees WHERE isgenerated IS FALSE) b ON a.code = b.dtr_sum_id) dtr INNER JOIN (".Employee::$emp_sql.") emp ON dtr.empid = emp.empid";
+                $con = " WHERE date_from >= '".date('Y-m-d', strtotime($pp->from))."' AND date_to <= '".date('Y-m-d', strtotime($pp->to))."' AND empstatus = '".$r->empstatus."' AND generationtype = '".$r->gen_type."' AND department = '".$r->ofc."'";
             $return_val->search = date('Y-m-d', strtotime($pp->from))." to ".date('Y-m-d', strtotime($pp->to));
-            $return_val->parameters = $r->all();
+            // $return_val->parameters = $r->all();
             $return_val->dtr_summaries = Core::sql($sql.$con);
             return json_encode($return_val);
         } catch (\Exception $e) {
-            ErrorCode::Generate('controller', 'GeneratePayrollController', '00001', $e->getMessage());
+            ErrorCode::Generate('controller', 'GeneratePayrollController', 'A00001', $e->getMessage());
             return "error";
         }
     }
@@ -80,10 +82,67 @@ class GeneratePayrollController extends Controller
         * @param $r->ofc
         * @param $r->empstatus
         * @param $r->month
-        * @param $r->payroll_period
         * @param $r->year
+        * @param $r->payroll_period
+        * @param $r->gen_type
         */
-        dd($this->find_dtr($r));
+
+        $errors = [];
+        $asd = [];
+        $dtr_summaries = (array)json_decode($this->find_dtr($r))->dtr_summaries;
+
+        try {
+            // Get records that is not generated yet
+            $pp = Payroll::PayrollPeriod2($r->month,$r->payroll_period); if ($pp =="error") { return "no pp"; }
+            if (count($dtr_summaries) > 0) {
+                for ($i=0; $i < count($dtr_summaries); $i++) { 
+                    try {
+                        $d = $dtr_summaries[$i];
+                        // array_push($asd, $d);
+                        /*Employee Info*/
+                        $rate = $d->pay_rate;
+                        $rate_type = $d->rate_type;
+                        
+                        /* Shift Computation */
+                        $shift_hours = Timelog::ShiftHours(); // returns float
+                        $covered_days = Core::CoveredDates($pp->from, $pp->to); // returns array
+                        $total_days = count($covered_days); // returns array
+                        
+                        /* -Rate breakdown by time- */
+                        $daily_rate = Payroll::GetDailyRate($rate, $rate_type);
+                        $hourly_rate = Payroll::ConvertRate($daily_rate, $shift_hours); // $hourly_rate = $daily_rate / $shift_hours;
+                        $minute_rate = Payroll::ConvertRate($hourly_rate, 60); // $minute_rate = $hourly_rate / 60;
+
+                        /* -Leave- */
+                        $leaves = json_decode($d->leaves_arr);
+                        $leave_count = $d->leaves;
+                        $leave_amt = 0;
+                        if (count($leaves) > 0) {
+                            for ($j=0; $j < count($leaves); $j++) { 
+                                $l = $leaves[$i];
+                            }
+                        }
+
+                        /* -Paywork Details- */
+                        $days_worked = $d->days_worked_arr;
+
+                        /* -Gross Pay- */
+                        /* -Personal Deductions- */
+                        /* -Government Shares- */
+                        /* -Net- */
+                        /* To Database */
+                    } catch (\Exception $e) {
+                        ErrorCode::Generate('controller', 'GeneratePayrollController', 'B00002-'.$i, $e->getMessage());
+                        array_push($errors, $i.":".$e->getMessage());
+                    }
+                }
+            }
+        } catch (\Exception $e) {
+            ErrorCode::Generate('controller', 'GeneratePayrollController', 'B00001', $e->getMessage());
+            array_push($errors, $e->getMessage());
+        }
+
+        return [$asd, $errors];
     }
 
     public function UpdatePayroll(Array $cp)
