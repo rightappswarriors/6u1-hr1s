@@ -90,6 +90,7 @@
 10-03-2019 14:35 | DTR | SQLSTATE[42703]: Undefined column: 7 ERROR:  column "date_from" does not exist LINE 1: select * from "hr_dtr_sum_employees" where "date_from" = $1                                                    ^ (SQL: select * from "hr_dtr_sum_employees" where "date_from" = 2019-09-26) (D00004)
 10-03-2019 14:35 | DTR | SQLSTATE[42703]: Undefined column: 7 ERROR:  column "date_from" does not exist LINE 1: select * from "hr_dtr_sum_employees" where "date_from" = $1                                                    ^ (SQL: select * from "hr_dtr_sum_employees" where "date_from" = 2019-09-26) (D00004)
 10-03-2019 14:35 | DTR | SQLSTATE[42703]: Undefined column: 7 ERROR:  column "date_from" does not exist LINE 1: select * from "hr_dtr_sum_employees" where "date_from" = $1                                                    ^ (SQL: select * from "hr_dtr_sum_employees" where "date_from" = 2019-09-26) (D00004)
+<<<<<<< HEAD
 10-04-2019 09:35 | GenerateDTRController | Undefined variable: data (GDTRCB00000)
 10-04-2019 09:35 | GenerateDTRController | Undefined variable: data (GDTRCB00000)
 10-04-2019 09:35 | GenerateDTRController | Undefined variable: data (GDTRCB00000)
@@ -210,3 +211,10 @@
 10-04-2019 18:31 | GeneratePayrollController | Undefined variable: pp (GPCB00002-9)
 10-04-2019 18:31 | GeneratePayrollController | Undefined variable: pp (GPCB00002-10)
 10-04-2019 18:31 | GeneratePayrollController | Undefined variable: pp (GPCB00002-11)
+=======
+10-04-2019 13:35 | DTR | Trying to get property 'days_worked_arr' of non-object (D00004)
+10-04-2019 13:39 | DTR | Trying to get property 'days_worked_arr' of non-object (D00004)
+10-04-2019 13:51 | DTR | Undefined offset: 0 (D00004)
+10-04-2019 13:51 | DTR | Undefined offset: 0 (D00004)
+10-04-2019 13:52 | DTR | Undefined offset: 0 (D00004)
+>>>>>>> b8cbe5c9ac1af8ece4d826db63f14ef31a815b12

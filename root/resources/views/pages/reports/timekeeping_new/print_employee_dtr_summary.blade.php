@@ -33,6 +33,12 @@
 							<option value="" disabled>No payroll generated</option>
 						@endif --}}
 					</select>
+					<label for="generationtype">Generation Type: </label>
+					<select class="form-control mr-3" name="generationtype" id="generationtype" onchange="">
+						{{-- <option disabled selected value="">Please select a type</option> --}}
+						<option value="BASIC">BASIC</option>
+						<option value="OVERTIME">OVERTIME</option>
+					</select>
 					<button class="btn btn-primary mr-3" id="find_btn" disabled>Find</button>
 					<button class="btn btn-primary mr-3" id="print_btn" disabled><i class="fa fa-fw fa-print"></i></button>
 				</div>
@@ -81,7 +87,7 @@
 			$.ajax({
 				type: 'post',
 				url: '{{url('reports/timekeeping/employee-dtr/')}}/findnew',
-				data: {"code":$('#payroll_period').val()},
+				data: {"code":$('#payroll_period').val(), "type":$('#generationtype').val()},
 				success: function(data) {
 					table.clear().draw();
 					for(i=0; i<data.length; i++) {

@@ -408,6 +408,7 @@
 					Route::get('/', 'Reports\PrintEmployeeDTRController@view2');
 
 					Route::post('/findnew', 'Reports\PrintEmployeeDTRController@findnew');
+					Route::post('/findnew2', 'Reports\PrintEmployeeDTRController@findnew2');
 					Route::post('/getperiods', 'Reports\PrintEmployeeDTRController@getperiods');
 				});
 
@@ -415,6 +416,7 @@
 					Route::get('/', 'Reports\PrintEmployeeDTRSummaryController@view2');
 
 					Route::post('/findnew', 'Reports\PrintEmployeeDTRSummaryController@findnew');
+
 					Route::post('/getperiods', 'Reports\PrintEmployeeDTRSummaryController@getperiods');
 				});
 				/*TIMEKEEPING NEW*/

@@ -55,8 +55,18 @@ class PrintEmployeeDTRController extends Controller
     public function findnew(Request $r)
     {
         // $data = DTR::GetAllHDRSummaryByCode($r->code);
-        $data = DTR::GetAllHDRSummaryByDate($r->code);
+        $data = DTR::GetAllHDRSummaryByDate($r->code, $r->type);
         // dd($data);
+        foreach($data as $k => $v) {
+            $v->employee_readable = Employee::Name($v->empid);
+        }
+        return $data;
+    }
+
+    public function findnew2(Request $r)
+    {
+        // $data = DTR::GetAllHDRSummaryByCode($r->code);
+        $data = DTR::GetAllHDRSummaryByDateWithEmployee($r->code, $r->type, $r->emp);
         foreach($data as $k => $v) {
             $v->employee_readable = Employee::Name($v->empid);
         }
