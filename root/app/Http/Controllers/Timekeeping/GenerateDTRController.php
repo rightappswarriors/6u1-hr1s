@@ -158,8 +158,14 @@ class GenerateDTRController extends Controller
                 * Check Timelogs
                 */
                 if (Timelog::IfLeave($employee->empid, $date)) {
-                    array_push($arr_leavedates, [$date, Leave::GetLeaveRecord2($employee->empid, $date, true)->leave_type]);
-                    $totalleave+=1;
+                    /**
+                    * Leave array format [date, leave type, leave amount]
+                    */
+                    $empleave = Leave::GetLeaveRecord2($employee->empid, $date, true);
+                    if ($empleave!=null) {
+                        array_push($arr_leavedates, [$date, $empleave->leave_type, $empleave->leave_amount]);
+                        $totalleave+=1;
+                    }
                 } elseif (count($rec_ti) > 0) {
                     if (count($rec_to) > 0) {
                         $rec_ti = explode(",", $rec_ti[0]->time_log);
@@ -370,7 +376,7 @@ class GenerateDTRController extends Controller
                     $totalabsent = 0;
                 }
             } catch (\Exception $e) {
-                ErrorCode::Generate('controller', 'GenerateDTRController', '00003', $e->getMessage());
+                ErrorCode::Generate('controller', 'GenerateDTRController', 'A00003', $e->getMessage());
                 return "error";
             }
 
@@ -472,7 +478,7 @@ class GenerateDTRController extends Controller
         /**
         * @param $r->dtrs - From Generate()
         */
-        // return dd($r->late_arr);
+        // return dd($r->all());
         try {
             if (isset($r->dtrs['errors'])) {
                 if (count($r->dtrs['errors']) > 0) {
@@ -485,6 +491,7 @@ class GenerateDTRController extends Controller
             }
 
             $dtrs = $r->dtrs;
+            // $dtrs = (array)json_decode($this->Generate($r));
 
             // $record = DB::table('hr_dtr_sum_hdr')->where('empid', $dtrs['empid'])->where('date_from', $dtrs['date_from'])->where('date_to', $dtrs['date_to'])->where('generationtype', $data['generateType'])->first();
             if (/*$record == null*/ $dtrs['isgenerated'] == null) {
@@ -573,7 +580,9 @@ class GenerateDTRController extends Controller
 
     public function SaveDTR(Request $r)
     {
-        return [$this->Save($r), "indv"];
+        $a = (object)[];
+        $a->dtrs = (array)json_decode($this->Generate($r));
+        return [$this->Save($a), "indv"];
     }
 
     public function GenerateByEmployee(Request $r)

@@ -379,7 +379,7 @@
 
 		function onToggleSaveDTRModal_ind()
 		{
-			$('#frm-add').attr('action', '{{url('timekeeping/generate-dtr/save-dtr')}}?empid='+selected_row.children()[0].innerText+"&ppid="+$('#payroll_period').val());
+			$('#frm-add').attr('action', '{{url('timekeeping/generate-dtr/save-dtr')}}?code='+selected_row.children()[0].innerText+'&pp='+$('#payroll_period').val()+'&ofc_id='+$('#payroll_ofc').val()+'&month='+$('#payroll_month').val()+'&year='+$('#payroll_year').val()+'&empstat='+$('#payroll_emp_stat').val()+'&gtype='+$('#payroll_gen_type').val());
 			$('#modal-add').modal('show');
 		}
 

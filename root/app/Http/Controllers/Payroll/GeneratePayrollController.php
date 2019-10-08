@@ -89,7 +89,7 @@ class GeneratePayrollController extends Controller
 
         $errors = [];
         $asd = [];
-        $dtr_summaries = (array)json_decode($this->find_dtr($r))->dtr_summaries;
+        $dtr_summaries = json_decode($this->find_dtr($r))->dtr_summaries;
 
         try {
             // Get records that is not generated yet
@@ -98,7 +98,7 @@ class GeneratePayrollController extends Controller
                 for ($i=0; $i < count($dtr_summaries); $i++) { 
                     try {
                         $d = $dtr_summaries[$i];
-                        // array_push($asd, $d);
+
                         /*Employee Info*/
                         $rate = $d->pay_rate;
                         $rate_type = $d->rate_type;
@@ -119,20 +119,30 @@ class GeneratePayrollController extends Controller
                         $leave_amt = 0;
                         if (count($leaves) > 0) {
                             for ($j=0; $j < count($leaves); $j++) { 
-                                $l = $leaves[$i];
-                            }
+                                $l = $leaves[$j];
+                                $leave_amt += (float)$l[2];
+                            };
                         }
 
                         /* -Paywork Details- */
                         $days_worked = $d->days_worked_arr;
+                        $regular_pay = 0; 
+                        if ($rate_type == "D") {
+                            $regular_pay = $daily_rate * ($total_days - $leave_total);
+                        } else {
+                            $regular_pay = $rate / 2;
+                        }
 
-                        /* -Gross Pay- */
+                        /* -Gross Pay Computation- */
+                        $pera = 2000;
+                        $basic_pay = ($regular_pay + $amt_overtime) - ($amt_absent + $amt_late + $amt_undertime);
+
                         /* -Personal Deductions- */
                         /* -Government Shares- */
                         /* -Net- */
                         /* To Database */
                     } catch (\Exception $e) {
-                        ErrorCode::Generate('controller', 'GeneratePayrollController', 'B00002-'.$i, $e->getMessage());
+                        ErrorCode::Generate('controller', 'GeneratePayrollController', 'B00002-'.$d->empid, $e->getMessage());
                         array_push($errors, $i.":".$e->getMessage());
                     }
                 }

@@ -260,6 +260,8 @@ return [
         'X05S' => App\X05_sub::class,
         'X07' => App\X07::class,
         'X08' => App\X08::class,
+        /* --Added aliases-- */
+        'Excel' => Maatwebsite\Excel\Facades\Excel::class,
         /* --Above this line is custom aliases created by the developers-- */
         'TestExport' => App\Exports\TestExport::class,
     ],
