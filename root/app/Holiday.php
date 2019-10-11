@@ -80,7 +80,12 @@ class Holiday extends Model
 
     public static function HolidayPercentage($htype)
     {
-        $data = (object) [];
+        /**
+        * Returns the percentage of selected holiday type
+        * @param $htype : holiday type
+        * @return object;
+        */
+        $data = (object)[];
         switch ($htype) {
             case 'RH':
                 $data->nowork = 100;

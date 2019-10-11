@@ -34,7 +34,12 @@ class Payroll extends Model
 
     public static function GetDailyRate($rate, $rate_type)
     {
-    	try {
+    	/*
+        * D = Daily; If not "D" it meants $rate_type = "M" for "Monthly"
+        * Computation for Daily Rate if $rate_type is "M"
+        * | Daily Rate = (Rate times 12 Months) divided by 314 days
+        */
+        try {
     		if ($rate_type == "D") {
 	    		$daily_rate = $rate;
 	    	} else {
@@ -94,7 +99,7 @@ class Payroll extends Model
         /*
         | Returns given value is on the 2nd payroll period of the month
         */
-        if ($pp == '30D') {
+        if ($pp == '15D') {
             return true;
         }
         return false;

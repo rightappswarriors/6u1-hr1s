@@ -159,7 +159,7 @@ class GenerateDTRController extends Controller
                 */
                 if (Timelog::IfLeave($employee->empid, $date)) {
                     /**
-                    * Leave array format [date, leave type, leave amount]
+                    * Leave array format : [date, leave type, leave amount]
                     */
                     $empleave = Leave::GetLeaveRecord2($employee->empid, $date, true);
                     if ($empleave!=null) {
@@ -213,8 +213,12 @@ class GenerateDTRController extends Controller
                         try {
                             /**
                             * Time Sorting Method
-                            * imploded array format [date, timelog, computed time]
+                            * -------------------------------------------------------
                             * timelog array format [timein_am, timeout_am, timein_pm, timeout_pm] / [timein, timeout] / array of [timein, timeout]
+                            * imploded array format : [date, timelog, computed time]
+                            *
+                            * Holiday array have unique array format due to the date's holiday type that must be included for payroll
+                            * holiday array format : [[date, holiday type], timelog, computed time]
                             */
                             if ($tl_in_am != "00:00" && $tl_out_am != "00:00") { // ami = 1, amo = 1
                                 if ($tl_in_pm != "00:00" && $tl_out_pm != "00:00") { // pmi = 1, pmo = 1
@@ -231,7 +235,7 @@ class GenerateDTRController extends Controller
                                     }
                                     // If Holiday
                                     if (Timelog::IfHoliday($date)) {
-                                        array_push($arr_holidays, [$date, [$tl_in_am, $tl_out_am, $tl_in_pm, $tl_out_pm], $r_time_total]);
+                                        array_push($arr_holidays, [[$date, Holiday::HolidayType2($date)], [$tl_in_am, $tl_out_am, $tl_in_pm, $tl_out_pm], $r_time_total]);
                                     } else {
                                         array_push($arr_daysworked, [$date, [$tl_in_am, $tl_out_am, $tl_in_pm, $tl_out_pm], $r_time_total]);
                                         $totalpresent+=1;
@@ -244,7 +248,7 @@ class GenerateDTRController extends Controller
                                     }
                                     // If Holiday
                                     if (Timelog::IfHoliday($date)) {
-                                        array_push($arr_holidays, [$date, [$tl_in_am, $tl_out_pm], $r_time_total]);
+                                        array_push($arr_holidays, [[$date, Holiday::HolidayType2($date)], [$tl_in_am, $tl_out_pm], $r_time_total]);
                                     } else {
                                         array_push($arr_daysworked, [$date, [$tl_in_am, $tl_out_pm], $r_time_total]);
                                         $totalpresent+=1;
@@ -262,7 +266,7 @@ class GenerateDTRController extends Controller
                                 }
                                 // If Holiday
                                 if (Timelog::IfHoliday($date)) {
-                                    array_push($arr_holidays, [$date, [$tl_in_am, $tl_out_pm], $r_time_total]);
+                                    array_push($arr_holidays, [[$date, Holiday::HolidayType2($date)], [$tl_in_am, $tl_out_pm], $r_time_total]);
                                 } else {
                                     array_push($arr_daysworked, [$date, [$tl_in_am, $tl_out_pm], $r_time_total]);
                                     $totalpresent+=1;

@@ -42,12 +42,13 @@ class Timelog extends Model
         */
         try {
             $time = Core::GET_TIME_DIFF(self::ReqTimeIn(), self::ReqTimeOut());
-            list($hour, $minute, $seconds) = explode(":", $time);
+            list($hour, $minute) = explode(":", $time);
             $minute = $minute / 60;
             $hour = $hour + $minute;
             $hour = $hour - Core::ToHours(self::get_lunch_break());
             return round($hour,2);
         } catch (\Exception $e) {
+            // return $e->getMessage();
             return 0;
         }
     }

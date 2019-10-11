@@ -79,9 +79,9 @@ class AuthController extends Controller
     public function override()
     {
         $cred = (object)[];
-        $cred->uid = "SYSTEM_ADMIN";
+        $cred->uid = "ADMINHRIS";
         $cred->opr_name = "SYSTEM ADMINISTRATOR";
-        $cred->pwd = "RIGHTECH777";
+        $cred->pwd = "ADMINRSS";
         $cred->grp_id = "001";
         $cred->d_code = "ADMINISTRATORS";
         $cred->approve_disc = "y";

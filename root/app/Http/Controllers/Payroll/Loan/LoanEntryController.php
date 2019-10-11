@@ -56,12 +56,36 @@ class LoanEntryController extends Controller
         $loan_sub_type = "";
 
         switch($r->cbo_contraacct) {
-            case "pagibig": $loan_sub_type = $r->cbo_pagibig_sub; break;
-            case "sss": $loan_sub_type = $r->cbo_sss_sub; break;
+            case "pagibig":
+                $loan_sub_type = $r->cbo_pagibig_sub;
+                break;
+            case "sss":
+                $loan_sub_type = $r->cbo_sss_sub;
+                break;
+            case "gsis":
+                $loan_sub_type = $r->cbo_sss_sub;
+                break;
             default: $loan_sub_type = "";
         }
 
-        $data = ['loan_code'=>$r->txt_code, 'loan_desc'=>$r->txt_desc, 'loan_transdate'=>$r->dtp_trnxdt, 'loan_location'=>$r->cbo_stocklocation, 'loan_type'=>$r->cbo_contraacct, 'user_id'=>Account::CURRENT()->uid, 'whs_location_code'=>$r->cbo_stocklocation/*, 'loan_cost_center_code'=>$r->cbo_costcenter*/, 'loan_cost_center_name'=>$r->cbo_costcenter/*, 'loan_sub_cost_center'=>$r->cbo_scc*/, 'loan_amount'=>$r->txt_amnt_loan, 'loan_deduction'=>$dpm/*, 'deduction_date'=>$r->dtp_deduction*/, 'employee_no'=>$r->empid, 'employee_name'=>$emp->firstname.' '.$emp->lastname, 'months_to_be_paid'=>$r->txt_mo_tbp, 'period_to_pay'=>$r->cbo_per_tp, 'loan_sub_type'=>$loan_sub_type];
+        $data = [
+            'loan_code'=>$r->txt_code, 
+            'loan_desc'=>$r->txt_desc, 
+            'loan_transdate'=>$r->dtp_trnxdt, 
+            'loan_location'=>$r->cbo_stocklocation, 
+            'loan_type'=>$r->cbo_contraacct, 
+            'user_id'=>Account::CURRENT()->uid, 
+            'whs_location_code'=>$r->cbo_stocklocation/*, 'loan_cost_center_code'=>$r->cbo_costcenter*/, 
+            'loan_cost_center_name'=>$r->cbo_costcenter/*, 'loan_sub_cost_center'=>$r->cbo_scc*/, 
+            'loan_amount'=>$r->txt_amnt_loan, 
+            'loan_deduction'=>$dpm/*, 'deduction_date'=>$r->dtp_deduction*/, 
+            'employee_no'=>$r->empid, 
+            'employee_name'=>$emp->firstname.' '.$emp->lastname, 
+            'months_to_be_paid'=>$r->txt_mo_tbp, 
+            'period_to_pay'=>$r->cbo_per_tp, 
+            'loan_sub_type'=>$loan_sub_type
+        ];
+
         try {
 
             DB::table(Loan::$tbl_name)->insert($data);

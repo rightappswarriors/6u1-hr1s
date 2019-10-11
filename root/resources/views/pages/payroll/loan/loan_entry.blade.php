@@ -271,7 +271,9 @@
 											@foreach(LoanType::Load_LoanTypes() as $key => $value)
 												<option value="{{$value->code}}">{{$value->description}}</option>
 											@endforeach
-											{{-- <option value="pagibig">Pag-Ibig</option> --}}
+											<option value="pagibig">Pag-Ibig</option>
+											{{-- <option value="sss">SSS</option> --}}
+											<option value="gsis">GSIS</option>
 										</select>
 									</div>
 									<div class="form-group exclusive_sub_hidden" id="pagibig_sub" hidden>
@@ -284,7 +286,7 @@
 										</select>
 									</div>
 									<div class="form-group exclusive_sub_hidden" id="sss_sub" hidden>
-										<label>SSS Type:</label>
+										<label>GSIS Type:</label>
 										<select name="cbo_sss_sub" id="" style="text-transform: uppercase;" class="form-control" required>
 											<option disabled hidden selected value="">---</option>
 											@foreach(SSS::Get_All_Sub() as $key => $value)
@@ -409,7 +411,23 @@
 
 					div[0].children[1].setAttribute('required', '');
 					break;
+
 				case "sss":
+					var divs = $('.exclusive_sub_hidden');
+					for(i=0; i<divs.length; i++) {
+						divs[i].setAttribute('hidden', '');
+						divs[i].children[1].setAttribute('disabled', '');
+						divs[i].children[1].removeAttribute('required');
+					}
+
+					var div = $('#sss_sub');
+					div[0].removeAttribute('hidden');
+					div[0].children[1].removeAttribute('disabled');
+
+					div[0].children[1].setAttribute('required', '');
+					break;
+
+				case "gsis":
 					var divs = $('.exclusive_sub_hidden');
 					for(i=0; i<divs.length; i++) {
 						divs[i].setAttribute('hidden', '');
@@ -617,6 +635,7 @@
 			switch(data.loan_type) {
 				case "pagibig": $('select[name="cbo_pagibig_sub"]').val(data.loan_sub_type); break;
 				case "sss": $('select[name="cbo_sss_sub"]').val(data.loan_sub_type); break;	
+				case "gsis": $('select[name="cbo_sss_sub"]').val(data.loan_sub_type); break;
 			}
 			
 
