@@ -15,6 +15,20 @@ class LoanTypeController extends Controller
         $SQLLoanType = "SELECT * from hr_loan_type WHERE COALESCE(cancel,cancel,'')<>'Y'";
         $this->depart = DB::select($SQLLoanType);
     }
+
+    public function IsReserved($string)
+    {
+        $reservedIds = [
+            "sss",
+            "gsis",
+            "pagibig",
+            "pag-ibig",
+            "philhealth",
+            "phil-health"
+        ];
+        return in_array($string, $reservedIds);
+    }
+
     public function view()
     {
     	// return dd($this->depart);
@@ -23,6 +37,11 @@ class LoanTypeController extends Controller
     public function add(Request $r) 
     {
         // return dd($r->all());
+        if ($this->IsReserved(strtolower($r->txt_code))) {
+            Core::Set_Alert('warning', "Code is a reserved. Please make a new one.");
+            return back();
+        }
+
     	$data = ['code'=>$r->txt_code , 'description' => $r->txt_name];
     	try {
 

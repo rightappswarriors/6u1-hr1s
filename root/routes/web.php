@@ -575,34 +575,44 @@
 			// dd(json_decode($data));
 			// dd(json_decode(Office::OfficeEmployees_byEmpStat(97, 3)));
 
-			/*KEEP THESE*/
-			$data = [
-				'a',
-				'b',
-				'c',
-				'd',
-				'e',
-				'f',
-				'g',
-				'h',
-				'i',
-				'j'
-			];
-			$condata = [];
-			$tmp = [];
+			// $reservedIds = [
+	  //           "sss",
+	  //           "gsis",
+	  //           "pagibig",
+	  //           "pag-ibig",
+	  //       ];
+	  //       dd(in_array('dsa', $reservedIds));
 
-			$j = 0;
-			for ($i=0; $i < count($data); $i++) { 
-				if ($j < 2) {
-					array_push($tmp, $data[$i]);
-					$j++;
-				} else {
-					array_push($condata, $tmp);
-					$tmp = [];
-					$j = 0;
-				}
-			}
-			dd($condata);
+			dd(json_encode([]));
+
+			/*KEEP THESE*/
+			// $data = [
+			// 	'a',
+			// 	'b',
+			// 	'c',
+			// 	'd',
+			// 	'e',
+			// 	'f',
+			// 	'g',
+			// 	'h',
+			// 	'i',
+			// 	'j'
+			// ];
+			// $condata = [];
+			// $tmp = [];
+
+			// $j = 0;
+			// for ($i=0; $i < count($data); $i++) { 
+			// 	if ($j < 2) {
+			// 		array_push($tmp, $data[$i]);
+			// 		$j++;
+			// 	} else {
+			// 		array_push($condata, $tmp);
+			// 		$tmp = [];
+			// 		$j = 0;
+			// 	}
+			// }
+			// dd($condata);
 			/*KEEP THESE*/
 		});
 

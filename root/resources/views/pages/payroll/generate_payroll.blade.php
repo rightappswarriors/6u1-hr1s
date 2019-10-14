@@ -37,20 +37,26 @@
 						</select>
 						<select class="form-control mr-2 YearSelector" id="year" name="year">
 						</select>
-						<button type="submit" class="btn btn-primary mr-2"><i class="fa fa-search"></i> Search</button>
-						<button type="button" class="btn btn-primary mr-2" onclick="ClearSearch()"><i class="fa fa-eraser"></i></button>
-						<button type="button" class="btn btn-primary mr-2" onclick="GeneratePayroll()" disabled="">Generate</button>
+						<select class="form-control mr-2" name="gen_type" id="gen_type">
+							<option Value="BASIC" selected>Basic</option>
+							<option value="OVERTIME">Overtime</option>
+						</select>
+						<div class="btn-group mr-2">
+							<button type="button" class="btn btn-primary border-right" onclick="FindDTRS()"><i class="fa fa-search"></i> Search</button>
+							<button type="button" class="btn btn-primary border-left" onclick="ClearSearch()"><i class="fa fa-eraser"></i> Clear</button>
+						</div>
 					</div>
 				</div>
 			</form>
 		</div>
-		<div class="card-header">
+		<div class="card-header border-top">
 			<div class="row">
 				<div class="col">
-					<i class="fa fa-clock-o"></i> Available DTR Summary
+					Available DTR Summary
 				</div>
 				<div class="col border-left">
-					<i class="fa fa-clock-o"></i> Generated Payroll History
+					Generated Payroll History
+					<button type="button" class="btn btn-primary" id="btn-generate" onclick="GeneratePayroll()" disabled=""><i class="fa fa-share"></i> <i class="fa fa-server"></i> Generate</button>
 				</div>
 			</div>
 		</div>
@@ -123,6 +129,7 @@
 	<script type="text/javascript">
 		var dataTable_gds = $('#dt-gds').DataTable(dataTable_config6);
 		var dataTable_gdh = $('#dt-gph').DataTable(dataTable_config6);
+		var dtrs = [];
 	</script>
 	<script type="text/javascript">
 		$('#ofc, #empstatus, #month, #payroll_period, #year').on('change', function() {
@@ -139,11 +146,13 @@
 					dataTy : 'json',
 					beforeSend : function()
 					{
-						togglePreloader();
+						// togglePreloader();
+						$('#btn-frm-submit').html('Searching DTR <i class="fa fa-spin fa-spinner"></i>');
 					},
 					complete : function()
 					{
-						togglePreloader();
+						// togglePreloader();
+						$('#btn-frm-submit').html('<i class="fa fa-search"></i> Search');
 					},
 					success : function(data)
 					{
@@ -151,13 +160,15 @@
 						dataTable_gds.clear().draw();
 						if (data!="error") {
 							var d = JSON.parse(data);
-							dataTable_gds.search(d.search).draw();
+							// dataTable_gds.search(d.search).draw();
 							dataTable_gdh.search(d.search).draw();
+							dtrs = d.dtr_summaries;
 							if (d.dtr_summaries.length > 0) {
 								for (var i = 0; i < d.dtr_summaries.length; i++) {
 									LoadTable_gds(d.dtr_summaries[i]);
 								}
 							}
+							$('#btn-generate').removeAttr('disabled');
 						} else {
 							alert("Error submiting your request.");
 						}
@@ -187,6 +198,12 @@
 			dataTable_gds.search('').draw();
 			dataTable_gds.clear().draw();
 			dataTable_gdh.search('').draw();
+			$('#btn-generate').attr('disabled', true);
+		}
+
+		function FindDTRS()
+		{
+			$("#frm-gp").submit();
 		}
 
 		function GeneratePayroll()
@@ -195,42 +212,42 @@
 				$.ajax({
 					type : 'post',
 					url : '{{url('/payroll/generate-payroll/generate')}}',
-					data : $('#frm-gp').serialize(),
+					data : $("#frm-gp").serialize(),
 					dataTy : 'json',
 					success : function(data)
 					{
-						// console.log(data);
-						if (data == "no record") {
-							alert("No generated DTR available.");
-						} else {
-							// console.log(data);
-							data = JSON.parse(data);
-							if (data.results.length > 0) {
-								var results = data.results;
-								for (var i = 0; i < results.length; i++) {
-									var d = results[i];
-									var e = d.split(":");
-									if (e[1]=="ok") {
-										alert(d);
-									}
-								}
-							}
-							dataTable_gds.clear().draw();
-							if (data.dtrsum.length > 0) {
-								dtrsum = data.dtrsum;
-								for (var i = 0; i < dtrsum.length; i++) {
-									// LoadTable_gds(dtrsum[i]);
-								}
-							}
-							dataTable_gdh.clear().draw();
-							if (data.ghistory.length > 0) {
-								ghistory = data.ghistory;
-								for (var i = 0; i < ghistory.length; i++) {
-									// LoadTable_gdh(ghistory[i]);
-								}
-							}
-							alert("Payroll Generated.");
-						}
+						console.log(data);
+						// if (data == "no record") {
+						// 	alert("No generated DTR available.");
+						// } else {
+						// 	// console.log(data);
+						// 	data = JSON.parse(data);
+						// 	if (data.results.length > 0) {
+						// 		var results = data.results;
+						// 		for (var i = 0; i < results.length; i++) {
+						// 			var d = results[i];
+						// 			var e = d.split(":");
+						// 			if (e[1]=="ok") {
+						// 				alert(d);
+						// 			}
+						// 		}
+						// 	}
+						// 	dataTable_gds.clear().draw();
+						// 	if (data.dtrsum.length > 0) {
+						// 		dtrsum = data.dtrsum;
+						// 		for (var i = 0; i < dtrsum.length; i++) {
+						// 			// LoadTable_gds(dtrsum[i]);
+						// 		}
+						// 	}
+						// 	dataTable_gdh.clear().draw();
+						// 	if (data.ghistory.length > 0) {
+						// 		ghistory = data.ghistory;
+						// 		for (var i = 0; i < ghistory.length; i++) {
+						// 			// LoadTable_gdh(ghistory[i]);
+						// 		}
+						// 	}
+						// 	alert("Payroll Generated.");
+						// }
 					}
 				});
 			}
