@@ -31,6 +31,12 @@ class ServiceRecordController extends Controller
         $this->ghistory = ServiceRecord::Load_ServiceRecords();
     }
 
+    /**
+    * view
+    * @param
+    *
+    * @return view
+    */
     public function view()
     {
         $data = $this->ghistory;
@@ -46,6 +52,12 @@ class ServiceRecordController extends Controller
         return view('pages.records.service_record', compact('data'));
     }
 
+    /**
+    * add remarks ajax 
+    * @param Request
+    *
+    * @return
+    */
     public function add_remark(Request $r)
     {
         // dd($r->all());
@@ -62,6 +74,12 @@ class ServiceRecordController extends Controller
         }
     }
 
+    /**
+    * find record ajax
+    * @param Request
+    *
+    * @return array | null
+    */
     public function find(Request $r)
     {
         $data = $this->ghistory;

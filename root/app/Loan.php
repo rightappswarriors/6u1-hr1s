@@ -13,11 +13,23 @@ class Loan extends Model
     public static $tbl_name = "hr_loanhdr";
     public static $pk = "loan_code";
 
+    /**
+    * returns all the loans that are not cancelled
+    * @param
+    *
+    * @return Object | null
+    */
     public static function Load_Loans()
     {
     	return DB::table(self::$tbl_name)->get();
     }
 
+    /**
+    * returns a loan via empid and date
+    * @param string, string
+    *
+    * @return Object | null
+    */
     public static function Find_Loan($empid, string $date)
     {
     	$tbl = DB::table(self::$tbl_name)->where('cancel', '=', null)->where('deduction_date', '=', date('Y-m-d', strtotime($date)))->where('employee_no', '=', $empid)->get();
