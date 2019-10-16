@@ -20,6 +20,13 @@ class OtherEarningsController extends Controller
     	// return dd($this->depart);
     	return view('pages.mfile.otherearnings', ['otherearnings' => $this->otherearnings]);
     }
+
+    /**
+    * add
+    * @param Request
+    *
+    * @return view | back
+    */
     public function add(Request $r) 
     {
         // return dd($r->all());
@@ -35,6 +42,13 @@ class OtherEarningsController extends Controller
     		return back();
     	}
     }
+
+    /**
+    * update
+    * @param Request
+    *
+    * @return view | back
+    */
     public function update(Request $r)
     {
     	$data = ['description' => $r->txt_name];
@@ -49,6 +63,13 @@ class OtherEarningsController extends Controller
     		return back();
     	}
     }
+
+    /**
+    * delete
+    * @param Request
+    *
+    * @return view | back
+    */
     public function delete(Request $r)
     {
     	$data = ['cancel' => 'Y'];

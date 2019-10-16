@@ -98,7 +98,7 @@
 				</div>
 			</div>-->
 
-			<div class="table-responsive">
+			<div class="table-responsive mt-3">
 				<table class="table table-hover" style="font-size: 13px;" id="table">
 					<thead>
 						<tr>
@@ -107,7 +107,7 @@
 							<th>Departure (AM)</th>
 							<th>Arrival (PM)</th>
 							<th>Departure (PM)</th>
-							<th>Undertime</th>
+							{{-- <th>Undertime</th> --}}
 						</tr>
 					</thead>
 					<tbody></tbody>
@@ -180,18 +180,16 @@
 						for(i=0; i<data[0].days_worked_readable.length; i++) {
 							// FillTable(data[i]);
 							let d1 = data[0].days_worked_readable[i];
-							let d2 = data[0].undertime_readable[i];
-							FillTable(d1, d2);
+							FillTable(d1);
 						}
 					},
 				});
 			}
 		});
 
-		function FillTable(data, data2) {
+		function FillTable(data) {
 
 			let amin = "", amout = "", pmin = "", pmout = "";
-			let ut = ""
 
 			if(data[1].length > 2) {
 				amin = data[1][0];
@@ -204,18 +202,13 @@
 				pmin = "";
 				pmout = data[1][1];
 			}
-
-			if(ut != undefined) {
-				//
-			}
-
+			
 			table.row.add([
 				data[3],
 				amin,
 				amout,
 				pmin,
 				pmout,
-				"",
 
 			]).draw();
 		}

@@ -47,6 +47,12 @@ class LoanEntryController extends Controller
     	return view('pages.payroll.loan.loan_entry', compact('data'));
     }
 
+    /**
+    * add ajax
+    * @param Request
+    *
+    * @return view | back
+    */
     public function add(Request $r) 
     {
         $emp=Employee::GetEmployee($r->empid);
@@ -99,6 +105,12 @@ class LoanEntryController extends Controller
         }
     }
 
+    /**
+    * find ajax
+    * @param Request
+    *
+    * @return array | null
+    */
     public function find(Request $r)
     {
         try {
@@ -121,6 +133,12 @@ class LoanEntryController extends Controller
         }
     }
 
+    /**
+    * update ajax
+    * @param Reuqest
+    *
+    * @return view | back
+    */
     public function update(Request $r)
     {
         $emp=Employee::GetEmployee($r->cbo_employee);
@@ -146,6 +164,12 @@ class LoanEntryController extends Controller
         }
     }
 
+    /**
+    * delete ajax
+    * @param Request
+    *
+    * @return view | back
+    */
     public function delete(Request $r)
     {
         try {
@@ -161,6 +185,12 @@ class LoanEntryController extends Controller
         }
     }
 
+    /**
+    * get ajax
+    * @param Request
+    *
+    * @return Object | null
+    */
     public function get_entry(Request $r)
     {
         // return $r->all();
@@ -169,6 +199,12 @@ class LoanEntryController extends Controller
         return json_encode($table);
     }
 
+    /**
+    * finds ID ajax
+    * @param Request
+    *
+    * @return Object | null
+    */
     public function FindID(Request $r)
     {
         try {

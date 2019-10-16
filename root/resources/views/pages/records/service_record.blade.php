@@ -80,6 +80,7 @@
 			"paging": false
 		});
 
+		// onchange jquery script for <select id="office">
 		$('#office').on('change', function() {
 			$.ajax({
 				type: "post",
@@ -94,6 +95,7 @@
 			});
 		});
 
+		// function to fill the datatables
 		function FillTable(d) {
 			table.row.add([
 				d.date_from_readable,
@@ -109,6 +111,7 @@
 			]).draw();
 		}
 
+		// function to save remarks ajax-cally
 		function save_remark(sr_code, remarks) {
 			remarks.style.height = "1px";
 			remarks.style.height = (25+remarks.scrollHeight)+"px";
