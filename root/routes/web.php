@@ -561,30 +561,10 @@
 
 		/* VIEW SESSIONS */
 		Route::get('/sessions', function () { dd(Session::all()); });
-		
+		Route::get('/test-blade', function() {
+			return view('pages.test');
+		});
 		Route::get('/test/', function () {
-			// $excel = new PHPExcel();
-            // header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-            // header('Content-Disposition: attachment; filename=download.xlsx');
-			// $data = [
-			// 	'column1' => 'data1',
-			// 	'column2' => 'data2',
-			// 	'column3' => 'data3'
-			// ];
-			// $data = json_encode($data);
-			// dd(json_decode($data));
-			// dd(json_decode(Office::OfficeEmployees_byEmpStat(97, 3)));
-
-			// $reservedIds = [
-	  //           "sss",
-	  //           "gsis",
-	  //           "pagibig",
-	  //           "pag-ibig",
-	  //       ];
-	  //       dd(in_array('dsa', $reservedIds));
-
-			dd(json_encode([]));
-
 			/*KEEP THESE*/
 			// $data = [
 			// 	'a',
@@ -614,6 +594,46 @@
 			// }
 			// dd($condata);
 			/*KEEP THESE*/
+
+			// $excel = new PHPExcel();
+            // header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            // header('Content-Disposition: attachment; filename=download.xlsx');
+			// $data = [
+			// 	'column1' => 'data1',
+			// 	'column2' => 'data2',
+			// 	'column3' => 'data3'
+			// ];
+			// $data = json_encode($data);
+			// dd(json_decode($data));
+			// dd(json_decode(Office::OfficeEmployees_byEmpStat(97, 3)));
+
+			// $reservedIds = [
+	  //           "sss",
+	  //           "gsis",
+	  //           "pagibig",
+	  //           "pag-ibig",
+	  //       ];
+	  //       dd(in_array('dsa', $reservedIds));
+			// Export2_1::exportBlade('pages.test', "sample function");
+			// TestExport::export();
+			// $val = 0;
+			// $array = [
+			// 	100,
+			// 	200,
+			// 	300,
+			// 	400,
+			// 	500,
+			// ];
+			// $asd = [];
+			// $b1 = 0; $b2 = 0;
+			// if (count($array) > 0) {
+			// 	for ($i=0; $i < count($array); $i++) { 
+			// 		$b1 = ($i == 0) ? 0 : $array[$i-1];
+			// 		$b2 = $array[$i];
+			// 		array_push($asd, [$i, $b1, $b2]);
+			// 	}
+			// }
+			dd(OtherDeductions::Get_Records("A", "2019-08-11", "2019-08-25"));
 		});
 
 		/* NOTIFICATION */

@@ -6,9 +6,9 @@
 			<i class="fa fa-file-excel-o"></i> Payroll Summary Report
 		</div>
 		<div class="card-body">
-			<div class="form-inline">
+			<form method="post" action="{{url('payroll/generate-payroll/find-dtr')}}" id="frm-gp">
 				<div class="form-group">
-					<form class="form-inline" method="post" action="{{url('payroll/generate-payroll/find-dtr')}}" id="frm-gp">
+					<div class="form-inline">
 						{{csrf_field()}}
 						<label class="mr-1">Select Payroll:</label>
 						<select class="form-control mr-2" id="month" name="month">
@@ -20,8 +20,11 @@
 							<option value="15D">15th Day</option>
 							<option value="30D">30th Day</option>
 						</select>
-						<select class="form-control mr-2 YearSelector" id="year" name="year">
-						</select>
+						<select class="form-control mr-2 YearSelector" id="year" name="year"></select>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="form-inline">
 						<select class="form-control mr-2" id="ofc" name="ofc">
 							<option value="" selected="" disabled="">-Select office to generate-</option>
 							@foreach($data[0] as $office)
@@ -29,14 +32,13 @@
 							@endforeach
 						</select>
 						<button type="button" class="btn btn-primary mr-2" onclick="SearchOnTable()"><i class="fa fa-search"></i></button>
-						<button type="button" class="btn btn-primary mr-2" onclick="PrintPayslip();"><i class="fa fa-print"></i> Print Payslip</button>
-						<button type="button" class="btn btn-primary" onclick="ExportPS()"><i class="fa fa-file-excel-o"></i> Export to Excel</button>
-					</form>
+						{{-- <button type="button" class="btn btn-primary mr-2" onclick="PrintPayslip();"><i class="fa fa-print"></i> Print Payslip</button> --}}
+					</div>
 				</div>
-			</div>
+			</form>
 		</div>
 		<div class="card-header">
-			Generated Payroll
+			Generated Payroll <button type="button" class="btn btn-primary" onclick="ExportPS()"><i class="fa fa-file-excel-o"></i> Export to Excel</button>
 		</div>
 		<div class="card-body">
 			<div class="table-responsive">

@@ -5,8 +5,8 @@
 		<thead>
 			<tr><th colspan="44">GENERAL PAYROLL</th></tr>
 			<tr><th colspan="44">{{Core::company_name()}}</th></tr>
-			<tr><th colspan="44">{{$data->ofc}}</th></tr>
-			<tr><th colspan="44">{{date('F j, Y', strtotime($data->pp->from))}} - {{date('F j, Y', strtotime($data->pp->to))}}</th></tr>
+			<tr><th colspan="44">{{-- {{$data->ofc}} --}}</th></tr>
+			<tr><th colspan="44">{{-- {{date('F j, Y', strtotime($data->pp->from))}} - {{date('F j, Y', strtotime($data->pp->to))}} --}}</th></tr>
 			<tr>
 				<th rowspan="4">ITEM NO.</th>
 				<th rowspan="4">NAME</th>
@@ -74,7 +74,7 @@
 			</tr>
 		</thead>
 		<tbody>
-			@for($i=0;$i<count($data->rsr);$i++)
+			{{-- @for($i=0;$i<count($data->rsr);$i++)
 			@php
 				$row = $data->rsr[$i];
 				$no = $i+1;
@@ -128,7 +128,7 @@
 				<td>{{($row->net_amt!=0) ? $row->net_amt : "-"}}</td>
 				<td>{{($row->amt_paid!=0) ? $row->amt_paid : "-"}}</td>
 			</tr>
-			@endfor
+			@endfor --}}
 		</tbody>
 	</table>
 {{-- @endsection

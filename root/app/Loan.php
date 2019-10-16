@@ -24,4 +24,9 @@ class Loan extends Model
     	return $tbl;
     }
 
+    public static function Find_Loan2($empid)
+    {
+        return DB::table(self::$tbl_name)->where('cancel', null)->where('employee_no', $empid)->get();
+    }
+
 }

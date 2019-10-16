@@ -23,7 +23,7 @@
 	@endfor
 	<div class="card">
 		<div class="card-header">
-			<i class="fa fa-users"></i> Employee <button type="button" class="btn btn-success mr-1" onclick="location.href='{{ url('master-file/employee/new2') }}';"><i class="fa fa-plus"></i> Add</button> <button type="button" class="btn btn-warning" id="opt-flag"><i class="fa fa-flag"></i> Set Flag</button>
+			<i class="fa fa-users"></i> Employee <button type="button" class="btn btn-success mr-1" onclick="location.href='{{ url('master-file/employee/new2') }}';"><i class="fa fa-plus"></i> Add</button> <button type="button" class="btn btn-warning" id="opt-flag"><i class="fa fa-flag"></i> Set Excemptions</button> {{-- <button type="button" class="btn btn-primary"><i class="fa fa-upload"></i> Import</button> --}}
 		</div>
 		<div class="card-body">
 			<div class="row">

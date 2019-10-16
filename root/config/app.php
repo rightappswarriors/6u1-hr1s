@@ -232,6 +232,7 @@ return [
         'EmployeeShiftSchedule' => App\EmployeeShiftSchedule::class,
         'EmployeeStatus' => App\EmployeeStatus::class,
         'ErrorCode' => App\ErrorCode::class,
+        'Export2_1' => App\Exports\Export2_1::class,
         'Exports\ExportBlade' => App\Exports\ExportBlade::class,
         'HDMF' => App\HDMF::class,
         'Holiday' => App\Holiday::class,

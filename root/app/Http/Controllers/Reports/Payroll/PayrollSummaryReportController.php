@@ -8,6 +8,7 @@ use Core;
 use DB;
 use ErrorCode;
 use Employee;
+use Export2_1;
 use Exports\ExportBlade;
 use JobTitle;
 use OtherDeductions;
@@ -57,16 +58,17 @@ class PayrollSummaryReportController extends Controller
 			} else {
 				return "no employee";
 			}
-			if (count($rsr) <= 0) {
-				return "no record";
-			}
+			// if (count($rsr) <= 0) {
+			// 	return "no record";
+			// }
 			$data = (object)[];
 			$data->pp = $pp;
 			$data->ofc = (Office::GetOffice($r->ofc)!=null) ? strtoupper(Office::GetOffice($r->ofc)->cc_desc) : "office-not-found";
 			$data->rsr = $rsr;
 			$data->pd = $pd;
 			// dd($data);
-			return Excel::download(new ExportBlade('print.reports.payroll.export_payroll_summary_report', $data), 'general-payroll-'.date('YmdHis').'.xlsx');
+			// return Excel::download(new ExportBlade('print.reports.payroll.export_payroll_summary_report', $data), 'general-payroll-'.date('YmdHis').'.xlsx');
+			Export2_1::exportBlade('print.reports.payroll.export_payroll_summary_report', $data);
 		} catch (\Exception $e) {
 			ErrorCode::Generate('controller', 'PayrollSummaryReportController', '00001', $e->getMessage());
 			return "error";

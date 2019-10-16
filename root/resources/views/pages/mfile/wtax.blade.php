@@ -7,9 +7,9 @@
 			<button type="button" class="btn btn-success" id="opt-add">
 				<i class="fa fa-plus"></i> Add
 			</button>
-			<button type="button" class="btn btn-info" id="opt-print">
+			{{-- <button type="button" class="btn btn-info" id="opt-print">
 				<i class="fa fa-print"></i> Print List
-			</button>
+			</button> --}}
 		</div>
 		<div class="card-body">
 			<div class="row">
@@ -104,131 +104,32 @@
 								</div>
 							</div>
 							<div class="row">
+								@php
+									$number_of_
+								@endphp
 								<div class="col">
+									@for($i = 1; $i <= 10; $i++)
 									<div class="form-inline">
-										<label class="my-1 mr-5">Bracket 1:</label>&nbsp;
+										<label class="my-1 mr-5">Bracket {{$i}}:</label>&nbsp;
 										<input type="text" name="brk[]"class="form-control VX" placeholder="0.00" value="0.00">
 									</div> &nbsp;
-									<div class="form-inline">
-										<label class="my-1 mr-5">Bracket 2:</label>&nbsp;
-										<input type="text" name="brk[]"class="form-control VX" placeholder="0.00" value="0.00">
-									</div> &nbsp;
-									<div class="form-inline">
-										<label class="my-1 mr-5">Bracket 3:</label>&nbsp;
-										<input type="text" name="brk[]"class="form-control VX" placeholder="0.00" value="0.00">
-									</div> &nbsp;
-									<div class="form-inline">
-										<label class="my-1 mr-5">Bracket 4:</label>&nbsp;
-										<input type="text" name="brk[]"class="form-control VX" placeholder="0.00" value="0.00">
-									</div> &nbsp;
-									<div class="form-inline">
-										<label class="my-1 mr-5">Bracket 5:</label>&nbsp;
-										<input type="text" name="brk[]"class="form-control VX" placeholder="0.00" value="0.00">
-									</div> &nbsp;
-									<div class="form-inline">
-										<label class="my-1 mr-5">Bracket 6:</label>&nbsp;
-										<input type="text" name="brk[]"class="form-control VX" placeholder="0.00" value="0.00">
-									</div> &nbsp;
-									<div class="form-inline">
-										<label class="my-1 mr-5">Bracket 7:</label>&nbsp;
-										<input type="text" name="brk[]"class="form-control VX" placeholder="0.00" value="0.00">
-									</div> &nbsp;
-									<div class="form-inline">
-										<label class="my-1 mr-5">Bracket 8:</label>&nbsp;
-										<input type="text" name="brk[]"class="form-control VX" placeholder="0.00" value="0.00">
-									</div> &nbsp;
-									<div class="form-inline">
-										<label class="my-1 mr-5">Bracket 9:</label>&nbsp;
-										<input type="text" name="brk[]"class="form-control VX" placeholder="0.00" value="0.00">
-									</div> &nbsp;
-									<div class="form-inline">
-										<label class="my-1 mr-5">Bracket 10:</label>
-										<input type="text" name="brk[]"class="form-control VX" placeholder="0.00" value="0.00">
-									</div> &nbsp;
+									@endfor
 								</div>
 								<div class="col">
+									@for($i = 1; $i <= 10; $i++)
 									<div class="form-inline">
-										<label class="my-1 mr-5">Factor 1:</label>&nbsp;
+										<label class="my-1 mr-5">Factor {{$i}}:</label>&nbsp;
 										<input type="text" name="fct[]"class="form-control VX" placeholder="0.00" value="0.00">
 									</div> &nbsp;
-									<div class="form-inline">
-										<label class="my-1 mr-5">Factor 2:</label>&nbsp;
-										<input type="text" name="fct[]"class="form-control VX" placeholder="0.00" value="0.00">
-									</div> &nbsp;
-									<div class="form-inline">
-										<label class="my-1 mr-5">Factor 3:</label>&nbsp;
-										<input type="text" name="fct[]"class="form-control VX" placeholder="0.00" value="0.00">
-									</div> &nbsp;
-									<div class="form-inline">
-										<label class="my-1 mr-5">Factor 4:</label>&nbsp;
-										<input type="text" name="fct[]"class="form-control VX" placeholder="0.00" value="0.00">
-									</div> &nbsp;
-									<div class="form-inline">
-										<label class="my-1 mr-5">Factor 5:</label>&nbsp;
-										<input type="text" name="fct[]"class="form-control VX" placeholder="0.00" value="0.00">
-									</div> &nbsp;
-									<div class="form-inline">
-										<label class="my-1 mr-5">Factor 6:</label>&nbsp;
-										<input type="text" name="fct[]"class="form-control VX" placeholder="0.00" value="0.00">
-									</div> &nbsp;
-									<div class="form-inline">
-										<label class="my-1 mr-5">Factor 7:</label>&nbsp;
-										<input type="text" name="fct[]"class="form-control VX" placeholder="0.00" value="0.00">
-									</div> &nbsp;
-									<div class="form-inline">
-										<label class="my-1 mr-5">Factor 8:</label>&nbsp;
-										<input type="text" name="fct[]"class="form-control VX" placeholder="0.00" value="0.00">
-									</div> &nbsp;
-									<div class="form-inline">
-										<label class="my-1 mr-5">Factor 9:</label>&nbsp;
-										<input type="text" name="fct[]"class="form-control VX" placeholder="0.00" value="0.00">
-									</div> &nbsp;
-									<div class="form-inline">
-										<label class="my-1 mr-5">Factor 10:</label>
-										<input type="text" name="fct[]"class="form-control VX" placeholder="0.00" value="0.00">
-									</div> &nbsp;
+									@endfor
 								</div>
 								<div class="col">
+									@for($i = 1; $i <= 10; $i++)
 									<div class="form-inline">
 										<label class="my-1 mr-5">Add-on 1:</label>&nbsp;
 										<input type="text" name="addon[]"class="form-control VX" placeholder="0.00" value="0.00">
 									</div> &nbsp;
-									<div class="form-inline">
-										<label class="my-1 mr-5">Add-on 2:</label>&nbsp;
-										<input type="text" name="addon[]"class="form-control VX" placeholder="0.00" value="0.00">
-									</div> &nbsp;
-									<div class="form-inline">
-										<label class="my-1 mr-5">Add-on 3:</label>&nbsp;
-										<input type="text" name="addon[]"class="form-control VX" placeholder="0.00" value="0.00">
-									</div> &nbsp;
-									<div class="form-inline">
-										<label class="my-1 mr-5">Add-on 4:</label>&nbsp;
-										<input type="text" name="addon[]"class="form-control VX" placeholder="0.00" value="0.00">
-									</div> &nbsp;
-									<div class="form-inline">
-										<label class="my-1 mr-5">Add-on 5:</label>&nbsp;
-										<input type="text" name="addon[]"class="form-control VX" placeholder="0.00" value="0.00">
-									</div> &nbsp;
-									<div class="form-inline">
-										<label class="my-1 mr-5">Add-on 6:</label>&nbsp;
-										<input type="text" name="addon[]"class="form-control VX" placeholder="0.00" value="0.00">
-									</div> &nbsp;
-									<div class="form-inline">
-										<label class="my-1 mr-5">Add-on 7:</label>&nbsp;
-										<input type="text" name="addon[]"class="form-control VX" placeholder="0.00" value="0.00">
-									</div> &nbsp;
-									<div class="form-inline">
-										<label class="my-1 mr-5">Add-on 8:</label>&nbsp;
-										<input type="text" name="addon[]"class="form-control VX" placeholder="0.00" value="0.00">
-									</div> &nbsp;
-									<div class="form-inline">
-										<label class="my-1 mr-5">Add-on 9:</label>&nbsp;
-										<input type="text" name="addon[]"class="form-control VX" placeholder="0.00" value="0.00">
-									</div> &nbsp;
-									<div class="form-inline">
-										<label class="my-1 mr-5">Add-on 10:</label
->										<input type="text" name="addon[]"class="form-control VX" value="0.00" placeholder="0.00">
-									</div> &nbsp;
+									@endfor
 								</div>
 							</div>
 						</span>
@@ -308,6 +209,7 @@
 							$('input[name="txt_exemp"]').val(d.exemption);
 							$('input[name="txt_desc"]').val(d.description);
 							$('input[name="txt_desc"]').val(d.description);
+							
 							$('input[name="brk[]"]').eq(0).val(d.bracket1);
 							$('input[name="brk[]"]').eq(1).val(d.bracket2);
 							$('input[name="brk[]"]').eq(2).val(d.bracket3);
@@ -318,6 +220,7 @@
 							$('input[name="brk[]"]').eq(7).val(d.bracket8);
 							$('input[name="brk[]"]').eq(8).val(d.bracket9);
 							$('input[name="brk[]"]').eq(9).val(d.bracket10);
+
 							$('input[name="fct[]"]').eq(0).val(d.factor1);
 							$('input[name="fct[]"]').eq(1).val(d.factor2);
 							$('input[name="fct[]"]').eq(2).val(d.factor3);
@@ -328,6 +231,7 @@
 							$('input[name="fct[]"]').eq(7).val(d.factor8);
 							$('input[name="fct[]"]').eq(8).val(d.factor9);
 							$('input[name="fct[]"]').eq(9).val(d.factor10);
+
 							$('input[name="addon[]"]').eq(0).val(d.add_on1);
 							$('input[name="addon[]"]').eq(1).val(d.add_on2);
 							$('input[name="addon[]"]').eq(2).val(d.add_on3);

@@ -77,7 +77,6 @@
 									<i class="fa fa-exclamation"></i> Error
 								</div>
 								<div class="card-body" id="alert-generate-error-body"></div>
-								
 							</div>
 						</div>
 						<div class="col">

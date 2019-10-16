@@ -48,6 +48,14 @@
 					</div>
 				</div>
 			</form>
+			<div>
+				<div class="card text-white bg-danger collapse mb-3" id="alert-generate-error">
+					<div class="card-header">
+						<i class="fa fa-exclamation"></i> Error
+					</div>
+					<div class="card-body" id="alert-generate-error-body"></div>
+				</div>
+			</div>
 		</div>
 		<div class="card-header border-top">
 			<div class="row">
@@ -199,10 +207,19 @@
 			dataTable_gds.clear().draw();
 			dataTable_gdh.search('').draw();
 			$('#btn-generate').attr('disabled', true);
+			hideErrorDiv();
+		}
+
+		function hideErrorDiv()
+		{
+			// $('#alert-generate-error').hide();
+			$('#alert-generate-error').collapse('hide');
+			$('#alert-generate-error-body').empty();
 		}
 
 		function FindDTRS()
 		{
+			ClearSearch();
 			$("#frm-gp").submit();
 		}
 
@@ -232,13 +249,6 @@
 						// 			}
 						// 		}
 						// 	}
-						// 	dataTable_gds.clear().draw();
-						// 	if (data.dtrsum.length > 0) {
-						// 		dtrsum = data.dtrsum;
-						// 		for (var i = 0; i < dtrsum.length; i++) {
-						// 			// LoadTable_gds(dtrsum[i]);
-						// 		}
-						// 	}
 						// 	dataTable_gdh.clear().draw();
 						// 	if (data.ghistory.length > 0) {
 						// 		ghistory = data.ghistory;
@@ -248,6 +258,24 @@
 						// 	}
 						// 	alert("Payroll Generated.");
 						// }
+						hideErrorDiv();
+						if (data[1].length > 0) {
+							$('#alert-generate-error').collapse('show');
+							for (var i = 0; i < data[1].length; i++) {
+								var data_error = data[1][i];
+								$('#alert-generate-error-body').append(data_error+'<br>');
+							}
+							alert("Some errors occured when generating.");
+						} else {
+							alert("Payroll Generated.");
+						}
+						dataTable_gdh.clear().draw();
+						if (data[0].length > 0) {
+							for (var i = 0; i < data[0].length; i++) {
+								var data_history = data[0][i];
+								// LoadTable_gdh(data_history);
+							}
+						}
 					}
 				});
 			}

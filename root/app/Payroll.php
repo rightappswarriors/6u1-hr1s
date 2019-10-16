@@ -51,6 +51,14 @@ class Payroll extends Model
     	}
     }
 
+    public static function PayPeriods()
+    {
+        /**
+        * Return how many payroll periods within a month
+        */
+        return 2;
+    }
+
     public static function PayrollPeriod2($month, $pp, $year = null)
     {
     	$m = (int)$month;
@@ -103,5 +111,57 @@ class Payroll extends Model
             return true;
         }
         return false;
+    }
+
+    public static function WithHoldingTax($rate, $tax_bracket)
+    {
+        $amt = 0;
+        try {
+            $wtax = DB::table('hr_wtax')->where('code', $tax_bracket)->first();
+            if ($wtax!=null) {
+                $asd = [];
+                $wtax_arr = [
+                   [$wtax->bracket1, $wtax->factor1, $wtax->add_on1],
+                   [$wtax->bracket2, $wtax->factor2, $wtax->add_on2],
+                   [$wtax->bracket3, $wtax->factor3, $wtax->add_on3],
+                   [$wtax->bracket4, $wtax->factor4, $wtax->add_on4],
+                   [$wtax->bracket5, $wtax->factor5, $wtax->add_on5],
+                   [$wtax->bracket6, $wtax->factor6, $wtax->add_on6],
+                   [$wtax->bracket7, $wtax->factor7, $wtax->add_on7],
+                   [$wtax->bracket8, $wtax->factor8, $wtax->add_on8],
+                   [$wtax->bracket9, $wtax->factor9, $wtax->add_on9],
+                ];
+                for ($i=0; $i < count($wtax_arr); $i++) { 
+                    list($bs, $fs, $as) = $wtax_arr[($i == 0) ? $i : $i-1];
+                    list($be, $fe, $fa) = $wtax_arr[$i];
+                    # start range (eg. START - XX)
+                    $a = 0;
+                    if ($i == 0) {
+                        $a = 0;
+                    } else {
+                        if ($be == 0 && $fe == 0 && $fa == 0) {
+                            $a= 0;
+                        } else {
+                            $a = (float)$bs+1;
+                        }
+                    }
+                    # end range (eg. XX - END)
+                    $b = 0;
+                    if ($be == 0 && $fe != 0) {
+                        $b = $a * 2;
+                    } else {
+                        $b = (float)$be;
+                    }
+                    if ($rate > $a && $rate <= $b) {
+                        $amt = (($rate - $a) * ((float)$fe / 100)) + (float)$fa;
+                    }
+                }
+                
+            }
+            return $amt;
+        } catch (\Exception $e) {
+            return $amt;
+            // return $e->getMessage();
+        }
     }
 }

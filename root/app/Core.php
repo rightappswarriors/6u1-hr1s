@@ -696,9 +696,10 @@ class Core extends Model
 
     public static function currSign(String $value = null)
     {
-    	/*
-	    | Returns the currency symbol of the currency that was set in .env file
-	    | Copy and paste this => {!!Core::currSign()!!}
+    	/**
+	    * Returns the currency symbol of the currency that was set in .env file
+	    * Copy and paste this => {!!Core::currSign()!!}
+	    * @return symbol of selected currency
 	    */
     	$curr = ($value!=null) ? $value : config('app.currency');
 
@@ -852,6 +853,9 @@ class Core extends Model
 
     public static function ToFloat($val)
     {
+    	/**
+    	* Convert number string with comma (eg. 1,000.00) into float (eg 1000.00)
+    	*/
     	return floatval(str_replace(',', '', $val));
     }
 
