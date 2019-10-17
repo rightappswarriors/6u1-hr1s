@@ -47,6 +47,12 @@ class CalendarMainController extends Controller
         return view('pages.calendar.calendar_main', compact('data'));
     }
 
+    /**
+    * add ajax
+    * @param Request
+    *
+    * @return view | back()
+    */
     public function add(Request $r)
     {
         $r->txt_type = strtoupper($r->txt_type);
@@ -64,6 +70,12 @@ class CalendarMainController extends Controller
         }
     }
 
+    /**
+    * update ajax
+    * @param Request
+    *
+    * @return view | back()
+    */
     public function update(Request $r) {
         $r->txt_type = strtoupper($r->txt_type);
         if(array_key_exists('delBtn', $r->all())) { // check if delete button is clicked
@@ -94,6 +106,12 @@ class CalendarMainController extends Controller
         }    
     }
 
+    /**
+    * delete ajax
+    * @param Request
+    *
+    * @return view | back()
+    */
     public function deleteA($id) {
         try {
             DB::table(Holiday::$tbl_name)->where(Holiday::$pk, $id)->delete();
@@ -104,6 +122,12 @@ class CalendarMainController extends Controller
         }
     }
 
+    /**
+    * restore ajax
+    * @param Request
+    *
+    * @return view | back()
+    */
     public function restore($id) {
         try {
             DB::table(Holiday::$tbl_name)->where(Holiday::$pk, $id)->update(['cancel'=>null]);

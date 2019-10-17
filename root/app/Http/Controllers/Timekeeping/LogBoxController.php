@@ -28,6 +28,12 @@ class LogBoxController extends Controller
         return view('pages.timekeeping.log_box', compact('data'));
     }
 
+    /**
+    * Get Latest Time In
+    * @param Request
+    *
+    * @return array | null
+    */
     public function getLastestTimeIn(Request $r) {
         $data = $this->ghistoryIn;
         for($i=0; $i<count($data); $i++) {
@@ -42,6 +48,12 @@ class LogBoxController extends Controller
         return $data;
     }
 
+    /**
+    * Get Latest Time Out
+    * @param Request
+    *
+    * @return array | null
+    */
     public function getLastestTimeOut(Request $r) {
         $data = $this->ghistoryOut;
         for($i=0; $i<count($data); $i++) {

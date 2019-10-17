@@ -46,6 +46,12 @@ class LeavesEntryController extends Controller
     	return view('pages.timekeeping.leaves_entry', compact('data'));
     }
 
+    /**
+    * getType ajax
+    * @param Request
+    *
+    * @return String
+    */
     public function getType(Request $r) {
         $ln = Leave::GetLeaveName($r->get('data'));
         if ($ln!=null) {
@@ -54,6 +60,12 @@ class LeavesEntryController extends Controller
         return null;
     }
 
+    /**
+    * find leave count record
+    * @param string
+    *
+    * @return Object
+    */
     public function FindLeaveCountRecord($empid)
     {
         $sql = Core::sql("SELECT code, description, count, empid, peak, carry_over  FROM hris.hr_leave_type a  RIGHT JOIN hris.hr_emp_leavecount b ON a.code = b.leave_type WHERE b.empid = '".$empid."' ORDER BY description");
@@ -61,6 +73,12 @@ class LeavesEntryController extends Controller
         return $sql;
     }
 
+    /**
+    * find ajax
+    * @param Request
+    *
+    * @return array
+    */
     public function find(Request $r)
     {
         try {
@@ -92,6 +110,12 @@ class LeavesEntryController extends Controller
         }
     }
 
+    /**
+    * add ajax
+    * @param Request
+    *
+    * @return view | back
+    */
     public function add(Request $r) 
     {
         // return dd($r->all());
@@ -202,6 +226,12 @@ class LeavesEntryController extends Controller
         return back();
     }
 
+    /**
+    * delete ajax
+    * @param Request
+    *
+    * @return view | back
+    */
     public function delete(Request $r)
     {
         try {
@@ -242,6 +272,12 @@ class LeavesEntryController extends Controller
         }
     }
 
+    /**
+    * get ajax
+    * @param Request
+    *
+    * @return json
+    */
     public function get_entry(Request $r)
     {
         // return $r->all();

@@ -15,6 +15,15 @@ class Leave extends Model
     public static $tbl_name = "hr_leaves";
     public static $pk = "lvcode";
 
+    /**
+    * Get Leave Entry Info
+    * @param String
+    * @param String
+    * @param String
+    * @param String
+    *
+    * @return array | String
+    */
     public static function GetLeaveInfo($empid, $rate, String $dateFrom, String $dateTo)
     {
         try { /*dd($empid, $dateFrom, $dateTo);*/
@@ -47,6 +56,14 @@ class Leave extends Model
         }
     }
 
+    /**
+    * Get Leave Entry Record
+    * @param String
+    * @param String
+    * @param String
+    *
+    * @return Object | null
+    */
     public static function GetLeaveRecord($empid, String $dateFrom, String $dateTo)
     {
     	try {
@@ -58,6 +75,14 @@ class Leave extends Model
     	}
     }
 
+    /**
+    * Get Leave Entry Record2
+    * @param String
+    * @param String
+    * @param bool
+    *
+    * @return Object | null
+    */
     public static function GetLeaveRecord2($empid, String $date, $onleave = false)
     {
         /**
@@ -78,6 +103,12 @@ class Leave extends Model
         }
     }
 
+    /**
+    * Get Leave Entry Name
+    * @param String
+    *
+    * @return Object | null
+    */
     public static function GetLeaveName($lvcode) {
     	try {
     		return DB::table('hr_leave_type')->where('code', '=', $lvcode)->where('cancel', '=', null)->first();
@@ -87,6 +118,12 @@ class Leave extends Model
     	}
     }
 
+    /**
+    * Get Leave Entry Qualified for SIL
+    * @param String
+    *
+    * @return bool
+    */
     public static function QualifiedForSIL($empid)
     {
         /*
@@ -105,6 +142,12 @@ class Leave extends Model
         return false;
     }
 
+    /**
+    * Get Today Leave
+    * @param
+    *
+    * @return Object | null
+    */
     public static function GetTodayLeave()
     {
         try {

@@ -69,6 +69,13 @@ class PrintEmployeeDTRController extends Controller
         $data = DTR::GetAllHDRSummaryByDateWithEmployee($r->code, $r->type, $r->emp);
         foreach($data as $k => $v) {
             $v->employee_readable = Employee::Name($v->empid);
+            $v->date_from_readable = \Carbon\Carbon::parse($v->date_from)->format('M d, Y');
+            $v->date_to_readable = \Carbon\Carbon::parse($v->date_to)->format('M d, Y');
+            $v->covered_dates = Core::CoveredDates($v->date_from, $v->date_to);
+
+            for($i=0; $i<count($v->covered_dates); $i++) {
+                $v->covered_dates[$i] = [$v->covered_dates[$i], date('Y-m-d', strtotime($v->covered_dates[$i]))];
+            }
         }
         return $data;
     }
