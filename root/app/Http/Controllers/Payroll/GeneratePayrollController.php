@@ -93,11 +93,19 @@ class GeneratePayrollController extends Controller
 
         $errors = [];
         $results = [];
-        $dtr_summaries = json_decode($this->find_dtr($r))->dtr_summaries;
         $asd = [];
 
+        # Get generated DTR Summary
+        $dtr_summaries = json_decode($this->find_dtr($r))->dtr_summaries;
+
+        # Currenty User Info
+        $cur_date = date('Y-m-d');
+        $cur_time = date('h:i');
+        $isgenerated_by = Account::ID();
+        $ip_location = $r->ip();
+
         try {
-            // Get records that is not generated yet
+            # Get Payroll period
             $pp = Payroll::PayrollPeriod2($r->month,$r->payroll_period); if ($pp =="error") { return "no pp"; }
             if (count($dtr_summaries) > 0) {
                 for ($i=0; $i < count($dtr_summaries); $i++) {
@@ -255,7 +263,10 @@ class GeneratePayrollController extends Controller
                                 }
                             }
 
-                        $gross_pay = $basic_pay + $regular_ot_amt + $dayoff_ot_amt + $legal_holiday_pay_amt + $special_holiday_pay_amt + $legal_holiday_ot_amt + $special_holiday_ot_amt + $other_earnings_amt;
+                            /* -Pera- */
+                            $pera = 2000;
+
+                        $gross_pay = $regular_ot_amt + $dayoff_ot_amt + $legal_holiday_pay_amt + $special_holiday_pay_amt + $legal_holiday_ot_amt + $special_holiday_ot_amt + $other_earnings_amt + $pera;
                                     
                         /* -Deductions- */
                         # a = array count/ID; b = employee's share; c = employer's share
@@ -306,8 +317,8 @@ class GeneratePayrollController extends Controller
                             if (count($other_deduction_arr) > 0) {
                                 for ($j=0; $j < count($other_deduction_arr); $j++) {
                                     $oda = $other_deduction_arr[$j];
-                                    array_push($other_deduction, $od->dedcode);
-                                    $other_deductions_amt += (float)$od->amount;
+                                    array_push($other_deduction, $oda->dedcode);
+                                    $other_deductions_amt += (float)$oda->amount;
                                 }
                             }
 
@@ -326,18 +337,18 @@ class GeneratePayrollController extends Controller
                                         'transdate' => date('Y-m-d'),
                                         'amt_paid' => (float)$la->loan_deduction,
                                         'month' => $r->month,
-                                        'period' => $r->payroll_period,
+                                        'period' => str_replace("D", "", $r->payroll_period),
                                         'year' => $r->year,
                                         'payment_desc' => "Deducted from payroll",
                                         'emp_pay_code' => $emp_pay_code,
                                     ]);
                                 }
-                            } array_push($asd, [$loans_amt, $other_deductions_amt]);
+                            }
 
                         $deductions = $personal_deductions + $wtax + $other_deductions_amt + $loans_amt;
 
                         /* -Net- */
-                        $net_pay = $gross_pay - $deductions;
+                        $net_pay = ($basic_pay + $gross_pay) - $deductions;
 
                         /* To Database */
                         $info = [
@@ -346,10 +357,10 @@ class GeneratePayrollController extends Controller
                             'payroll_version' => 3,
                             'date_from' => $pp->from,
                             'date_to' => $pp->to,
-                            'date_generated' => date('Y-m-d'),
-                            'time_generated' => date('h:i'),
-                            'isgenerated_by' => Account::ID(),
-                            'ip_location' => $r->ip(),
+                            'date_generated' => $cur_date,
+                            'time_generated' => $cur_time,
+                            'isgenerated_by' => $isgenerated_by,
+                            'ip_location' => $ip_location,
                         ];
                         $todbs = [
                             # Basic Information
@@ -417,11 +428,11 @@ class GeneratePayrollController extends Controller
                             'loans' => $updateln_loan,
                         ];
 
-                        // $data = ['info' => $info, 'todbs' => $todbs];
-                        // $response = $this->UpdatePayroll2($data, $info['payroll_version']);
-                        // if ($response!="ok") {
-                        //     array_push($errors, 'B00005-'.$d->empid.":".$response);
-                        // }
+                        $data = ['info' => $info, 'todbs' => $todbs, 'updateLines' => $updateLines]; array_push($asd, $data);
+                        $response = $this->UpdatePayroll2($data, $info['payroll_version']);
+                        if ($response!="ok") {
+                            array_push($errors, 'B00005-'.$d->empid.":".$response);
+                        }
                     } catch (\Exception $e) {
                         ErrorCode::Generate('controller', 'GeneratePayrollController', 'B00003-'.$d->empid, $e->getMessage());
                         array_push($errors, 'B00003-'.$d->empid.":".$e->getMessage());
@@ -474,15 +485,40 @@ class GeneratePayrollController extends Controller
                     break;
 
                 case 3:
+                    $error_count = 0;
                     if (DB::table('hr_emp_payroll_log')->insert($data['info'])) {
                         if (DB::table('hr_emp_payroll3')->insert($data['todbs'])) {
                             Core::updatem99('emp_pay_code',Core::get_nextincrementlimitchar($data['info']['emp_pay_code'], 8));
-                            return "ok";
                         } else {
                             return "Unable to save log. Failed to generate.";
+                            $error_count++;
                         }
                     } else {
                         return "Unable to save log header. Failed to generate.";
+                        $error_count++;
+                    }
+                    # Update Lines
+                    #Loan
+                    if (count($data['updateLines']['loans']) > 0) {
+                        try {
+                            for ($i=0; $i < count($data['updateLines']['loans']); $i++) { 
+                                $loanLN = $data['updateLines']['loans'][$i];
+                                try {
+                                    DB::table('hr_loanln')->insert($loanLN);
+                                } catch (\Exception $e) {
+                                    return $e->getMessage();
+                                    $error_count++;
+                                }
+                            }
+                        } catch (\Exception $e) {
+                            $error_count++;
+                        }
+                    }
+                    
+                    if ($error_count == 0) {
+                        return "ok";
+                    } else {
+                        return "Some lines where unable to save. Failed to generate.";
                     }
                     break;
                 

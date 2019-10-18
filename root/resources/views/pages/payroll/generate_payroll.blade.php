@@ -63,8 +63,10 @@
 					Available DTR Summary
 				</div>
 				<div class="col border-left">
-					Generated Payroll History
-					<button type="button" class="btn btn-primary" id="btn-generate" onclick="GeneratePayroll()" disabled=""><i class="fa fa-share"></i> <i class="fa fa-server"></i> Generate</button>
+					<button type="button" class="btn btn-primary" id="btn-generate" onclick="GeneratePayroll()" disabled=""><i class="fa fa-share"></i> <i class="fa fa-server"></i> Generated Payroll</button>
+					{{-- <div class="progress">
+					    <div class="progress-bar" role="progressbar" style="width: 100%;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">25%</div>
+					</div> --}}
 				</div>
 			</div>
 		</div>
@@ -79,7 +81,6 @@
 									{{-- <th>Time Generated</th> --}}
 									<th>Payroll Period</th>
 									<th>Employee</th>
-									<th>Office</th>
 									<th>User ID</th>
 								</tr>
 							</thead>
@@ -287,7 +288,6 @@
 				data.date_generated+"<br>"+data.time_generated,
 				data.date_from+" to "+data.date_to,
 				data.empname,
-				data.cc_desc,
 				data.empid,
 			]).draw();
 		}

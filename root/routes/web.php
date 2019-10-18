@@ -633,7 +633,8 @@
 			// 		array_push($asd, [$i, $b1, $b2]);
 			// 	}
 			// }
-			dd(OtherDeductions::Get_Records("A", "2019-08-11", "2019-08-25"));
+			$record = OtherDeductions::Get_Records("A", "2019-08-11", "2019-08-25");
+			// dd();
 		});
 
 		/* NOTIFICATION */

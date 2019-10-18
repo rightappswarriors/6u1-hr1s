@@ -97,3 +97,4 @@
 10-16-2019 19:12 | LoanEntryController | Trying to get property 'description' of non-object (LoEC00003)
 10-16-2019 19:13 | LoanEntryController | Trying to get property 'description' of non-object (LoEC00003)
 10-16-2019 21:50 | GeneratePayrollController | Undefined variable: amt (GPCB00003-123)
+10-17-2019 09:30 | GeneratePayrollController | Undefined variable: od (GPCB00003-123)
