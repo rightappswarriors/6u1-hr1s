@@ -210,6 +210,7 @@
           <li id="reportstimekeepingDailyTimelogRecord">
             <a href="{{url('reports/timekeeping/DailyTimelogRecord')}}">Daily Timelog Records</a>
           </li>
+
           {{-- <li>
             <a href="#">Abscences, Late, and Undertime</a>
           </li> --}}
@@ -250,6 +251,16 @@
       <li id="reportspayroll-summary-report">
         <a href="{{url('reports/payroll-summary-report')}}">Payroll Summary Report</a>
         <!--<a href="{{url('reports/payroll/payroll-summary-report')}}">Payroll Summary Report</a>--> {{-- Separated from Reports -> Payroll --}}
+      </li>
+      <li class="nav-separator"></li>
+      <li>
+        <a href="{{url('reports/sss/')}}">SSS Contributions Summary</a>
+      </li>
+      <li>
+        <a href="{{url('reports/pagibig/')}}">HDMF Contributions Summary</a>
+      </li>
+      <li>
+        <a href="{{url('reports/philhealth/')}}">PhilHealth Contributions Summary</a>
       </li>
       {{-- <li>
         <a href="#">Other Deductions Entry</a>

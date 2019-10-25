@@ -447,6 +447,21 @@
 					Route::post('/get-dates', 'Reports\Payroll\PayrollSummaryReportController@getDates');
 				});
 			// });
+		
+				Route::prefix('sss')->group(function() {
+					Route::get('/', 'Reports\SSSContributionsController@view');
+					Route::post('/find-sss', 'Reports\SSSContributionsController@find');
+				});
+
+				Route::prefix('pagibig')->group(function() {
+					Route::get('/', 'Reports\PagibigContributionsController@view');
+					Route::post('/find-pagibig', 'Reports\PagibigContributionsController@find');
+				});
+
+				Route::prefix('philhealth')->group(function() {
+					Route::get('/', 'Reports\PhilhealthContributionsController@view');
+					Route::post('/find-philhealth', 'Reports\PhilhealthContributionsController@find');
+				});
 		});
 		/* REPORTS */
 
