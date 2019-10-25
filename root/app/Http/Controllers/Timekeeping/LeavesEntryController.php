@@ -118,7 +118,21 @@ class LeavesEntryController extends Controller
     */
     public function add(Request $r) 
     {
-        // return dd($r->all());
+        /**
+        * @param $r->cbo_employee_txt
+        * @param $r->cbo_employee
+        * @param $r->txt_code
+        * @param $r->dtp_filed
+        * @param $r->cbo_leave
+        * @param $r->dtp_lfrm
+        * @param $r->dtp_lfrm
+        * @param $r->txt_no_of_days
+        * @param $r->dtp_lto
+        * @param $r->cbo_leave_pay
+        * @param $r->txt_reason
+        * @param $r->mode
+        */
+        return dd($r->all());
         $amount = "0.00";
         $lr = null;
 

@@ -19,6 +19,9 @@ use Loan;
 use Office;
 use OtherDeductions;
 use Payroll;
+use SSS;
+use Philhealth;
+use Pagibig;
 
 class GeneratePayrollController extends Controller
 {
@@ -54,12 +57,14 @@ class GeneratePayrollController extends Controller
         try {
             $return_val = (object)[];
             $dtr_summaries = [];
+            $emp_sql = Employee::$emp_sql;
             $pp = Payroll::PayrollPeriod2($r->month, $r->payroll_period, $r->year);
-            $sql = "SELECT dtr.*, emp.* FROM (SELECT * FROM hris.hr_dtr_sum_hdr a LEFT JOIN (SELECT * FROM hris.hr_dtr_sum_employees WHERE isgenerated IS FALSE) b ON a.code = b.dtr_sum_id) dtr INNER JOIN (".Employee::$emp_sql.") emp ON dtr.empid = emp.empid";
-                $con = " WHERE date_from >= '".date('Y-m-d', strtotime($pp->from))."' AND date_to <= '".date('Y-m-d', strtotime($pp->to))."' AND empstatus = '".$r->empstatus."' AND generationtype = '".$r->gen_type."' AND department = '".$r->ofc."'";
+            $sql = "SELECT dtr.*, emp.* FROM (SELECT * FROM hris.hr_dtr_sum_hdr a LEFT JOIN hris.hr_dtr_sum_employees b ON a.code = b.dtr_sum_id) dtr INNER JOIN ($emp_sql) emp ON dtr.empid = emp.empid";
+                $con = " WHERE isgenerated IS NOT TRUE AND date_from >= '".date('Y-m-d', strtotime($pp->from))."' AND date_to <= '".date('Y-m-d', strtotime($pp->to))."' AND empstatus = '".$r->empstatus."' AND generationtype = '".$r->gen_type."' AND department = '".$r->ofc."'";
             $return_val->search = date('Y-m-d', strtotime($pp->from))." to ".date('Y-m-d', strtotime($pp->to));
             // $return_val->parameters = $r->all();
             $return_val->dtr_summaries = Core::sql($sql.$con);
+            $return_val->payroll_history = Core::sql("SELECT pr.*, CONCAT(emp.lastname, ', ', emp.firstname) AS empname FROM (SELECT a.*, b.date_generated, b.time_generated FROM hris.hr_emp_payroll3 a INNER JOIN hris.hr_dtr_sum_hdr b ON a.dtr_sum_id = b.code) pr INNER JOIN ($emp_sql) emp ON pr.empid = emp.empid");
             return json_encode($return_val);
         } catch (\Exception $e) {
             ErrorCode::Generate('controller', 'GeneratePayrollController', 'A00001', $e->getMessage());
@@ -116,6 +121,7 @@ class GeneratePayrollController extends Controller
                         $rate = $d->pay_rate;
                         $rate_type = $d->rate_type;
                         $workdays = (float)$d->workdays;
+                        $weekends = (float)$d->weekends;
                         $emp_pay_code = Core::getm99('emp_pay_code');
                         $pay_period = Payroll::PayPeriods();
                         $tax_bracket = $d->tax_bracket;
@@ -123,18 +129,18 @@ class GeneratePayrollController extends Controller
                         /* Shift Info */
                         $shift_hours = Timelog::ShiftHours(); # returns float
                         $covered_days = Core::CoveredDates($pp->from, $pp->to); # returns array
-                        $total_days = count($covered_days); # returns array
+                        $total_days = $workdays + $weekends;
 
                         /* -Regular Pay- */
                         $regular_pay = 0;
                         if ($rate_type == "D") {
-                            $regular_pay = $rate * $total_days;
+                            $regular_pay = $rate * $workdays;
                         } else {
                             $regular_pay = $rate / $pay_period;
                         }
                         
                         /* -Rate breakdown by time- */
-                        $daily_rate = $regular_pay / $total_days;
+                        $daily_rate = 0; $daily_rate = $regular_pay / $workdays;
                         $hourly_rate = Payroll::ConvertRate($daily_rate, $shift_hours); # $hourly_rate = $daily_rate / $shift_hours;
                         $minute_rate = Payroll::ConvertRate($hourly_rate, 60); # $minute_rate = $hourly_rate / 60;
 
@@ -151,17 +157,20 @@ class GeneratePayrollController extends Controller
                             $late = Core::ToMinutes($d->late);
                             $late_amt = 0; $late_amt = $late * $minute_rate;
 
+                            /* -Undertime- */
+                            $undertime = Core::ToMinutes($d->undertime);
+                            $undertime_amt = 0; $undertime_amt = $undertime * $minute_rate;
+
                             /* -Leave- */
                             $leaves = json_decode($d->leaves_arr);
                             $leave_count = $d->leaves;
                             $leave_amt = 0;
                             if (count($leaves) > 0) {
                                 for ($j=0; $j < count($leaves); $j++) { 
-                                    $l = $leaves[$j];
-                                    $leave_amt += (float)$l[2];
+                                    $leave_amt += $daily_rate;
                                 };
                             }
-                        $basic_pay = $days_worked_amt + $days_absent_amt + $late_amt + $leave_amt;
+                        $basic_pay = $days_worked_amt + $leave_amt;
 
                         /* -Gross Pay Computation- */
                             /* -Regular Overtime- */
@@ -264,7 +273,7 @@ class GeneratePayrollController extends Controller
                             }
 
                             /* -Pera- */
-                            $pera = 2000;
+                            $pera = Payroll::Pera();
 
                         $gross_pay = $regular_ot_amt + $dayoff_ot_amt + $legal_holiday_pay_amt + $special_holiday_pay_amt + $legal_holiday_ot_amt + $special_holiday_ot_amt + $other_earnings_amt + $pera;
                                     
@@ -276,7 +285,7 @@ class GeneratePayrollController extends Controller
                                     $sss_cont_a = '';
                                     $sss_cont_b = 0;
                                     $sss_cont_c = 0;
-                                    $sss_arr = $this->Get_SSS_Deduction($rate);
+                                    $sss_arr = ($d->sss!=""||$d->sss!=null) ? SSS::Get_SSS_Deduction($rate) : null;
                                     if ($sss_arr != null) {
                                         $sss_cont_a = $sss_arr->code;
                                         $sss_cont_b += $sss_arr->empshare_ec;
@@ -288,7 +297,7 @@ class GeneratePayrollController extends Controller
                                     $philhealth_cont_a = '';
                                     $philhealth_cont_b = 0;
                                     $philhealth_cont_c = 0;
-                                    $philhealth_arr = $this->Get_PhilHealth_Deduction($rate);
+                                    $philhealth_arr = ($d->philhealth!=""||$d->philhealth!=null) ? Philhealth::Get_PhilHealth_Deduction($rate) : null;
                                     if ($philhealth_arr != null) {
                                         $philhealth_cont_a = $philhealth_arr->code;
                                         $philhealth_cont_b += $philhealth_arr->emp_ee;
@@ -299,7 +308,7 @@ class GeneratePayrollController extends Controller
                                     $pagibig_cont_a = '';
                                     $pagibig_cont_b = 0;
                                     $pagibig_cont_c = 0;
-                                    $pagibig_arr = $this->Get_PagIbig_Deduction($rate);
+                                    $pagibig_arr = ($d->pagibig!=""||$d->pagibig!=null) ? Pagibig::Get_PagIbig_Deduction($rate) : null;
                                     if ($pagibig_arr != null) {
                                         $pagibig_cont_a = $pagibig_arr->code;
                                         $pagibig_cont_b += $pagibig_arr->emp_ee;
@@ -351,6 +360,7 @@ class GeneratePayrollController extends Controller
                         $net_pay = ($basic_pay + $gross_pay) - $deductions;
 
                         /* To Database */
+                        # Index names on these arrays must reflects to their respective database tables
                         $info = [
                             'empid' => $d->empid,
                             'emp_pay_code' => $emp_pay_code,
@@ -380,9 +390,11 @@ class GeneratePayrollController extends Controller
                             'abcences' => $days_absent,
                             'abcences_amt' => $days_absent_amt,
                             'late' => $late,
-                            'late_amt' => $hourly_rate,
+                            'late_amt' => $late_amt,
                             'leave_cnt' => $leave_count,
                             'leave_amt' => $leave_amt,
+                            'undertime' => $undertime,
+                            'undertime_amt' => $undertime_amt,
                             'basic_pay' => $basic_pay,
 
                             # Gross Pay
@@ -428,7 +440,7 @@ class GeneratePayrollController extends Controller
                             'loans' => $updateln_loan,
                         ];
 
-                        $data = ['info' => $info, 'todbs' => $todbs, 'updateLines' => $updateLines]; array_push($asd, $data);
+                        $data = ['info' => $info, 'todbs' => $todbs, 'updateLines' => $updateLines];
                         $response = $this->UpdatePayroll2($data, $info['payroll_version']);
                         if ($response!="ok") {
                             array_push($errors, 'B00005-'.$d->empid.":".$response);
@@ -445,31 +457,8 @@ class GeneratePayrollController extends Controller
             ErrorCode::Generate('controller', 'GeneratePayrollController', 'B00001', $e->getMessage());
             array_push($errors, 'B00001'.":".$e->getMessage());
         }
-        $log = DB::table('hr_emp_payroll_log')->where('cancel', null)->get();
-        for ($i=0; $i < count($log); $i++) { 
-            $log[$i]->name = Employee::Name($log[$i]->empid);
-        }
-        $results = $log;
+        $results = json_decode($this->find_dtr($r))->payroll_history;
         return [$results, $errors, $asd];
-    }
-
-    public function UpdatePayroll(Array $cp)
-    {
-        try {
-            // try {
-            //     $new_epc = Core::getm99One('emp_pay_code');
-            //     if ($new_epc!=null) {
-            //         $new_epc = $new_epc->emp_pay_code;
-            //     } else {
-            //         return "error";
-            //     }
-            // } catch (\Exception $e) {
-            //     return "error";
-            // }
-            DB::table('hr_emp_payroll2')->insert($cp[0]);
-            DB::table('hr_dtr_sum_employees')->where('empid', $cp[0]['empid'])->where('dtr_sum_id', $cp['dtr_sum_id'])->update(['isgenerated' => 1]);
-            return "ok";
-        } catch (\Exception $e) { return $e->getMessage(); }
     }
 
     public function UpdatePayroll2(Array $data, $version)
@@ -486,39 +475,60 @@ class GeneratePayrollController extends Controller
 
                 case 3:
                     $error_count = 0;
+                    # Save log
                     if (DB::table('hr_emp_payroll_log')->insert($data['info'])) {
                         if (DB::table('hr_emp_payroll3')->insert($data['todbs'])) {
-                            Core::updatem99('emp_pay_code',Core::get_nextincrementlimitchar($data['info']['emp_pay_code'], 8));
-                        } else {
-                            return "Unable to save log. Failed to generate.";
-                            $error_count++;
-                        }
-                    } else {
-                        return "Unable to save log header. Failed to generate.";
-                        $error_count++;
-                    }
-                    # Update Lines
-                    #Loan
-                    if (count($data['updateLines']['loans']) > 0) {
-                        try {
-                            for ($i=0; $i < count($data['updateLines']['loans']); $i++) { 
-                                $loanLN = $data['updateLines']['loans'][$i];
+                            if (Core::updatem99('emp_pay_code',Core::get_nextincrementlimitchar($data['info']['emp_pay_code'], 8))) {
                                 try {
-                                    DB::table('hr_loanln')->insert($loanLN);
+                                    DB::table('hr_dtr_sum_employees')->where('dtr_sum_id', $data['todbs']['dtr_sum_id'])->update(['isgenerated' => true]);
                                 } catch (\Exception $e) {
-                                    return $e->getMessage();
-                                    $error_count++;
+                                    # Delete log and payroll if failed to update dtr summary
+                                    DB::table('hr_emp_payroll_log')->where('emp_pay_code', $data['info']['emp_pay_code'])->delete();
+                                    DB::table('hr_emp_payroll3')->where('emp_pay_code', $data['info']['emp_pay_code'])->delete();
+                                    return "Unable to update dtr summary. Failed to generate.";
                                 }
+                                # Update Lines
+                                # Loan
+                                if (count($data['updateLines']['loans']) > 0) {
+                                    try {
+                                        for ($i=0; $i < count($data['updateLines']['loans']); $i++) {
+                                            $loanLN = $data['updateLines']['loans'][$i];
+                                            try {
+                                                DB::table('hr_loanln')->insert($loanLN);
+                                            } catch (\Exception $e) {
+                                                return $e->getMessage();
+                                                $error_count++;
+                                            }
+                                        }
+                                    } catch (\Exception $e) {
+                                        $error_count++;
+                                    }
+                                }
+                                if ($error_count == 0) {
+                                    return "ok";
+                                } else {
+                                    # Delete log and payroll if any of the line failed to be saved
+                                    DB::table('hr_emp_payroll_log')->where('emp_pay_code', $data['info']['emp_pay_code'])->delete();
+                                    DB::table('hr_emp_payroll3')->where('emp_pay_code', $data['info']['emp_pay_code'])->delete();
+                                    $no_error = DB::table('hr_loanln')->where('emp_pay_code', $data['info']['emp_pay_code'])->get();
+                                    if (count($no_error) > 0) {
+                                        DB::table('hr_loanln')->where('emp_pay_code', $data['info']['emp_pay_code'])->delete();
+                                    }
+                                    return "Some lines where unable to save. Failed to generate.";
+                                }
+                            } else {
+                                # Delete log and payroll if emp_pay_code failed to generate new code
+                                DB::table('hr_emp_payroll_log')->where('emp_pay_code', $data['info']['emp_pay_code'])->delete();
+                                DB::table('hr_emp_payroll3')->where('emp_pay_code', $data['info']['emp_pay_code'])->delete();
+                                return "Unable to update payroll code. Failed to generate."; 
                             }
-                        } catch (\Exception $e) {
-                            $error_count++;
+                        } else {
+                            # Delete log if error in saving payroll
+                            DB::table('hr_emp_payroll_log')->where('emp_pay_code', $data['info']['emp_pay_code'])->delete();
+                            return "Unable to generate payroll. Failed to generate.";
                         }
-                    }
-                    
-                    if ($error_count == 0) {
-                        return "ok";
                     } else {
-                        return "Some lines where unable to save. Failed to generate.";
+                        return "Unable to save payroll log. Failed to generate.";
                     }
                     break;
                 
@@ -531,181 +541,6 @@ class GeneratePayrollController extends Controller
         }
     }
 
-    public function GetDayOfOT($empid, $dateFrom, $dateTo)
-    {
-    	try {
-    		$employee = Employee::GetEmployee($empid);
-    		if ($employee!=null) {
-    			if ($this->CheckIfSchedIsFixed($employee->fixed_sched)) {
-    				$data = $this->GetFixDayOffInfo($empid, $dateFrom, $dateTo);
-
-    			} else {
-    				$data = $this->GetShiftDayOffInfo($empid);
-    			}
-    		} else {
-                $data = [
-                    'amt' => 0.00,
-                    'total' => 0
-                ];
-            }
-            return $data;
-    	} catch (\Exception $e) {
-    		return $e->getMessage();
-    		return 0.00;
-    	}
-    }
-
-    public function CheckIfSchedIsFixed($val)
-    {
-    	if (strtoupper($val) == "Y") {
-    		return true;
-    	}
-
-    	return false;
-    }
-
-    public function GetFixDayOffInfo($empid, $dateFrom, $dateTo)
-    {
-	    $amt = 0.00;
-        $total = 0;
-        try {
-	    	$dayoff = DB::table('hr_employee')->select('dayoff1', 'dayoff2')->where('empid', $empid)->first();
-	    	$workdates = Timelog::getWorkdates($empid, $dateFrom, $dateTo, [['status', 'I']]);
-	    	$emp = Employee::GetEmployee($empid);
-	    	if ($dayoff!=null) {
-	    		$dayoff1 = DB::table('hr_days')->select('dayname')->where('day', $dayoff->dayoff1)->first();
-	    		$dayoff2 = DB::table('hr_days')->select('dayname')->where('day', $dayoff->dayoff2)->first();
-	    		if ($dayoff1!=null) {
-	    			// $dayoff1 = Core::WeekValRev($dayoff1);
-	    			foreach ($workdates as $wd) {
-	    				if (strtoupper(date('l', strtotime($wd->work_date))) == $dayoff1->dayname) {
-	    					if ($emp->rate_type == "M") {
-	    						$amt += ($emp->pay_rate * 12) / 314;
-	    					} else if ($emp->rate_type == "D") {
-	    						$amt += $emp->pay_rate;
-	    					}
-                            $total++;
-	    				}
-	    			}
-	    		}
-
-	    		if ($dayoff2!=null) {
-	    			if ($dayoff2!=$dayoff1) {
-	    				foreach ($workdates as $wd) {
-		    				if (strtoupper(date('l', strtotime($wd->work_date))) == $dayoff2->dayname) {
-		    					if ($emp->rate_type == "M") {
-		    						$amt += ($emp->pay_rate * 12) / 314;
-		    					} else if ($emp->rate_type == "D") {
-		    						$amt += $emp->pay_rate;
-		    					}
-                                $total++;
-		    				}
-		    			}
-	    			}
-	    		}
-	    	}
-	    } catch (\Exception $e) { return $e->getMessage(); }
-
-        $data = [
-            'amt' => $amt,
-            'total' => $total
-        ];
-        return $data;
-    }
-
-    public function GetShiftDayOffInfo()
-    {
-    	$amt = 0.00;
-        $total = 0;
-        $data = [
-            'amt' => $amt,
-            'total' => $total
-        ];
-    	return $data;
-    }
-
-    public function GetHolidayAmt($empid, array $covered_days, $daily_rate)
-    {
-    	$amt = 0.00;
-        $total = 0;
-        $total_time = [];
-        $data = (object) [];
-        try {
-            for ($i=0; $i < count($covered_days); $i++) {
-                $h_amt = 0;
-                $cd = $covered_days[$i];
-                if (Timelog::IfHoliday($cd)) {
-                    if (Timelog::IfPresent($empid, $cd)) {
-                        $h_info = Holiday::FindHoliday($cd); if($h_info==null) { $h_perc = null; } else { $h_perc =  $h_info->holiday_type; }
-                        $h_perc =  Holiday::HolidayPercentage($h_perc);
-                        $h_amt = $daily_rate + ($daily_rate * ($h_perc->work / 100));
-
-                        $amt += $h_amt;
-                        array_push($total_time, Timelog::RetrieveRenHours($empid, $cd));
-                    }
-                }
-            }
-            $data->amt = $amt;
-            $data->total = $total;
-            $data->total_time = $total_time;
-        } catch (\Exception $e) {
-            $data->amt = $amt;
-            $data->total = $total;
-            $data->total_time = $total_time;
-        }
-        return $data;
-
-    }
-
-    public function CheckDutyOnHol($empid, $date)
-    {
-	    try {
-	    	$data = DB::table('hr_tito2')->where('empid', $empid)->where('work_date', $date)->first();
-	    	if ($data == null) {
-	    		return false;
-	    	} else {
-	    		return true;
-	    	}
-	    } catch (\Exception $e) {
-	    	return $e->getMessage();
-	    	return false;
-	    }
-
-    }
-
-    public function GetSpecialHolidayPay($empid, $dateFrom, $dateTo)
-    {
-    	$amt = 0.00;
-        $total = 0;
-            $holidays = PayrollPeriod::GetHolidays($dateFrom, $dateTo, 'S');
-        try {
-	    	$employee = Employee::GetEmployee($empid);
-		    if ($employee!=null) {
-		    	if (count($holidays) > 0) {
-		    		foreach ($holidays as $day) {
-		    			if ($this->CheckDutyOnHol($empid, $day->date_holiday)) {
-		    				if ($employee->rate_type == "M") {
-		    					$rate = ($employee->pay_rate * 12) / 314;
-		    					$amt += $rate;
-		    				} elseif ($employee->rate_type == "D") {
-		    					$rate = ($employee->pay_rate * 12) / 314;
-		    					$amt += $rate;
-		    				}
-                            $total++;
-		    			}
-		    		}
-		    	}
-		    }
-    	} catch (\Exception $e) {}
-
-        $data = [
-            'amt' => $amt,
-            'total' => $total
-        ];
-
-        return $data;
-    }
-
     public function GetOtherEarnings($empid, $ppid, $month, $year)
     {
     	try {
@@ -713,22 +548,6 @@ class GeneratePayrollController extends Controller
     	} catch (\Exception $e) {
     		return [];
     	}
-    }
-
-    public function Get_SSS_Deduction($amt)
-    {
-        try {
-            $sql = "SELECT * FROM hris.hr_sss WHERE CANCEL IS NULL ";
-            $con = "AND bracket1 <= ".$amt." AND bracket2 > ".$amt." LIMIT 1";
-            $result = Core::sql($sql.$con);
-            if (count($result) > 0) {
-                return $result[0];
-            } else {
-                return null;
-            }
-        } catch (\Exception $e) {
-            return null;
-        }
     }
 
     public function Get_SSS_Loans($empid)
@@ -774,60 +593,6 @@ class GeneratePayrollController extends Controller
         }
         return $data;
 
-    }
-
-    public function Get_PhilHealth_Deduction($amt)
-    {
-    	try {
-            $sql = "SELECT * FROM hris.hr_philhealth WHERE CANCEL IS NULL ";
-            $con = "AND bracket1 <= ".$amt." AND bracket2 > ".$amt." LIMIT 1";
-            $result = Core::sql($sql.$con);
-            if (count($result) > 0) {
-                return $result[0];
-            } else {
-                return null;
-            }
-        } catch (\Exception $e) {
-            return null;
-        }
-    }
-
-    public function Get_PagIbig_Deduction($amt)
-    {
-    	try {
-            $sql = "SELECT * FROM hris.hr_hdmf WHERE CANCEL IS NULL ";
-            $con = "AND bracket1 <= ".$amt." AND bracket2 > ".$amt." LIMIT 1";
-            $result = Core::sql($sql.$con);
-            if (count($result) > 0) {
-                return $result[0];
-            } else {
-                return null;
-            }
-        } catch (\Exception $e) {
-            return null;
-        }
-    }
-
-    public function Get_Loans_Amt($empid, $covered_days)
-    {
-    	$amt = 0.00;
-        try {
-            for ($i=0; $i < count($covered_days); $i++) {
-                $cd = $covered_days[$i];
-                $loan_record = Loan::Find_Loan($empid, $cd);
-                if (count($loan_record) > 0) {
-                    for ($j=0; $j < count($loan_record); $j++) { 
-                        $lr = $loan_record[$i];
-                        if ($cd == $lr->deduction_date) {
-                            $amt += $lr->loan_deduction;
-                        }
-                    }
-                }
-            }
-    		return $amt;
-    	} catch (\Exception $e) {
-    		return $amt;
-    	}
     }
 
     public function Monetize($empid, $basic_pay = 0)

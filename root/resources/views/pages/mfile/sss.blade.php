@@ -3,7 +3,7 @@
 @section('to-body')
 	<div class="card">
 		<div class="card-header">
-			<i class="fa fa-clock-o"></i> SSS
+			<i class="fa fa-clock-o"></i> GSIS
 			<button type="button" class="btn btn-success" id="opt-add">
 				<i class="fa fa-plus"></i> Add
 			</button>

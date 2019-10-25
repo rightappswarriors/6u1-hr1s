@@ -164,4 +164,9 @@ class Payroll extends Model
             // return $e->getMessage();
         }
     }
+
+    public static function Pera()
+    {
+        return 2000.00;
+    }
 }

@@ -37,6 +37,44 @@ class PayrollSummaryReportController extends Controller
 		return view('pages.reports.payroll.payroll_summary_report', compact('data'));
 	}
 
+	public function getDates(Request $r)
+	{
+		/**
+		* @param $r->ofc
+		*/
+		// return dd($r->all());
+		# Rework this fucntion
+		# use this sql "SELECT DISTINCT CONCAT(date_from, ' to ', date_to) pp, date_from, date_to FROM hris.hr_emp_payroll3 pr INNER JOIN (SELECT empid, department FROM hris.hr_employee) emp ON pr.empid = emp.empid WHERE emp.department = '97'"
+		try {
+			$ofc = $r->ofc;
+			return Core::sql("SELECT DISTINCT CONCAT(date_from, ' to ', date_to) pp, date_from, date_to FROM hris.hr_emp_payroll3 pr INNER JOIN (SELECT empid, department FROM hris.hr_employee) emp ON pr.empid = emp.empid WHERE emp.department = '$ofc' ORDER BY date_from DESC");
+		} catch (\Exception $e) {
+			ErrorCode::Generate('controller', 'PayrollSummaryReportController', '00001', $e->getMessage());
+			return "error";
+		}
+	}
+
+	public function getRecords(Request $r)
+	{
+		/**
+		* @param $r->pp
+		* @param $r->gen_type
+		*/
+		try {
+			$record = [];
+			$emp = Employee::$emp_sql;
+			if ($r->pp != null || $r->pp != "") {
+				list($date_from, $date_to) = explode("|", $r->pp);
+				$gen_type = $r->gen_type;
+				$record = Core::sql("SELECT CONCAT(emp.lastname, ',', emp.firstname) empname, log.date_generated, log.time_generated, pr.* FROM hris.hr_emp_payroll3 pr INNER JOIN hris.hr_emp_payroll_log log ON pr.emp_pay_code = log.emp_pay_code LEFT JOIN (SELECT * FROM hris.hr_dtr_sum_hdr hdr INNER JOIN hris.hr_dtr_sum_employees ln ON hdr.code = ln.dtr_sum_id) dtr ON pr.dtr_sum_id = dtr.code LEFT JOIN ($emp) emp ON log.empid = emp.empid WHERE dtr.generationtype = '$gen_type' AND log.date_from = '$date_from' AND log.date_to = '$date_to'");
+			}
+			return $record;
+		} catch (\Exception $e) {
+			ErrorCode::Generate('controller', 'PayrollSummaryReportController', '00002', $e->getMessage());
+			return "error";
+		}
+	}
+
 	public function export(Request $r)
 	{
 		try {
@@ -70,7 +108,7 @@ class PayrollSummaryReportController extends Controller
 			// return Excel::download(new ExportBlade('print.reports.payroll.export_payroll_summary_report', $data), 'general-payroll-'.date('YmdHis').'.xlsx');
 			Export2_1::exportBlade('print.reports.payroll.export_payroll_summary_report', $data);
 		} catch (\Exception $e) {
-			ErrorCode::Generate('controller', 'PayrollSummaryReportController', '00001', $e->getMessage());
+			ErrorCode::Generate('controller', 'PayrollSummaryReportController', '00003', $e->getMessage());
 			return "error";
 		}
 	}
@@ -82,33 +120,29 @@ class PayrollSummaryReportController extends Controller
 
 	public function print(Request $r)
 	{
+		/**
+		* @param $r->pcode
+		*/
 		/*$p = DB::table('hr_emp_payroll2')->where('item_no', '=', $r->item_no)->first();
 		$emp = Employee::GetEmployee($p->empid);
 		$jt = JobTitle::Get_JobTitle($emp->positions);*/
-		return view('print.reports.payroll.print_payroll_summary_report3'/*, compact(['p', 'jt'])*/);
+		$pcode = $r->pcode;
+		$sql = "SELECT emp.empname, emp.department, emp.biometric, CONCAT(pr.date_from, ' to ', pr.date_to) payroll_period, pr.* FROM hris.hr_emp_payroll3 pr LEFT JOIN (SELECT emp.*, ofc.cc_desc AS department FROM (SELECT empid, CONCAT(lastname, ', ', firstname) empname, biometric, CAST(department AS integer) cc_id FROM hris.hr_employee) emp LEFT JOIN rssys.m08 ofc ON emp.cc_id = ofc.cc_id) emp ON pr.empid = emp.empid";
+		$con = " WHERE pr.emp_pay_code = '$pcode'";
+		$record = Core::sql($sql.$con);
+		if (count($record) > 0) {
+			$record = $record[0];
+		} else {
+			$record = null;
+		}
+		// return $record;
+		return view('print.reports.payroll.print_payroll_summary_report3', compact('record'));
 	}
 
-	public function getDates(Request $r)
+	public function print_ot(Request $r)
 	{
-		// return dd($r->all());
-		try {
-			$return_val = (object)[];
-			$pp = Payroll::PayrollPeriod2($r->month, $r->pp, $r->year);
-			$pp->from = date('Y-m-d', strtotime($pp->from));
-			$pp->to = date('Y-m-d', strtotime($pp->to));
-			$return_val->pp = json_encode($pp);
-			$return_val->psr = DB::table('hr_dtr_sum_hdr')->where('ppid' , '=', $r->pp)->where('date_from', '=', $pp->from)->where('date_to', '=', $pp->to)->get();
-			if (count($return_val->psr) > 0) {
-				for ($i=0; $i < count($return_val->psr); $i++) { 
-					$psr = $return_val->psr[$i];
-					$psr->name = Employee::Name($psr->empid);
-				}
-			}
-			return json_encode($return_val);
-		} catch (\Exception $e) {
-			ErrorCode::Generate('controller', 'PayrollSummaryReportController', '00003', $e->getMessage());
-			return "error";
-		}
+		$record = "ok";
+		return view('print.reports.payroll.print_payroll_summary_report_ot', compact('record'));
 	}
 
 }

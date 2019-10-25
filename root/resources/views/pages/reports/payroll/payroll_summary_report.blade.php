@@ -7,53 +7,65 @@
 		</div>
 		<div class="card-body">
 			<form method="post" action="{{url('payroll/generate-payroll/find-dtr')}}" id="frm-gp">
-				<div class="form-group">
-					<div class="form-inline">
-						{{csrf_field()}}
-						<label class="mr-1">Select Payroll:</label>
-						<select class="form-control mr-2" id="month" name="month">
-							@foreach(Core::Months() as $key => $value)
-							<option value="{{$key}}" {{($key == date('m')) ? 'selected' : ''}}>{{$value}}</option>
-							@endforeach
-						</select>
-						<select class="form-control mr-2" name="payroll_period" id="payroll_period" required>
-							<option value="15D">15th Day</option>
-							<option value="30D">30th Day</option>
-						</select>
-						<select class="form-control mr-2 YearSelector" id="year" name="year"></select>
+				<div class="row">
+					<div class="col-6">
+						<div class="form-group">
+							<div class="form-inline">
+								<label class="mr-2">Office:</label>
+								<select class="form-control mr-2" id="ofc" name="ofc">
+									<option value="" selected="" disabled="">-Select office to generate-</option>
+									@foreach($data[0] as $office)
+									<option value="{{$office->cc_id}}">{{$office->cc_desc}}</option>
+									@endforeach
+								</select>
+							</div>
+						</div>
+					</div>
+					<div class="col-6">
+						<div class="form-group">
+							<div class="form-inline">
+								
+							</div>
+						</div>
 					</div>
 				</div>
-				<div class="form-group">
-					<div class="form-inline">
-						<select class="form-control mr-2" id="ofc" name="ofc">
-							<option value="" selected="" disabled="">-Select office to generate-</option>
-							@foreach($data[0] as $office)
-							<option value="{{$office->cc_id}}">{{$office->cc_desc}}</option>
-							@endforeach
-						</select>
-						<button type="button" class="btn btn-primary mr-2" onclick="SearchOnTable()"><i class="fa fa-search"></i></button>
-						{{-- <button type="button" class="btn btn-primary mr-2" onclick="PrintPayslip();"><i class="fa fa-print"></i> Print Payslip</button> --}}
+				<div class="row">
+					<div class="col-6">
+						<div class="form-group">
+							<div class="form-inline">
+								<label class="mr-2">Payroll period:</label>
+								<select class="form-control mr-2" id="pp" name="pp">
+									<option value="" selected="" disabled="">-Select Generated Payroll Period-</option>
+								</select>
+								<select class="form-control mr-2" name="gen_type" id="gen_type">
+									<option Value="BASIC" selected>Basic</option>
+									<option value="OVERTIME">Overtime</option>
+								</select>
+								<i class="fa fa-spin fa-spinner" id="loading-icon-1" style="display: none;"></i>
+							</div>
+						</div>
 					</div>
 				</div>
 			</form>
 		</div>
-		<div class="card-header">
-			Generated Payroll <button type="button" class="btn btn-primary" onclick="ExportPS()"><i class="fa fa-file-excel-o"></i> Export to Excel</button>
+		<div class="card-header border-top">
+			Generated Payroll <i class="fa fa-spin fa-spinner" id="loading-icon-2" style="display: none;"></i>{{-- <button type="button" class="btn btn-primary" onclick="ExportPS()"><i class="fa fa-file-excel-o"></i> Export to Excel</button> --}}
 		</div>
 		<div class="card-body">
 			<div class="table-responsive">
 				<table class="table table-bordered table-hover" id="dataTable">
 					<col>
+					<col width="40%">
 					<col>
 					<col>
-					<col>
-					<col>
+					<col width="10%">
 					<thead>
 						<tr>
 							<th>User ID</th>
 							<th>Employee</th>
 							<th>Date Generated</th>
 							<th>Payroll Period</th>
+							<th>Option</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -84,22 +96,11 @@
 	<script type="text/javascript">
 		var selected_row = null;
 		var dtr_summary = null;
-		tbl_psr.on('click', 'tbody > tr', function() {
-			$(this).parents('tbody').find('.table-active').removeClass('table-active');
-			selected_row = $(this);
-			$(this).toggleClass('table-active');
-		});
-	</script>
-	<script type="text/javascript">
-		$('#month').on('change', function() {
-			SearchOnTable();
-		});
-		$('#year').on('change', function() {
-			SearchOnTable();
-		});
-		$('#payroll_period').on('change', function() {
-			SearchOnTable();
-		});
+		// tbl_psr.on('click', 'tbody > tr', function() {
+		// 	$(this).parents('tbody').find('.table-active').removeClass('table-active');
+		// 	selected_row = $(this);
+		// 	$(this).toggleClass('table-active');
+		// });
 	</script>
 	<script type="text/javascript">
 		function ExportPS()
@@ -128,31 +129,70 @@
 
 		function SearchOnTable()
 		{
-			var pp_from = ""; var pp_to = ""; var pp_txt = "";
 			if (ChckReqFlds()) {
 				$.ajax({
 					type : 'post',
 					url : '{{url('reports/payroll-summary-report/get-dates')}}',
-					data : {month:$('#month').val(), pp:$('#payroll_period').val(), year:$('#year').val(), ofc:$('#ofc').val()},
+					data : {ofc:$('#ofc').val()},
 					dataTy : 'json',
+					beforeSend : function()
+					{
+						$('#loading-icon-1').show();
+						tbl_psr.clear().draw();
+					},
 					success : function(data) {
 						// console.log(data);
-						tbl_psr.clear().draw();
-						data = JSON.parse(data);
+						$('#pp').html('<option value="" selected="" disabled="">-Select Generated Payroll Period-</option>');
+
 						if (data!="error") {
-							pp = JSON.parse(data.pp);
-							pp_from = pp.from;
-							pp_to = pp.to;
-							pp_txt = pp_from + " to " + pp_to;
-							// tbl_psr.search(pp_txt).draw();
-							for (var i = 0; i < data.psr.length; i++) {
-								var psr =  data.psr[i];
-								Load_PSR(psr);
+							if (data.length > 0) {
+								for (var i = 0; i < data.length; i++) {
+									$('#pp').append('<option value="'+data[i].date_from+'|'+data[i].date_to+'">'+data[i].pp+'</option>');
+								}
+							} else {
+								$('#pp').html('<option value="" selected="" disabled="">-No Generated Payroll-</option>');
 							}
 						} else {
 							alert("ERROR! Unable to find payroll period");
 						}
-					}
+					},
+					complete : function()
+					{
+						$('#loading-icon-1').hide();
+					},
+				});
+			}
+		}
+
+		function SearchRecord()
+		{
+			if (ChckReqFlds()) {
+				$.ajax({
+					type : 'post',
+					url : '{{url('reports/payroll-summary-report/get-records')}}',
+					data : {pp: $("#pp").val(), gen_type : $('#gen_type').val()},
+					dataTy : 'json',
+					beforeSend : function()
+					{
+						$('#loading-icon-2').show();
+						tbl_psr.clear().draw();
+					},
+					success : function(data) {
+						// console.log(data);
+						if (data!="error") {
+							if (data.length > 0) {
+								for (var i = 0; i < data.length; i++) {
+									Load_PSR(data[i]);
+								}
+							}
+						} else {
+							alert("ERROR! Unable to find payroll period");
+						}
+					},
+					complete : function()
+					{
+						$('#loading-icon-2').hide();
+					},
 				});
 			}
 		}
@@ -161,35 +201,29 @@
 		{
 			tbl_psr.row.add([
 				data.empid,
-				data.name,
-				data.date_generated+" @ "+data.time_generated,
+				data.empname,
+				data.date_generated+" at "+data.time_generated,
 				data.date_from+" to "+data.date_to,
+				'<button type="button" class="btn btn-primary mr-2" onclick="PrintPayslip(this);" data="'+data.emp_pay_code+'"><i class="fa fa-print"></i></button>',
 			]).draw();
 		}
 
-		function PrintPayslip()
+		function PrintPayslip(obj)
 		{
-			if (selected_row != null) {
+			/*if (selected_row != null) {
 				PrintPage('{{url('reports/payroll-summary-report/print')}}?item_no='+selected_row[0].cells[0].textContent);
 			} else {
 				alert("No selected payroll.");
+			}*/
+			if ($('#gen_type').val() == "OVERTIME") {
+				PrintPage('{{url('reports/payroll-summary-report/print-ot')}}?pcode='+$(obj).attr('data'));
+			} else {
+				PrintPage('{{url('reports/payroll-summary-report/print')}}?pcode='+$(obj).attr('data'));
 			}
 		}
 
 		function ChckReqFlds()
 		{
-			if ($("#month").val()==null || $("#month").val()=="") {
-				alert("No month selected");
-				return false;
-			}
-			if ($("#payroll_period").val()==null || $("#payroll_period").val()=="") {
-				alert("No payroll period selected");
-				return false;
-			}
-			if ($("#year").val()==null || $("#year").val()=="") {
-				alert("No year selected");
-				return false;
-			}
 			if ($('#ofc').val()==null || $('#ofc').val()=="") {
 				alert("No office selected");
 				return false;
@@ -197,9 +231,8 @@
 			return true;
 		}
 
-		$('#month').on('change', function() {SearchOnTable();});
-		$('#payroll_period').on('change', function() {SearchOnTable();});
-		$('#year').on('change', function() {SearchOnTable();});
 		$('#ofc').on('change', function() {SearchOnTable();});
+		$('#pp').on('change', function() {SearchRecord();});
+		$('#gen_type').on('change', function() {SearchRecord();});
 	</script>
 @endsection

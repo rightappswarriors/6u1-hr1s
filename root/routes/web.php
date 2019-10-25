@@ -444,7 +444,9 @@
 					Route::get('/', 'Reports\Payroll\PayrollSummaryReportController@view');
 					Route::get('/export', 'Reports\Payroll\PayrollSummaryReportController@export');
 					Route::get('/print', 'Reports\Payroll\PayrollSummaryReportController@print');
+					Route::get('/print-ot', 'Reports\Payroll\PayrollSummaryReportController@print_ot');
 					Route::post('/get-dates', 'Reports\Payroll\PayrollSummaryReportController@getDates');
+					Route::post('/get-records', 'Reports\Payroll\PayrollSummaryReportController@getRecords');
 				});
 			// });
 		});
@@ -633,8 +635,8 @@
 			// 		array_push($asd, [$i, $b1, $b2]);
 			// 	}
 			// }
-			$record = OtherDeductions::Get_Records("A", "2019-08-11", "2019-08-25");
-			// dd();
+			// $record = OtherDeductions::Get_Records("A", "2019-08-11", "2019-08-25");
+			dd(Core::GET_TIME_DIFF( "9:00", "16:00"));
 		});
 
 		/* NOTIFICATION */

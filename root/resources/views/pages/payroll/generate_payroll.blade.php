@@ -75,11 +75,12 @@
 				<div class="col">
 					<div class="table-responsive">
 						<table class="table table-bordered table-hover" id="dt-gds">
+							<col width="10%">
 							<thead>
 								<tr>
 									<th>Date Generated</th>
 									{{-- <th>Time Generated</th> --}}
-									<th>Payroll Period</th>
+									{{-- <th>Payroll Period</th> --}}
 									<th>Employee</th>
 									<th>User ID</th>
 								</tr>
@@ -103,11 +104,12 @@
 				<div class="col border-left">
 					<div class="table-responsive">
 						<table class="table table-bordered table-hover" id="dt-gph">
+							<col width="10%">
 							<thead>
 								<tr>
 									<th>Date Generated</th>
-									<th>Time Generated</th>
-									<th>Payroll Period</th>
+									{{-- <th>Time Generated</th> --}}
+									{{-- <th>Payroll Period</th> --}}
 									<th>Employee</th>
 									<th>User ID</th>
 								</tr>
@@ -167,14 +169,19 @@
 					{
 						// console.log(data);
 						dataTable_gds.clear().draw();
+						dataTable_gdh.clear().draw();
 						if (data!="error") {
 							var d = JSON.parse(data);
 							// dataTable_gds.search(d.search).draw();
-							dataTable_gdh.search(d.search).draw();
-							dtrs = d.dtr_summaries;
+							// dataTable_gdh.search(d.search).draw();
 							if (d.dtr_summaries.length > 0) {
 								for (var i = 0; i < d.dtr_summaries.length; i++) {
 									LoadTable_gds(d.dtr_summaries[i]);
+								}
+							}
+							if (d.payroll_history.length > 0) {
+								for (var i = 0; i < d.payroll_history.length; i++) {
+									LoadTable_gdh(d.payroll_history[i]);
 								}
 							}
 							$('#btn-generate').removeAttr('disabled');
@@ -232,33 +239,12 @@
 					url : '{{url('/payroll/generate-payroll/generate')}}',
 					data : $("#frm-gp").serialize(),
 					dataTy : 'json',
+					beforeSend : function()
+					{
+						togglePreloader();
+					},
 					success : function(data)
 					{
-						console.log(data);
-						// if (data == "no record") {
-						// 	alert("No generated DTR available.");
-						// } else {
-						// 	// console.log(data);
-						// 	data = JSON.parse(data);
-						// 	if (data.results.length > 0) {
-						// 		var results = data.results;
-						// 		for (var i = 0; i < results.length; i++) {
-						// 			var d = results[i];
-						// 			var e = d.split(":");
-						// 			if (e[1]=="ok") {
-						// 				alert(d);
-						// 			}
-						// 		}
-						// 	}
-						// 	dataTable_gdh.clear().draw();
-						// 	if (data.ghistory.length > 0) {
-						// 		ghistory = data.ghistory;
-						// 		for (var i = 0; i < ghistory.length; i++) {
-						// 			// LoadTable_gdh(ghistory[i]);
-						// 		}
-						// 	}
-						// 	alert("Payroll Generated.");
-						// }
 						hideErrorDiv();
 						if (data[1].length > 0) {
 							$('#alert-generate-error').collapse('show');
@@ -269,15 +255,17 @@
 							alert("Some errors occured when generating.");
 						} else {
 							alert("Payroll Generated.");
+							FindDTRS();
 						}
-						dataTable_gdh.clear().draw();
-						if (data[0].length > 0) {
-							for (var i = 0; i < data[0].length; i++) {
-								var data_history = data[0][i];
-								// LoadTable_gdh(data_history);
-							}
-						}
-					}
+					},
+					error : function()
+					{
+						alert('Error in generating dtr. Please try again or reload the page.');
+					},
+					complete : function()
+					{
+						togglePreloader();
+					},
 				});
 			}
 		}
@@ -285,8 +273,8 @@
 		function LoadTable_gds(data)
 		{
 			dataTable_gds.row.add([
-				data.date_generated+"<br>"+data.time_generated,
-				data.date_from+" to "+data.date_to,
+				data.date_generated + data.time_generated,
+				// data.date_from+" to "+data.date_to,
 				data.empname,
 				data.empid,
 			]).draw();
@@ -295,9 +283,9 @@
 		function LoadTable_gdh(data)
 		{
 			dataTable_gdh.row.add([
-				data.date_generated,
-				data.time_generated,
-				data.date_from+" to "+data.date_to,
+				data.date_generated + data.time_generated,
+				// data.time_generated,
+				// data.date_from+" to "+data.date_to,
 				data.empname,
 				data.empid,
 			]).draw();
