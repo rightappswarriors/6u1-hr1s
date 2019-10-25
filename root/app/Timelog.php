@@ -46,7 +46,7 @@ class Timelog extends Model
             $minute = $minute / 60;
             $hour = $hour + $minute;
             $hour = $hour - Core::ToHours(self::get_lunch_break());
-            return round($hour,2);
+            return round($hour, 2);
         } catch (\Exception $e) {
             // return $e->getMessage();
             return 0;
