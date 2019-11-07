@@ -16,7 +16,7 @@
 								<option value="{{$office->cc_id}}">{{$office->cc_desc}}</option>
 								@endforeach
 							</select>
-						<button class="btn btn-primary">Print</button>
+						<button type="button" class="btn btn-primary " onclick="PrintAllPage();">Print <i class="fa fa-print"></i></button>
 						</div>
 					</div>
 				</div>
@@ -45,6 +45,8 @@
 
 
 @section('to-bottom')
+	<script type="text/javascript" src="{{url('js/for-fixed-tag.js')}}"></script>
+	<script type="text/javascript" src="{{url('js/print-me.js')}}"></script>
 	<script>
 		var table = $('#dataTable').DataTable({
 			"paging": false
@@ -63,25 +65,36 @@
 				data: data,
 				success: function(data) {
 					for(i=0; i<data.length; i++){
-						var sum = parseFloat(data[i].pay_rate);
-						var sums = sum + sum;
+						var emp1 = parseFloat((typeof(data[i][1][0]) != 'undefined' ? data[i][1][0].empshare_sc : 0.00));
+						var emp2 = parseFloat((typeof(data[i][1][0]) != 'undefined' ? data[i][1][0].empshare_ec : 0.00));
+						var emp3 = parseFloat((typeof(data[i][1][0]) != 'undefined' ? data[i][1][0].s_ec : 0.00));
+						var sums = emp1 + emp2;
+						if(data[i][0].philhealth == ''){
+							var philhealth = '0-0-0';
+						}
+						else{
+							var philhealth = data[i][0].philhealth;	
+						}
 						console.log(sums);
 						table.row.add([
-							data[i].philhealth,
-							data[i].empname,
-							data[i].pay_rate,
-							data[i].pay_rate,
-							data[i].pay_rate,
-							data[i].pay_rate,
+							philhealth,
+							data[i][0].empname,
+							emp1,
+							emp2,
+							emp3,
 							sums, 
 						]).draw();
 					}
 				},
 			});
 		});
+
+		function PrintAllPage(obj)
+		{
+			var ofc_id = parseInt($('#ofc :selected').val());
+			PrintPage("{{url('reports/philhealth/print')}}?ofc_id="+ofc_id);
+
+		}
 	</script>
-
-
-
 
 @endsection

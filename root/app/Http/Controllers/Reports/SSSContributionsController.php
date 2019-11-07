@@ -28,10 +28,25 @@ class SSSContributionsController extends Controller
         return view('pages.reports.sss', compact('data'));   
     }
     public function find(Request $request){
+        $arrRet = [];
         $ofc_id = $request->ofc_id;
         $employee = Employee::getEmployeeOffice($ofc_id);
-    
-        return $employee;
+        foreach($employee as $e){
+            array_push($arrRet, [$e,DB::select("SELECT s_ec, empshare_sc, empshare_ec  FROM hris.hr_sss WHERE bracket1 >= '$e->pay_rate' AND cancel is null ORDER BY bracket1 ASC LIMIT 1")]);
+        }
+        return $arrRet;
 
+    }
+
+    public function print(Request $request){
+        $arrRet = [];
+        $ofc_id = $request->ofc_id;
+        $employee = Employee::getEmployeeOffice($ofc_id);
+        foreach($employee as $e){
+    
+        array_push($arrRet, [$e,DB::select("SELECT s_ec, empshare_sc, empshare_ec  FROM hris.hr_sss WHERE bracket1 >= '$e->pay_rate' AND cancel is null ORDER BY bracket1 ASC LIMIT 1"), DB::select("SELECT cc_desc FROM rssys.m08 WHERE cc_id = '$ofc_id' "), DB::select("SELECT * FROM hris.m99")] );
+        }
+       
+        return view('print.reports.print_sss_contributions', compact('arrRet'));
     }
 }
