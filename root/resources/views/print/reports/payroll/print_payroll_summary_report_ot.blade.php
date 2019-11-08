@@ -147,33 +147,40 @@
 								<col>
 							</colgroup>
 							<tbody>
-								@if(count($ot_timelogs) > 0) 
-									<tr>
-										<td>{{ $ot_timelogs[0]['date'] }}</td>
-										<td>-</td>
-										<td>{{ $ot_timelogs[0]['timelog1'] }}</td>
-										<td>{{ $ot_timelogs[0]['timelog2'] }}</td>
-										<td>=</td>
-										<td>{{ $ot_timelogs[0]['rendered'] }}</td>
-									</tr>
-									<tr>
-										<td colspan="3"></td>
-										<td style="text-align: right;"><span style="font-weight: bold;">P @isset($record[0]) {{ $record[0]->pay_rate }} @endif</span>x43</td>
-										<td>=</td>
-										<td>6,304.66</td>
-									</tr>
-									<tr>
-										<td colspan="3"></td>
-										<td style="text-align: right;"><span style="font-weight: bold;">P 146.62/60</span>x0</td>
-										<td>=</td>
-										<td style="border-bottom: 1px solid; border: solid #000;
-border-width: 0 1px;">0</td>	
-									</tr>
-									<tr>
-										<td colspan="5"></td>
-										<td style="font-weight: bold; border-top: 1px solid;">P 6,304.66</td>	
-									</tr>
-
+								@if(count($ot_timelogs) > 0)
+									@foreach($ot_timelogs as $ot_timelogs) 
+										<tr>
+											<td>{{ $ot_timelogs['date'] }}</td>
+											<td>-</td>
+											<td>{{ $ot_timelogs['timelog1'] }}</td>
+											<td>{{ $ot_timelogs['timelog2'] }}</td>
+											<td>=</td>
+											<td>{{ $ot_timelogs['rendered'] }}</td>
+										</tr>
+											@php
+												$rendered = $ot_timelogs['rendered'];
+												$payrate = $record[0]->pay_rate;
+												$divide = $payrate / 8;
+												$sum = $rendered * $divide;
+											@endphp
+										<tr>
+											<td colspan="3"></td>
+											<td style="text-align: right;"><span style="font-weight: bold;">P @isset($record[0]) {{ $divide }} @endif</span> x {{ $ot_timelogs['rendered'] }}</td>
+											<td>=</td>
+											
+											<td>{{ number_format($sum, 2, '.', ',') }}</td>
+										</tr>
+										<tr>
+											<td colspan="3"></td>
+											<td style="text-align: right;"><span style="font-weight: bold;">P rendered/60</span>x0</td>
+											<td>=</td>
+											<td style="border-bottom: 1px solid; border: solid #000;border-width: 0 1px;">0</td>	
+										</tr>
+										<tr>
+											<td colspan="5"></td>
+											<td style="font-weight: bold; border-top: 1px solid;">P {{ $sum }}</td>	
+										</tr>
+									@endforeach
 								@else
 									<p>-No Overtime-</p>	
 								@endif
@@ -189,38 +196,35 @@ border-width: 0 1px;">0</td>
 								<col width="25%">
 								<col width="5%">
 								<col>
-							</colgroup>
-							@if(count($ot_timelogs) > 0) 
-								<tbody>
-									<tr>
-										<td>May 1, 2019</td>
-										<td>-</td>
-										<td>6:00pm - 9:00pm</td>
-										<td>10:00pm - 12:00md</td>
-										<td>=</td>
-										<td>5 hours</td>
-									</tr>
-									<tr>
-										<td>May 18, 2019</td>
-										<td>-</td>
-										<td>6:00pm - 9:00pm</td>
-										<td>10:00pm - 12:00md</td>
-										<td>=</td>
-										<td>5 hours</td>
-									</tr>
-									<tr>
-										<td colspan="5"></td>
-										<td style="border-top: 1px solid;"><b>P 8,064.06</b></td>	
-									</tr>
-									<tr>
-										<td><b>LESS: Witholding Tax</b></td>
-										<td colspan="4"></td>
-										<td style="border-bottom: 1px solid;"><b>3,317.14</b></td>
-									</tr>
-								</tbody>
-							@else
-								<p>-No Overtime-</p>
-							@endif
+							</colgroup> 
+							<tbody>
+								@if(count($legal_timelogs) > 0)
+									@foreach($legal_timelogs as $legal_timelogs)	
+										<tr>
+											<td>{{ $ot_timelogs['date'] }}</td>
+											<td>-</td>
+											<td>{{ $legal_timelogs['timelog1'] }}</td>
+											<td>{{ $legal_timelogs['timelog2'] }} }}</td>
+											<td>=</td>
+											<td>5 hours</td>
+										</tr>	
+									@endforeach
+									@foreach($special_timelogs as $special_timelogs)
+										<tr>
+											<td>{{ $special_timelogs['date'] }}</td>
+											<td>-</td>
+											<td>{{ $special_timelogs['timelog1'] }}</td>
+											<td>{{ $special_timelogs['timelog2'] }} }}</td>
+											<td>=</td>
+											<td>5 hours</td>
+										</tr>
+									@endforeach	
+								@else
+									<p>-No Overtime-</p>
+								@endif
+							</tbody>
+								
+							
 						</table>
 						
 						{{-- @for($i=6;$i<=9;$i++)

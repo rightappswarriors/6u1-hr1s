@@ -173,8 +173,50 @@ class PayrollSummaryReportController extends Controller
 			array_push($ot_timelogs, $tmp);
 		}
 
+		$legal_holiday_ot = json_decode($record[0]->legal_holiday_ot);
+		$legal_timelogs = [];
+		for ($i=0; $i < count($legal_holiday_ot); $i++) { 
+			list($date, $timelog, $rendered) = $legal_holiday_ot[$i]; # [date, timelog[0], rendered]
+			# May 2, 2019 - 6:00pm - 9:00pm 10:00pm - 11:00pm = 4 hours
+			$date = date('M d, Y', strtotime($date));
+			$timelog1 = "";
+			$timelog2 = "";
+			if (count($timelog) > 2) {
+				$timelog1 = date('ha', strtotime($timelog[0]))."-".date('ha', strtotime($timelog[1]));
+				$timelog2 = date('ha', strtotime($timelog[2]))."-".date('ha', strtotime($timelog[3]));
+			} else {
+				$timelog1 = date('ha', strtotime($timelog[0]))."-".date('ha', strtotime($timelog[1]));
+			}
+			$tmp = [
+				'date' => $date,
+				'timelog1' => $timelog1,
+				'timelog2' => $timelog2,
+			];
+			array_push($legal_timelogs, $tmp);
+		}
 		
-		return view('print.reports.payroll.print_payroll_summary_report_ot', compact('record', 'ot_timelogs'));
+		$special_holiday_ot = json_decode($record[0]->special_holiday_ot);
+		$special_timelogs = [];
+		for ($i=0; $i < count($special_holiday_ot); $i++) { 
+			list($date, $timelog, $rendered) = $special_holiday_ot[$i]; # [date, timelog[0], rendered]
+			# May 2, 2019 - 6:00pm - 9:00pm 10:00pm - 11:00pm = 4 hours
+			$date = date('M d, Y', strtotime($date));
+			$timelog1 = "";
+			$timelog2 = "";
+			if (count($timelog) > 2) {
+				$timelog1 = date('ha', strtotime($timelog[0]))."-".date('ha', strtotime($timelog[1]));
+				$timelog2 = date('ha', strtotime($timelog[2]))."-".date('ha', strtotime($timelog[3]));
+			} else {
+				$timelog1 = date('ha', strtotime($timelog[0]))."-".date('ha', strtotime($timelog[1]));
+			}
+			$tmp = [
+				'date' => $date,
+				'timelog1' => $timelog1,
+				'timelog2' => $timelog2,
+			];
+			array_push($special_timelogs, $tmp);
+		}
+		return view('print.reports.payroll.print_payroll_summary_report_ot', compact('record', 'ot_timelogs', 'legal_timelogs', 'special_timelogs'));
 	}
 
 }
