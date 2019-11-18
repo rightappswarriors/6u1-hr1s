@@ -145,4 +145,11 @@ class Employee extends Model
         $data = DB::table(self::$tbl_name)->where('empid', $empid)->first();
         return $data->department == $ofc_id;
     }
+    public static function getEmployeeOffice($ofc_id){
+        $sql = "SELECT a.*, COALESCE(b.cc_desc, 'no-assigned-office') cc_desc FROM (SELECT empid, firstname, lastname, mi, CONCAT(lastname, ', ',firstname) AS empname, section, CAST(positions AS INTEGER) positions, picture, CAST(department AS INTEGER) department, date_hired, contractual_date, prohibition_date, date_regular, date_resigned, date_terminated, CAST(empstatus AS INTEGER) empstatus, contract_days, prc, ctc, rate_type, pay_rate, biometric, sss, pagibig, philhealth,  sss_bracket, fixed_sched, accountnumber, COALESCE(b.jtitle_name, 'no-jobtitle-assigned') jobtitle, COALESCE(c.description, 'no-employee-status') empstatus_desc FROM (SELECT * FROM hris.hr_employee WHERE cancel IS NULL ORDER BY lastname ASC) a LEFT JOIN (SELECT * FROM hris.hr_jobtitle WHERE cancel IS NULL ) b ON a.positions = b.jt_cn LEFT JOIN (SELECT statcode, description, CAST(status_id AS TEXT) status_id, type FROM hris.hr_emp_status WHERE cancel IS NULL) c ON a.empstatus = c.status_id) a LEFT JOIN (SELECT cc_code, cc_desc, active, funcid, cc_id FROM rssys.m08 WHERE active IS TRUE) b ON a.department = b.cc_id WHERE b.cc_id = '$ofc_id'";
+
+        return DB::select(DB::raw($sql));
+
+    }
+
 }

@@ -3,7 +3,10 @@
 <head>
 	<title>Print View</title>
 	<!-- Bootstrap core CSS-->
+	<link href="{{asset('vendor/bootstrap/css/bootstrap.min.css')}}" rel="stylesheet">
     <link href="{{asset('vendor/bootstrap/css/bootstrap.min.css')}}" rel="stylesheet">
+    <link href="{{asset('vendor/font-awesome/css/font-awesome.min.css')}}" rel="stylesheet" type="text/css">
+
 
 
 	{{-- <style type="text/css">
