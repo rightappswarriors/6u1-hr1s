@@ -25,28 +25,6 @@
 				</div>
 
 				<div class="col-2">
-					Employee:
-				</div>
-				<div class="col-4">
-					<select name="" id="employee" class="form-control mr-3">
-						<option value="" disabled selected>SELECT EMPLOYEE</option>
-					</select>
-				</div>
-
-				<div class="col-1">
-					<button class="btn btn-primary mr-3" id="find_btn" disabled><i class="fa fa-fw fa-search"></i></button>
-				</div>
-			</div>
-
-			<div class="row mt-1">
-				<div class="col-1">
-					Payroll Period:
-				</div>
-				<div class="col-4">
-					<select class="form-control mr-3" name="payroll_period" id="payroll_period" onchange=""></select>
-				</div>
-
-				<div class="col-2">
 					Generation Type:
 				</div>
 				<div class="col-4">
@@ -59,9 +37,29 @@
 					<button class="btn btn-primary mr-3" id="print_btn" disabled><i class="fa fa-fw fa-print"></i></button>
 				</div>
 			</div>
+
+			<div class="row mt-1">
+				<div class="col-1">
+					Payroll Period:
+				</div>
+				<div class="col-4">
+					<select class="form-control mr-3" name="payroll_period" id="payroll_period" onchange=""></select>
+				</div>
+
+				<div class="col-2">
+					Employee:
+				</div>
+				<div class="col-4">
+					<select name="" id="employee" class="form-control mr-3">
+						<option value="" disabled selected>SELECT EMPLOYEE</option>
+					</select>
+				</div>
+
+				<div class="col-1">
+					<button class="btn btn-primary mr-3" id="find_btn" disabled><i class="fa fa-fw fa-search"></i></button>
+				</div>
+			</div>
 			</span>
-
-
 			<!--<div class="form-inline mb-4" id="print_hide">
 				<div class="form-group">
 					<label for="date_month">Office: </label>
@@ -97,7 +95,7 @@
 					<button class="btn btn-primary mr-3" id="print_btn" disabled><i class="fa fa-fw fa-print"></i></button>
 				</div>
 			</div>-->
-
+			
 			<div class="table-responsive hidden mt-3">
 				<table class="table table-hover" style="font-size: 13px;" id="table">
 					<thead>
@@ -124,6 +122,9 @@
 					<tbody id="timelogs"></tbody>
 				</table>
 			</div>
+			<div class="jumbotron" style="background: transparent; border:none;" id="loadAnimation">
+				<center><i class="fa fa-spin fa-spinner" style="font-size: 50px;"></i></center>
+			</div>
 		</div>
 	</div>
 @endsection
@@ -135,12 +136,24 @@
 
 	<script>
 		$('#office').on('change', function() {
+			$('#employee').find('option').remove().end();
+			generateDate();
+		});
+		$('#generationtype').on('change', function(){
+			$('#employee').find('option').remove().end();
+			generateDate();
+		});
+		function generateDate(){
+
 			$('#find_btn')[0].removeAttribute('disabled');
 
 			$.ajax({
 				type: 'post',
 				url: '{{url('reports/timekeeping/employee-dtr/')}}/getperiods',
 				data: {'office':$('#office').val()},
+				beforeSend: function(){
+				    $('#loadAnimation').show();
+				},
 				success: function(data) {
 					setPeriods(data);
 				},
@@ -157,35 +170,59 @@
 				hiddenChild.innerText='SELECT EMPLOYEE';
 
 			$('#employee')[0].appendChild(hiddenChild);
+			setTimeout(generateEmployees,500);
 
-			$.ajax({
-				type: 'post',
-				url: '{{url('timekeeping/timelog-entry/find-emp-office')}}',
-				data: {ofc_id: $(this).val()},
-				success: function(data) {
-					// console.log(typeof(data));
-					if(data.length > 0) {
-						for(i=0; i<data.length; i++) {
-							var option = document.createElement('option');
-								option.setAttribute('value', data[i].empid);
-								option.innerText=data[i].name;
+		}
+		function generateEmployees(){
 
-							$('#employee')[0].appendChild(option);
+			$(document).ready(function() {
+
+				var dategenerated = $('#payroll_period').val();
+				var date = dategenerated.split('|');
+				var from = date[0];
+				var to = date[1];
+				var gentype = $('#generationtype').val();
+				$.ajax({
+	             url: '{{url('reports/timekeeping/employee-dtr/getgeneratedemployee')}}/'+gentype+'/'+from+'/'+to,
+	             method: 'GET',
+	             success : function(data)
+	             {
+	              	if(data.length > 0) {
+							for(i=0; i<data.length; i++) {
+								var option = document.createElement('option');
+									option.setAttribute('value', data[i].empid);
+									option.innerText=data[i].lastname;
+
+								$('#employee')[0].appendChild(option);
+							}
 						}
-					}
-				},
+					
+				       $('#loadAnimation').hide();		 
+	             }
+	           });
 			});
-		});
+			
+		}
+		
+			
+		$('#generationtype').on('change', function(){
+			generateData();
+		});	
+	
 
 		$('#find_btn').on('click', function() {
 
 			if($('#employee').val() == "" || $('#employee').val() == null) {
 				alert('Please select an employee');
 			} else {
+				var dategenerated = $('#payroll_period').val();
+				var date = dategenerated.split('|');
+				var from = date[0];
+				var to = date[1];
 				$.ajax({
 					type: 'post',
 					url: '{{url('reports/timekeeping/employee-dtr/')}}/findnew2',
-					data: {"code":$('#payroll_period').val(), "type":$('#generationtype').val(), "emp":$('#employee').val()},
+					data: {"code":from, "type":$('#generationtype').val(), "emp":$('#employee').val()},
 					success: function(data) {
 						// table.clear().draw();
 						// for(i=0; i<data[0].days_worked_readable.length; i++) {
@@ -203,7 +240,10 @@
 			}
 		});
 
+
+
 		function MakeDTR(data) {
+			$('#print_btn')[0].removeAttribute('disabled');
 			var divX = document.getElementById('dtr');
 				divX.setAttribute('style', 'overflow-x: hidden !important');
 
@@ -271,6 +311,7 @@
 					td20.setAttribute('style', 'text-align: center; width: 10%');
 					td20.innerHTML = "Minutes";
 				var td21 = document.createElement('td');
+
 				tr4.appendChild(td12);
 				tr4.appendChild(td13);
 				tr4.appendChild(td14);
@@ -318,6 +359,8 @@
 					for(j=0; j<data.days_worked_readable.length; j++) {
 						if(data.covered_dates[i][1] == data.days_worked_readable[j][0]) {
 							in1.innerHTML = formatAMPM2(data.days_worked_readable[j][1][0]);
+							out1.innerHTML = '12:00nn';
+							in2.innerHTML = '1:00pm';
 
 							if(data.days_worked_readable[j][1].length > 2) {
 								out1.innerHTML = formatAMPM2(data.days_worked_readable[j][1][1]);
@@ -438,7 +481,7 @@
 
 				for(i=0; i<data.length; i++) {
 					var option = document.createElement('option');
-						option.setAttribute('value', data[i][1]);
+						option.setAttribute('value', data[i][1] + '|' + data[i][0]);
 						option.innerText = data[i][1]+' to '+data[i][0];
 
 					select[0].appendChild(option);
@@ -452,5 +495,11 @@
 			}
 
 		}
+	
+	$('#loadAnimation').hide();
+	
+
+	
+	
 	</script>
 @endsection

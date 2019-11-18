@@ -52,6 +52,17 @@ class PrintEmployeeDTRController extends Controller
         return view('pages.reports.timekeeping_new.print_employee_dtr', compact('data'));
     }
 
+    public function generateEmployee(Request $r){
+        $gentype = $r->gentype;
+        $datefrom = $r->from;
+        $dateto = $r->to;
+
+        $generatedEmployee = Employee::getGeneratedEmployee($gentype, $datefrom, $dateto);
+
+        return $generatedEmployee;
+
+    }
+
     public function findnew(Request $r)
     {
         // $data = DTR::GetAllHDRSummaryByCode($r->code);

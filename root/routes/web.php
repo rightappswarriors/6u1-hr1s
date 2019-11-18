@@ -410,6 +410,7 @@
 					Route::post('/findnew', 'Reports\PrintEmployeeDTRController@findnew');
 					Route::post('/findnew2', 'Reports\PrintEmployeeDTRController@findnew2');
 					Route::post('/getperiods', 'Reports\PrintEmployeeDTRController@getperiods');
+					Route::get('/getgeneratedemployee/{gentype}/{from}/{to}', 'Reports\PrintEmployeeDTRController@generateEmployee');
 				});
 
 				Route::prefix('employee-dtr-summary')->group(function() {

@@ -23,7 +23,7 @@
 									@foreach($data[1] as $off)
 										<option value="{{$off->cc_id}}">{{$off->cc_desc}}</option>
 									@endforeach
-								@endif
+								<@endif></@endif>
 							</select>
 						</div>
 					</div>
@@ -45,9 +45,6 @@
 							</select>
 						</div>
 					</div>
-					
-							
-
 
 					<div class="col-2 mr-3">
 						<div class="row">
