@@ -21,7 +21,7 @@
   $NoPageRoute = route('redirect', ['page'=> '6']);
 @endphp
 
-<ul class="sidebar navbar-nav" style="background-color: #343a40;" id="sidebar-parent">
+<ul class="sidebar navbar-nav no-print" style="background-color: #343a40;" id="sidebar-parent">
   <li class="nav-item">
     <div class="hris-img-profile nav-profile">
       @php
@@ -53,21 +53,21 @@
       <span>Master File</span>
     </a>
     <ul class="sidenav-second-level collapse-menu collapse" id="MF" data-parent="#sidebar-parent">
+      <li id="master-fileemployee">
+        <a href="{{url('master-file/employee')}}">Employee</a>
+      </li>
+      <li id="master-fileemployee-status">
+        <a href="{{url('master-file/employee-status')}}">Employee Status</a>
+      </li>
+      <li id="master-filejob-title">
+        <a href="{{url('master-file/job-title')}}">Job Title</a>
+      </li>
       <li id="master-fileoffice">
         <a href="{{url('master-file/office')}}">Office</a>
       </li>
       {{-- <li>
         <a href="{{url('master-file/department-section')}}">Department Section</a>
       </li> --}}
-      <li id="master-filejob-title">
-        <a href="{{url('master-file/job-title')}}">Job Title</a>
-      </li>
-      <li id="master-fileemployee-status">
-        <a href="{{url('master-file/employee-status')}}">Employee Status</a>
-      </li>
-      <li id="master-fileemployee">
-        <a href="{{url('master-file/employee')}}">Employee</a>
-      </li>
 {{--       <li id="master-fileshift-schedule">
         <a href="{{url('master-file/shift-schedule')}}">Shift Schedule</a>
       </li>
@@ -93,14 +93,16 @@
       <li id="master-filehdmf">
         <a href="{{url('master-file/hdmf')}}">HDMF</a>
       </li>
-      <li id="master-fileloan-type">
-        <a href="{{ url('master-file/loan-type') }}">Loan Types</a>
-      </li>
+      <li class="nav-separator"></li>
       <li id="master-fileother-earnings">
         <a href="{{ url('master-file/other-earnings') }}">Other Earnings</a>
       </li>
       <li id="master-fileother-deductions">
         <a href="{{ url('master-file/other-deductions') }}">Other Deductions</a>
+      </li>
+      <li class="nav-separator"></li>
+      <li id="master-fileloan-type">
+        <a href="{{ url('master-file/loan-type') }}">Loan Types</a>
       </li>
       <li id="master-fileleave-types">
         <a href="{{ url('master-file/leave-types') }}">Leave Types</a>

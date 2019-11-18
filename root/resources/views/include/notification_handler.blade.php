@@ -130,7 +130,7 @@
 </script>
 
 <script>
-    setInterval(function() {
-        notif_find();
-    }, notif_reload_seconds * 500);
+    // setInterval(function() {
+    //     notif_find();
+    // }, notif_reload_seconds * 500);
 </script>

@@ -65,6 +65,15 @@
             box-shadow: none !important;
         }
     </style>
+    <style type="text/css">
+        @media print
+        {    
+            .no-print, .no-print *
+            {
+                display: none !important;
+            }
+        }
+    </style>
 
     <!-- Head Scripts-->
     <script type="text/JavaScript">

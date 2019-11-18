@@ -610,12 +610,12 @@
 			// dd(json_decode(Office::OfficeEmployees_byEmpStat(97, 3)));
 
 			// $reservedIds = [
-	  //           "sss",
-	  //           "gsis",
-	  //           "pagibig",
-	  //           "pag-ibig",
-	  //       ];
-	  //       dd(in_array('dsa', $reservedIds));
+	        //     "sss",
+	        //     "gsis",
+	        //     "pagibig",
+	        //     "pag-ibig",
+	        // ];
+	        // dd(in_array('dsa', $reservedIds));
 			// Export2_1::exportBlade('pages.test', "sample function");
 			// TestExport::export();
 			// $val = 0;
@@ -636,7 +636,15 @@
 			// 	}
 			// }
 			// $record = OtherDeductions::Get_Records("A", "2019-08-11", "2019-08-25");
-			dd(Core::GET_TIME_DIFF( "9:00", "16:00"));
+			// dd(Core::GET_TIME_DIFF( "9:00", "16:00"));
+			// $empid = '0001';
+			// $amount = 1000;
+			// $sql = Core::sql("SELECT pi_ee, pi_er, pi_ecc,(pi_ee+pi_er+pi_ecc) pi_total , ph_ee, ph_er, ph_ecc, (ph_ee+ph_er+ph_ecc) ph_total, sss_ee, sss_er, sss_ecc, (sss_ee+sss_er+sss_ecc) sss_total FROM (SELECT CAST($empid AS text) AS empid, emp_ee AS pi_ee, emp_er AS pi_er, pct AS pi_ecc FROM hris.hr_hdmf WHERE bracket1 <= $amount AND bracket2 > $amount LIMIT 1) pi INNER JOIN (SELECT CAST($empid AS text) AS empid, emp_ee AS ph_ee, emp_er AS ph_er, salary_base AS ph_ecc FROM hris.hr_philhealth WHERE bracket1 <= $amount AND bracket2 > $amount LIMIT 1) ph ON pi.empid = ph.empid INNER JOIN (SELECT CAST($empid AS text) AS empid, empshare_ec AS sss_ee, empshare_sc AS sss_er, s_ec AS sss_ecc FROM hris.hr_sss WHERE bracket1 <= $amount AND bracket2 > $amount LIMIT 1) sss on ph.empid = sss.empid");
+			// dd($sql);
+			// $rate = 700000;
+			// $tax_bracket = "Z";
+			// dd(Payroll::WithHoldingTax($rate, $tax_bracket));
+			dd(date('d-m-Y h A', strtotime("24:00")));
 		});
 
 		/* NOTIFICATION */

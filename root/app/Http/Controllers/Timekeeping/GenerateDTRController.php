@@ -104,7 +104,6 @@ class GenerateDTRController extends Controller
             $arr_leavedates = [];
 
             $totaldays = 0;
-            $totalpresent = 0;
             $totalabsent = 0;
             $totalweekend = 0;
             $totalholiday = 0;
@@ -210,6 +209,8 @@ class GenerateDTRController extends Controller
                             return "error";
                         }
 
+                        $temp_tl = "";
+
                         try {
                             /**
                             * Time Sorting Method
@@ -222,9 +223,9 @@ class GenerateDTRController extends Controller
                             */
                             if ($tl_in_am != "00:00" && $tl_out_am != "00:00") { // ami = 1, amo = 1
                                 if ($tl_in_pm != "00:00" && $tl_out_pm != "00:00") { // pmi = 1, pmo = 1
-                                    $r_time_am = Timelog::GetRenHours($tl_in_am, $tl_out_am, "am");
-                                    $r_time_pm = Timelog::GetRenHours($tl_in_pm, $tl_out_pm, "pm");
-                                    $r_time_total = Core::GET_TIME_TOTAL([$r_time_am, $r_time_pm]);
+                                    $r_time_am = Timelog::GetRenHours($tl_in_am, $tl_out_am);
+                                    $r_time_pm = Timelog::GetRenHours($tl_in_pm, $tl_out_pm);
+                                    $r_time_total = Core::GET_TIME_DIFF(Timelog::get_lunch_break(), Core::GET_TIME_TOTAL([$r_time_am, $r_time_pm]));
                                     # If Late
                                     if (Timelog::IfLate($tl_in_am)) {
                                         array_push($arr_late, [$date, [$tl_in_am, $tl_out_am, $tl_in_pm, $tl_out_pm], Core::GET_TIME_DIFF(Timelog::ReqTimeIn(), $tl_in_am)]);
@@ -238,10 +239,9 @@ class GenerateDTRController extends Controller
                                         array_push($arr_holidays, [[$date, Holiday::HolidayType2($date)], [$tl_in_am, $tl_out_am, $tl_in_pm, $tl_out_pm], $r_time_total]);
                                     } else {
                                         array_push($arr_daysworked, [$date, [$tl_in_am, $tl_out_am, $tl_in_pm, $tl_out_pm], $r_time_total]);
-                                        $totalpresent+=1;
                                     }
                                 } elseif ($tl_in_am != "00:00" && $tl_out_pm != "00:00") { // ami = 1, pmo = 1
-                                    $r_time_total = Timelog::GetRenHours($tl_in_am, $tl_out_pm, "am");
+                                    $r_time_total = Timelog::GetRenHours($tl_in_am, $tl_out_pm, true);
                                     # If Late
                                     if (Timelog::IfLate($tl_in_am)) {
                                         array_push($arr_late, [$date, [$tl_in_am, $tl_out_pm], Core::GET_TIME_DIFF(Timelog::ReqTimeIn(), $tl_in_am)]);
@@ -255,11 +255,26 @@ class GenerateDTRController extends Controller
                                         array_push($arr_holidays, [[$date, Holiday::HolidayType2($date)], [$tl_in_am, $tl_out_pm], $r_time_total]);
                                     } else {
                                         array_push($arr_daysworked, [$date, [$tl_in_am, $tl_out_pm], $r_time_total]);
-                                        $totalpresent+=1;
+                                    }
+                                } else {
+                                    $r_time_total = Timelog::GetRenHours($tl_in_am, $tl_out_am);
+                                    # If Late
+                                    if (Timelog::IfLate($tl_in_am)) {
+                                        array_push($arr_late, [$date, [$tl_in_am, $tl_out_am], Core::GET_TIME_DIFF(Timelog::ReqTimeIn(), $tl_in_am)]);
+                                    }
+                                    # If Undertime
+                                    if (Timelog::IfUndertime($r_time_total, $req_hrs2)) {
+                                        array_push($arr_undertime, [$date, [$tl_in_am, $tl_out_pm], Core::GET_TIME_DIFF($r_time_total, $req_hrs2)]); 
+                                    }
+                                    # If Holiday
+                                    if (Timelog::IfHoliday($date)) {
+                                        array_push($arr_holidays, [[$date, Holiday::HolidayType2($date)], [$tl_in_am, $tl_out_pm], $r_time_total]);
+                                    } else {
+                                        array_push($arr_daysworked, [$date, [$tl_in_am, $tl_out_pm], $r_time_total]);
                                     }
                                 }
                             } elseif ($tl_in_am != "00:00" && $tl_out_pm != "00:00") { // ami = 1, pmo = 1
-                                $r_time_total = Timelog::GetRenHours($tl_in_am, $tl_out_pm, "am"); 
+                                $r_time_total = Timelog::GetRenHours($tl_in_am, $tl_out_pm, true); 
                                 # If Late
                                 if (Timelog::IfLate($tl_in_am)) {
                                     array_push($arr_late, [$date, [$tl_in_am, $tl_out_pm], Core::GET_TIME_DIFF(Timelog::ReqTimeIn(), $tl_in_am)]);
@@ -273,9 +288,10 @@ class GenerateDTRController extends Controller
                                     array_push($arr_holidays, [[$date, Holiday::HolidayType2($date)], [$tl_in_am, $tl_out_pm], $r_time_total]);
                                 } else {
                                     array_push($arr_daysworked, [$date, [$tl_in_am, $tl_out_pm], $r_time_total]);
-                                    $totalpresent+=1;
                                 }
                             }
+
+                            # OVERTIME DAYS WORKED
                             if (count($tl_in_ot) > 0) {
                                 for ($j=0; $j < count($tl_in_ot); $j++) {
                                     list($ja, $jb) = explode("|", $tl_in_ot[$j]);
@@ -341,9 +357,9 @@ class GenerateDTRController extends Controller
                 /**
                 * Time Counting Method
                 */
-                $workdays = count($covereddates) - $totalweekend;
-                $totaldays = $totalpresent + ((count($arr_holidays) > 0) ? count($arr_holidays) : 0);
-                $totalabsent = $workdays - $totaldays - ((count($arr_leavedates) > 0) ? count($arr_leavedates) : 0);
+                $workdays = 11;
+                $totaldays = count($arr_daysworked);
+                $totalabsent = ($workdays - $totaldays) - count($arr_leavedates);
                 if (count($arr_late) > 0) { 
                     $tmp = [];
                     for ($i=0; $i < count($arr_late); $i++) { 

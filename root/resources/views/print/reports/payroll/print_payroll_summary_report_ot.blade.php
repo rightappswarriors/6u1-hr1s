@@ -126,10 +126,10 @@
 						<p style="text-indent: .3in;text-align: justify;">Payment of overtime pay of {{"<MR/MS/MRS"}}. {{"<NAME>"}} for the month of {{"<MONTH&YEAR"}} in the amount {{"<AMOUNT_IN_WORDS>"}}.</p><br>
 						<p><b><u>Regular Days:</u></b></p>
 						<p style="text-indent: .3in;"><b><i>Basic Salary: 20,644.00/22days/8days+25%</i></b></p>
-						{{-- @for($i=6;$i<=9;$i++)
+						@for($i=6;$i<=9;$i++)
 						<p class="timelog">May {{$i}}, 2019 - 6:00pm - 9:00pm 10:00pm - 11:00pm <span>= 4 hours</span></p>
 						@endfor
-						<p class="timelog">May {{$i}}, 2019 - 6:00pm <span class="last">= 3 hours</span></p> --}}
+						<p class="timelog">May {{$i}}, 2019 - 6:00pm <span class="last">= 3 hours</span></p>
 						
 					</div>
 				</td>

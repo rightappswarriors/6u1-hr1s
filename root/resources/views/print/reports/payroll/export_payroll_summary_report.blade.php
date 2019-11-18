@@ -1,12 +1,17 @@
 {{-- @extends('layouts.print_layout')
 
+
 @section('body')  --}}
+@php
+	$inf = $data['inf'];
+	$record = $data['record'];
+@endphp
 	<table>
 		<thead>
-			<tr><th colspan="44">GENERAL PAYROLL</th></tr>
+			<tr><th colspan="44">{{strtoupper($inf->title)}}</th></tr>
 			<tr><th colspan="44">{{Core::company_name()}}</th></tr>
-			<tr><th colspan="44">{{-- {{$data->ofc}} --}}</th></tr>
-			<tr><th colspan="44">{{-- {{date('F j, Y', strtotime($data->pp->from))}} - {{date('F j, Y', strtotime($data->pp->to))}} --}}</th></tr>
+			<tr><th colspan="44">{{isset($inf->ofc) ? $inf->ofc->cc_desc : "OFFICE NOT FOUND"}}</th></tr>
+			<tr><th colspan="44">{{$inf->payroll_period}}</th></tr>
 			<tr>
 				<th rowspan="4">ITEM NO.</th>
 				<th rowspan="4">NAME</th>
@@ -74,6 +79,47 @@
 			</tr>
 		</thead>
 		<tbody>
+			@if(count($record) > 0) @for($i=0;$i<count($record);$i++)
+			@php
+				$row = $record[$i];/* dd($row);*/
+				$no = $i+1;
+				$pera = 0;
+				$hazard_duty_pay = 0;
+				$allowance = 0;
+				$allowance_laundry = 0;
+				$oe = json_decode($row->other_earnings);
+				if (count($oe) > 0) {
+					for ($j=0; $j < count($oe); $j++) { 
+						list($id, $code, $amt) = $oe[$j];
+						if ($code == "PERA") {
+							$pera += $amt;
+						} elseif ($code == "HAZARDPAY") {
+							$hazard_duty_pay += $amt;
+						} elseif ($code == "ALLOWNC") {
+							if ($id == "A1") {
+								$allowance_laundry += $amt;
+							}
+							$allowance += $amt;
+						}
+					}
+				}
+			@endphp
+			<tr>
+				<td>ACC-{{$row->emp_pay_code}}</td>
+				<td>{{strtoupper($row->empname)}}</td>
+				<td>{{$no}}</td>
+				<td>{{$row->cc_desc}}</td>
+				<td>{{$row->rate}}</td>
+				<td>{{$row->abcences}}</td>
+				<td>{{$row->basic_pay}}</td>
+				<td>{{$pera}}</td>
+				<td>{{$hazard_duty_pay}}</td>
+				<td>{{$allowance_laundry}}</td>
+				<td></td>
+				<td></td>
+				<td>{{$allowance}}</td>
+			</tr>
+			@endfor @endif
 			{{-- @for($i=0;$i<count($data->rsr);$i++)
 			@php
 				$row = $data->rsr[$i];

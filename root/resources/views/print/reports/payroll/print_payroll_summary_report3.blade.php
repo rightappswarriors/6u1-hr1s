@@ -59,6 +59,7 @@
 	$name = ($record != null) ? ucwords(strtolower($record->empname)) : "";
 	$payroll_period = ($record != null) ? $record->payroll_period : "";
 	$bm_no = ($record != null) ? ($record->biometric != null) ? $record->biometric : "-BMID-NOT-FOUND-" : "";
+	$rt = ($record != null) ? Core::ToWord($record->rate_type) : "";
 
 	# Payroll Details
     $total_workdays_amt = ($record != null) ? number_format($record->total_workdays_amt, 2) : "";
@@ -181,8 +182,11 @@
 		<div class="col-7"> {{-- payslip --}}
 			<div style="margin-top: 5px;">
 				<h5>Payslip</h5>
-				<span class="indented"><i>Pay period</i></span> <strong>{{$payroll_period}}</strong> <br>
 				<table class="c-table">
+					<tr>
+						<td><span class="indented"><i>Pay period</i></span> <strong>{{$payroll_period}}</strong> <br></td>
+						<td>RT: {{$rt}}</td>
+					</tr>
 					<tr>
 						<td><span class="indented">Biometric No.</span> {{$bm_no}}</td>
 						<td><span class="indented">Name</span> <strong>{{$name}}</strong></td>
