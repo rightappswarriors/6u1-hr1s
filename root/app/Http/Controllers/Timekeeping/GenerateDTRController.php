@@ -215,8 +215,8 @@ class GenerateDTRController extends Controller
                             /**
                             * Time Sorting Method
                             * -------------------------------------------------------
-                            * timelog array format [timein_am, timeout_am, timein_pm, timeout_pm] / [timein, timeout] / array of [timein, timeout]
-                            * imploded array format : [date, timelog, computed time]
+                            * timelog array format [timein_am, timeout_am, timein_pm, timeout_pm] OR [timein, timeout] OR array of [timein, timeout]
+                            * imploded array format : [date, (array)timelog, computed time]
                             *
                             * Holiday array have unique array format due to the date's holiday type that must be included for payroll
                             * holiday array format : [[date, holiday type], timelog, computed time]
@@ -256,7 +256,7 @@ class GenerateDTRController extends Controller
                                     } else {
                                         array_push($arr_daysworked, [$date, [$tl_in_am, $tl_out_pm], $r_time_total]);
                                     }
-                                } else {
+                                } else { // ami = 1, amo = 1
                                     $r_time_total = Timelog::GetRenHours($tl_in_am, $tl_out_am);
                                     # If Late
                                     if (Timelog::IfLate($tl_in_am)) {
@@ -357,7 +357,7 @@ class GenerateDTRController extends Controller
                 /**
                 * Time Counting Method
                 */
-                $workdays = 11;
+                $workdays = 22 / 2;
                 $totaldays = count($arr_daysworked);
                 $totalabsent = ($workdays - $totaldays) - count($arr_leavedates);
                 if (count($arr_late) > 0) { 

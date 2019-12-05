@@ -38,7 +38,20 @@ class Loan extends Model
 
     public static function Find_Loan2($empid)
     {
-        return DB::table(self::$tbl_name)->where('cancel', null)->where('employee_no', $empid)->get();
+        try {
+            return DB::table(self::$tbl_name)->where('cancel', null)->where('employee_no', $empid)->get();
+        } catch (\Exception $e) {
+            return [];
+        }
+    }
+
+    public static function PreviousLoanRecords($loanhdr_id)
+    {
+        try {
+            return DB::table('hr_loan')->where()->where('loan_hdr_code', $loanhdr_id)->get();
+        } catch (\Exception $e) {
+            return [];
+        }
     }
 
 }

@@ -770,7 +770,7 @@ class Core extends Model
     public static function ToHours(string $time)
     {
     	/**
-    	* @param string "00:00 format
+    	* @param string "00:00" format
     	* @return float "0.0000.."
     	*/
     	try {
@@ -786,7 +786,7 @@ class Core extends Model
     public static function ToMinutes(string $time)
     {
     	/**
-    	* @param string "00:00 format
+    	* @param string "00:00" format
     	* @return float "0.0000.."
     	*/
     	try {
@@ -795,6 +795,21 @@ class Core extends Model
     		return $minute;
     	} catch (\Exception $e) {
     		// return $e->getMessage();
+    		return 0;
+    	}
+    }
+
+    public static function ToHourOnly(string $time)
+    {
+    	/**
+    	* converts string time to float. Only converts the value of hour. Minute value will be discarded.
+    	* @param string "00:00" format
+    	* @return only hour float "0.0000.."
+    	*/
+    	try {
+    		list($hour, $minute) = explode(":", $time);
+    		return round($hour);
+    	} catch (\Exception $e) {
     		return 0;
     	}
     }

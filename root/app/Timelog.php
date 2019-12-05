@@ -37,11 +37,12 @@ class Timelog extends Model
     {
         /**
         * Returns total hours between start time and end time
+        * In this case, Required Time In in the Morning (eg. 8 AM) and Required Time Out in the Afternoon (eg. 5 PM)
         * In double (0.00) format
         * @return 0.00
         */
         try {
-            $time = Core::GET_TIME_DIFF(self::ReqTimeIn(), self::ReqTimeOut());
+            $time = Core::GET_TIME_DIFF(self::ReqTimeIn(), self::ReqTimeOut_2());
             list($hour, $minute) = explode(":", $time);
             $minute = $minute / 60;
             $hour = $hour + $minute;

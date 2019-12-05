@@ -134,82 +134,99 @@ class PayrollSummaryReportController extends Controller
 
 	public function print_ot(Request $r)
 	{	
+		# General
 		$pcode = $r->pcode;
 		$record = [];
 		$emp = Employee::$emp_sql;
 		$gen_type = 'OVERTIME';
-		// $record = Core::sql("SELECT CONCAT(emp.lastname, ',', emp.firstname) empname, log.date_generated, log.time_generated, pr.* FROM hris.hr_emp_payroll3 pr INNER JOIN hris.hr_emp_payroll_log log ON pr.emp_pay_code = log.emp_pay_code LEFT JOIN (SELECT * FROM hris.hr_dtr_sum_hdr hdr INNER JOIN hris.hr_dtr_sum_employees ln ON hdr.code = ln.dtr_sum_id) dtr ON pr.dtr_sum_id = dtr.code LEFT JOIN ($emp) emp ON log.empid = emp.empid WHERE dtr.generationtype = '$gen_type' AND pr.emp_pay_code = '$pcode'");
-		
-		$record = DB::select("SELECT emp.empname, emp.department, emp.biometric, emp.firstname, emp.lastname, emp.mi, emp.empname, emp.tin, emp.pay_rate, emp.cc_desc, emp.department,  CONCAT(dtr.date_from, ' to ', dtr.date_to) payroll_period, dtr.*, pr.* FROM hris.hr_emp_payroll3 pr INNER JOIN hris.hr_emp_payroll_log log ON pr.emp_pay_code = log.emp_pay_code LEFT JOIN (SELECT * FROM hris.hr_dtr_sum_hdr hdr INNER JOIN hris.hr_dtr_sum_employees ln ON hdr.code = ln.dtr_sum_id WHERE generationtype = 'OVERTIME') dtr ON pr.dtr_sum_id = dtr.code LEFT JOIN ($emp) emp ON dtr.empid = emp.empid WHERE pr.emp_pay_code = '$pcode' ");
+		$record = DB::select("SELECT emp.empname, emp.department, emp.biometric, emp.firstname, emp.lastname, emp.mi, emp.empname, emp.tin, emp.pay_rate, emp.cc_desc, emp.department,  CONCAT(dtr.date_from, ' to ', dtr.date_to) payroll_period, dtr.*, pr.* FROM hris.hr_emp_payroll3 pr INNER JOIN hris.hr_emp_payroll_log log ON pr.emp_pay_code = log.emp_pay_code LEFT JOIN (SELECT * FROM hris.hr_dtr_sum_hdr hdr INNER JOIN hris.hr_dtr_sum_employees ln ON hdr.code = ln.dtr_sum_id WHERE generationtype = 'OVERTIME') dtr ON pr.dtr_sum_id = dtr.code LEFT JOIN ($emp) emp ON dtr.empid = emp.empid WHERE pr.emp_pay_code = '$pcode' "); /*dd($record);*/
 
+		# Payroll Info
+		$hourly_rate = 0; $hourly_rate = (($record[0]->rate / 22) / 2) / 8;
+
+		# OT Regular Day
 		$days_worked_arr = json_decode($record[0]->total_overtime_arr);
 		$ot_timelogs = [];
-		for ($i=0; $i < count($days_worked_arr); $i++) { 
-			list($date, $timelog, $rendered) = $days_worked_arr[$i]; # [date, timelog[0], rendered]
-			# May 2, 2019 - 6:00pm - 9:00pm 10:00pm - 11:00pm = 4 hours
-			$date = date('M d, Y', strtotime($date));
-			$timelog1 = "";
-			$timelog2 = "";
-			$rendered = Core::ToHours($rendered);
-			if (count($timelog) > 2) {
-				$timelog1 = date('ha', strtotime($timelog[0]))."-".date('ha', strtotime($timelog[1]));
-				$timelog2 = date('ha', strtotime($timelog[2]))."-".date('ha', strtotime($timelog[3]));
-			} else {
-				$timelog1 = date('ha', strtotime($timelog[0]))."-".date('ha', strtotime($timelog[1]));
+		if (count($days_worked_arr) > 0) {
+			for ($i=0; $i < count($days_worked_arr); $i++) { 
+				list($date, $timelog, $rendered) = $days_worked_arr[$i]; # [date, timelog, rendered]
+				# May 2, 2019 - 6:00pm - 9:00pm 10:00pm - 11:00pm = 4 hours
+				$date = date('M d, Y', strtotime($date));
+				$timelog1 = "";
+				$timelog2 = "";
+				$rendered = Core::ToHourOnly($rendered);
+				if (count($timelog) > 2) {
+					$timelog1 = date('h:ia', strtotime($timelog[0]))." - ".date('ha', strtotime($timelog[1]));
+					$timelog2 = date('h:ia', strtotime($timelog[2]))." - ".date('ha', strtotime($timelog[3]));
+				} else {
+					$timelog1 = date('h:ia', strtotime($timelog[0]))." - ".date('ha', strtotime($timelog[1]));
+				}
+				$tmp = [
+					'date' => $date,
+					'timelog1' => $timelog1,
+					'timelog2' => $timelog2,
+					'rendered' => $rendered,
+				];
 			}
-			$tmp = [
-				'date' => $date,
-				'timelog1' => $timelog1,
-				'timelog2' => $timelog2,
-				'rendered' => $rendered
-			];
-			array_push($ot_timelogs, $tmp);
 		}
+		$regular_day_rate = 0; $regular_day_rate = number_format($hourly_rate + ($hourly_rate * 0.25), 2);
+
+		# OT Holiday
+		$holiday_rate = 0; $holiday_rate = number_format($hourly_rate + ($hourly_rate * 0.50), 2);
+		$ls_holiday_amt = 0; $ls_holiday_amt = $record[0]->legal_holiday_ot_amt + $record[0]->special_holiday_ot_amt;
 
 		$legal_holiday_ot = json_decode($record[0]->legal_holiday_ot);
 		$legal_timelogs = [];
-		for ($i=0; $i < count($legal_holiday_ot); $i++) { 
-			list($date, $timelog, $rendered) = $legal_holiday_ot[$i]; # [date, timelog[0], rendered]
-			# May 2, 2019 - 6:00pm - 9:00pm 10:00pm - 11:00pm = 4 hours
-			$date = date('M d, Y', strtotime($date));
-			$timelog1 = "";
-			$timelog2 = "";
-			if (count($timelog) > 2) {
-				$timelog1 = date('ha', strtotime($timelog[0]))."-".date('ha', strtotime($timelog[1]));
-				$timelog2 = date('ha', strtotime($timelog[2]))."-".date('ha', strtotime($timelog[3]));
-			} else {
-				$timelog1 = date('ha', strtotime($timelog[0]))."-".date('ha', strtotime($timelog[1]));
+		if (count($legal_holiday_ot) > 0) {
+			for ($i=0; $i < count($legal_holiday_ot); $i++) {
+				list($date, $timelog, $rendered) = $legal_holiday_ot[$i]; # [date, timelog, rendered]
+				# May 2, 2019 - 6:00pm - 9:00pm 10:00pm - 11:00pm = 4 hours
+				$date = date('M d, Y', strtotime($date));
+				$timelog1 = "";
+				$timelog2 = "";
+				$rendered = Core::ToHourOnly($rendered);
+				if (count($timelog) > 2) {
+					$timelog1 = date('h:ia', strtotime($timelog[0]))." - ".date('ha', strtotime($timelog[1]));
+					$timelog2 = date('h:ia', strtotime($timelog[2]))." - ".date('ha', strtotime($timelog[3]));
+				} else {
+					$timelog1 = date('h:ia', strtotime($timelog[0]))." - ".date('ha', strtotime($timelog[1]));
+				}
+				$tmp = [
+					'date' => $date,
+					'timelog1' => $timelog1,
+					'timelog2' => $timelog2,
+					'rendered' => $rendered,
+				];
+				array_push($legal_timelogs, $tmp);
 			}
-			$tmp = [
-				'date' => $date,
-				'timelog1' => $timelog1,
-				'timelog2' => $timelog2,
-			];
-			array_push($legal_timelogs, $tmp);
 		}
 		
 		$special_holiday_ot = json_decode($record[0]->special_holiday_ot);
 		$special_timelogs = [];
-		for ($i=0; $i < count($special_holiday_ot); $i++) { 
-			list($date, $timelog, $rendered) = $special_holiday_ot[$i]; # [date, timelog[0], rendered]
-			# May 2, 2019 - 6:00pm - 9:00pm 10:00pm - 11:00pm = 4 hours
-			$date = date('M d, Y', strtotime($date));
-			$timelog1 = "";
-			$timelog2 = "";
-			if (count($timelog) > 2) {
-				$timelog1 = date('ha', strtotime($timelog[0]))."-".date('ha', strtotime($timelog[1]));
-				$timelog2 = date('ha', strtotime($timelog[2]))."-".date('ha', strtotime($timelog[3]));
-			} else {
-				$timelog1 = date('ha', strtotime($timelog[0]))."-".date('ha', strtotime($timelog[1]));
+		if (count($special_holiday_ot) > 0) {
+			for ($i=0; $i < count($special_holiday_ot); $i++) { 
+				list($date, $timelog, $rendered) = $legal_holiday_ot[$i]; # [date, timelog, rendered]
+				# May 2, 2019 - 6:00pm - 9:00pm 10:00pm - 11:00pm = 4 hours
+				$date = date('M d, Y', strtotime($date));
+				$timelog1 = "";
+				$timelog2 = "";
+				$rendered = Core::ToHourOnly($rendered);
+				if (count($timelog) > 2) {
+					$timelog1 = date('h:ia', strtotime($timelog[0]))." - ".date('ha', strtotime($timelog[1]));
+					$timelog2 = date('h:ia', strtotime($timelog[2]))." - ".date('ha', strtotime($timelog[3]));
+				} else {
+					$timelog1 = date('h:ia', strtotime($timelog[0]))." - ".date('ha', strtotime($timelog[1]));
+				}
+				$tmp = [
+					'date' => $date,
+					'timelog1' => $timelog1,
+					'timelog2' => $timelog2,
+					'rendered' => $rendered,
+				];
+				array_push($special_timelogs, $tmp);
 			}
-			$tmp = [
-				'date' => $date,
-				'timelog1' => $timelog1,
-				'timelog2' => $timelog2,
-			];
-			array_push($special_timelogs, $tmp);
 		}
-		return view('print.reports.payroll.print_payroll_summary_report_ot', compact('record', 'ot_timelogs', 'legal_timelogs', 'special_timelogs'));
+		return view('print.reports.payroll.print_payroll_summary_report_ot', compact('record', 'ot_timelogs', 'regular_day_rate', 'holiday_rate', 'legal_timelogs', 'special_timelogs', 'ls_holiday_amt'));
 	}
 
 }

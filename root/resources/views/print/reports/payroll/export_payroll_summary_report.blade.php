@@ -62,7 +62,7 @@
 				<th rowspan="2">HOUSING LOAN</th>
 
 				<th rowspan="2">RETIREMENT &amp; LIFE INSURANCE PREMIUMS</th>
-				<th rowspan="2">EDU. ASSIST- ANCE</th>
+				<th rowspan="2">EDU. ASSISTANCE</th>
 				<th rowspan="2">CEAP</th>
 				<th rowspan="2">EMERGENCY LOAN</th>
 				<th rowspan="2">COMBO LOAN</th>
@@ -105,77 +105,98 @@
 				}
 			@endphp
 			<tr>
-				<td>ACC-{{$row->emp_pay_code}}</td>
-				<td>{{strtoupper($row->empname)}}</td>
-				<td>{{$no}}</td>
-				<td>{{$row->cc_desc}}</td>
-				<td>{{$row->rate}}</td>
-				<td>{{$row->abcences}}</td>
-				<td>{{$row->basic_pay}}</td>
-				<td>{{$pera}}</td>
-				<td>{{$hazard_duty_pay}}</td>
-				<td>{{$allowance_laundry}}</td>
-				<td></td>
-				<td></td>
-				<td>{{$allowance}}</td>
+				<td>ACC-{{$row->emp_pay_code}}</td> {{-- Item No. --}}
+				<td>{{strtoupper($row->empname)}}</td> {{-- Name --}}
+				<td>{{$no}}</td> {{-- No. --}}
+				<td>-</td> {{-- Position --}}
+				<td>{{($row->rate!=0) ? $row->rate : "-"}}</td> {{-- Rate --}}
+				<td>{{($row->abcences!=9) ? $row->abcences : "-"}}</td> {{-- No. of Absence w/o Pay --}}
+				<td>{{($row->basic_pay) ? $row->basic_pay : "-"}}</td> {{-- Rate Computed Absences --}}
+				<td>{{$pera}}</td> {{-- PERA --}}
+				<td>{{$hazard_duty_pay}}</td> {{-- Hazard Duty Pay --}}
+				<td>{{$allowance_laundry}}</td> {{-- Allowance - Laundry --}}
+				<td>-</td> {{-- Allowance - Subsistence - Leave --}}
+				<td>-</td> {{-- Allowance - Subsistence - Travel --}}
+				<td>{{$allowance}}</td> {{-- Allowance - Subsistence - Total --}}
+				<td>-</td> {{-- Amount Earned --}}
+				<td>-</td> {{-- Personal Deductions - Withholding Tax --}}
+				<td>-</td> {{-- Personal Deductions - Philhealth --}}
+				<td>-</td> {{-- Personal Deductions - Pag-ibig - HDMF Cont. --}}
+				<td>-</td> {{-- Personal Deductions - Pag-ibig - MPL. --}}
+				<td>-</td> {{-- Personal Deductions - Pag-ibig - Housing Laon. --}}
+				<td>-</td> {{-- Personal Deductions - JGM --}}
+				<td>-</td> {{-- Personal Deductions - LBP --}}
+				<td>-</td> {{-- Personal Deductions - CFI --}}
+				<td>-</td> {{-- Personal Deductions - DCCCO --}}
+				<td>-</td> {{-- Personal Deductions - PEI 2014 Refund --}}
+				<td>-</td> {{-- Personal Deductions - Refund for cash advance --}}
+				<td>-</td> {{-- Personal Deductions - GSIS - Retirement & Life Insurance Premiums --}}
+				<td>-</td> {{-- Personal Deductions - GSIS - Edu. Asstance --}}
+				<td>-</td> {{-- Personal Deductions - GSIS - CEAP --}}
+				<td>-</td> {{-- Personal Deductions - GSIS - Emergency Loan --}}
+				<td>-</td> {{-- Personal Deductions - GSIS - Combo Loan --}}
+				<td>-</td> {{-- Personal Deductions - GSIS - Policy Loan Reg --}}
+				<td>-</td> {{-- Personal Deductions - GSIS - Optional Policy Loan --}}
+				<td>-</td> {{-- Personal Deductions - GSIS - Ouli Permium --}}
+				<td>-</td> {{-- Personal Deductions - GSIS - UMID E-Card Plus --}}
+				<td>-</td> {{-- Personal Deductions - GSIS - GSIS H/L --}}
+				<td>-</td> {{-- Total Deductions --}}
+				<td>-</td> {{-- Government Shares - Philhealth --}}
+				<td>-</td> {{-- Government Shares - Retirement & Life Insurance Permiums --}}
+				<td>-</td> {{-- Government Shares - Pag-ibig HDMF Cont. --}}
+				<td>-</td> {{-- Government Shares - State Ins. --}}
+				<td>-</td> {{-- No. --}}
+				<td>-</td> {{-- Net Amount Received --}}
+				<td>-</td> {{-- Amount Paid --}}
+				<td>-</td> {{-- Signature of Payee --}}
 			</tr>
 			@endfor @endif
-			{{-- @for($i=0;$i<count($data->rsr);$i++)
-			@php
-				$row = $data->rsr[$i];
-				$no = $i+1;
-
-				$emp = Employee::GetEmployee($row->empid);
-			@endphp
-			<tr>
-				<td>ACC-{{$row->item_no}}</td>
-				<td>{{Employee::Name($row->empid, 'complete')}}</td>
-				<td>{{$no}}</td>
-				<td>{{JobTitle::Get_JobTitle($emp->positions)}}</td>
-				<td>{{($row->rate!=0) ? $row->rate : "-"}}</td>
-				<td>{{($row->absences_wo_pay!=0) ? $row->absences_wo_pay : "-"}}</td>
-				<td>{{($row->computed_rate!=0) ? $row->computed_rate : "-"}}</td>
-				<td>{{($row->pera!=0) ? $row->pera : "-"}}</td>
-				<td>{{($row->hazard_duty_pay!=0) ? $row->hazard_duty_pay : "-"}}</td>
-				<td>{{($row->alw_laundry!=0) ? $row->alw_laundry : "-"}}</td>
-				<td>{{($row->alw_sub_leave!=0) ? $row->alw_sub_leave : "-"}}</td>
-				<td>{{($row->alw_sub_travel!=0) ? $row->alw_sub_travel : "-"}}</td>
-				<td>{{($row->alw_sub_total!=0) ? $row->alw_sub_total : "-"}}</td>
-				<td>{{($row->amt_earned!=0) ? $row->amt_earned : "-"}}</td>
-				<td>{{($row->pd_w_tax!=0) ? $row->pd_w_tax : "-"}}</td>
-				<td>{{($row->pd_philhealth!=0) ? $row->pd_philhealth : "-"}}</td>
-				<td>{{($row->pd_pagibig_a!=0) ? $row->pd_pagibig_a : "-"}}</td>
-				<td>{{($row->pd_pagibig_b!=0) ? $row->pd_pagibig_b : "-"}}</td>
-				<td>{{($row->pd_pagibig_c!=0) ? $row->pd_pagibig_c : "-"}}</td>
-				@php
-					$pd_content = [$row->pd_jgm, $row->pd_lbp, $row->pd_lbp, $row->pd_dccco, $row->pd_pei_refund, $row->pd_ca_refund];
-				@endphp
-				@if(count($pd_content) > 0)
-					@for($j = 0; $j < count($pd_content); $j++)
-						<td>{{($pd_content[$j]!=0) ? $pd_content[$j] : "-"}}</td>
-					@endfor
-				@endif
-				<td>{{($row->pd_gsis_a!=0) ? $row->pd_gsis_a : "-"}}</td>
-				<td>{{($row->pd_gsis_b!=0) ? $row->pd_gsis_b : "-"}}</td>
-				<td>{{($row->pd_gsis_c!=0) ? $row->pd_gsis_c : "-"}}</td>
-				<td>{{($row->pd_gsis_d!=0) ? $row->pd_gsis_d : "-"}}</td>
-				<td>{{($row->pd_gsis_e!=0) ? $row->pd_gsis_e : "-"}}</td>
-				<td>{{($row->pd_gsis_f!=0) ? $row->pd_gsis_f : "-"}}</td>
-				<td>{{($row->pd_gsis_g!=0) ? $row->pd_gsis_g : "-"}}</td>
-				<td>{{($row->pd_gsis_h!=0) ? $row->pd_gsis_h : "-"}}</td>
-				<td>{{($row->pd_gsis_i!=0) ? $row->pd_gsis_i : "-"}}</td>
-				<td>{{($row->pd_gsis_j!=0) ? $row->pd_gsis_j : "-"}}</td>
-				<td>{{($row->pd_total_deductions!=0) ? $row->pd_total_deductions : "-"}}</td>
-				<td>{{($row->gs_philhealth!=0) ? $row->gs_philhealth : "-"}}</td>
-				<td>{{($row->gs_life_ins!=0) ? $row->gs_life_ins : "-"}}</td>
-				<td>{{($row->gs_pagibig_hdmf!=0) ? $row->gs_pagibig_hdmf : "-"}}</td>
-				<td>{{($row->gs_state_ins!=0) ? $row->gs_state_ins : "-"}}</td>
-				<td>{{$no}}</td>
-				<td>{{($row->net_amt!=0) ? $row->net_amt : "-"}}</td>
-				<td>{{($row->amt_paid!=0) ? $row->amt_paid : "-"}}</td>
-			</tr>
-			@endfor --}}
 		</tbody>
+		<tfoot>
+			<tr>
+				<th colspan="4">Total</th>
+				<th>-</th> {{-- Rate --}}
+				<th>-</th> {{-- No. of Absence w/o Pay --}}
+				<th>-</th> {{-- Rate Computed Absences --}}
+				<th>-</th> {{-- PERA --}}
+				<th>-</th> {{-- Hazard Duty Pay --}}
+				<th>-</th> {{-- Allowance - Laundry --}}
+				<th>-</th> {{-- Allowance - Subsistence - Leave --}}
+				<th>-</th> {{-- Allowance - Subsistence - Travel --}}
+				<th>-</th> {{-- Allowance - Subsistence - Total --}}
+				<th>-</th> {{-- Amount Earned --}}
+				<th>-</th> {{-- Personal Deductions - Withholding Tax --}}
+				<th>-</th> {{-- Personal Deductions - Philhealth --}}
+				<th>-</th> {{-- Personal Deductions - Pag-ibig - HDMF Cont. --}}
+				<th>-</th> {{-- Personal Deductions - Pag-ibig - MPL. --}}
+				<th>-</th> {{-- Personal Deductions - Pag-ibig - Housing Laon. --}}
+				<th>-</th> {{-- Personal Deductions - JGM --}}
+				<th>-</th> {{-- Personal Deductions - LBP --}}
+				<th>-</th> {{-- Personal Deductions - CFI --}}
+				<th>-</th> {{-- Personal Deductions - DCCCO --}}
+				<th>-</th> {{-- Personal Deductions - PEI 2014 Refund --}}
+				<th>-</th> {{-- Personal Deductions - Refund for cash advance --}}
+				<th>-</th> {{-- Personal Deductions - GSIS - Retirement & Life Insurance Premiums --}}
+				<th>-</th> {{-- Personal Deductions - GSIS - Edu. Asstance --}}
+				<th>-</th> {{-- Personal Deductions - GSIS - CEAP --}}
+				<th>-</th> {{-- Personal Deductions - GSIS - Emergency Loan --}}
+				<th>-</th> {{-- Personal Deductions - GSIS - Combo Loan --}}
+				<th>-</th> {{-- Personal Deductions - GSIS - Policy Loan Reg --}}
+				<th>-</th> {{-- Personal Deductions - GSIS - Optional Policy Loan --}}
+				<th>-</th> {{-- Personal Deductions - GSIS - Ouli Permium --}}
+				<th>-</th> {{-- Personal Deductions - GSIS - UMID E-Card Plus --}}
+				<th>-</th> {{-- Personal Deductions - GSIS - GSIS H/L --}}
+				<th>-</th> {{-- Total Deductions --}}
+				<th>-</th> {{-- Government Shares - Philhealth --}}
+				<th>-</th> {{-- Government Shares - Retirement & Life Insurance Permiums --}}
+				<th>-</th> {{-- Government Shares - Pag-ibig HDMF Cont. --}}
+				<th>-</th> {{-- Government Shares - State Ins. --}}
+				<th>-</th> {{-- No. --}}
+				<th>-</th> {{-- Net Amount Received --}}
+				<th>-</th> {{-- Amount Paid --}}
+				<th>-</th> {{-- Signature of Payee --}}
+			</tr>
+		</tfoot>
 	</table>
 {{-- @endsection
 
