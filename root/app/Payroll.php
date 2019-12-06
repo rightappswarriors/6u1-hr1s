@@ -156,6 +156,31 @@ class Payroll extends Model
                         $amt = (($rate - $a) * ((float)$fe / 100)) + (float)$fa;
                     }
                 }
+                // $wtax_arr = [
+                //     # Bracket 1, Bracker 2, Factor, Addon
+                //    [0, $wtax->bracket1, $wtax->factor1, $wtax->add_on1],
+                //    [$wtax->bracket1, $wtax->bracket2, $wtax->factor2, $wtax->add_on2],
+                //    [$wtax->bracket2, $wtax->bracket3, $wtax->factor3, $wtax->add_on3],
+                //    [$wtax->bracket3, $wtax->bracket4, $wtax->factor4, $wtax->add_on4],
+                //    [$wtax->bracket4, $wtax->bracket5, $wtax->factor5, $wtax->add_on5],
+                //    [$wtax->bracket5, $wtax->bracket6, $wtax->factor6, $wtax->add_on6],
+                //    [$wtax->bracket6, $wtax->bracket7, $wtax->factor7, $wtax->add_on7],
+                //    [$wtax->bracket7, $wtax->bracket8, $wtax->factor8, $wtax->add_on8],
+                //    [$wtax->bracket8, $wtax->bracket9, $wtax->factor9, $wtax->add_on9],
+                //    [$wtax->bracket9, $wtax->bracket10, $wtax->factor10, $wtax->add_on10],
+                //    [$wtax->bracket10, "max", $wtax->factor10, $wtax->add_on10],
+                // ];/* dd($wtax_arr);*/
+                // for ($i=0; $i < count($wtax_arr); $i++) { 
+                //     list($b1, $b2, $f, $a) = $wtax_arr[$i];
+                //     if ($b2 != "max") {
+                //         if ($rate > $b1 && $rate <= $b2) {
+                //             $amt = ($rate - $b1) * ((float)$f / 100) + (float)$a;
+                //         }
+                //     } else {
+                //         $amt = ($rate - ($b1 + 1)) * ((float)$f / 100) + (float)$a;
+                //         dd($rate, $b1, $b2, $f, $a, $amt);
+                //     }
+                // }
                 
             }
             return $amt;

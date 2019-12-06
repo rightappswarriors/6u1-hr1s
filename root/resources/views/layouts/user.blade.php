@@ -65,6 +65,15 @@
             box-shadow: none !important;
         }
     </style>
+    <style type="text/css">
+        @media print
+        {    
+            .no-print, .no-print, #print_name_hide, #print_hide *
+            {
+                display: none !important;
+            }
+        }
+    </style>
 
     <!-- Head Scripts-->
     <script type="text/JavaScript">
@@ -222,6 +231,7 @@
             }
         }
     </script>
+
     @yield('to-bottom')
 </body>
 </html>

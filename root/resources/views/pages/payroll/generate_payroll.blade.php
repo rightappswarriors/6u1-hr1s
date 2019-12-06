@@ -61,9 +61,10 @@
 			<div class="row">
 				<div class="col">
 					Available DTR Summary
+					<button type="button" class="btn btn-primary float-right" id="btn-generate" onclick="GeneratePayroll()" disabled=""><i class="fa fa-share"></i> <i class="fa fa-server"></i> Generate All</button>
 				</div>
 				<div class="col border-left">
-					<button type="button" class="btn btn-primary" id="btn-generate" onclick="GeneratePayroll()" disabled=""><i class="fa fa-share"></i> <i class="fa fa-server"></i> Generated Payroll</button>
+					Generated Payroll
 					{{-- <div class="progress">
 					    <div class="progress-bar" role="progressbar" style="width: 100%;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">25%</div>
 					</div> --}}

@@ -727,6 +727,18 @@ class Core extends Model
     		case 'D':
     			$value = "Daily";
     			break;
+
+    		case 'S':
+    			$value = "Semi-monthly";
+    			break;
+
+    		case 'W':
+    			$value = "Weekly";
+    			break;
+
+    		case 'A':
+    			$value = "Annual";
+    			break;
     		
     		default:
     			$value = "no_value";

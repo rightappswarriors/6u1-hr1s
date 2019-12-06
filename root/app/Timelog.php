@@ -124,7 +124,11 @@ class Timelog extends Model
         * Must be in h:m:s format and 24 hours
         * @return "hh:mm:ss"
         */
-        return "01:00";
+        try {
+            return DB::table('hris.m99')->first()->lunch_break;
+        } catch (\Exception $e) {
+            return "00:00";
+        }
     }
 
     public static function MinReqOTHrs()
@@ -145,7 +149,7 @@ class Timelog extends Model
         * @return bolean true / false
         */ 
 
-        if (strtotime(self::ReqTimeIn()) <= strtotime($time) && strtotime($time) <= strtotime(self::ReqTimeOut())) {
+        if (strtotime(self::ReqTimeIn()) <= strtotime($time) && strtotime($time) <= strtotime(self::ReqTimeOut()) || self::ReqTimeIn() > strtotime($time)) {
             return true;
         } else {
             return false;
@@ -239,7 +243,7 @@ class Timelog extends Model
         return $hour_2.":".$min_2;
     }
 
-    public static function GetRenHours(string $time_1, string $time_2, string $type)
+    public static function GetRenHours(string $time_1, string $time_2, $isWholeDay = false)
     {
         /**
         * @param string $time_1 timed in or time start "hh:mm"
@@ -249,7 +253,7 @@ class Timelog extends Model
         * @return "hh:mm"
         */
         $time = Core::GET_TIME_DIFF($time_1, $time_2);
-        if ((Core::ToMinutes($time_2) > Core::ToMinutes("12:00")) && $type == "am") {
+        if ((Core::ToMinutes($time_2) > Core::ToMinutes("12:00")) && $isWholeDay == true) {
             $time = Core::GET_TIME_DIFF(self::get_lunch_break(), $time);
         }
         return $time;
@@ -459,6 +463,14 @@ class Timelog extends Model
         }
         return false;
     }
+
+    // public static function IfOvertime(string $rendered_time, string $required_time)
+    // {
+    //     if (Core::ToMinutes($rendered_time) > Core::ToMinutes($required_time)) {
+    //         return true;
+    //     }
+    //     return false;
+    // }
 
     public static function IfOvertime(string $rendered_time)
     {

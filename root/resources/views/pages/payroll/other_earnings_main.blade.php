@@ -43,7 +43,7 @@
 			     	<a class="nav-link active" href="#home1" data-toggle="tab">Other Earnings Entry</a>
 			  	</li>
 			  	<li>
-			    	<a class="nav-link" href="#menu1" data-toggle="tab">RATA</a>
+			    	<a class="nav-link" href="#menu1" data-toggle="tab">RATA - Representation Allowance (RA) and Transportation Allowance (TA)</a>
 			  	</li>
 			</ul>
 			<div class="tab-content">

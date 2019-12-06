@@ -62,7 +62,7 @@
 					</div>
 					<div class="form-group">
 						{{-- <button type="button" class="btn btn-primary btn-spin mr-1" id="btn-generate-ind" disabled="">Generate (Individual)</button> --}}
-						<button type="button" class="btn btn-primary" id="btn-generate-ofc"><i class="fa fa-share"></i> <i class="fa fa-server"></i> Generate (By Office)</button>
+						<button type="button" class="btn btn-primary" id="btn-generate-ofc"><i class="fa fa-share"></i> <i class="fa fa-server"></i> Generate All</button>
 					</div>
 				</div>
 			</form>
@@ -272,7 +272,7 @@
 				success : function(data) {
 					if (data!="error") {
 						if (data!="noemp") {
-							var d = JSON.parse(data);
+							var d = JSON.parse(data); console.log(d);
 							LoadSummaryTable(d);
 							if (d.errors.length>0) {
 								$('#alert-generate-error').collapse('show');
@@ -304,8 +304,8 @@
 
 		function LoadSummaryTable(data)
 		{
-			
-			$('#sum-tw').text(data.workdays+((data.req_hrs!=null) ? " ("+data.req_hrs+" hrs/day)" : ""));
+			var a = ($('#payroll_gen_type').val() == "OVERTIME") ? "N/A" : data.workdays+((data.req_hrs!=null) ? " ("+data.req_hrs+" hrs/day)" : "");
+			$('#sum-tw').text(a);
 			$('#sum-dw').text(data.daysworked);
 			$('#sum-a').text(data.absences);
 			$('#sum-l').text(data.late);

@@ -3,7 +3,7 @@
 @section('to-body')
 	<div class="card">
 		<div class="card-header">
-			<i class="fa fa-file-excel-o"></i> Philhealth Contributions Summary
+			<i class="fa fa-file-excel-o"></i> Pagibig Contributions Summary
 		</div>
 		<div class="card-body">
 			<form method="post" action="{{url('reports/sss/find-philhealth')}}" id="frm-gp">
@@ -17,6 +17,7 @@
 								@endforeach
 							</select>
 						<button type="button" class="btn btn-primary " onclick="PrintAllPage();">Print <i class="fa fa-print"></i></button>
+						<i class="fa fa-spin fa-spinner ml-3" id="loadAnimation"></i>
 						</div>
 					</div>
 				</div>
@@ -52,7 +53,7 @@
 		var table = $('#dataTable').DataTable({
 			"paging": false
 		});
-
+		$('#loadAnimation').hide();
 		// onchange jquery script for <select id="office">
 		$('#ofc').on('change', function() {
 			table.clear().draw();
@@ -65,6 +66,9 @@
 				type: "post",
 				url: "{{url('reports/pagibig/find-pagibig')}}",
 				data: data,
+				beforeSend: function(){
+				    $('#loadAnimation').show();
+				},
 				success: function(data) {
 					for(i=0; i<data.length; i++){
 						if(data[i][0].sss == ''){
@@ -92,6 +96,8 @@
 							sums,
 						]).draw();
 					}
+
+					$('#loadAnimation').hide();
 				},
 			});
 		});

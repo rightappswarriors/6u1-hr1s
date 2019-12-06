@@ -47,7 +47,7 @@ class PayrollSummaryReportController extends Controller
 		# use this sql "SELECT DISTINCT CONCAT(date_from, ' to ', date_to) pp, date_from, date_to FROM hris.hr_emp_payroll3 pr INNER JOIN (SELECT empid, department FROM hris.hr_employee) emp ON pr.empid = emp.empid WHERE emp.department = '97'"
 		try {
 			$ofc = $r->ofc;
-			return Core::sql("SELECT DISTINCT CONCAT(date_from, ' to ', date_to) pp, date_from, date_to FROM hris.hr_emp_payroll3 pr INNER JOIN (SELECT empid, department FROM hris.hr_employee) emp ON pr.empid = emp.empid WHERE emp.department = '$ofc' ORDER BY date_from DESC");
+			return Core::sql("SELECT DISTINCT CONCAT(date_from, ' to ', date_to) pp, date_from, date_to FROM hris.hr_emp_payroll3 pr INNER JOIN (SELECT empid, department FROM hris.hr_employee) emp ON pr.empid = emp.empid WHERE emp.department = '$ofc' ORDER BY date_from ASC");
 		} catch (\Exception $e) {
 			ErrorCode::Generate('controller', 'PayrollSummaryReportController', '00001', $e->getMessage());
 			return "error";
@@ -66,7 +66,7 @@ class PayrollSummaryReportController extends Controller
 			if ($r->pp != null || $r->pp != "") {
 				list($date_from, $date_to) = explode("|", $r->pp);
 				$gen_type = $r->gen_type;
-				$record = Core::sql("SELECT CONCAT(emp.lastname, ',', emp.firstname) empname, log.date_generated, log.time_generated, pr.* FROM hris.hr_emp_payroll3 pr INNER JOIN hris.hr_emp_payroll_log log ON pr.emp_pay_code = log.emp_pay_code LEFT JOIN (SELECT * FROM hris.hr_dtr_sum_hdr hdr INNER JOIN hris.hr_dtr_sum_employees ln ON hdr.code = ln.dtr_sum_id) dtr ON pr.dtr_sum_id = dtr.code LEFT JOIN ($emp) emp ON log.empid = emp.empid WHERE dtr.generationtype = '$gen_type' AND log.date_from = '$date_from' AND log.date_to = '$date_to'");
+				$record = Core::sql("SELECT CONCAT(emp.lastname, ',', emp.firstname) empname, log.date_generated, log.time_generated, pr.*, emp.*, dtr.*, hp.* FROM hris.hr_emp_payroll3 pr INNER JOIN hris.hr_emp_payroll_log log ON pr.emp_pay_code = log.emp_pay_code LEFT JOIN (SELECT * FROM hris.hr_dtr_sum_hdr hdr INNER JOIN hris.hr_dtr_sum_employees ln ON hdr.code = ln.dtr_sum_id) dtr ON pr.dtr_sum_id = dtr.code LEFT JOIN ($emp) emp ON log.empid = emp.empid LEFT JOIN (SELECT hp_id, hp_type, CAST(cc_id AS integer) AS ofc_id, withpay as hp_withpay, hp_pct, hp_amount FROM hris.hr_hazardpay) hp ON emp.department = hp.ofc_id WHERE dtr.generationtype = '$gen_type' AND log.date_from = '$date_from' AND log.date_to = '$date_to'");
 			}
 			return $record;
 		} catch (\Exception $e) {
@@ -77,36 +77,29 @@ class PayrollSummaryReportController extends Controller
 
 	public function export(Request $r)
 	{
+		/**
+		* @param $r->ofc
+		* @param $r->gen_type
+		* @param $r->pp
+		*/
 		try {
-			$pp = Payroll::PayrollPeriod2($r->month, $r->pp, $r->year);
-			$ofc_emp = json_decode(Office::OfficeEmployees($r->ofc));
-			$rsr = [];
-			$pd = [];
-			if (count($ofc_emp) > 0) {
-				for ($i=0; $i < count($ofc_emp); $i++) { 
-					$rsr_i = $this->RetrieveSummaryReport($ofc_emp[$i]->empid,$pp->id, $pp->from, $pp->to);
-					$pd_content = OtherDeductions::Get_Records($ofc_emp[$i]->empid, $pp->from, $pp->to);
-					if ($rsr_i!=null) {
-						array_push($rsr, $rsr_i);
-					}
-					if (count($pd) > 0) {
-						array_push($pd, $pd_content);
-					}
-				}
-			} else {
-				return "no employee";
-			}
-			// if (count($rsr) <= 0) {
-			// 	return "no record";
-			// }
-			$data = (object)[];
-			$data->pp = $pp;
-			$data->ofc = (Office::GetOffice($r->ofc)!=null) ? strtoupper(Office::GetOffice($r->ofc)->cc_desc) : "office-not-found";
-			$data->rsr = $rsr;
-			$data->pd = $pd;
-			// dd($data);
-			// return Excel::download(new ExportBlade('print.reports.payroll.export_payroll_summary_report', $data), 'general-payroll-'.date('YmdHis').'.xlsx');
-			Export2_1::exportBlade('print.reports.payroll.export_payroll_summary_report', $data);
+			# Payroll Info
+			$pi = (object)[];
+			$pi->title = "General Payroll";
+			$pi->ofc = Office::GetOffice($r->ofc);
+			list($date_from, $date_to) = explode("|", $r->pp);
+			$pi->payroll_period = $date_to." to ".$date_to;
+
+			# Payoll Record
+			$record = $this->getRecords($r);
+
+			$data = [
+				'inf' => $pi,
+				'record' => $record,
+			];
+
+			return Excel::download(new ExportBlade('print.reports.payroll.export_payroll_summary_report', $data), 'general-payroll-'.date('YmdHis').'.xlsx');
+			// Export2_1::exportBlade('print.reports.payroll.export_payroll_summary_report', $data);
 		} catch (\Exception $e) {
 			ErrorCode::Generate('controller', 'PayrollSummaryReportController', '00003', $e->getMessage());
 			return "error";

@@ -26,7 +26,9 @@ class Office extends Model
 
     public static function OfficeEmployees($ofc_id)
     {
-        $employees = DB::table('hr_employee')->where('department', '=', $ofc_id)->where('cancel', '=', null)->orderBy('empid', 'ASC')->get();
+
+        $employees = DB::table('hr_employee')->where('department', '=', $ofc_id)->where('cancel', null)->orderBy('empid', 'ASC')->get();
+
         if (count($employees) > 0) {
             for ($i=0; $i < count($employees); $i++) {
                 $emp = $employees[$i];

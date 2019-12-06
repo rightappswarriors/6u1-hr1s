@@ -1,5 +1,24 @@
 @extends('layouts.user')
 
+@section('to-head')
+	<style type="text/css">
+        @media print
+        {    
+
+        	.card{
+        		border:none;
+        	}
+            #table_wrapper tr:first-child{
+            	 visibility: visible !important;
+            }
+
+            #table_wrapper:first-child{
+				visibility: hidden;
+        	}
+        }
+    </style>
+@endsection
+
 @section('to-body')
 	<div class="card">
 		<div class="card-header" id="print_name_hide">
@@ -40,7 +59,7 @@
 						<option value="OVERTIME">OVERTIME</option>
 					</select>
 					<button class="btn btn-primary mr-3" id="find_btn" disabled>Find</button>
-					<button class="btn btn-primary mr-3" id="print_btn" disabled><i class="fa fa-fw fa-print"></i></button>
+					<button class="btn btn-primary mr-3" id="print_btn" onclick="printAll()" disabled><i class="fa fa-fw fa-print"></i></button>
 				</div>
 			</div>
 
@@ -66,7 +85,11 @@
 
 @section('to-bottom')
 	<script>
-		var table = $('#table').DataTable();
+		var table = $('#table').DataTable({
+			 "ordering": false,
+		});
+
+		
 	</script>
 
 	<script>
@@ -93,6 +116,8 @@
 					for(i=0; i<data.length; i++) {
 						FillTable(data[i]);
 					}
+
+					$('#print_btn')[0].removeAttribute('disabled');
 				},
 			});
 		});
@@ -144,6 +169,13 @@
 				select[0].appendChild(option);
 			}
 
+		}
+
+		function printAll()
+		{
+			
+
+			window.print();
 		}
 	</script>
 @endsection

@@ -9,7 +9,7 @@
       </tr>
       <tr>
         <th rowspan="1" style="text-align: left; font-size:35px;">R-5</th>
-        <th colspan="1" style="text-align: center; font-size: 20px;">Monthly Contribution Payment Breakdown</th>
+        <th colspan="1" style="text-align: center; font-size: 20px; padding-right: 100px;">Monthly Contribution Payment Breakdown</th>
         <td colspan="3" style="text-align: right;">Page No. 1</td>
       </tr>
         @isset($arrRet)
@@ -20,7 +20,7 @@
           @endphp
           <tr>
             <th></th>
-            <th colspan="1" style="text-align: center; font-size: 20px;">Calendar Month Ending</th>
+            <th colspan="1" style="text-align: center; font-size: 20px; padding-right: 100px;" class="mr-5">Calendar Month Ending</th>
             <td colspan="3" style="text-align: right;">{{ $currdate }}</td>
           </tr> 
           <tr>
@@ -55,7 +55,7 @@
     </tbody>
     <tbody>
       <tr>
-        <td style="text-transform: uppercase; font-weight: bold; text-decoration: underline;">@isset($arrRet) {{ $arrRet[2][0]->cc_desc }} @endif</td>
+        <td style="text-transform: uppercase; font-weight: bold; text-decoration: underline;">@isset($arrRet) {{ $arrRet[0][2][0]->cc_desc }} @endif</td>
       </tr>
       @if(count($arrRet) > 0)
       @php

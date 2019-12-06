@@ -34,7 +34,7 @@
 					</select>
 				</div>
 				<div class="col-1">
-					<button class="btn btn-primary mr-3" id="print_btn" disabled><i class="fa fa-fw fa-print"></i></button>
+					<button class="btn btn-primary mr-3" id="print_btn" onclick="printAll()" disabled><i class="fa fa-fw fa-print"></i></button>
 				</div>
 			</div>
 
@@ -498,6 +498,10 @@
 	
 	$('#loadAnimation').hide();
 	
+	function printAll(){
+		
+		window.print();
+	}
 
 	
 	

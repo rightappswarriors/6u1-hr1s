@@ -45,9 +45,9 @@
 							    </div>
 							    <!-- Account Number -->
 							    <div class="form-group row">
-							      <label class="col-sm-4 col-form-label">Account Number <strong style="color:red">*</strong></label>
+							      <label class="col-sm-4 col-form-label">Account Number {{-- <strong style="color:red">*</strong> --}}</label>
 							      <div class="col-sm-8">
-							      	<input type="text" class="form-control T0 T0r" name="txt_accountnumber" placeholder="ACCOUNT NUMBER" value="@isset($MYDATA){{$MYDATA->accountnumber}}@endisset" required>
+							      	<input type="text" class="form-control T0 T0r" name="txt_accountnumber" placeholder="ACCOUNT NUMBER" value="@isset($MYDATA){{$MYDATA->accountnumber}}@endisset">
 							      </div>
 							    </div>
 							    <!-- Account Number -->

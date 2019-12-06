@@ -26,7 +26,7 @@
 										@isset($office)
 											@if(count($office)>0)
 												@foreach($office as $pp)
-												<tr data_id="{{$pp->cc_id}}" data_code="{{$pp->cc_code}}" data_name="{{$pp->cc_desc}}">
+												<tr data_id="{{$pp->cc_id}}" data_code="{{$pp->cc_code}}" data_name="{{$pp->cc_desc}}" data_hp="{{$pp->hp_id}}|{{$pp->withpay}}">
 													<td>{{$pp->cc_code}}</td>
 													<td>{{$pp->cc_desc}}</td>
 													<td>
@@ -84,6 +84,11 @@
 										<label>Name:</label>
 										<input type="text" name="txt_name" style="text-transform: uppercase;" class="form-control" placeholder="DESCRIPTION" required>
 									</div>
+									<div class="form-group form-inline">
+										<label>With Hazard Pay:</label>
+										<input type="checkbox" name="chk_hazrd" style="width: 7%; margin: 1%;" class="form-control">
+										<input type="hidden" name="txt_hazrd">
+									</div>
 								</div>
 							</div>
 						</span>
@@ -95,11 +100,11 @@
 				<div class="modal-footer">
 					<span class="AddMode">
 						<button type="submit" form="frm-pp" class="btn btn-success">Save</button>
-						<button type="button" class="btn btn-danger" data-dismiss="modal" onclick="ClearFld()">Close</button>
+						<button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
 					</span>
 					<span class="DeleteMode">
 						<button type="submit" form="frm-pp" class="btn btn-danger">Delete</button>
-						<button type="button" class="btn btn-success" data-dismiss="modal" onclick="ClearFld()">Cancel</button>
+						<button type="button" class="btn btn-success" data-dismiss="modal">Cancel</button>
 					</span>
 				</div>
 			</div>
@@ -130,6 +135,8 @@
 			$('input[name="txt_code"]').val('');
 			$('input[name="txt_id"]').val('');
 			$('input[name="txt_name"]').val('');
+			$('input[name="txt_hazrd"]').val('');
+			$('input[name="chk_hazrd"]').prop( "checked", false);
 
 			$('.AddMode').show();
 			$('.DeleteMode').hide();
@@ -145,6 +152,14 @@
 			$('input[name="txt_code"]').val(selected_row.attr('data_code'));
 			$('input[name="txt_id"]').val(selected_row.attr('data_id'));
 			$('input[name="txt_name"]').val(selected_row.attr('data_name'));
+
+			var txt_hazrd = selected_row.attr('data_hp').split("|");
+			$('input[name="txt_hazrd"]').val((txt_hazrd[0] == '') ? null : txt_hazrd[0]);
+			if (txt_hazrd[1] == 1) {
+				$('input[name="chk_hazrd"]').prop( "checked", true);
+			} else {
+				$('input[name="chk_hazrd"]').prop( "checked", false);
+			}
 
 			$('.AddMode').show();
 			$('.DeleteMode').hide();

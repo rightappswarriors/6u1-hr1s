@@ -17,7 +17,9 @@
 								@endforeach
 							</select>
 						<button type="button" class="btn btn-primary " onclick="PrintAllPage();">Print <i class="fa fa-print"></i></button>
+						<i class="fa fa-spin fa-spinner ml-3" id="loadAnimation"></i>
 						</div>
+							
 					</div>
 				</div>
 			</form>
@@ -57,9 +59,10 @@
 		var table = $('#dataTable').DataTable({
 			"paging": false
 		});
-
+		$('#loadAnimation').hide();	
 		// onchange jquery script for <select id="office">
 		$('#ofc').on('change', function() {
+			table.clear();
 			var ofc_id = $('#ofc :selected').val();
 			var data = { 
                           _token : $('meta[name="csrf-token"]').attr('content'),
@@ -69,6 +72,9 @@
 				type: "post",
 				url: "{{url('reports/sss/find-sss')}}",
 				data: data,
+				beforeSend: function(){
+				    $('#loadAnimation').show();
+				},
 				success: function(data) {
 					for(let i=0; i < data.length; i++){
 						
@@ -98,6 +104,8 @@
 						]).draw();
 
 					}
+
+					$('#loadAnimation').hide();		
 				},
 			});
 		});

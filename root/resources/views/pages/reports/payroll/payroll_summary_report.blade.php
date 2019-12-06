@@ -49,7 +49,7 @@
 			</form>
 		</div>
 		<div class="card-header border-top">
-			Generated Payroll <i class="fa fa-spin fa-spinner" id="loading-icon-2" style="display: none;"></i>{{-- <button type="button" class="btn btn-primary" onclick="ExportPS()"><i class="fa fa-file-excel-o"></i> Export to Excel</button> --}}
+			Generated Payroll <button type="button" class="btn btn-primary" onclick="ExportPS()"><i class="fa fa-file-excel-o"></i> Export General Payroll (.xlsx)</button> <i class="fa fa-spin fa-spinner" id="loading-icon-2" style="display: none;"></i>
 		</div>
 		<div class="card-body">
 			<div class="table-responsive">
@@ -109,12 +109,12 @@
 				$.ajax({
 					type : 'get',
 					url : '{{url('reports/payroll-summary-report/export')}}',
-					data : {pp:$('#payroll_period').val(), year:$('#year').val(), month:$('#month').val(), ofc:$('#ofc').val()},
+					data : {pp: $("#pp").val(), ofc:$('#ofc').val(), gen_type:$('#gen_type').val()},
 					dataTy : 'json',
 					success : function(data) {
 						if (data!="error") {
-							PrintPage('{{url('reports/payroll-summary-report/export')}}?pp='+$('#payroll_period').val()+'&year='+$('#year').val()+'&month='+$('#month').val()+"&ofc="+$('#ofc').val());
-							alert("Payroll generated.");
+							PrintPage('{{url('reports/payroll-summary-report/export')}}?pp='+$('#pp').val()+'&ofc='+$('#ofc').val()+'&gen_type='+$('#gen_type').val());
+							// alert("Payroll generated.");
 						} else {
 							alert("Error in exporting payroll.");
 						}

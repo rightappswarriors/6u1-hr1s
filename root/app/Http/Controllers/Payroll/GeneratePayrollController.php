@@ -111,27 +111,46 @@ class GeneratePayrollController extends Controller
 
         try {
             # Get Payroll period
-            $pp = Payroll::PayrollPeriod2($r->month,$r->payroll_period); if ($pp =="error") { return "no pp"; }
+            $pp = Payroll::PayrollPeriod2($r->month,$r->payroll_period, $r->year); if ($pp =="error") { return "no pp"; }
             if (count($dtr_summaries) > 0) {
                 for ($i=0; $i < count($dtr_summaries); $i++) {
                     $tmp = "";
+                    $withDeductions = false;
                     try {
-                        /*Payroll Info*/
+                        # Payroll Info
                         $d = $dtr_summaries[$i];
                         $rate = $d->pay_rate;
                         $rate_type = $d->rate_type;
-                        $workdays = (float)$d->workdays;
+                        $tax_bracket = $d->tax_bracket;
+
+                        $workdays = (float)$d->workdays;;
                         $weekends = (float)$d->weekends;
+
                         $emp_pay_code = Core::getm99('emp_pay_code');
                         $pay_period = Payroll::PayPeriods();
-                        $tax_bracket = $d->tax_bracket;
+
+
+                        if ($r->payroll_period == "15D") {
+                            $withDeductions = true;
+                        }
+
+                        # Guihulngan formula
+                        /**
+                        * Daily Rate = Monthly Rate / 22 Days
+                        * Hourly Rate = Daily Rate / 8 Hours
+                        * Overtime Hourly Rate (Regular Days) = Hourly Rate + 25% of Hourly Rate
+                        */
                         
-                        /* Shift Info */
-                        $shift_hours = Timelog::ShiftHours(); # returns float
-                        $covered_days = Core::CoveredDates($pp->from, $pp->to); # returns array
+                        # Shift Info
+                        /**
+                        * returns float
+                        * returns array
+                        */
+                        $shift_hours = Timelog::ShiftHours(); /**  */
+                        $covered_days = Core::CoveredDates($pp->from, $pp->to); /**  */
                         $total_days = $workdays + $weekends;
 
-                        /* -Regular Pay- */
+                        # Regular Pay
                         $regular_pay = 0;
                         if ($rate_type == "D") {
                             $regular_pay = $rate * $workdays;
@@ -139,29 +158,33 @@ class GeneratePayrollController extends Controller
                             $regular_pay = $rate / $pay_period;
                         }
                         
-                        /* -Rate breakdown by time- */
+                        # Rate breakdown by time
+                        /**
+                        * $hourly_rate = $daily_rate / $shift_hours;
+                        * $minute_rate = $hourly_rate / 60;
+                        */
                         $daily_rate = 0; $daily_rate = $regular_pay / $workdays;
-                        $hourly_rate = Payroll::ConvertRate($daily_rate, $shift_hours); # $hourly_rate = $daily_rate / $shift_hours;
-                        $minute_rate = Payroll::ConvertRate($hourly_rate, 60); # $minute_rate = $hourly_rate / 60;
+                        $hourly_rate = Payroll::ConvertRate($daily_rate, $shift_hours);
+                        $minute_rate = Payroll::ConvertRate($hourly_rate, 60);
 
-                        /* -Basic Pay- */
-                            /* -Days Worked- */
+                        # Basic Pay
+                            ## Days Worked
                             $days_worked = (float)$d->days_worked;
                             $days_worked_amt = 0; $days_worked_amt = $days_worked * $daily_rate;
 
-                            /* -Absent- */
+                            ## Absent
                             $days_absent = $d->days_absent;
                             $days_absent_amt = 0; $days_absent_amt = $days_absent * $daily_rate;
 
-                            /* -Late- */
+                            ## Late
                             $late = Core::ToMinutes($d->late);
                             $late_amt = 0; $late_amt = $late * $minute_rate;
 
-                            /* -Undertime- */
+                            ## Undertime
                             $undertime = Core::ToMinutes($d->undertime);
                             $undertime_amt = 0; $undertime_amt = $undertime * $minute_rate;
 
-                            /* -Leave- */
+                            ## Leave
                             $leaves = json_decode($d->leaves_arr);
                             $leave_count = $d->leaves;
                             $leave_amt = 0;
@@ -172,29 +195,37 @@ class GeneratePayrollController extends Controller
                             }
                         $basic_pay = $days_worked_amt + $leave_amt;
 
-                        /* -Gross Pay Computation- */
-                            /* -Regular Overtime- */
-                            $regular_ot = 0;
+                        # Gross Pay Computation
+                            ## Regular Overtime
+                            /**
+                            * Array definition respectively: date, timelog, hours
+                            */
+                            $regular_ot = [];
                             $regular_ot_amt = 0;
-                            $dayoff_ot = 0;
+                            $dayoff_ot = [];
                             $dayoff_ot_amt = 0;
                             $overtime_arr = json_decode($d->total_overtime_arr);
                             if (count($overtime_arr) > 0) {
-                                for ($j=0; $j < count($overtime_arr); $j++) { 
+                                for ($j=0; $j < count($overtime_arr); $j++) {
                                     list($ota_date, $ota_timelogs, $ota_rhrs) = $overtime_arr[$j];
                                     $ota_rvalue = Core::ToHours($ota_rhrs) * $hourly_rate;
                                     if (Timelog::IfWorkdays($ota_date)) {
-                                        $regular_ot++;
                                         $regular_ot_amt += $ota_rvalue;
+                                        array_push($regular_ot, [$ota_date, $ota_timelogs, $ota_rhrs]);
                                     } else {
-                                        $dayoff_ot++;
                                         $dayoff_ot_amt += $ota_rvalue;
+                                        array_push($dayoff_ot, [$ota_date, $ota_timelogs, $ota_rhrs]);
                                     }
                                 }
                             }
 
-                            /* -Holiday- */
-                                /* -Worked/Holiday OT- */
+                            ## Holiday
+                            /**
+                            * Holiday array = [date, timelog]
+                            * exempted = complete timelog
+                            * no-log = absent
+                            */
+                                ### Worked/Holiday OT
                                 $legal_holiday_ot = [];
                                 $legal_holiday_ot_amt = 0;
                                 $special_holiday_ot = [];
@@ -225,12 +256,7 @@ class GeneratePayrollController extends Controller
                                     }
                                 }
 
-                                /**
-                                * Holiday array = [date, timelog]
-                                * exempted = complete timelog
-                                * no-log = absent
-                                */
-                                /* -Not worked Holiday- */
+                                ### Not worked Holiday
                                 $legal_holiday_pay = [];
                                 $legal_holiday_pay_amt = 0;
                                 $special_holiday_pay = [];
@@ -252,7 +278,7 @@ class GeneratePayrollController extends Controller
                                                 break;
                                             
                                             default:
-                                                # Error retrieving leave type
+                                                /** Error retrieving leave type */
                                                 ErrorCode::Generate('controller', 'GeneratePayrollController', 'B00004-HD-'.$d->empid, $e->getMessage());
                                                 array_push($errors, 'B00004-HD-'.$d->empid."-".$j.": Unknown holiday type.");
                                                 break;
@@ -260,28 +286,63 @@ class GeneratePayrollController extends Controller
                                     }
                                 }
 
-                            /* -Other Earnings- */
+                            ## Other Earnings
+                            /** 
+                            * Other earnings array format = [earnings id, earning code, amount]
+                            * -Temporary IDs:
+                            * P1 - PERA = 2000
+                            * HP1 - Hazard Pay
+                            * A1 - Laundry = 150
+                            * A2 - Clothing Allowance = 6000; If Employee is still under 6 years in service
+                            */
                             $other_earnings = [];
                             $other_earnings_amt = 0;
-                            $earnings_arr = $this->GetOtherEarnings($d->empid, $r->payroll_period, (int)$r->month, (int)$r->year);
+                            $earnings_arr = $this->GetOtherEarnings($d->empid, $pp->from, $pp->to);
                             if (count($earnings_arr) > 0) {
                                 for ($j=0; $j < count($earnings_arr); $j++) { 
-                                    $ea = $earnings_arr[$j]; $ea_amnt = $ea->amount; $ea_id = $ea->id;
-                                    # Other earnings array format = [earnings id, amount]
+                                    $ea = $earnings_arr[$j];
+                                    $ea_amnt = $ea->amount; $ea_id = $ea->id;
                                     $other_earnings_amt += $ea_amnt;
+                                    array_push($other_earnings, [$ea->entcode, $ea->earning_code, $ea_amnt]);
                                 }
                             }
+                                ### PERA
+                                $other_earnings_amt += 2000;
+                                array_push($other_earnings, ["P1", "PERA", 2000]);
+                                ### Hazard Pay
+                                $hazard_pay_amt = 0;
+                                $hazard_pay = $this->GetHazardPay($d->department);
+                                if ($hazard_pay!=null) {
+                                    if ($hazard_pay->withpay) {
+                                        $hazard_pay_amt = (float)$basic_pay * ((float)$hazard_pay->hp_pct / 100);
+                                    }
+                                }
+                                $other_earnings_amt += $hazard_pay_amt;
+                                array_push($other_earnings, ["HP1", "HAZARDPAY", $hazard_pay_amt]);
+                                ### ALLOWANCE
+                                    #### LAUNDRY
+                                    $alw_laundry_amt = 150;
+                                    $other_earnings_amt += $alw_laundry_amt;
+                                    array_push($other_earnings, ["A1", "ALLOWNC", $alw_laundry_amt]);
+                                    #### CLOTHING
+                                    $alw_clothing = $this->GetAlw_Clothing($d->empid);
+                                    if (count($alw_clothing) > 0) {
+                                        if ($alw_clothing[0]->service_overall <= 6) {
+                                            $alw_clothing_amt = 6000;
+                                            $other_earnings_amt += $alw_clothing_amt;
+                                            array_push($other_earnings, ["A2", "ALLOWNC", $alw_clothing_amt]);
+                                        }
+                                    }
 
-                            /* -Pera- */
-                            $pera = Payroll::Pera();
-
-                        $gross_pay = $regular_ot_amt + $dayoff_ot_amt + $legal_holiday_pay_amt + $special_holiday_pay_amt + $legal_holiday_ot_amt + $special_holiday_ot_amt + $other_earnings_amt + $pera;
+                        $gross_pay = $regular_ot_amt + $dayoff_ot_amt + $legal_holiday_pay_amt + $special_holiday_pay_amt + $legal_holiday_ot_amt + $special_holiday_ot_amt + $other_earnings_amt;
                                     
-                        /* -Deductions- */
-                        # a = array count/ID; b = employee's share; c = employer's share
-                            /* -Personal Deductions- */
-                                /* -SSS- */
-                                    /* -Contribution- */
+                        # Deductions
+                            ## Personal Deductions
+                            /**
+                            * a = array count/ID; b = employee's share; c = employer's share
+                            */
+                                ### SSS
+                                    #### Contribution
                                     $sss_cont_a = '';
                                     $sss_cont_b = 0;
                                     $sss_cont_c = 0;
@@ -292,8 +353,8 @@ class GeneratePayrollController extends Controller
                                         $sss_cont_c += $sss_arr->empshare_sc;
                                     }
 
-                                /* -PHILHEALTH- */
-                                    /* -Contributions- */
+                                ### PHILHEALTH
+                                    #### Contributions
                                     $philhealth_cont_a = '';
                                     $philhealth_cont_b = 0;
                                     $philhealth_cont_c = 0;
@@ -304,7 +365,7 @@ class GeneratePayrollController extends Controller
                                         $philhealth_cont_c += $philhealth_arr->emp_er;
                                     }
 
-                                /* -PAG-IBIG- */
+                                ### PAG-IBIG
                                     $pagibig_cont_a = '';
                                     $pagibig_cont_b = 0;
                                     $pagibig_cont_c = 0;
@@ -313,25 +374,46 @@ class GeneratePayrollController extends Controller
                                         $pagibig_cont_a = $pagibig_arr->code;
                                         $pagibig_cont_b += $pagibig_arr->emp_ee;
                                         $pagibig_cont_c += $pagibig_arr->emp_er;
-                                    } 
+                                    }
+                                if ($withDeductions == false) {
+                                    $sss_cont_a = '';
+                                    $sss_cont_b = 0;
+                                    $sss_cont_c = 0;
+                                    $philhealth_cont_a = '';
+                                    $philhealth_cont_b = 0;
+                                    $philhealth_cont_c = 0;
+                                    $pagibig_cont_a = '';
+                                    $pagibig_cont_b = 0;
+                                    $pagibig_cont_c = 0;
+                                }
                             $personal_deductions = $sss_cont_b + $philhealth_cont_b + $pagibig_cont_b;
 
-                            /* -Withholding Tax- */
-                            $wtax = Payroll::WithHoldingTax($rate, $tax_bracket);
+                            ## Withholding Tax
+                            $wtax = 0;
+                            if ($withDeductions) {
+                                $wtax = Payroll::WithHoldingTax($rate, $tax_bracket);
+                            }
 
-                            /* -Other Deductions- */
+                            ## Other Deductions
+                            /**
+                            * Other deduction array format [id, reference code, amount]
+                            */
                             $other_deduction = [];
                             $other_deductions_amt = 0;
                             $other_deduction_arr = OtherDeductions::Get_Records($d->empid, $pp->from, $pp->to);
                             if (count($other_deduction_arr) > 0) {
                                 for ($j=0; $j < count($other_deduction_arr); $j++) {
                                     $oda = $other_deduction_arr[$j];
-                                    array_push($other_deduction, $oda->dedcode);
-                                    $other_deductions_amt += (float)$oda->amount;
+                                    $oda_amt = (float)$oda->amount;
+                                    $other_deductions_amt += $oda_amt;
+                                    array_push($other_deduction, [$oda->dedcode, $oda->deduction_code, $oda_amt]);
                                 }
                             }
 
-                            /*Loans*/
+                            ## Loans
+                            /**
+                            * Loans array pattern [loan code, loan type, loan sub-typ, amount]
+                            */
                             $loans = [];
                             $loans_amt = 0;
                             $loans_arr = Loan::Find_Loan2($d->empid);
@@ -339,7 +421,6 @@ class GeneratePayrollController extends Controller
                             if (count($loans_arr) > 0) {
                                 for ($j=0; $j < count($loans_arr); $j++) {
                                     $la = $loans_arr[$j];
-                                    array_push($loans, $la->loan_code);
                                     $loans_amt += (float)$la->loan_deduction;
                                     array_push($updateln_loan, [
                                         'loan_hdr_code' => $la->loan_code,
@@ -351,16 +432,19 @@ class GeneratePayrollController extends Controller
                                         'payment_desc' => "Deducted from payroll",
                                         'emp_pay_code' => $emp_pay_code,
                                     ]);
+                                    array_push($loans, [$la->loan_code, $la->loan_type, $la->loan_sub_type, (float)$la->loan_deduction]);
                                 }
                             }
 
                         $deductions = $personal_deductions + $wtax + $other_deductions_amt + $loans_amt;
 
-                        /* -Net- */
+                        # Net
                         $net_pay = ($basic_pay + $gross_pay) - $deductions;
 
-                        /* To Database */
-                        # Index names on these arrays must reflects to their respective database tables
+                        # To Database
+                        /**
+                        * Index names on these arrays must reflects to their respective database tables
+                        */
                         $info = [
                             'empid' => $d->empid,
                             'emp_pay_code' => $emp_pay_code,
@@ -398,9 +482,9 @@ class GeneratePayrollController extends Controller
                             'basic_pay' => $basic_pay,
 
                             # Gross Pay
-                            'regular_ot' => $regular_ot,
+                            'regular_ot' => json_encode($regular_ot),
                             'regular_ot_amt' => $regular_ot_amt,
-                            'dayoff_ot' => $dayoff_ot,
+                            'dayoff_ot' => json_encode($dayoff_ot),
                             'dayoff_ot_amt' => $dayoff_ot_amt,
                             'legal_holiday_ot' => json_encode($legal_holiday_ot),
                             'legal_holiday_ot_amt' => $legal_holiday_ot_amt,
@@ -541,10 +625,11 @@ class GeneratePayrollController extends Controller
         }
     }
 
-    public function GetOtherEarnings($empid, $ppid, $month, $year)
+    public function GetOtherEarnings($empid, $date_from, $date_to)
     {
     	try {
-    		return DB::table('hr_earning_entry')->where('emp_no', $empid)->where('payroll_period', $ppid)->where('month', $month)->where('year', $year)->where('cancel', null)->get();
+    		return DB::table('hr_earning_entry')->where('emp_no', $empid)->where('date_from', $date_from
+        )->where('date_to', $date_to)->where('cancel', null)->get();
     	} catch (\Exception $e) {
     		return [];
     	}
@@ -595,6 +680,23 @@ class GeneratePayrollController extends Controller
 
     }
 
+    public function GetHazardPay($office_id)
+    {
+        try {
+            return DB::table('hr_hazardpay')->where('cc_id', $office_id)->first();
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
+    public function GetAlw_Clothing($empid)
+    {
+        try {
+            return Core::sql("SELECT empid, STRING_AGG(CONCAT(service_from,'|', service_to), ',') service_dates, STRING_AGG((CASE WHEN (service_from IS NULL OR service_to IS NULL) THEN 0 ELSE DATE_PART('month', service_to::date) - DATE_PART('month', service_from::date) END)::character varying, ',') AS service_totals, SUM(CASE WHEN (service_from IS NULL OR service_to IS NULL) THEN 0 ELSE DATE_PART('month', service_to::date) - DATE_PART('month', service_from::date) END) service_overall FROM hris.hr_service_record WHERE empid = '$empid' GROUP BY empid");
+        } catch (\Exception $e) {
+            return []; 
+        }
+    }
     public function Monetize($empid, $basic_pay = 0)
     {
         try {
