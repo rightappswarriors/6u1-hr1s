@@ -78,6 +78,7 @@
 	$date = date('m-d-Y');
 	$month = date('F');
 	$year = date('Y');
+	$rate = number_format(($record[0]->pay_rate /2), 2);
 @endphp
 
 @section('body') 
@@ -98,15 +99,6 @@
 				<col width="15%">
 				<col width="15%">
 			</colgroup>
-			{{-- <tr style="text-align: center;">
-				<td>1</td>
-				<td>2</td>
-				<td>3</td>
-				
-				<td>4</td>
-				<td>5</td>
-				<td>6</td>
-			</tr> --}}
 			<tr>
 				<td>Name</td>
 				<td colspan="2">@isset($record[0]) {{ $record[0]->empname }} @endif</td>
@@ -134,112 +126,95 @@
 			<tr>
 				<td colspan="4">
 					<div style="margin: 7px;">
-						<p style="text-indent: .3in;text-align: justify;">Payment of overtime pay of {{"<MR/MS/MRS"}}. @isset($record[0]) {{ $record[0]->empname }} @endif for the month of {{$month}} {{ $year }} in the amount {{"<AMOUNT_IN_WORDS>"}}.</p><br>
+						<p style="text-indent: .3in;text-align: justify;">Payment of overtime pay of {{"MR/MS/MRS"}}. @isset($record[0]) {{ $record[0]->empname }} @endif for the month of {{$month}} {{ $year }} in the amount {{"<AMOUNT_IN_WORDS>"}}.</p><br>
+						@if(count($ot_timelogs) > 0)
 						<p><b><u>Regular Days:</u></b></p>
-<<<<<<< HEAD
-						<p style="text-indent: .3in;"><b><i>Basic Salary: 20,644.00/22days/8days+25%</i></b></p>
-						@for($i=6;$i<=9;$i++)
-						<p class="timelog">May {{$i}}, 2019 - 6:00pm - 9:00pm 10:00pm - 11:00pm <span>= 4 hours</span></p>
-						@endfor
-						<p class="timelog">May {{$i}}, 2019 - 6:00pm <span class="last">= 3 hours</span></p>
-						
-=======
-						<p style="text-indent: .3in;"><b><i>Basic Salary: @isset($record[0]) {{ $record[0]->pay_rate }} @endif {{-- /22days/8days+25% = P146.62 --}}</i></b></p>
-						<table class="tbl-no-border">
-							<colgroup>
-								<col width="20%">
-								<col>
-								<col width="25%">
-								<col width="25%">
-								<col width="5%">
-								<col>
-							</colgroup>
+						<p style="text-indent: .3in;"><b><i>Basic Salary: @isset($record[0]) {{ $rate }} @endif/22days/8hours+25% = {{$regular_day_rate}}</i></b></p>
+						<table class="tbl-no-border" style="margin-left: .5in; width: 93%;">
+							<col>
+							<col width="15%">
+							<col width="10%">
 							<tbody>
-								@if(count($ot_timelogs) > 0)
-									@foreach($ot_timelogs as $ot_timelogs) 
-										<tr>
-											<td>{{ $ot_timelogs['date'] }}</td>
-											<td>-</td>
-											<td>{{ $ot_timelogs['timelog1'] }}</td>
-											<td>{{ $ot_timelogs['timelog2'] }}</td>
-											<td>=</td>
-											<td>{{ $ot_timelogs['rendered'] }}</td>
-										</tr>
-											@php
-												$rendered = $ot_timelogs['rendered'];
-												$payrate = $record[0]->pay_rate;
-												$divide = $payrate / 8;
-												$sum = $rendered * $divide;
-											@endphp
-										<tr>
-											<td colspan="3"></td>
-											<td style="text-align: right;"><span style="font-weight: bold;">P @isset($record[0]) {{ $divide }} @endif</span> x {{ $ot_timelogs['rendered'] }}</td>
-											<td>=</td>
-											
-											<td>{{ number_format($sum, 2, '.', ',') }}</td>
-										</tr>
-										<tr>
-											<td colspan="3"></td>
-											<td style="text-align: right;"><span style="font-weight: bold;">P rendered/60</span>x0</td>
-											<td>=</td>
-											<td style="border-bottom: 1px solid; border: solid #000;border-width: 0 1px;">0</td>	
-										</tr>
-										<tr>
-											<td colspan="5"></td>
-											<td style="font-weight: bold; border-top: 1px solid;">P {{ $sum }}</td>	
-										</tr>
-									@endforeach
-								@else
-									<p>-No Overtime-</p>	
-								@endif
+								@php
+									$ot_t_total_rendered = 0;
+								@endphp
+								@foreach($ot_timelogs as $ot_t) 
+								@php
+									$ot_t_total_rendered += $ot_t['rendered'];
+								@endphp
+									<tr>
+										<td width="45%" style="text-align: right;">{{ $ot_t['date'] }} - {{ $ot_t['timelog1'] }} {{ $ot_t['timelog2'] }} =</td>
+										<td style="text-align: right;">{{ $ot_t['rendered'] }} @if($ot_t['rendered'] <= 1) hour @else hours @endif</td>
+										<td></td>
+									</tr>
+								@endforeach
+								<tr>
+									<td width="45%" style="text-align: right;">P 146.62 x {{$ot_t_total_rendered}} =</td>
+									<td style="text-align: right;">{{$regular_day_rate}}</td>
+									<td></td>
+								</tr>
+								<tr>
+									<td width="45%" style="text-align: right;">P 146.62/60 x 0 =</td>
+									<td style="text-align: right; border-bottom: 1px solid black!important;">0</td>
+									<td style="border-bottom: 1px solid black!important;"></td>
+								</tr>
+								<tr>
+									<td colspan="3" style="text-align: right;">P 6,304.66</td>
+								</tr>
 							</tbody>
 						</table>
+						@endif
+						@if(count($legal_timelogs) > 0 || count($special_timelogs) > 0)
 						<p><b><u>Holidays:</u></b></p>
-						<p style="text-indent: .3in;"><b><i>Basic Salary: @isset($record[0]) {{ $record[0]->pay_rate }} @endif {{-- /22days/8days+50% = P175.94 --}}</i></b></p>
-						<table class="tbl-no-border">
-							<colgroup>
-								<col width="20%">
-								<col>
-								<col width="25%">
-								<col width="25%">
-								<col width="5%">
-								<col>
-							</colgroup> 
+						<p style="text-indent: .3in;"><b><i>Basic Salary: @isset($record[0]) {{ $rate }} @endif/22days/8hours+50% = {{$holiday_rate}}</i></b></p>
+						<table class="tbl-no-border" style="margin-left: .5in; width: 93%">
+							<col>
+							<col width="15%">
+							<col width="10%">
 							<tbody>
+								@php
+									$ot_h_total_rendered = 0;
+								@endphp
 								@if(count($legal_timelogs) > 0)
-									@foreach($legal_timelogs as $legal_timelogs)	
+									@foreach($legal_timelogs as $lt)
+									@php
+										$ot_h_total_rendered += $lt['rendered'];
+									@endphp
 										<tr>
-											<td>{{ $ot_timelogs['date'] }}</td>
-											<td>-</td>
-											<td>{{ $legal_timelogs['timelog1'] }}</td>
-											<td>{{ $legal_timelogs['timelog2'] }} }}</td>
-											<td>=</td>
-											<td>5 hours</td>
-										</tr>	
-									@endforeach
-									@foreach($special_timelogs as $special_timelogs)
-										<tr>
-											<td>{{ $special_timelogs['date'] }}</td>
-											<td>-</td>
-											<td>{{ $special_timelogs['timelog1'] }}</td>
-											<td>{{ $special_timelogs['timelog2'] }} }}</td>
-											<td>=</td>
-											<td>5 hours</td>
+											<td width="45%" style="text-align: right;">{{ $lt['date'] }} - {{ $lt['timelog1'] }} {{ $lt['timelog2'] }} =</td>
+											<td style="text-align: right;">{{ $lt['rendered'] }} @if($lt['rendered'] <= 1) hour @else hours @endif</td>
+											<td></td>
 										</tr>
-									@endforeach	
-								@else
-									<p>-No Overtime-</p>
+									@endforeach
 								@endif
+								@if(count($special_timelogs) > 0)
+									@foreach($special_timelogs as $st)
+									@php
+										$ot_h_total_rendered += $st['rendered'];
+									@endphp
+										<tr>
+											<td width="45%" style="text-align: right;">{{ $st['date'] }} - {{ $st['timelog1'] }} {{ $st['timelog2'] }} =</td>
+											<td style="text-align: right;">{{ $st['rendered'] }} @if($st['rendered'] <= 1) hour @else hours @endif</td>
+											<td></td>
+										</tr>
+									@endforeach
+								@endif
+								<tr>
+									<td width="45%" style="text-align: right;">P {{$holiday_rate}} x {{$ot_h_total_rendered}} =</td>
+									<td style="text-align: right;">{{$ls_holiday_amt}}</td>
+									<td></td>
+								</tr>
+								<tr>
+									<td width="45%" style="text-align: right;">P {{$holiday_rate}}/60 x 0 =</td>
+									<td style="text-align: right; border-bottom: 1px solid black!important;">0</td>
+									<td style="border-bottom: 1px solid black!important;"></td>
+								</tr>
+								<tr>
+									<td colspan="3" style="text-align: right;">P {{$ls_holiday_amt}}</td>
+								</tr>
 							</tbody>
-								
-							
 						</table>
-						
-						{{-- @for($i=6;$i<=9;$i++)
-						<p class="timelog">May {{$i}}, 2019 - 6:00pm - 9:00pm 10:00pm - 11:00pm <span>= 4 hours</span></p>
-						@endfor
-						<p class="timelog">May {{$i}}, 2019 - 6:00pm <span class="last">= 3 hours</span></p> --}}
->>>>>>> 0017b827caaffe511eb77f216c12989e140966b8
+						@endif
 					</div>
 					
 				</td>

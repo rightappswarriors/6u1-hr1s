@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 10-07-2019 10:20 | GenerateDTRController | Undefined index:  (GDTRCA00000)
 10-07-2019 10:20 | GenerateDTRController | SQLSTATE[23502]: Not null violation: 7 ERROR:  null value in column "empid" violates not-null constraint DETAIL:  Failing row contains (null, null, null, null, 2019-10-07, 10:10:25, 00000049, SYSTEM_ADMIN, null). (SQL: insert into "hr_dtr_sum_hdr" ("empid", "ppid", "date_from", "date_to", "date_generated", "time_generated", "code", "generatedby", "generationtype") values (, , , , 2019-10-07, 10:10:25, 00000049, SYSTEM_ADMIN, )) (GDTRCB00003)
 10-07-2019 17:51 | GenerateDTRController | Undefined index:  (GDTRCA00000)
@@ -120,3 +121,9 @@
 11-18-2019 17:10 | TimeLogEntryController | SQLSTATE[23505]: Unique violation: 7 ERROR:  duplicate key value violates unique constraint "hr_tito2_pkey" DETAIL:  Key (work_date, empid, time_log)=(2019-11-04, 1523123, 07:05) already exists. (SQL: insert into "hr_tito2" ("work_date", "time_log", "empid", "status", "source", "logs_id") values (2019-11-04, 07:05, 1523123, 1, M, 00000548)) (TLEC00002)
 =======
 >>>>>>> 25c73825809b2236155e546e9bac05600b116b99
+=======
+
+11-25-2019 19:28 | GeneratePayrollController | Undefined variable: payroll_period (GPCB00003-1523123)
+11-26-2019 15:50 | GeneratePayrollController | A non well formed numeric value encountered (GPCB00003-1523123)
+11-26-2019 15:52 | GeneratePayrollController | A non well formed numeric value encountered (GPCB00003-1523123)
+>>>>>>> 70af4f606bdadc5697483e93427f7e26bfd111ba
