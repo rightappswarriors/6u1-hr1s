@@ -1,7 +1,23 @@
 @extends('layouts.user')
 
+<style>
+	@media print{
+		#wholeBody{
+			width: 700px!important;
+			margin-top: 100px!important;
+		}
+		.border{
+			border:0px solid black!important;
+		}
+
+/*		table, thead, tbody, tr, td{
+			border: 2px solid black!important;
+		}*/
+	}
+</style>
+
 @section('to-body')
-	<div class="card">
+	<div class="card" id="wholeBody">
 		<div class="card-header" id="print_name_hide">
 			<div class="form-inline">
 				<i class="fa fa-fw fa-clock-o"></i>Print Employee DTR<br>
@@ -206,7 +222,7 @@
 		
 			
 		$('#generationtype').on('change', function(){
-			generateData();
+			generateDate();
 		});	
 	
 
@@ -320,10 +336,33 @@
 				tr4.appendChild(td19);
 				tr4.appendChild(td20);
 
+			var tr5 = document.createElement('tr');
+				var td22 = document.createElement('td');
+					td22.setAttribute('colspan', '7');
+					td22.innerHTML = 'Note:';
+			var tr6 = document.createElement('tr');
+				var td23 = document.createElement('td');
+					td23.setAttribute('colspan', '7');
+			var tr7 = document.createElement('tr');
+				var td24 = document.createElement('td');
+					td24.setAttribute('colspan', '7');
+					td24.innerHTML = 'Employer Signature:';
+			var tr8 = document.createElement('tr');
+				var td25 = document.createElement('td');
+					td25.setAttribute('colspan', '7');
+					td25.innerHTML = 'Date Sign in:';
+
+				tr5.appendChild(td22);
+				tr6.appendChild(td23);
+				tr7.appendChild(td24);
+				tr8.appendChild(td25);
+
+
 			tbody.appendChild(tr1);
 			tbody.appendChild(tr2);
 			tbody.appendChild(tr3);
 			tbody.appendChild(tr4);
+
 
 			for(i=0; i<data.covered_dates.length; i++) {
 				var tr = document.createElement('tr');
@@ -384,6 +423,10 @@
 				tbody.appendChild(tr);
 
 			}
+				tbody.appendChild(tr5);
+				tbody.appendChild(tr6);
+				tbody.appendChild(tr7);
+				tbody.appendChild(tr8);
 
 			// for (i = 0; i < response[0].length; i++) {
 			// 	var tr = document.createElement('tr');

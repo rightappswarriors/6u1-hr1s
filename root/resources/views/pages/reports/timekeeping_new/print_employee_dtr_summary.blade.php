@@ -15,6 +15,23 @@
             #table_wrapper:first-child{
 				visibility: hidden;
         	}
+
+        	table.dataTable{
+        		clear: both;
+			    margin-top: 0px !important;
+			    margin-bottom: 0px !important;
+			    max-width: none !important;
+        	}
+
+        	table {
+			  border-collapse: collapse;
+			}
+
+			table, thead, tr, td, th {
+			  border: 1px solid black!important;
+			}
+
+        	
         }
     </style>
 @endsection
