@@ -127,3 +127,6 @@
 11-26-2019 15:50 | GeneratePayrollController | A non well formed numeric value encountered (GPCB00003-1523123)
 11-26-2019 15:52 | GeneratePayrollController | A non well formed numeric value encountered (GPCB00003-1523123)
 >>>>>>> 70af4f606bdadc5697483e93427f7e26bfd111ba
+
+01-10-2020 19:15 | SyncSystemSettings | Undefined property: stdClass::$hy (SSS00001)
+01-10-2020 19:15 | SyncSystemSettings | Undefined property: stdClass::$hy (SSS00001)
