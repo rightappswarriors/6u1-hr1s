@@ -130,3 +130,5 @@
 
 01-10-2020 19:15 | SyncSystemSettings | Undefined property: stdClass::$hy (SSS00001)
 01-10-2020 19:15 | SyncSystemSettings | Undefined property: stdClass::$hy (SSS00001)
+01-13-2020 11:23 | LoanEntryController | count(): Parameter must be an array or an object that implements Countable (LoEC00003)
+01-13-2020 19:27 | TimeLogEntryController | SQLSTATE[23505]: Unique violation: 7 ERROR:  duplicate key value violates unique constraint "hr_tito2_pkey" DETAIL:  Key (work_date, empid, time_log)=(2020-01-13, 1523123, 19:26) already exists. (SQL: insert into "hr_tito2" ("work_date", "time_log", "empid", "status", "source", "logs_id") values (2020-01-13, 19:26, 1523123, 0, M, 00000582)) (TLEC00002)
