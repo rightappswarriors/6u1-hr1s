@@ -55,14 +55,14 @@ class EmployeeEarnings extends Model
 
     public static function Update_Earning($r)
     {
-    	if($r->txt_amount < 1) return false;
+    	if($r->txt_amount < 1 && !isset($r->cbo_employee_id)) return false;
     	
     	try {
             $important_obj = Payroll::PayrollPeriod2($r->cbo_month, $r->cbo_period.'D', $r->cbo_year);
             $data = [
                 'payroll_period'=>$r->cbo_period,
-                'emp_no'=>$r->cbo_employee,
-                'emp_name'=>Employee::Name($r->cbo_employee),
+                'emp_no'=>$r->cbo_employee_id,
+                'emp_name'=>Employee::Name($r->cbo_employee_id),
                 'earning_code'=>$r->cbo_type,
                 'amount'=>$r->txt_amount,
                 'date_from'=>$important_obj->from,

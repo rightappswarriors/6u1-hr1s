@@ -172,6 +172,9 @@
       <li id="payrollother-earnings">
         <a href="{{url('payroll/other-earnings')}}">Other Earnings</a>
       </li>
+      <li id="payrollother-earningsRATA">
+        <a href="{{url('payroll/other-earnings/RATA')}}">R.A.T.A</a>
+      </li>
       <li id="payrollother-deductions">
         <a href="{{url('payroll/other-deductions')}}">Other Deductions Entry</a>
       </li>

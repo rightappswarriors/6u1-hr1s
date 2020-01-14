@@ -3,8 +3,8 @@
 
 @section('body')  --}}
 @php
-	$inf = $data['inf'];
-	$record = $data['record'];
+	// $inf = $data['inf'];
+	// $record = $data['record'];
 @endphp
 	<table>
 		<thead>
@@ -145,7 +145,7 @@
 				<td>-</td> {{-- Government Shares - Retirement & Life Insurance Permiums --}}
 				<td>-</td> {{-- Government Shares - Pag-ibig HDMF Cont. --}}
 				<td>-</td> {{-- Government Shares - State Ins. --}}
-				<td>-</td> {{-- No. --}}
+				<td>-</td> {{-- No. --}} {{-- running increment --}}
 				<td>-</td> {{-- Net Amount Received --}}
 				<td>-</td> {{-- Amount Paid --}}
 				<td>-</td> {{-- Signature of Payee --}}

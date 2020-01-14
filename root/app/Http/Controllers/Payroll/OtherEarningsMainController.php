@@ -46,16 +46,18 @@ class OtherEarningsMainController extends Controller
         $this->employees = Employee::Load_Employees();
     }
 
-    public function view()
+    public function view($isRata = false)
     {
-    	$data = [$this->ghistory, $this->employees, Office::get_all(), OtherEarnings::Load_List(), EmployeeEarning::Load_Earnings()];
+    	$data = [$this->ghistory, $this->employees, Office::get_all(), OtherEarnings::Load_List(), EmployeeEarning::Load_Earnings(), Employee::Load_Employees_Dynamic([['isheadoffacility',TRUE]])];
         // dd($data[1]);
-    	return view('pages.payroll.other_earnings_main', compact('data'));
+        $view = (!$isRata ? 'pages.payroll.other_earnings_main' : 'pages.payroll.other_earning_rata');
+    	return view($view, compact('data'));
     }
 
     /* ENTRY */
     public function add(Request $r)
     {
+        // return $r->all();
         if(EmployeeEarning::Add_Earnings($r)) {
             Core::Set_Alert('success', 'Successfully added new Other Earning.');
             return back();
@@ -67,6 +69,7 @@ class OtherEarningsMainController extends Controller
 
     public function update(Request $r)
     {
+        // return $r->all();
         if(EmployeeEarning::Update_Earning($r)) {
             Core::Set_Alert('success', 'Successfully updated new Other Earning.');
             return back();
@@ -105,17 +108,34 @@ class OtherEarningsMainController extends Controller
     {
         try {
             $final_data = array();
-            $data = DB::table(RATA::$tbl_name)->where('date', $r->date_queried)->orderBy('rata_id', 'ASC')->get();
-            for($i=0; $i<count($data); $i++) {
-                if(Employee::IfEmployeeInOffice($data[$i]->empid, $r->ofc_id)) {
-                    $data[$i]->count = $i+1;
-                    $data[$i]->name = Employee::Name($data[$i]->empid);
-                    // $data[$i]->position_readable = Position::Get_Position(Employee::GetEmployee($data[$i]->empid)->positions);
-                    $data[$i]->position_readable = Employee::GetJobTitle($data[$i]->empid);
-                    $data[$i]->rate_type = Employee::GetEmployee($data[$i]->empid)->rate_type;
-                    $data[$i]->pay_rate = Employee::GetEmployee($data[$i]->empid)->pay_rate;
+            // $data = DB::table(RATA::$tbl_name)->where('date', $r->date_queried)->orderBy('rata_id', 'ASC')->get();
+            // for($i=0; $i<count($data); $i++) {
+            //     if(Employee::IfEmployeeInOffice($data[$i]->empid, $r->ofc_id)) {
+            //         $data[$i]->count = $i+1;
+            //         $data[$i]->name = Employee::Name($data[$i]->empid);
+            //         // $data[$i]->position_readable = Position::Get_Position(Employee::GetEmployee($data[$i]->empid)->positions);
+            //         $data[$i]->position_readable = Employee::GetJobTitle($data[$i]->empid);
+            //         $data[$i]->rate_type = Employee::GetEmployee($data[$i]->empid)->rate_type;
+            //         $data[$i]->pay_rate = Employee::GetEmployee($data[$i]->empid)->pay_rate;
 
-                    $final_data[] = $data[$i];
+            //         $final_data[] = $data[$i];
+            //     }
+            // }
+
+            // revised by Syrel on 1/14/2020, changes: per employee instead of per office
+            if(isset($r->ofc_id)){
+                $data = DB::table(RATA::$tbl_name)->where([['date', $r->date_queried],['empid',$r->ofc_id]])->orderBy('rata_id', 'ASC')->get();
+                for($i=0; $i<count($data); $i++) {
+                    if(Employee::IfEmployeeInOffice($data[$i]->empid, Employee::Load_Employees_Dynamic([['empid',$r->ofc_id]],true)->department )) {
+                        $data[$i]->count = $i+1;
+                        $data[$i]->name = Employee::Name($data[$i]->empid);
+                        // $data[$i]->position_readable = Position::Get_Position(Employee::GetEmployee($data[$i]->empid)->positions);
+                        $data[$i]->position_readable = Employee::GetJobTitle($data[$i]->empid);
+                        $data[$i]->rate_type = Employee::GetEmployee($data[$i]->empid)->rate_type;
+                        $data[$i]->pay_rate = Employee::GetEmployee($data[$i]->empid)->pay_rate;
+
+                        $final_data[] = $data[$i];
+                    }
                 }
             }
             return $final_data;
@@ -130,7 +150,9 @@ class OtherEarningsMainController extends Controller
         // dd($r->all());
         try {
             // $data = Employee::Load_Employees();
-            $data = Employee::Load_Employees_Office($r->ofc_id);
+            //edited by Syrel on 1/14/2020 changes: RATA per employees not offices
+            // $data = Employee::Load_Employees_Office($r->ofc_id);
+            $data = Employee::Load_Employees_Dynamic([['empid',$r->ofc_id]]);
             for($i=0; $i<count($data); $i++) {
                 $data[$i]->count = $i+1;
                 $data[$i]->name = Employee::Name($data[$i]->empid);
@@ -148,7 +170,6 @@ class OtherEarningsMainController extends Controller
     public function generate(Request $r)
     {
         try {
-            // dd($r->all());
             $data = $r->empid;
             for($i=0; $i<count($data); $i++) {
                 $latest_id = Core::get_nextincrementlimitchar(Core::getm99(RATA::$pk), 8);
