@@ -36,7 +36,7 @@ class EmployeeController extends Controller
         $this->days= DB::select($SQLDays);
         $SQLCivilStatus = "SELECT * FROM hris.hr_civil_status";
         $this->civil_stat = DB::select($SQLCivilStatus);
-        $SQLEmployee = "SELECT empid,lastname,firstname,mi,positions,department,section,date_hired,contractual_date,date_resigned,date_terminated,prohibition_date,date_regular,empstatus,contract_days,prc,ctc,rate_type,pay_rate,biometric,sss,pagibig,philhealth,payroll_account,tin,tax_bracket,shift_sched_from,dayoff1,dayoff2,sex,birth,civil_status,religion,height,weight,father,father_address,father_contact,father_job,mother,mother_address,mother_contact,mother_job,emp_contact,home_tel,email,home_address,emergency_name,emergency_contact,em_home_address,relationship,shift_sched_sat_from,shift_sched_to,shift_sched_sat_to,fixed_rate,primary_ed,secondary_ed,tertiary_ed,graduate,post_graduate, sss_bracket,fixed_sched FROM hris.hr_employee WHERE COALESCE(cancel, cancel, '')<>'Y'";
+        $SQLEmployee = "SELECT isheadoffacility,empid,lastname,firstname,mi,positions,department,section,date_hired,contractual_date,date_resigned,date_terminated,prohibition_date,date_regular,empstatus,contract_days,prc,ctc,rate_type,pay_rate,biometric,sss,pagibig,philhealth,payroll_account,tin,tax_bracket,shift_sched_from,dayoff1,dayoff2,sex,birth,civil_status,religion,height,weight,father,father_address,father_contact,father_job,mother,mother_address,mother_contact,mother_job,emp_contact,home_tel,email,home_address,emergency_name,emergency_contact,em_home_address,relationship,shift_sched_sat_from,shift_sched_to,shift_sched_sat_to,fixed_rate,primary_ed,secondary_ed,tertiary_ed,graduate,post_graduate, sss_bracket,fixed_sched FROM hris.hr_employee WHERE COALESCE(cancel, cancel, '')<>'Y'";
         $this->employee = DB::select($SQLEmployee);
     }
     public function view()
@@ -62,9 +62,9 @@ class EmployeeController extends Controller
     }
     public function add2(Request $r)
     {
-        // return dd($r->all());
         $data = [
             'empid' => strtoupper($r->txt_id),
+            'isheadoffacility' => (isset($r->isHeadOfFaci) ? true : false),
             'lastname' => strtoupper($r->txt_lname),
             'firstname' => strtoupper($r->txt_fname),
             'mi' => ($r->txt_mname != '') ? strtoupper($r->txt_mname).'.' : null,
@@ -292,6 +292,7 @@ class EmployeeController extends Controller
         // dd($old_data);
         $data = [
             'empid' => strtoupper($r->txt_id),
+            'isheadoffacility' => (isset($r->isHeadOfFaci) ? true : false),
             'lastname' => strtoupper($r->txt_lname),
             'firstname' => strtoupper($r->txt_fname),
             'mi' => ($r->txt_mname != '') ? strtoupper($r->txt_mname).'.' : null,

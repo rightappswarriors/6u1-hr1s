@@ -55,7 +55,7 @@
               $leave_amount = array(
                 \Carbon\Carbon::parse(date("Y-m-d"))->format('M d, Y'),
                 ($data[1]==null)?"None":$data[1]->description,
-                $data[2],
+                $data[5],
                 ($data[3]==null)?"None":count($data[3]),
               );
               $leave_icon = array(
@@ -67,7 +67,7 @@
               $leave_text = array(
                 "date today",
                 "upcoming holiday",
-                "timed-in employees",
+                "currently timed-in",
                 "employees on leave",
               );
               $leave_link = array(

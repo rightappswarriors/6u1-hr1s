@@ -45,6 +45,7 @@
 											<th>Job Title</th>
 											<th>Designation</th>
 											<th>Employment Status</th>
+											<th>Head of Facility?</th>
 											<th></th>
 										</tr>
 									</thead>
@@ -68,6 +69,7 @@
 													<td>{{$pp->jobtitle}}</td>
 													<td>{{$pp->office}}</td>
 													<td>{{$pp->emp_status}}</td>
+													<td>{{($pp->isheadoffacility ? 'Yes' : 'No')}}</td>
 													<td>
 														<button type="button" class="btn btn-primary mr-1" id="opt-update" onclick="row_update(this)"><i class="fa fa-edit"></i></button>
 														<button type="button" class="btn btn-danger" id="opt-delete" onclick="row_delete(this)"><i class="fa fa-trash"></i></button>

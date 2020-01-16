@@ -29,6 +29,9 @@ class HomeController extends Controller
             $dtr_timeout = DTR::GetTimedOutToday(); 
             $upHolidy = Holiday::GetUpcomingHoliday();
             $count_in = count(DB::table('hr_tito2')->where('cancel', '=', null)->where('status', '=', '1')->where('work_date', date('Y-m-d'))->orderBy('work_date', 'DESC')->orderBy('time_log', 'DESC')->orderBy('logs_id', 'DESC')->take(6)->get());
+            $count_out = count(DB::table('hr_tito2')->where('cancel', '=', null)->where('status', '=', '0')->where('work_date', date('Y-m-d'))->orderBy('work_date', 'DESC')->orderBy('time_log', 'DESC')->orderBy('logs_id', 'DESC')->take(6)->get());
+            $count_sum = $count_in - $count_out;
+
             $count_leave = Leave::GetTodayLeave();
 
             if (count($dtr)!=0) {
@@ -43,7 +46,7 @@ class HomeController extends Controller
                     }
                 }
             }
-            $data = [$dtr, $upHolidy, $count_in, $count_leave, $dtr_timeout];
+            $data = [$dtr, $upHolidy, $count_in, $count_leave, $dtr_timeout, $count_sum];
             // dd($data);
             if (Account::UAG()=="ADMINISTRATORS") {
                 return view($this->admin(), compact('data'));

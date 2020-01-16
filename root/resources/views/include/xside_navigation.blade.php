@@ -131,9 +131,9 @@
       <li id="timekeepinglog-box">
         <a href="{{url('timekeeping/log-box')}}">Log Box</a>
       </li>
-      <li id="timekeepingupload-dtr">
+    {{--       <li id="timekeepingupload-dtr">
         <a href="{{url('timekeeping/upload-dtr')}}">Upload DTR</a>
-      </li>
+      </li> --}}
       <li class="nav-separator"></li>
       <li id="timekeepingtimelog-entry">
         <a href="{{url('timekeeping/timelog-entry')}}">Time Log Entry</a>

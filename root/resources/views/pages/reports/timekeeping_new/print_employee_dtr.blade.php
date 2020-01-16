@@ -203,15 +203,18 @@
 	             method: 'GET',
 	             success : function(data)
 	             {
+	             	$('#employee option').remove();
 	              	if(data.length > 0) {
-							for(i=0; i<data.length; i++) {
-								var option = document.createElement('option');
-									option.setAttribute('value', data[i].empid);
-									option.innerText=data[i].lastname;
+						for(i=0; i<data.length; i++) {
+							var option = document.createElement('option');
+								option.setAttribute('value', data[i].empid);
+								option.innerText=data[i].lastname;
 
-								$('#employee')[0].appendChild(option);
-							}
+							$('#employee')[0].appendChild(option);
 						}
+					} else {
+						$("#employee").append(new Option("No Employee Available", ""));
+					}
 					
 				       $('#loadAnimation').hide();		 
 	             }
@@ -248,7 +251,6 @@
 						// }
 
 						if(data.length > 0) {
-							console.log(data);
 							MakeDTR(data[0]);
 						}
 					},
@@ -298,14 +300,14 @@
 					td8.setAttribute('colspan', '2');
 					td8.setAttribute('style', 'text-align: center; font-weight: bold');
 					td8.innerHTML = "P.M.";
-				var td10 = document.createElement('td');
-					td10.setAttribute('colspan', '2');
-					td10.setAttribute('style', 'text-align: center; font-weight: bold');
-					td10.innerHTML = "Undertime";
+				// var td10 = document.createElement('td');
+				// 	td10.setAttribute('colspan', '2');
+				// 	td10.setAttribute('style', 'text-align: center; font-weight: bold');
+				// 	td10.innerHTML = "Undertime";
 				tr3.appendChild(td6);
 				tr3.appendChild(td7);
 				tr3.appendChild(td8);
-				tr3.appendChild(td10);
+				// tr3.appendChild(td10);
 			var tr4 = document.createElement('tr');
 				var td12 = document.createElement('td');
 				var td13 = document.createElement('td');
@@ -320,12 +322,12 @@
 				var td16 = document.createElement('td');
 					td16.setAttribute('style', 'text-align: center; width: 10%');
 					td16.innerHTML = "Departure";
-				var td19 = document.createElement('td');
-					td19.setAttribute('style', 'text-align: center; width: 10%');
-					td19.innerHTML = "Hours";
-				var td20 = document.createElement('td');
-					td20.setAttribute('style', 'text-align: center; width: 10%');
-					td20.innerHTML = "Minutes";
+				// var td19 = document.createElement('td');
+				// 	td19.setAttribute('style', 'text-align: center; width: 10%');
+				// 	td19.innerHTML = "Hours";
+				// var td20 = document.createElement('td');
+				// 	td20.setAttribute('style', 'text-align: center; width: 10%');
+				// 	td20.innerHTML = "Minutes";
 				var td21 = document.createElement('td');
 
 				tr4.appendChild(td12);
@@ -333,8 +335,8 @@
 				tr4.appendChild(td14);
 				tr4.appendChild(td15);
 				tr4.appendChild(td16);
-				tr4.appendChild(td19);
-				tr4.appendChild(td20);
+				// tr4.appendChild(td19);
+				// tr4.appendChild(td20);
 
 			var tr5 = document.createElement('tr');
 				var td22 = document.createElement('td');
@@ -386,13 +388,13 @@
 					out2.setAttribute('style', 'text-align: center;');
 					out2.innerHTML = "";
 
-				var undertime_in = document.createElement('td');
-					undertime_in.setAttribute('style', 'text-align: center;');
-					undertime_in.innerHTML = "";
+				// var undertime_in = document.createElement('td');
+				// 	undertime_in.setAttribute('style', 'text-align: center;');
+				// 	undertime_in.innerHTML = "";
 
-				var undertime_out = document.createElement('td');
-					undertime_out.setAttribute('style', 'text-align: center;');
-					undertime_out.innerHTML = "";
+				// var undertime_out = document.createElement('td');
+				// 	undertime_out.setAttribute('style', 'text-align: center;');
+				// 	undertime_out.innerHTML = "";
 
 				if(data.days_worked_readable.length > 0) {
 					for(j=0; j<data.days_worked_readable.length; j++) {
@@ -417,8 +419,8 @@
 				tr.appendChild(out1);
 				tr.appendChild(in2);
 				tr.appendChild(out2);
-				tr.appendChild(undertime_in);
-				tr.appendChild(undertime_out);
+				// tr.appendChild(undertime_in);
+				// tr.appendChild(undertime_out);
 
 				tbody.appendChild(tr);
 

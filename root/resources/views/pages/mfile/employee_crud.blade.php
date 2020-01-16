@@ -37,6 +37,12 @@
 						<br>
 						<div class="row">
 					  		<div class="col-sm-6">
+					  			<div class="form-group row">
+							      <label class="col-sm-4 col-form-label">Head Of Facility? <strong style="color:red;">*</strong></label>
+							      <div class="col-sm-2">
+							      	<input name="isHeadOfFaci" {{($mode == "edit" && $MYDATA->isheadoffacility) ? "checked" : ""}} class="form-control exclusive-check" type="checkbox">
+							      </div>
+							    </div>
 						  		<div class="form-group row">
 							      <label class="col-sm-4 col-form-label">Employee ID <strong style="color:red;">*</strong></label>
 							      <div class="col-sm-8">

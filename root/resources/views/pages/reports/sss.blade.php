@@ -16,10 +16,30 @@
 								<option value="{{$office->cc_id}}">{{$office->cc_desc}}</option>
 								@endforeach
 							</select>
-						<button type="button" class="btn btn-primary " onclick="PrintAllPage();">Print <i class="fa fa-print"></i></button>
-						<i class="fa fa-spin fa-spinner ml-3" id="loadAnimation"></i>
 						</div>
-							
+					</div>
+					<div class="form-group">
+						<div class="form-inline">
+								<select class="form-control mr-2" id="month" name="month">
+									@foreach(Core::Months() as $key => $value)
+									<option value="{{$key}}" {{($key == date('m')) ? 'selected' : ''}}>{{$value}}</option>
+									@endforeach
+								</select>
+								<select class="form-control mr-2" id="payroll_period" name="payroll_period">
+									<option value="15D">15th day</option>
+									<option value="30D">30th day</option>
+								</select>
+								<select class="form-control mr-2 YearSelector" id="year" name="year">
+								</select>
+								<select class="form-control mr-2" id="empstatus" name="empstatus">
+									<option value="" selected="" disabled="">-Select Employee Status-</option>
+									@foreach($data[1] as $empstatus)
+										<option value="{{$empstatus->status_id}}">{{$empstatus->description}}</option>
+									@endforeach
+								</select>
+							<button type="button" class="btn btn-primary " onclick="PrintAllPage();">Print <i class="fa fa-print"></i></button>
+							<i class="fa fa-spin fa-spinner ml-3" id="loadAnimation"></i>
+						</div>
 					</div>
 				</div>
 			</form>
@@ -67,6 +87,10 @@
 			var data = { 
                           _token : $('meta[name="csrf-token"]').attr('content'),
                           ofc_id : $('#ofc :selected').val(),
+                          month : $('#month').val(),
+                          payroll_period : $('#payroll_period').val(),
+                          year : $('#year').val(),
+
                        };
 			$.ajax({
 				type: "post",
