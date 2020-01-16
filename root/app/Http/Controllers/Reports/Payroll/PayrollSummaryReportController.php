@@ -108,6 +108,7 @@ class PayrollSummaryReportController extends Controller
 			return Excel::download(new ExportBlade('print.reports.payroll.export_payroll_summary_report', $data), 'general-payroll-'.date('YmdHis').'.xlsx');
 			// Export2_1::exportBlade('print.reports.payroll.export_payroll_summary_report', $data);
 		} catch (\Exception $e) {
+			return $e;
 			ErrorCode::Generate('controller', 'PayrollSummaryReportController', '00003', $e->getMessage());
 			return "error";
 		}
