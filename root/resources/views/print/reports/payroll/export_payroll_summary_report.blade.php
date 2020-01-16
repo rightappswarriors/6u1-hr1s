@@ -122,7 +122,7 @@
 				<td>-</td> {{-- Position --}}
 				<td>{{($row->rate!=0) ? number_format($row->rate,2) : "-"}} <?php $runningRowTotal['rate'] = isset($runningRowTotal['rate']) ? ($row->rate !=0 ? $row->rate : 0) + $runningRowTotal['rate'] : ($row->rate !=0 ? $row->rate : 0) ?></td> {{-- Rate --}}
 				<td>{{($row->abcences!=9) ? $row->abcences : "-"}}</td> {{-- No. of Absence w/o Pay --}}
-				<td>{{($row->basic_pay) ? $row->basic_pay : "-"}}</td> {{-- Rate Computed Absences --}}
+				<td>{{($row->basic_pay) ? number_format($row->basic_pay,2) : "-"}}</td> {{-- Rate Computed Absences --}}
 				<td>{{number_format($pera,2)}}</td><?php $runningRowTotal['pera'] = isset($runningRowTotal['pera']) ? $pera + $runningRowTotal['pera'] : $pera ?> {{-- PERA --}}
 				<td>{{number_format($hazard_duty_pay,2)}}<?php $runningRowTotal['hazard_duty'] = isset($runningRowTotal['hazard_duty']) ? $hazard_duty_pay + $runningRowTotal['hazard_duty'] : $hazard_duty_pay ?></td> {{-- Hazard Duty Pay --}}
 				<td>{{number_format($allowance_laundry,2)}}<?php $runningRowTotal['allowance_laundry'] = isset($runningRowTotal['allowance_laundry']) ? $allowance_laundry + $runningRowTotal['allowance_laundry'] : $allowance_laundry ?></td> {{-- Allowance - Laundry --}}
@@ -130,7 +130,7 @@
 				<td>-</td> {{-- Allowance - Subsistence - Travel , not sure as of Paolo --}}
 				<td>{{number_format($allowance,2)}}<?php $runningRowTotal['allowance'] = isset($runningRowTotal['allowance']) ? $allowance + $runningRowTotal['allowance'] : $allowance ?></td> {{-- Allowance - Subsistence - Total --}}
 				<td>{{number_format($row->rate - $record[$i]->net_pay,2)}}<?php $runningRowTotal['amount_earned'] = isset($runningRowTotal['amount_earned']) ? ($row->rate - $record[$i]->net_pay) + $runningRowTotal['amount_earned'] : ($row->rate - $record[$i]->net_pay) ?></td> {{-- Amount Earned --}}
-				<td>{{$record[$i]->w_tax}}<?php $runningRowTotal['withholding_tax'] = isset($runningRowTotal['withholding_tax']) ? $record[$i]->w_tax + $runningRowTotal['withholding_tax'] : $record[$i]->w_tax ?></td> {{-- Personal Deductions - Withholding Tax --}}
+				<td>{{number_format($record[$i]->w_tax,2)}}<?php $runningRowTotal['withholding_tax'] = isset($runningRowTotal['withholding_tax']) ? $record[$i]->w_tax + $runningRowTotal['withholding_tax'] : $record[$i]->w_tax ?></td> {{-- Personal Deductions - Withholding Tax --}}
 				<td>{{$record[$i]->philhealth_cont_b}}<?php $runningRowTotal['pphilhealth'] = isset($runningRowTotal['pphilhealth']) ? $record[$i]->philhealth_cont_b + $runningRowTotal['pphilhealth'] : $record[$i]->philhealth_cont_b ?></td> {{-- Personal Deductions - Philhealth --}}
 				<td>{{$record[$i]->pagibig_cont_b}}<?php $runningRowTotal['pphilhealthhdmf'] = isset($runningRowTotal['pphilhealthhdmf']) ? $record[$i]->pagibig_cont_b + $runningRowTotal['pphilhealthhdmf'] : $record[$i]->pagibig_cont_b ?></td> {{-- Personal Deductions - Pag-ibig - HDMF Cont. --}}
 
@@ -138,12 +138,13 @@
 					$pagIbigDeduction = 0;
 					$otherDeduction = json_decode($record[$i]->pagibig_cont_a);
 					foreach($initilize[2] as $ini){
-						foreach($otherDeduction as $od){ 
-							if($ini === $od[0]){
-								$pagIbigDeduction = $od[2];
+						if(isset($otherDeduction)){
+							foreach($otherDeduction as $od){ 
+								if($ini === $od[0]){
+									$pagIbigDeduction = $od[2];
+								}
 							}
 						}
-
 						?>
 						{{-- Personal Deductions - Pag-ibig - MPL. --}}
 						{{-- Personal Deductions - Pag-ibig - Housing Laon. --}}
@@ -158,9 +159,11 @@
 					$otherDeductionValue = 0;
 					$otherDeduction = json_decode($record[$i]->other_deduction);
 					foreach($initilize[1] as $ini){
-						foreach($otherDeduction as $od){ 
-							if($ini === $od[0]){
-								$otherDeductionValue = $od[2];
+						if(isset($otherDeduction)){
+							foreach($otherDeduction as $od){ 
+								if($ini === $od[0]){
+									$otherDeductionValue = $od[2];
+								}
 							}
 						}
 
@@ -184,9 +187,11 @@
 					$gsisValue = 0;
 					$gsis = json_decode($record[$i]->sss_cont_a);
 					foreach($initilize[0] as $ini){
-						foreach($gsis as $sss){ 
-							if($ini === $sss[0]){
-								$gsisValue = $sss[2];
+						if(isset($gsis)){
+							foreach($gsis as $sss){ 
+								if($ini === $sss[0]){
+									$gsisValue = $sss[2];
+								}
 							}
 						}
 
@@ -205,7 +210,7 @@
 						$gsisValue = 0;
 					}
 				?>
-				<td>{{$record[$i]->total_deductions}}<?php $runningRowTotal['total_deductions'] = isset($runningRowTotal['total_deductions']) ? $record[$i]->total_deductions + $runningRowTotal['total_deductions'] : $record[$i]->total_deductions ?></td> {{-- Total Deductions --}}
+				<td>{{number_format($record[$i]->total_deductions,2)}}<?php $runningRowTotal['total_deductions'] = isset($runningRowTotal['total_deductions']) ? $record[$i]->total_deductions + $runningRowTotal['total_deductions'] : $record[$i]->total_deductions ?></td> {{-- Total Deductions --}}
 				<td>{{$record[$i]->philhealth_cont_c}}<?php $runningRowTotal['gphilhealth'] = isset($runningRowTotal['gphilhealth']) ? $record[$i]->philhealth_cont_c + $runningRowTotal['gphilhealth'] : $record[$i]->philhealth_cont_c ?></td> {{-- Government Shares - Philhealth --}}
 				<td>{{$record[$i]->sss_cont_c}}<?php $runningRowTotal['retirement'] = isset($runningRowTotal['retirement']) ? $record[$i]->sss_cont_c + $runningRowTotal['retirement'] : $record[$i]->sss_cont_c ?></td> {{-- Government Shares - Retirement & Life Insurance Permiums --}}
 				<td>{{$record[$i]->pagibig_cont_c}}<?php $runningRowTotal['pagibighdmf'] = isset($runningRowTotal['pagibighdmf']) ? $record[$i]->pagibig_cont_c + $runningRowTotal['pagibighdmf'] : $record[$i]->pagibig_cont_c ?></td> {{-- Government Shares - Pag-ibig HDMF Cont. --}}

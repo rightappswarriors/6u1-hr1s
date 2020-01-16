@@ -501,7 +501,7 @@ class GenerateDTRController extends Controller
         /**
         * @param $r->dtrs - From Generate()
         */
-        // return dd($r->all());
+        // return $r;
         try {
             if (isset($r->dtrs['errors'])) {
                 if (count($r->dtrs['errors']) > 0) {
@@ -517,6 +517,14 @@ class GenerateDTRController extends Controller
             // $dtrs = (array)json_decode($this->Generate($r));
 
             // $record = DB::table('hr_dtr_sum_hdr')->where('empid', $dtrs['empid'])->where('date_from', $dtrs['date_from'])->where('date_to', $dtrs['date_to'])->where('generationtype', $data['generateType'])->first();
+
+            // for removed trap by Syrel
+            // to continue history 
+            if($dtrs['isgenerated'] != null){
+                $codeFromSumHdr = DB::table('hr_dtr_sum_hdr')->where([['empid',$dtrs['empid']],['ppid',$dtrs['ppid']],['generationtype',$dtrs['generateType']],['date_from',$dtrs['date_from']],['date_to',$dtrs['date_to']]])->first();
+                DB::table('hr_dtr_sum_hdr')->where([['empid',$dtrs['empid']],['ppid',$dtrs['ppid']],['generationtype',$dtrs['generateType']],['date_from',$dtrs['date_from']],['date_to',$dtrs['date_to']]])->delete();
+                DB::table('hr_dtr_sum_employees')->where([['xempid',$dtrs['empid']],['isgenerated',TRUE],['dtr_sum_id',$codeFromSumHdr]])->delete();
+            }
             if (/*$record == null*/ $dtrs['isgenerated'] == null) {
                 try {
                     $code = Core::getm99('dtr_sum_id');
