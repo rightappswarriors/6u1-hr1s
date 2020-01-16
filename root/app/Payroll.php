@@ -61,6 +61,8 @@ class Payroll extends Model
 
     public static function PayrollPeriod2($month, $pp, $year = null)
     {
+
+
     	$m = (int)$month;
         $year = ($year == null || $year == "") ? date('Y') : $year;
         $pd = [
@@ -100,6 +102,10 @@ class Payroll extends Model
         $return_val->d_pagibig = ($return_val->id == $pp_deduction_trigger) ? "Y" : "N";
         $return_val->d_w_tax = ($return_val->id == $pp_deduction_trigger) ? "Y" : "N";
     	return $return_val;
+    }
+    public static function PayrollPeriod3($month, $pp, $year = null)
+    {
+        return json_encode(self::PayrollPeriod2($month, $pp, $year = null));
     }
 
     public static function IfWithContributions($pp)

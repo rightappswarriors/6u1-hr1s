@@ -36,7 +36,7 @@ class SSSContributionsController extends Controller
         $payroll_period = $request->payroll_period;
         $year = $request->year;
         $employee = Employee::getEmployeeOffice($ofc_id);
-        $pp = Payroll::PayrollPeriod2($month, $payroll_period, $year);
+        $pp = Payroll::PayrollPeriod3($month, $payroll_period, $year);
 
         return $pp;
 

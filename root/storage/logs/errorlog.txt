@@ -138,3 +138,8 @@
 01-15-2020 19:18 | PayrollSummaryReportController | Undefined variable: inf (View: C:\xampp\htdocs\6u1-hr1s\root\resources\views\print\reports\payroll\export_payroll_summary_report.blade.php) (00003)
 01-15-2020 19:18 | PayrollSummaryReportController | Undefined variable: inf (View: C:\xampp\htdocs\6u1-hr1s\root\resources\views\print\reports\payroll\export_payroll_summary_report.blade.php) (00003)
 01-15-2020 19:19 | PayrollSummaryReportController | Undefined variable: inf (View: C:\xampp\htdocs\6u1-hr1s\root\resources\views\print\reports\payroll\export_payroll_summary_report.blade.php) (00003)
+01-16-2020 18:38 | GeneratePayrollController | Trying to get property 'from' of non-object (GPCA00001)
+01-16-2020 18:38 | GeneratePayrollController | Trying to get property 'from' of non-object (GPCA00001)
+01-16-2020 18:39 | GeneratePayrollController | Trying to get property 'from' of non-object (GPCA00001)
+01-16-2020 18:39 | GeneratePayrollController | Trying to get property 'from' of non-object (GPCA00001)
+01-16-2020 18:41 | GeneratePayrollController | Undefined variable: return_valalue (GPCA00001)
