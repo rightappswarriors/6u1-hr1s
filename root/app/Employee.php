@@ -20,6 +20,13 @@ class Employee extends Model
     	return DB::table(self::$tbl_name)->where('cancel', '=', null)->orderBy('lastname', 'ASC')->get();
     }
 
+    //added by Syrel for Dynamic where clause and condition
+    public static function Load_Employees_Dynamic($whereClause = [], $selectFirstOnly = false)
+    {
+        $toReturn = DB::table(self::$tbl_name)->where($whereClause);
+        return ($selectFirstOnly ? $toReturn->first() : $toReturn->get());
+    }
+
     public static function Load_Employees_Office($ofc_id)
     {
         return DB::table(self::$tbl_name)->where('cancel', '=', null)->where('department', $ofc_id)->orderBy('lastname', 'ASC')->get();

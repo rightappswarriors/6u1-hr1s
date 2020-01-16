@@ -330,7 +330,7 @@
 			/* LOAN HISTORY */
 			/* OTHER EARNINGS */
 			Route::prefix('other-earnings')->group(function() {
-				Route::get('/', 'Payroll\OtherEarningsMainController@view')->name('oehome');
+				Route::get('/{isRata?}', 'Payroll\OtherEarningsMainController@view')->name('oehome');
 				Route::post('/find', 'Payroll\OtherEarningsMainController@find');
 				Route::post('/employee', 'Payroll\OtherEarningsMainController@employee');
 				Route::post('/generate', 'Payroll\OtherEarningsMainController@generate');

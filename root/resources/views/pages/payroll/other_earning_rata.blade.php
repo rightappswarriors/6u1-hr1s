@@ -4,7 +4,7 @@
 	<div class="card">
 		<div class="card-header">
 			<div class="form-inline">
-				<i class="fa fa-building"></i> Other Earnings<br>
+				<i class="fa fa-building"></i> Representation Allowance (RA) and Transportation Allowance (TA)<br>
 					{{-- <div class="form-group mr-2">
 						<select class="form-control w-50" name="office" id="office" required>
 							<option disabled selected value="">Please select an office</option>
@@ -26,25 +26,32 @@
 				{{-- <div class="float-right">
 					<button class="btn btn-success" onclick="GenerateRata($('#date_from').val())">Generate</button>
 				</div> --}}
+				{{-- <span class="OtherEarnings">
+					<button type="button" class="btn btn-success" id="opt-add">
+						<i class="fa fa-plus"></i> Add
+					</button>
+					<button type="button" class="btn btn-info" id="opt-print">
+						<i class="fa fa-print"></i> Print List
+					</button>
+				</span> --}}
 			</div>
 		</div>
 		<div class="card-body">
 
 			<ul class="nav nav-tabs mb-3">
-				<li class="nav-item active">
+				{{-- <li class="nav-item active">
 			     	<a class="nav-link active" href="#home1" data-toggle="tab">Other Earnings Entry</a>
-			  	</li>
-			  	<li>
-			    	<a class="nav-link" hidden="" href="#menu1" data-toggle="tab">RATA - Representation Allowance (RA) and Transportation Allowance (TA)</a>
+			  	</li> --}}
+			  	<li class="nav-item active">
+			    	<a class="nav-link active show" href="#menu1" data-toggle="tab">RATA - Representation Allowance (RA) and Transportation Allowance (TA)</a>
 			  	</li>
 			</ul>
 			<div class="tab-content">
-				<div id="home1" class="tab-pane fade in active show">
+				{{-- <div id="home1" class="tab-pane fade in active show">
 					<div class="table-responsive">
 						<div class="row mb-3 mt-1 ml-1">
 							<div class="col-3">
 								<select class="form-control" name="ofc" id="ofc">
-									{{-- <option value="" disabled selected hidden>Please select an office</option> --}}
 									@if(count($data[2]) > 0)
 										@foreach($data[2] as $office)
 										<option value="{{$office->cc_id}}">{{ucwords($office->cc_desc)}}</option>
@@ -59,7 +66,6 @@
 							</div>
 							<div class="col-2">
 								<select class="form-control YearSelector ml-3" name="date_year_1" id="date_year_1" onchange="">
-									{{-- <option value="" disabled selected hidden>YEAR</option> --}}
 								</select>
 							</div>
 							<div class="col-2">
@@ -70,18 +76,6 @@
 							</div>
 							<div class="col-1">
 								<button class="ml-3 btn btn-primary" id="f_find">Find</button>
-							</div>
-						</div>
-						<div class="row mb-3 mt-1 ml-1">
-							<div class="col-3">
-								<span class="OtherEarnings">
-									<button type="button" class="btn btn-success" id="opt-add">
-										<i class="fa fa-plus"></i> Add
-									</button>
-									<button type="button" class="btn btn-info" id="opt-print">
-										<i class="fa fa-print"></i> Print List
-									</button>
-								</span>
 							</div>
 						</div>
 						<div class="row">
@@ -109,27 +103,18 @@
 									</tbody>
 								</table>
 							</div>
-							{{-- <div class="col-3">
-								<div class="card">
-									<div class="card-body">
-										<button type="button" class="btn btn-success btn-block" id="opt-add"><i class="fa fa-plus"></i> Add</button>
-										<button type="button" class="btn btn-primary btn-block" id="opt-update"><i class="fa fa-edit"></i> Edit</button>
-										<button type="button" class="btn btn-danger btn-block" id="opt-delete"><i class="fa fa-trash"></i> Delete</button>
-									</div>
-								</div>
-							</div> --}}
 						</div>	
 					</div>
-				</div>
+				</div> --}}
 
-				<div id="menu1" class="tab-pane fade in">
-					<div class="row">
+				<div id="menu1" class="tab-pane fade in active show">
+					<div class="row pb-3">
 						<div class="col-3">
 							<select class="form-control w-100" name="office" id="office" required>
-								<option disabled selected value="">Please select an office</option>
-								@if(!empty($data[2]))
-								@foreach($data[2] as $off)
-								<option value="{{$off->cc_id}}">{{$off->cc_desc}}</option>
+								<option disabled selected value="">Please select an Employee</option>
+								@if(!empty($data[5]))
+								@foreach($data[5] as $off)
+								<option value="{{$off->empid}}">{{$off->lastname . ', ' . $off->firstname}}</option>
 								@endforeach
 								@endif
 							</select>
@@ -146,6 +131,13 @@
 						</div>
 						<div class="col">
 							<button class="btn btn-primary ml-3" onclick="toPrint()"><i class="fa fa-print"></i></button>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-12 mt-3">
+							<div class="alert alert-success text-center" role="alert" style="cursor: auto;">
+							  For your convenience, all inputs will <a class="alert-link">automatically saved</a>. No need for a button!
+							</div>
 						</div>
 					</div>
 					<div class="table-responsive">
@@ -248,14 +240,13 @@
 									<div class="form-group">
 										<label>Employee:</label>
 										<input type="text" class="form-control" name="cbo_employee_txt" id="cbo_employee_txt" readonly required hidden disabled>
-										<select name="cbo_employee" id="" style="text-transform: uppercase;" class="form-control">
+										<select name="cbo_employee" style="text-transform: uppercase;" class="form-control">
 											<option disabled hidden selected value="">---</option>
 											{{-- @foreach(Employee::Load_Employees() as $key => $value)
 												<option value="{{$value->empid}}">{{$value->lastname}}, {{$value->firstname}} {{$value->mi}}</option>
 											@endforeach --}}
 										</select>
 										<input type="text" class="form-control" hidden id="cbo_employee_view" disabled>
-										<input type="text" class="form-control" hidden name="cbo_employee_id">
 									</div>
 
 									<div class="form-group">
@@ -372,13 +363,13 @@
 			}
 		});
 
-		$('.nav-link').on('click', function() {
-			if($(this).attr('href') == '#home1') {
-				$('.OtherEarnings').show();
-			} else {
-				$('.OtherEarnings').hide();
-			}
-		});
+		// $('.nav-link').on('click', function() {
+		// 	if($(this).attr('href') == '#home1') {
+		// 		$('.OtherEarnings').show();
+		// 	} else {
+		// 		$('.OtherEarnings').hide();
+		// 	}
+		// });
 
 		// $('#opt-update').on('click', function() {
 		function row_update(obj) {
@@ -398,7 +389,7 @@
 					url: '{{url('payroll/other-earnings/')}}/find2_e',
 					data : {id: selected_row.children()[0].innerText},
 					success: function(data) {
-						FillFields(data,true);
+						FillFields(data);
 					},
 				});
 
@@ -487,10 +478,7 @@
 
 			]).draw();
 		}
-
-		function FillFields(data,forUpdate = false) {
-			forUpdate = (forUpdate ? data.emp_no : '');
-			$('[name=cbo_employee_id]').val(forUpdate).trigger('change');
+		function FillFields(data) {
 			$('select[name="cbo_employee"]').val(data.emp_no).trigger('change');
 			$('select[name="cbo_type"]').val(data.earning_code).trigger('change');
 			$('select[name="cbo_period"]').val(data.payroll_period).trigger('change');
@@ -500,7 +488,6 @@
 		}
 
 		function ClearFields() {
-			$('[name=cbo_employee_id]').val("").trigger('change');
 			$('select[name="cbo_employee"]').val("").trigger('change');
 			$('select[name="cbo_type"]').val("").trigger('change');
 			$('select[name="cbo_period"]').val("15").trigger('change');
@@ -518,7 +505,7 @@
 		}
 	</script>
 
-	{{-- <script>
+	<script>
 		var date_month = $('#date_month').val();
 			if(date_month.length < 2) date_month = '0'+date_month;	
 		var date_year = $('#date_year').val();
@@ -644,8 +631,6 @@
 						// 	location.reload();
 						// 	// GenerateRata(response[i]);
 						// }
-						console.log(response);
-
 						$.ajax({
 							type: "post",
 							url: "{{url('payroll/other-earnings/generate')}}",
@@ -662,7 +647,7 @@
 				}
 			});
 		}
-	</script> --}}
+	</script>
 
 	<script>
 		/* -- The following scripts are used to ajax-cally set and get data to the database -- */
@@ -700,6 +685,7 @@
 				url: "{{url('payroll/other-earnings/deduc1')}}",
 				data: {"rata_id":rata_id, "value":element.value},
 				success: function(response) {
+					prompMessageAfterDelay(false)
 					CalculateTotalDeduction(rata_id);
 				},
 			});
@@ -714,6 +700,7 @@
 				data: {"rata_id":rata_id, "value":element.value},
 				success: function(response) {
 					CalculateTotalDeduction(rata_id);
+					prompMessageAfterDelay(false)
 				},
 			});
 		}
@@ -780,6 +767,7 @@
 	</script>
 
 	<script>
+
 		function toPrint() {
 			if(rata_exist)
 				window.location = '{{url('payroll/other-earnings/print/')}}/'+date_x;
@@ -788,6 +776,7 @@
 				if(flag) { GetCurrentEmployees(); }
 			}	
 		}
+
 	</script>
 
 	<style>

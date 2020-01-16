@@ -5,6 +5,17 @@
 @php
 	$inf = $data['inf'];
 	$record = $data['record'];
+
+	//initialization of array for hardcoded assigning of value by Syrel
+	$statIns = 100;
+	$runningRowTotal = [];
+	$initilize = [
+		//for gsis
+		[1,2,3,4,5,6,7,8,9],
+		//for other deductions
+		['PD-1','PD-2','PD-3','PD-4','PD-5','PD-6'],
+		[2,3]
+	];
 @endphp
 	<table>
 		<thead>
@@ -109,91 +120,160 @@
 				<td>{{strtoupper($row->empname)}}</td> {{-- Name --}}
 				<td>{{$no}}</td> {{-- No. --}}
 				<td>-</td> {{-- Position --}}
-				<td>{{($row->rate!=0) ? $row->rate : "-"}}</td> {{-- Rate --}}
+				<td>{{($row->rate!=0) ? number_format($row->rate,2) : "-"}} <?php $runningRowTotal['rate'] = isset($runningRowTotal['rate']) ? ($row->rate !=0 ? $row->rate : 0) + $runningRowTotal['rate'] : ($row->rate !=0 ? $row->rate : 0) ?></td> {{-- Rate --}}
 				<td>{{($row->abcences!=9) ? $row->abcences : "-"}}</td> {{-- No. of Absence w/o Pay --}}
 				<td>{{($row->basic_pay) ? $row->basic_pay : "-"}}</td> {{-- Rate Computed Absences --}}
-				<td>{{$pera}}</td> {{-- PERA --}}
-				<td>{{$hazard_duty_pay}}</td> {{-- Hazard Duty Pay --}}
-				<td>{{$allowance_laundry}}</td> {{-- Allowance - Laundry --}}
-				<td>-</td> {{-- Allowance - Subsistence - Leave --}}
-				<td>-</td> {{-- Allowance - Subsistence - Travel --}}
-				<td>{{$allowance}}</td> {{-- Allowance - Subsistence - Total --}}
-				<td>-</td> {{-- Amount Earned --}}
-				<td>-</td> {{-- Personal Deductions - Withholding Tax --}}
-				<td>-</td> {{-- Personal Deductions - Philhealth --}}
-				<td>-</td> {{-- Personal Deductions - Pag-ibig - HDMF Cont. --}}
-				<td>-</td> {{-- Personal Deductions - Pag-ibig - MPL. --}}
-				<td>-</td> {{-- Personal Deductions - Pag-ibig - Housing Laon. --}}
-				<td>-</td> {{-- Personal Deductions - JGM --}}
-				<td>-</td> {{-- Personal Deductions - LBP --}}
-				<td>-</td> {{-- Personal Deductions - CFI --}}
-				<td>-</td> {{-- Personal Deductions - DCCCO --}}
-				<td>-</td> {{-- Personal Deductions - PEI 2014 Refund --}}
-				<td>-</td> {{-- Personal Deductions - Refund for cash advance --}}
-				<td>-</td> {{-- Personal Deductions - GSIS - Retirement & Life Insurance Premiums --}}
-				<td>-</td> {{-- Personal Deductions - GSIS - Edu. Asstance --}}
-				<td>-</td> {{-- Personal Deductions - GSIS - CEAP --}}
-				<td>-</td> {{-- Personal Deductions - GSIS - Emergency Loan --}}
-				<td>-</td> {{-- Personal Deductions - GSIS - Combo Loan --}}
-				<td>-</td> {{-- Personal Deductions - GSIS - Policy Loan Reg --}}
-				<td>-</td> {{-- Personal Deductions - GSIS - Optional Policy Loan --}}
-				<td>-</td> {{-- Personal Deductions - GSIS - Ouli Permium --}}
-				<td>-</td> {{-- Personal Deductions - GSIS - UMID E-Card Plus --}}
-				<td>-</td> {{-- Personal Deductions - GSIS - GSIS H/L --}}
-				<td>-</td> {{-- Total Deductions --}}
-				<td>-</td> {{-- Government Shares - Philhealth --}}
-				<td>-</td> {{-- Government Shares - Retirement & Life Insurance Permiums --}}
-				<td>-</td> {{-- Government Shares - Pag-ibig HDMF Cont. --}}
-				<td>-</td> {{-- Government Shares - State Ins. --}}
-				<td>-</td> {{-- No. --}}
-				<td>-</td> {{-- Net Amount Received --}}
-				<td>-</td> {{-- Amount Paid --}}
+				<td>{{number_format($pera,2)}}</td><?php $runningRowTotal['pera'] = isset($runningRowTotal['pera']) ? $pera + $runningRowTotal['pera'] : $pera ?> {{-- PERA --}}
+				<td>{{number_format($hazard_duty_pay,2)}}<?php $runningRowTotal['hazard_duty'] = isset($runningRowTotal['hazard_duty']) ? $hazard_duty_pay + $runningRowTotal['hazard_duty'] : $hazard_duty_pay ?></td> {{-- Hazard Duty Pay --}}
+				<td>{{number_format($allowance_laundry,2)}}<?php $runningRowTotal['allowance_laundry'] = isset($runningRowTotal['allowance_laundry']) ? $allowance_laundry + $runningRowTotal['allowance_laundry'] : $allowance_laundry ?></td> {{-- Allowance - Laundry --}}
+				<td>-</td> {{-- Allowance - Subsistence - Leave , not sure as of Paolo--}}
+				<td>-</td> {{-- Allowance - Subsistence - Travel , not sure as of Paolo --}}
+				<td>{{number_format($allowance,2)}}<?php $runningRowTotal['allowance'] = isset($runningRowTotal['allowance']) ? $allowance + $runningRowTotal['allowance'] : $allowance ?></td> {{-- Allowance - Subsistence - Total --}}
+				<td>{{number_format($row->rate - $record[$i]->net_pay,2)}}<?php $runningRowTotal['amount_earned'] = isset($runningRowTotal['amount_earned']) ? ($row->rate - $record[$i]->net_pay) + $runningRowTotal['amount_earned'] : ($row->rate - $record[$i]->net_pay) ?></td> {{-- Amount Earned --}}
+				<td>{{$record[$i]->w_tax}}<?php $runningRowTotal['withholding_tax'] = isset($runningRowTotal['withholding_tax']) ? $record[$i]->w_tax + $runningRowTotal['withholding_tax'] : $record[$i]->w_tax ?></td> {{-- Personal Deductions - Withholding Tax --}}
+				<td>{{$record[$i]->philhealth_cont_b}}<?php $runningRowTotal['pphilhealth'] = isset($runningRowTotal['pphilhealth']) ? $record[$i]->philhealth_cont_b + $runningRowTotal['pphilhealth'] : $record[$i]->philhealth_cont_b ?></td> {{-- Personal Deductions - Philhealth --}}
+				<td>{{$record[$i]->pagibig_cont_b}}<?php $runningRowTotal['pphilhealthhdmf'] = isset($runningRowTotal['pphilhealthhdmf']) ? $record[$i]->pagibig_cont_b + $runningRowTotal['pphilhealthhdmf'] : $record[$i]->pagibig_cont_b ?></td> {{-- Personal Deductions - Pag-ibig - HDMF Cont. --}}
+
+				<?php 
+					$pagIbigDeduction = 0;
+					$otherDeduction = json_decode($record[$i]->pagibig_cont_a);
+					foreach($initilize[2] as $ini){
+						foreach($otherDeduction as $od){ 
+							if($ini === $od[0]){
+								$pagIbigDeduction = $od[2];
+							}
+						}
+
+						?>
+						{{-- Personal Deductions - Pag-ibig - MPL. --}}
+						{{-- Personal Deductions - Pag-ibig - Housing Laon. --}}
+						<td>{{number_format($pagIbigDeduction,2)}}</td>
+						<?php
+						$runningRowTotal['pagibigDeductionLoop'][$ini] = (isset($runningRowTotal['pagibigDeductionLoop'][$ini]) ? $pagIbigDeduction + $runningRowTotal['pagibigDeductionLoop'][$ini] : $pagIbigDeduction);
+						$pagIbigDeduction = 0;
+					}
+				?>
+
+				<?php 
+					$otherDeductionValue = 0;
+					$otherDeduction = json_decode($record[$i]->other_deduction);
+					foreach($initilize[1] as $ini){
+						foreach($otherDeduction as $od){ 
+							if($ini === $od[0]){
+								$otherDeductionValue = $od[2];
+							}
+						}
+
+						?>
+						{{-- Personal Deductions - JGM --}}
+						{{-- Personal Deductions - LBP --}}
+						{{-- Personal Deductions - CFI --}}
+						{{-- Personal Deductions - DCCCO --}}
+						{{-- Personal Deductions - PEI 2014 Refund --}}
+						{{-- Personal Deductions - Refund for cash advance --}}
+						<td>{{number_format($otherDeductionValue,2)}}</td>
+						<?php
+						$runningRowTotal['otherDeductionLoop'][$ini] = (isset($runningRowTotal['otherDeductionLoop'][$ini]) ? $otherDeductionValue + $runningRowTotal['otherDeductionLoop'][$ini] : $otherDeductionValue);
+						$otherDeductionValue = 0;
+					}
+				?>
+
+				<td>{{$record[$i]->sss_cont_b}}<?php $runningRowTotal['gsisretirement'] = isset($runningRowTotal['gsisretirement']) ? $record[$i]->sss_cont_b + $runningRowTotal['gsisretirement'] : $record[$i]->sss_cont_b ?></td> {{-- Personal Deductions - GSIS - Retirement & Life Insurance Premiums --}}
+
+				<?php 
+					$gsisValue = 0;
+					$gsis = json_decode($record[$i]->sss_cont_a);
+					foreach($initilize[0] as $ini){
+						foreach($gsis as $sss){ 
+							if($ini === $sss[0]){
+								$gsisValue = $sss[2];
+							}
+						}
+
+						?>
+						{{-- Personal Deductions - GSIS - Edu. Asstance --}}
+						{{-- Personal Deductions - GSIS - Emergency Loan --}}
+						{{-- Personal Deductions - GSIS - Combo Loan --}}
+						{{-- Personal Deductions - GSIS - Policy Loan Reg --}}
+						{{-- Personal Deductions - GSIS - Optional Policy Loan --}}
+						{{-- Personal Deductions - GSIS - Ouli Permium --}}
+						{{-- Personal Deductions - GSIS - UMID E-Card Plus --}}
+						{{-- Personal Deductions - GSIS - GSIS H/L --}}
+						<td>{{number_format($gsisValue,2)}}</td>
+						<?php
+						$runningRowTotal['gsisLoop'][$ini] = (isset($runningRowTotal['gsisLoop'][$ini]) ? $gsisValue + $runningRowTotal['gsisLoop'][$ini] : $gsisValue);
+						$gsisValue = 0;
+					}
+				?>
+				<td>{{$record[$i]->total_deductions}}<?php $runningRowTotal['total_deductions'] = isset($runningRowTotal['total_deductions']) ? $record[$i]->total_deductions + $runningRowTotal['total_deductions'] : $record[$i]->total_deductions ?></td> {{-- Total Deductions --}}
+				<td>{{$record[$i]->philhealth_cont_c}}<?php $runningRowTotal['gphilhealth'] = isset($runningRowTotal['gphilhealth']) ? $record[$i]->philhealth_cont_c + $runningRowTotal['gphilhealth'] : $record[$i]->philhealth_cont_c ?></td> {{-- Government Shares - Philhealth --}}
+				<td>{{$record[$i]->sss_cont_c}}<?php $runningRowTotal['retirement'] = isset($runningRowTotal['retirement']) ? $record[$i]->sss_cont_c + $runningRowTotal['retirement'] : $record[$i]->sss_cont_c ?></td> {{-- Government Shares - Retirement & Life Insurance Permiums --}}
+				<td>{{$record[$i]->pagibig_cont_c}}<?php $runningRowTotal['pagibighdmf'] = isset($runningRowTotal['pagibighdmf']) ? $record[$i]->pagibig_cont_c + $runningRowTotal['pagibighdmf'] : $record[$i]->pagibig_cont_c ?></td> {{-- Government Shares - Pag-ibig HDMF Cont. --}}
+				<td>{{number_format($statIns,2)}}<?php $runningRowTotal['statin'] = isset($runningRowTotal['statin']) ? $statIns + $runningRowTotal['statin'] : $statIns ?></td> {{-- Government Shares - State Ins. --}}
+				<td>{{$i+1}}</td> {{-- No. --}} {{-- running increment --}}
+				<td>{{number_format($record[$i]->net_pay,2)}}<?php $runningRowTotal['netamount'] = isset($runningRowTotal['netamount']) ? $record[$i]->net_pay + $runningRowTotal['netamount'] : $record[$i]->net_pay ?></td> {{-- Net Amount Received --}}
+				<td>{{number_format($record[$i]->net_pay,2)}}<?php $runningRowTotal['amountpaid'] = isset($runningRowTotal['amountpaid']) ? $record[$i]->net_pay + $runningRowTotal['amountpaid'] : $record[$i]->net_pay ?></td> {{-- Amount Paid --}}
 				<td>-</td> {{-- Signature of Payee --}}
 			</tr>
 			@endfor @endif
 		</tbody>
 		<tfoot>
+			{{-- {{dd($runningRowTotal)}} --}}
 			<tr>
 				<th colspan="4">Total</th>
-				<th>-</th> {{-- Rate --}}
+				<th>{{number_format($runningRowTotal['rate'],2)}}</th> {{-- Rate --}}
 				<th>-</th> {{-- No. of Absence w/o Pay --}}
 				<th>-</th> {{-- Rate Computed Absences --}}
-				<th>-</th> {{-- PERA --}}
-				<th>-</th> {{-- Hazard Duty Pay --}}
-				<th>-</th> {{-- Allowance - Laundry --}}
+				<th>{{number_format($runningRowTotal['pera'],2)}}</th> {{-- PERA --}}
+				<th>{{number_format($runningRowTotal['hazard_duty'],2)}}</th> {{-- Hazard Duty Pay --}}
+				<th>{{number_format($runningRowTotal['allowance_laundry'],2)}}</th> {{-- Allowance - Laundry --}}
 				<th>-</th> {{-- Allowance - Subsistence - Leave --}}
 				<th>-</th> {{-- Allowance - Subsistence - Travel --}}
-				<th>-</th> {{-- Allowance - Subsistence - Total --}}
-				<th>-</th> {{-- Amount Earned --}}
-				<th>-</th> {{-- Personal Deductions - Withholding Tax --}}
-				<th>-</th> {{-- Personal Deductions - Philhealth --}}
-				<th>-</th> {{-- Personal Deductions - Pag-ibig - HDMF Cont. --}}
-				<th>-</th> {{-- Personal Deductions - Pag-ibig - MPL. --}}
-				<th>-</th> {{-- Personal Deductions - Pag-ibig - Housing Laon. --}}
-				<th>-</th> {{-- Personal Deductions - JGM --}}
-				<th>-</th> {{-- Personal Deductions - LBP --}}
-				<th>-</th> {{-- Personal Deductions - CFI --}}
-				<th>-</th> {{-- Personal Deductions - DCCCO --}}
-				<th>-</th> {{-- Personal Deductions - PEI 2014 Refund --}}
-				<th>-</th> {{-- Personal Deductions - Refund for cash advance --}}
-				<th>-</th> {{-- Personal Deductions - GSIS - Retirement & Life Insurance Premiums --}}
-				<th>-</th> {{-- Personal Deductions - GSIS - Edu. Asstance --}}
-				<th>-</th> {{-- Personal Deductions - GSIS - CEAP --}}
-				<th>-</th> {{-- Personal Deductions - GSIS - Emergency Loan --}}
-				<th>-</th> {{-- Personal Deductions - GSIS - Combo Loan --}}
-				<th>-</th> {{-- Personal Deductions - GSIS - Policy Loan Reg --}}
-				<th>-</th> {{-- Personal Deductions - GSIS - Optional Policy Loan --}}
-				<th>-</th> {{-- Personal Deductions - GSIS - Ouli Permium --}}
-				<th>-</th> {{-- Personal Deductions - GSIS - UMID E-Card Plus --}}
-				<th>-</th> {{-- Personal Deductions - GSIS - GSIS H/L --}}
-				<th>-</th> {{-- Total Deductions --}}
-				<th>-</th> {{-- Government Shares - Philhealth --}}
-				<th>-</th> {{-- Government Shares - Retirement & Life Insurance Permiums --}}
-				<th>-</th> {{-- Government Shares - Pag-ibig HDMF Cont. --}}
-				<th>-</th> {{-- Government Shares - State Ins. --}}
+				<th>{{number_format($runningRowTotal['allowance'],2)}}</th> {{-- Allowance - Subsistence - Total --}}
+				<th>{{number_format($runningRowTotal['amount_earned'],2)}}</th> {{-- Amount Earned --}}
+				<th>{{number_format($runningRowTotal['withholding_tax'],2)}}</th> {{-- Personal Deductions - Withholding Tax --}}
+				<th>{{number_format($runningRowTotal['pphilhealth'],2)}}</th> {{-- Personal Deductions - Philhealth --}}
+				<th>{{number_format($runningRowTotal['pphilhealthhdmf'],2)}}</th> {{-- Personal Deductions - Pag-ibig - HDMF Cont. --}}
+
+
+				{{-- Personal Deductions - Pag-ibig - MPL. --}}
+				{{-- Personal Deductions - Pag-ibig - Housing Laon. --}}
+				@foreach($runningRowTotal['pagibigDeductionLoop'] as $thisloop)
+				<th>{{number_format($thisloop,2)}}</th>
+				@endforeach 
+
+				{{-- Personal Deductions - JGM --}}
+				{{-- Personal Deductions - LBP --}}
+				{{-- Personal Deductions - CFI --}}
+				{{-- Personal Deductions - DCCCO --}}
+				{{-- Personal Deductions - PEI 2014 Refund --}}
+				{{-- Personal Deductions - Refund for cash advance --}}
+				@foreach($runningRowTotal['otherDeductionLoop'] as $thisloop)
+				<th>{{number_format($thisloop,2)}}</th>
+				@endforeach 
+
+				<th>{{number_format($runningRowTotal['gsisretirement'],2)}}</th>{{-- Personal Deductions - GSIS - Retirement & Life Insurance Premiums --}}
+				{{-- Personal Deductions - GSIS - Edu. Asstance --}}
+				{{-- Personal Deductions - GSIS - CEAP --}}
+				{{-- Personal Deductions - GSIS - Emergency Loan --}}
+				{{-- Personal Deductions - GSIS - Combo Loan --}}
+				{{-- Personal Deductions - GSIS - Policy Loan Reg --}}
+				{{-- Personal Deductions - GSIS - Optional Policy Loan --}}
+				{{-- Personal Deductions - GSIS - Ouli Permium --}}
+				{{-- Personal Deductions - GSIS - UMID E-Card Plus --}}
+				 {{-- Personal Deductions - GSIS - GSIS H/L --}}
+				@foreach($runningRowTotal['gsisLoop'] as $thisloop)
+				<th>{{number_format($thisloop,2)}}</th>
+				@endforeach 
+
+				<th>{{number_format($runningRowTotal['total_deductions'],2)}}</th> {{-- Total Deductions --}}
+				<th>{{number_format($runningRowTotal['gphilhealth'],2)}}</th> {{-- Government Shares - Philhealth --}}
+				<th>{{number_format($runningRowTotal['retirement'],2)}}</th> {{-- Government Shares - Retirement & Life Insurance Permiums --}}
+				<th>{{number_format($runningRowTotal['pagibighdmf'],2)}}</th> {{-- Government Shares - Pag-ibig HDMF Cont. --}}
+				<th>{{number_format($runningRowTotal['statin'],2)}}</th> {{-- Government Shares - State Ins. --}}
 				<th>-</th> {{-- No. --}}
-				<th>-</th> {{-- Net Amount Received --}}
-				<th>-</th> {{-- Amount Paid --}}
+				<th>{{number_format($runningRowTotal['netamount'],2)}}</th> {{-- Net Amount Received --}}
+				<th>{{number_format($runningRowTotal['amountpaid'],2)}}</th> {{-- Amount Paid --}}
 				<th>-</th> {{-- Signature of Payee --}}
 			</tr>
 		</tfoot>

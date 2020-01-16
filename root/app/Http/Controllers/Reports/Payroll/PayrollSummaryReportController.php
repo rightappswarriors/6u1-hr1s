@@ -82,6 +82,12 @@ class PayrollSummaryReportController extends Controller
 		* @param $r->gen_type
 		* @param $r->pp
 		*/
+		// $data = DB::table('hr_pagibig_sub')->where('cancel',null)->get();
+		// $toRet = [];
+		// foreach($data as $d){
+		// 	array_push($toRet, [$d->id, $d->description, rand(10,100)]);
+		// }
+		// dd(json_encode($toRet));
 		try {
 			# Payroll Info
 			$pi = (object)[];
@@ -97,7 +103,8 @@ class PayrollSummaryReportController extends Controller
 				'inf' => $pi,
 				'record' => $record,
 			];
-
+			// dd($data);
+			// return view('print.reports.payroll.export_payroll_summary_report',$data);
 			return Excel::download(new ExportBlade('print.reports.payroll.export_payroll_summary_report', $data), 'general-payroll-'.date('YmdHis').'.xlsx');
 			// Export2_1::exportBlade('print.reports.payroll.export_payroll_summary_report', $data);
 		} catch (\Exception $e) {
