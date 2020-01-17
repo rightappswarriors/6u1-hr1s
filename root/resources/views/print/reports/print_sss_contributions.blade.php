@@ -28,11 +28,11 @@
           </tr>
         @endif
       <tr>
-        <td colspan="2">Registered Employer Name: <span style="font-weight: bold;">@isset($arrRet) {{ $arrRet[0][3][0]->comp_name }} @endif</span></td>
+        <td colspan="2">Registered Employer Name: <span style="font-weight: bold;">@isset($m99) {{ $m99->comp_name }} @endif</span></td>
         <td style="text-align: right;">Employer SSS No.</td>
       </tr>
        <tr>
-          <td colspan="2"><span style="visibility: hidden;">RERERER</span>Employee Address: <span style="font-weight: bold;">@isset($arrRet) {{ $arrRet[0][3][0]->comp_addr }} @endif </span></td>
+          <td colspan="2"><span style="visibility: hidden;">RERERER</span>Employee Address: <span style="font-weight: bold;">@isset($arrRet) {{ $m99->comp_addr }} @endif </span></td>
        </tr>
     </thead>
     <tbody style="border: 2px solid #000;">

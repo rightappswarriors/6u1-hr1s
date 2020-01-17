@@ -9,7 +9,7 @@
 			<form method="post" action="{{url('reports/sss/find')}}" id="frm-gp">
 				<div class="container">
 					<div class="form-group row">
-						<div class="col-sm-7">
+						<div class="col-sm-5">
 							<select class="form-control mr-2 select2" id="ofc" name="ofc">
 								<option value="" selected="" disabled="">-Select office to generate-</option>
 								@foreach($data[0] as $office)
@@ -17,42 +17,17 @@
 								@endforeach
 							</select>
 						</div>
-						<div class="col-sm-4">
-							
-								<button type="button" class="btn btn-primary " onclick="PrintAllPage();">Print <i class="fa fa-print"></i></button>
-								<i class="fa fa-spin fa-spinner ml-3" id="loadAnimation"></i>
-							
+						<div class="col-sm-5">
+							<select name="pp" class="form-control mr-2" id="pp">
+								<option value="" selected="" disabled="">-Select Payroll Period-</option>
+							</select>
+						</div>
+						<div class="col-sm-2">
+							<button type="button" class="btn btn-primary " onclick="PrintAllPage();">Print <i class="fa fa-print"></i></button>
+							<i class="fa fa-spin fa-spinner ml-3" id="loadAnimation"></i>
 						</div>
 					</div>
-					<div class="form-group row">
-						<div class="row">
-							<div class="col-sm-3">
-								<select style="width: 100%;" class="form-control select2" id="month" name="month">
-									@foreach(Core::Months() as $key => $value)
-									<option value="{{$key}}" {{($key == date('m')) ? 'selected' : ''}}>{{$value}}</option>
-									@endforeach
-								</select>
-							</div>
-							<div class="col-sm-3">	
-								<select style="width: 100%;" class="form-control select2" id="payroll_period" name="payroll_period">
-									<option value="15D">15th day</option>
-									<option value="30D">30th day</option>
-								</select>
-							</div>
-							<div class="col-sm-2">	
-								<select style="width:100%;" class="form-control YearSelector select2" id="year" name="year">
-								</select>
-							</div>
-							<div class="col-sm-4">
-								<select class="form-control select2" style="width: 100%;" id="empstatus" name="empstatus">
-									<option value="" selected="" disabled="">-Select Employee Status-</option>
-									@foreach($data[1] as $empstatus)
-										<option value="{{$empstatus->status_id}}">{{$empstatus->description}}</option>
-									@endforeach
-								</select>
-							</div>	
-						</div>
-					</div>
+					
 				</div>
 			</form>
 		</div>
@@ -94,15 +69,84 @@
 		$('#loadAnimation').hide();	
 		// onchange jquery script for <select id="office">
 		$('#ofc').on('change', function() {
-			table.clear();
+			$('#pp').empty();
+			$('#pp').append('<option value="">'+'-Select Payroll Period-'+'</option>');
 			var ofc_id = $('#ofc :selected').val();
 			var data = { 
                           _token : $('meta[name="csrf-token"]').attr('content'),
                           ofc_id : $('#ofc :selected').val(),
-                          month : $('#month').val(),
-                          payroll_period : $('#payroll_period').val(),
-                      year : $('#year').val(),
 
+                       };
+			// $.ajax({
+			// 	type: "post",
+			// 	url: "{{url('reports/sss/find-sss')}}",
+			// 	data: data,
+			// 	beforeSend: function(){
+			// 	    $('#loadAnimation').show();
+			// 	},
+			// 	success: function(data) {
+			// 		for(let i=0; i < data.length; i++){
+						
+			// 			//data[i][0].civil_status // display user details
+			// 			//data[i][1][0].empshare_ec //payments
+
+			// 			var emp1 = parseFloat((typeof(data[i][1][0]) != 'undefined' ? data[i][1][0].empshare_sc : 0.00));
+			// 			var emp2 = parseFloat((typeof(data[i][1][0]) != 'undefined' ? data[i][1][0].empshare_ec : 0.00));
+			// 			var emp3 = parseFloat((typeof(data[i][1][0]) != 'undefined' ? data[i][1][0].s_ec : 0.00));
+			// 			if(data[i][0].sss == ''){
+			// 				var sss = '0-0-0';
+			// 			}
+			// 			else{
+			// 				var sss = data[i][0].sss;	
+			// 			}
+
+			// 			var sums = emp1 + emp2;
+			// 			data[i][1].empshare_sc //payments
+			// 			data[i][0].empname //employee details
+			// 			table.row.add([
+			// 				sss,
+			// 				data[i][0].empname,
+			// 				emp1,
+			// 				emp2,
+			// 				emp3,
+			// 				sums, 
+			// 			]).draw();
+
+			// 		}
+
+			// 		$('#loadAnimation').hide();		
+			// 	},
+			// });
+		
+		$.ajax({
+				type: "post",
+				url: "{{url('reports/sss/find-sss-pp')}}",
+				data: data,
+				beforeSend: function(){
+				    $('#loadAnimation').show();
+				},
+				success: function(data) {
+					for(let i=0; i < data.length; i++)
+					{
+						var date_from = data[i].date_from;
+						var date_to = data[i].date_to;
+						$('#pp').append('<option value='+'"'+date_from+'|'+date_to+'"'+'>'+date_from+ ' - ' +date_to+ '</option>'); 
+					}
+					
+					$('#loadAnimation').hide();		
+				},
+			});
+
+		});
+
+		$('#pp').on('change', function() {
+			table.clear();
+			var pp_split = $('#pp :selected').val();
+			var pp =  pp_split.split('|');
+			var data = { 
+                          _token : $('meta[name="csrf-token"]').attr('content'),
+                          ofc_id : $('#ofc :selected').val(),
+                          pp : pp,
                        };
 			$.ajax({
 				type: "post",
@@ -112,36 +156,36 @@
 				    $('#loadAnimation').show();
 				},
 				success: function(data) {
+					
 					for(let i=0; i < data.length; i++){
 						
 						//data[i][0].civil_status // display user details
 						//data[i][1][0].empshare_ec //payments
-
-						var emp1 = parseFloat((typeof(data[i][1][0]) != 'undefined' ? data[i][1][0].empshare_sc : 0.00));
-						var emp2 = parseFloat((typeof(data[i][1][0]) != 'undefined' ? data[i][1][0].empshare_ec : 0.00));
-						var emp3 = parseFloat((typeof(data[i][1][0]) != 'undefined' ? data[i][1][0].s_ec : 0.00));
-						if(data[i][0].sss == ''){
+						var name = data[i].firstname + ' ' + data[i].mi + ' ' + data[i].lastname;
+						var emp1 = parseFloat((typeof(data[i]) != 'undefined' ? data[i].sss_cont_b : 0.00));
+						var emp2 = parseFloat((typeof(data[i]) != 'undefined' ? data[i].sss_cont_c : 0.00));
+						var emp3 = parseFloat((typeof(data[i]) != 'undefined' ? data[i].sss_cont_d : 0.00));
+						if(data[i].sss == ''){
 							var sss = '0-0-0';
 						}
 						else{
-							var sss = data[i][0].sss;	
+							var sss = data[i].sss;	
 						}
 
 						var sums = emp1 + emp2;
-						data[i][1].empshare_sc //payments
-						data[i][0].empname //employee details
 						table.row.add([
 							sss,
-							data[i][0].empname,
+							name,
 							emp1,
 							emp2,
 							emp3,
 							sums, 
 						]).draw();
+						
+						console.log(data[i]);
+					}		
 
-					}
-
-					$('#loadAnimation').hide();		
+					$('#loadAnimation').hide();	
 				},
 			});
 		});
