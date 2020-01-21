@@ -141,3 +141,4 @@
 01-16-2020 10:14 | PayrollSummaryReportController | Invalid argument supplied for foreach() (View: C:\xampp\htdocs\6u1-hr1s\root\resources\views\print\reports\payroll\export_payroll_summary_report.blade.php) (00003)
 01-16-2020 10:15 | PayrollSummaryReportController | Invalid argument supplied for foreach() (View: C:\xampp\htdocs\6u1-hr1s\root\resources\views\print\reports\payroll\export_payroll_summary_report.blade.php) (00003)
 01-16-2020 10:15 | PayrollSummaryReportController | Invalid argument supplied for foreach() (View: C:\xampp\htdocs\6u1-hr1s\root\resources\views\print\reports\payroll\export_payroll_summary_report.blade.php) (00003)
+01-21-2020 09:40 | SyncSystemSettings | Undefined property: stdClass::$hy (SSS00001)

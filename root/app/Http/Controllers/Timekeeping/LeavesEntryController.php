@@ -132,7 +132,7 @@ class LeavesEntryController extends Controller
         * @param $r->txt_reason
         * @param $r->mode
         */
-        return dd($r->all());
+        // return dd($r->all());
         $amount = "0.00";
         $lr = null;
 

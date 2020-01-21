@@ -219,60 +219,63 @@
 									</div>
 									<div class="form-group">
 										<div class="row">
-											<div class="col-4">
+											{{-- note: please change to col-4 if AM/PM will be reverted --}}
+											<div class="col-6">
 												<label>Leave Date From:</label>
 											</div>
-											<div class="col-2">
+
+											<div hidden class="col-2">
 												<label>AM:</label>
 											</div>
-											<div class="col-2">
+											<div hidden class="col-2">
 												<label>PM:</label>
 											</div>
-											<div class="col-4">
+											<div class="col-6">
 												<label>Number of Days:</label>
 											</div>
 										</div>
 										<div class="row">
-											<div class="col-4">
+											<div class="col-6">
 												<input type="text" name="dtp_lfrm" id="dtp_lfrm" class="form-control" value="{{date('Y-m-d')}}">
 											</div>
-											<div class="col-2">
+											<div hidden class="col-2">
 												<input type="checkbox" class="form-control" name="fam" id="fam">
 											</div>
-											<div class="col-2">
+											<div hidden class="col-2">
 												<input type="checkbox" class="form-control" name="fpm" id="fpm">
 											</div>
-											<div class="col-4">
+											<div class="col-6">
 												<input type="number" name="txt_no_of_days" id="txt_no_of_days" class="form-control" step=".01" readonly>
 											</div>
 										</div>
 									</div>
 									<div class="form-group">
 										<div class="row">
-											<div class="col-4">
+											{{-- note: please change to col-4 if AM/PM will be reverted --}}
+											<div class="col-6">
 												<label>Leave Date To:</label>
 											</div>
-											<div class="col-2">
+											<div hidden class="col-2">
 												<label>AM:</label>
 											</div>
-											<div class="col-2">
+											<div hidden class="col-2">
 												<label>PM:</label>
 											</div>
-											<div class="col-4">
+											<div class="col-6">
 												<label>Leave with pay?</label>
 											</div>
 										</div>
 										<div class="row">
-											<div class="col-4">
+											<div class="col-6">
 												<input type="text" name="dtp_lto" id="dtp_lto" class="form-control" value="{{date('Y-m-d')}}" required>
 											</div>
-											<div class="col-2">
+											<div hidden class="col-2">
 												<input type="checkbox" class="form-control" name="tam" id="tam">
 											</div>
-											<div class="col-2">
+											<div hidden class="col-2">
 												<input type="checkbox" class="form-control" name="tpm" id="tpm">
 											</div>
-											<div class="col-4">
+											<div class="col-6">
 												<select name="cbo_leave_pay" id="cbo_leave_pay" style="text-transform: uppercase;" class="form-control" {{-- onchange="leavewithpay(this)" --}}>
 													<option value="NO" selected>No</option>
 													<option value="YES">Yes</option>

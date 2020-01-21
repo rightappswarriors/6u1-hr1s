@@ -85,12 +85,14 @@
 								<table class="table table-bordered table-hover" id="dataTable-employee">
 									<col width="15%">
 									<col>
-									<col width="25%">
+									<col width="15%">
+									<col width="10%">
 									<col width="10%">
 									<thead>
 										<th>Employee ID</th>
 										<th>Name</th>
 										<th>Job Title</th>
+										<th>Has been generated</th>
 										<th>Option</th>
 									</thead>
 									<tbody>
@@ -272,7 +274,7 @@
 				success : function(data) {
 					if (data!="error") {
 						if (data!="noemp") {
-							var d = JSON.parse(data); console.log(d);
+							var d = JSON.parse(data);
 							LoadSummaryTable(d);
 							if (d.errors.length>0) {
 								$('#alert-generate-error').collapse('show');
@@ -356,6 +358,7 @@
 				data.empid,
 				data.empname,
 				data.jobtitle,
+				(data.isgenerated ? 'Yes' : 'No'),
 				'<button type="button" class="btn btn-primary btn-spin mr-1" onclick="GenerateIndv(this)"><i class="fa fa-share"></i> <i class="fa fa-server"></i></button>'
 			]).draw();
 			hideErrorDiv();
@@ -577,9 +580,29 @@
 					},
 					success : function(data) {
 						// console.log(data);
-						var d = JSON.parse(data);
+						let d = JSON.parse(data);
 						emp_count = d.length;
-						for (var i = 0; i < d.length; i++) {
+						for (var i = 0; i < d.length; i++) {		
+							$.ajax({
+								type : 'get',
+								url : '{{url('master-file/office/is-Generated-OnDTR')}}',
+								data : {
+									empid:d[i].empid,
+									pp:$('#payroll_period').val(),
+									month: $('#payroll_month').val(),
+									year: $('#payroll_year').val(),
+									gtype : $('#payroll_gen_type').val()
+								},
+								async: false,
+								dataTy : 'json',
+								success : function(data) {
+									if (data!="error") {
+										if (data!="noemp") {
+											d[i].isgenerated = JSON.parse(data);
+										}
+									}
+								},
+							})
 							LoadEmployeeTable(d[i]);
 						}
 					},

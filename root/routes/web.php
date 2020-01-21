@@ -58,6 +58,7 @@
 				Route::post('/delete', 'MFile\OfficeController@delete');
 				// Route::get('/get-employees', 'MFile\OfficeController@getEmployees');
 				Route::get('/get-employees', 'MFile\OfficeController@getEmployees_byEmpStat');
+				Route::get('/is-Generated-OnDTR', 'MFile\OfficeController@isGeneratedDTR');
 			});
 			/* DEPARTMENT/OFFICE */
 			/* DEPARTMENT SECTION */
