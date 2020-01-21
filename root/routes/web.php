@@ -455,6 +455,7 @@
 				Route::prefix('sss')->group(function() {
 					Route::get('/', 'Reports\SSSContributionsController@view');
 					Route::post('/find-sss', 'Reports\SSSContributionsController@find');
+					Route::post('/find-sss-pp', 'Reports\SSSContributionsController@findPayrollPeriod');
 					Route::get('/print', 'Reports\SSSContributionsController@print');
 				});
 

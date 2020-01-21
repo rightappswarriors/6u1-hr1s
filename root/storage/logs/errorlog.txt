@@ -1,5 +1,6 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 10-07-2019 10:20 | GenerateDTRController | Undefined index:  (GDTRCA00000)
 10-07-2019 10:20 | GenerateDTRController | SQLSTATE[23502]: Not null violation: 7 ERROR:  null value in column "empid" violates not-null constraint DETAIL:  Failing row contains (null, null, null, null, 2019-10-07, 10:10:25, 00000049, SYSTEM_ADMIN, null). (SQL: insert into "hr_dtr_sum_hdr" ("empid", "ppid", "date_from", "date_to", "date_generated", "time_generated", "code", "generatedby", "generationtype") values (, , , , 2019-10-07, 10:10:25, 00000049, SYSTEM_ADMIN, )) (GDTRCB00003)
 10-07-2019 17:51 | GenerateDTRController | Undefined index:  (GDTRCA00000)
@@ -142,3 +143,5 @@
 01-16-2020 10:15 | PayrollSummaryReportController | Invalid argument supplied for foreach() (View: C:\xampp\htdocs\6u1-hr1s\root\resources\views\print\reports\payroll\export_payroll_summary_report.blade.php) (00003)
 01-16-2020 10:15 | PayrollSummaryReportController | Invalid argument supplied for foreach() (View: C:\xampp\htdocs\6u1-hr1s\root\resources\views\print\reports\payroll\export_payroll_summary_report.blade.php) (00003)
 01-21-2020 09:40 | SyncSystemSettings | Undefined property: stdClass::$hy (SSS00001)
+=======
+>>>>>>> 25a6edc5522e59a928d03d61fc9495beeacf17f8

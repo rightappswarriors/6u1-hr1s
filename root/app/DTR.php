@@ -24,11 +24,25 @@ class DTR extends Model
     {
     	try {
 			$schema = env('DB_SCHEMA');
-			$sql = Core::sql("SELECT work_date, array_to_string(array_agg(time_log), ',') time_log, empid, array_to_string(array_agg(status), ',') status, array_to_string(array_agg(logs_id), ',') logs_id FROM ".DB::raw($schema).".hr_tito2 hr_tito2 WHERE work_date >= '".date('Y-m-d')."' GROUP BY hr_tito2.work_date, empid ORDER BY hr_tito2.work_date ASC LIMIT 5");
+			$sql = Core::sql("SELECT work_date, array_to_string(array_agg(time_log), ',') time_log, empid, array_to_string(array_agg(status), ',') status, array_to_string(array_agg(logs_id), ',') logs_id FROM ".DB::raw($schema).".hr_tito2 hr_tito2 WHERE status = '1' AND work_date >= '".date('Y-m-d')."' GROUP BY hr_tito2.work_date, empid ORDER BY hr_tito2.work_date ASC");
 			return $sql;
 		} catch (\Exception $e) {
 			return [];
 		}	
+    }
+    public static function GetTimedOutToday()
+    {
+        try 
+        {
+            $schema = env('DB_SCHEMA');
+            $sql = Core::sql("SELECT work_date, array_to_string(array_agg(time_log), ',') time_log, empid, array_to_string(array_agg(status), ',') status, array_to_string(array_agg(logs_id), ',') logs_id FROM ".DB::raw($schema).".hr_tito2 hr_tito2 WHERE status = '0' AND work_date >= '".date('Y-m-d')."' GROUP BY hr_tito2.work_date, empid ORDER BY hr_tito2.work_date ASC");
+            return $sql;        
+        } 
+        catch (Exception $e) 
+        {
+            return [];
+        }
+       
     }
 
     /**

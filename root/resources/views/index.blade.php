@@ -13,6 +13,22 @@
       .hide {
         display: none;
       }
+      .my-custom-scrollbar {
+      position: relative;
+      height: 200px;
+      overflow: auto;
+      }
+      .table-wrapper-scroll-y {
+      display: block;
+      }
+      #nav-tab a{
+        color: #fff;
+        font-weight: bold;
+        border-bottom: 0px;
+      }
+      #nav-tab .active{
+        background-color: transparent;
+      }
     </style>
 @endsection
 
@@ -39,7 +55,7 @@
               $leave_amount = array(
                 \Carbon\Carbon::parse(date("Y-m-d"))->format('M d, Y'),
                 ($data[1]==null)?"None":$data[1]->description,
-                $data[2],
+                $data[5],
                 ($data[3]==null)?"None":count($data[3]),
               );
               $leave_icon = array(
@@ -51,7 +67,7 @@
               $leave_text = array(
                 "date today",
                 "upcoming holiday",
-                "timed-in employees",
+                "currently timed-in",
                 "employees on leave",
               );
               $leave_link = array(
@@ -96,6 +112,7 @@
               $currentYear = date('Y');
               $numberOfDays = 5;
             @endphp
+
             <div class="row">
               <div class="col">
                 {{-- <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -128,40 +145,85 @@
                     </div>
                   </div>
                   @endfor
-                </div>                <div class="row">
+                </div>
+                <div class="row">
                   <div class="col mb-3">
                     <div class="dashboard-menu db-bg-boxColor" style="height: 100%;">
                       <div class="dashboard-menu-header">
-                        <h6><strong>Daily Time Record</strong></h6>
+                        <div class="form-row">
+                          <div class="col-sm-6">
+                            <h6 class="mt-3"><strong>Daily Time Record</strong></h6>
+                          </div>
+                          <div class="col-sm-6">
+                            <nav>
+                              <div class="nav nav-tabs btn-sm" id="nav-tab" role="tablist" style="width: 100%;">
+                                <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-home" role="tab" aria-controls="nav-home" aria-selected="true">Time In</a>
+                                <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-profile" role="tab" aria-controls="nav-profile" aria-selected="false">Time Out</a>
+                              </div>
+                            </nav>
+                          </div>
+                        </div>   
                       </div>
                       <div class="dashboard-menu-body">
-                        <div class="table-responsive">
-                          <table class="table table-bordered table-sm">
-                            @if(count($data[0])!=0)
-                            <thead>
-                              <tr>
-                                <th>Date</th>
-                                <th>Employee Name</th>
-                                <th>Time In</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              @foreach($data[0] as $dtr)
-                              <tr>
-                                <td>{{$dtr->work_date}}</td>
-                                <td>{{Employee::Name($dtr->empid)}}</td>
-                                <td>{{$dtr->time_log}}</td>
-                              </tr>
-                              @endforeach
-                            </tbody>
-                            @else
-                            <tbody>
-                              <tr>
-                                <td class="text-center">No record.</td>
-                              </tr>
-                            </tbody>
-                            @endif
-                          </table>
+                        <div class="table-wrapper-scroll-y my-custom-scrollbar">
+                          <div class="tab-content" id="nav-tabContent">
+                            <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
+                              <table class="table table-bordered table-sm">
+                                @if(count($data[0])!=0)
+                                <thead>
+                                  <tr>
+                                    <th>Date</th>
+                                    <th>Employee Name</th>
+                                    <th>Time In</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  @foreach($data[0] as $dtr)
+                                  <tr>
+                                    <td>{{$dtr->work_date}}</td>
+                                    <td>{{Employee::Name($dtr->empid)}}</td>
+                                    <td>{{$dtr->time_log}}</td>
+                                  </tr>
+                                  @endforeach
+                                </tbody>
+                                @else
+                                <tbody>
+                                  <tr>
+                                    <td class="text-center">No record.</td>
+                                  </tr>
+                                </tbody>
+                                @endif
+                              </table>
+                            </div>
+                            <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
+                              <table class="table table-bordered table-sm">
+                                @if(count($data[4])!=0)
+                                <thead>
+                                  <tr>
+                                    <th>Date</th>
+                                    <th>Employee Name</th>
+                                    <th>Time Out</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  @foreach($data[4] as $dtr)
+                                  <tr>
+                                    <td>{{$dtr->work_date}}</td>
+                                    <td>{{Employee::Name($dtr->empid)}}</td>
+                                    <td>{{$dtr->time_log}}</td>
+                                  </tr>
+                                  @endforeach
+                                </tbody>
+                                @else
+                                <tbody>
+                                  <tr>
+                                    <td class="text-center">No record.</td>
+                                  </tr>
+                                </tbody>
+                                @endif
+                              </table>
+                            </div>
+                          </div>
                         </div>
                       </div>
                       <div class="dashboard-menu-icon">
@@ -175,16 +237,18 @@
                   <div class="col mb-3">
                     <div class="dashboard-menu db-bg-boxColor" style="height: 100%;">
                       <div class="dashboard-menu-header">
-                        <h6><strong>STATUS OF LEAVE APPLICATION</strong></h6>
+                        <h6 class="mt-3"><strong>Status Of Leave Application</strong></h6>
                       </div>
                       <div class="dashboard-menu-body">
-                        <table class="table table-bordered table-sm">
-                          <tbody>
-                              <tr>
-                                <td class="text-center">No application.</td>
-                              </tr>
-                            </tbody>
-                        </table>
+                        <div class="table-wrapper-scroll-y my-custom-scrollbar">
+                          <table class="table table-bordered table-sm">
+                            <tbody>
+                                <tr>
+                                  <td class="text-center">No application.</td>
+                                </tr>
+                              </tbody>
+                          </table>
+                        </div>
                       </div>
                       <div class="dashboard-menu-icon">
                         <i class="fa fa-fw fa-file-text fa-5x"></i>
@@ -294,6 +358,10 @@
               selected_card[i].classList.remove('hide');
             }
           }
-
+          $(document).ready(function () {
+            
+            $('#dtBasicExample').dataTable({bFilter: false, pageLength: 5});
+            $('.dataTables_length').css('display', 'none');
+          });
         </script>
 @endsection

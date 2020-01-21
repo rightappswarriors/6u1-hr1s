@@ -45,6 +45,9 @@
     <!-- Custom Time Picker -->
     <link rel="stylesheet" href="{{asset('css/bootstrap-timepicker.css')}}">
 
+    {{-- Custom Select 2 --}}
+    <link rel="stylesheet" href="{{ asset('css/select2.min.css') }}">
+
     <style>
         .parsley-errors-list {
             color:red;
@@ -173,6 +176,7 @@
     <script type="text/javascript" src="{{asset('js/exif.js')}}"></script>
     <script type="text/javascript" src="{{asset('js/multiple-select.js')}}"></script>
     <script type="text/javascript" src="{{asset('js/bootstrap-timepicker.js')}}"></script>
+    <script type="text/javascript" src="{{ asset('js/select2.min.js') }}"></script>
     
     @include('include.js_dateoption_config')
     <script type="text/javascript">
@@ -231,7 +235,9 @@
             }
         }
     </script>
-
+    <script type="text/javascript">
+        $('select').select2();
+    </script>
     @yield('to-bottom')
 </body>
 </html>
