@@ -667,7 +667,7 @@
 			// dd(Payroll::WithHoldingTax($rate, $tax_bracket));
 			// dd(date('d-m-Y h A', strtotime("24:00")));
 			// dd(Core::ToHourOnly("9:20"));
-			dd(round(0, 2));
+			dd(Timelog::ValidateLog_OTHrs2("20:00"));
 		});
 
 		/* NOTIFICATION */

@@ -79,6 +79,8 @@
 	$month = date('F');
 	$year = date('Y');
 	$rate = number_format(($record[0]->pay_rate /2), 2);
+	$overtime = json_decode($record[0]->total_overtime_arr);
+	$holiday = json_decode($record[0]->holiday_arr);
 @endphp
 
 @section('body') 
@@ -89,6 +91,7 @@
 		# Column 6
 		# Rows 11
 	 --}}
+
 	<div style="width: 100%;">
 		<table class="c-table">
 			<colgroup>
@@ -127,7 +130,7 @@
 				<td colspan="4">
 					<div style="margin: 7px;">
 						<p style="text-indent: .3in;text-align: justify;">Payment of overtime pay of {{"MR/MS/MRS"}}. @isset($record[0]) {{ $record[0]->empname }} @endif for the month of {{$month}} {{ $year }} in the amount {{"<AMOUNT_IN_WORDS>"}}.</p><br>
-						@if(count($ot_timelogs) > 0)
+						@if(isset($overtime))
 						<p><b><u>Regular Days:</u></b></p>
 						<p style="text-indent: .3in;"><b><i>Basic Salary: @isset($record[0]) {{ $rate }} @endif/22days/8hours+25% = {{$regular_day_rate}}</i></b></p>
 						<table class="tbl-no-border" style="margin-left: .5in; width: 93%;">
@@ -136,21 +139,21 @@
 							<col width="10%">
 							<tbody>
 								@php
-									$ot_t_total_rendered = 0;
+									$ot_t_total_rendered = 0.00;
 								@endphp
-								@foreach($ot_timelogs as $ot_t) 
-								@php
-									$ot_t_total_rendered += $ot_t['rendered'];
-								@endphp
+								@foreach($overtime as $ot_t) 
 									<tr>
-										<td width="45%" style="text-align: right;">{{ $ot_t['date'] }} - {{ $ot_t['timelog1'] }} {{ $ot_t['timelog2'] }} =</td>
-										<td style="text-align: right;">{{ $ot_t['rendered'] }} @if($ot_t['rendered'] <= 1) hour @else hours @endif</td>
+										<td width="45%" style="text-align: right;">{{Date('F j, Y',strtotime($ot_t[0]))}} - {{Date('g:i A',strtotime($ot_t[1][0]))}} - {{Date('g:i A',strtotime($ot_t[1][1]))}} = {{$ot_t[2]}} hours</td>
+										<?php 
+											$ot_t_total_rendered += Core::ToHours($ot_t[2]);
+										?>
+										{{-- <td style="text-align: right;">{{ $ot_t['rendered'] }} @if($ot_t['rendered'] <= 1) hour @else hours @endif</td> --}}
 										<td></td>
 									</tr>
 								@endforeach
 								<tr>
 									<td width="45%" style="text-align: right;">P 146.62 x {{$ot_t_total_rendered}} =</td>
-									<td style="text-align: right;">{{$regular_day_rate}}</td>
+									<td style="text-align: right;">{{146.62 * $ot_t_total_rendered}}</td>
 									<td></td>
 								</tr>
 								<tr>
@@ -159,11 +162,52 @@
 									<td style="border-bottom: 1px solid black!important;"></td>
 								</tr>
 								<tr>
-									<td colspan="3" style="text-align: right;">P 6,304.66</td>
+									<td colspan="3" style="text-align: right;">₱ {{146.62 * $ot_t_total_rendered}}</td>
 								</tr>
 							</tbody>
 						</table>
 						@endif
+
+
+						@if(isset($holiday))
+						<p><b><u>Holiday:</u></b></p>
+						<p style="text-indent: .3in;"><b><i>Basic Salary: @isset($record[0]) {{ $rate }} @endif/22days/8hours+50% = {{$regular_day_rate}}</i></b></p>
+						<table class="tbl-no-border" style="margin-left: .5in; width: 93%;">
+							<col>
+							<col width="15%">
+							<col width="10%">
+							<tbody>
+								@php
+									$ot_t_total_rendered_holiday = 0.00;
+								@endphp
+								@foreach($holiday as $ot_t) 
+									<tr>
+										<td width="45%" style="text-align: right;">{{Date('F j, Y',strtotime($ot_t[0]))}} - {{Date('g:i A',strtotime($ot_t[1][0]))}} - {{Date('g:i A',strtotime($ot_t[1][1]))}} = {{$ot_t[2]}} hours</td>
+										<?php 
+											$ot_t_total_rendered_holiday += Core::ToHours($ot_t[2]);
+										?>
+										{{-- <td style="text-align: right;">{{ $ot_t['rendered'] }} @if($ot_t['rendered'] <= 1) hour @else hours @endif</td> --}}
+										<td></td>
+									</tr>
+								@endforeach
+								<tr>
+									<td width="45%" style="text-align: right;">P 146.62 x {{$ot_t_total_rendered_holiday}} =</td>
+									<td style="text-align: right;">{{146.62 * $ot_t_total_rendered_holiday}}</td>
+									<td></td>
+								</tr>
+								<tr>
+									<td width="45%" style="text-align: right;">P 146.62/60 x 0 =</td>
+									<td style="text-align: right; border-bottom: 1px solid black!important;">0</td>
+									<td style="border-bottom: 1px solid black!important;"></td>
+								</tr>
+								<tr>
+									<td colspan="3" style="text-align: right;">₱ {{146.62 * $ot_t_total_rendered_holiday}}</td>
+								</tr>
+							</tbody>
+						</table>
+						@endif
+
+
 						@if(count($legal_timelogs) > 0 || count($special_timelogs) > 0)
 						<p><b><u>Holidays:</u></b></p>
 						<p style="text-indent: .3in;"><b><i>Basic Salary: @isset($record[0]) {{ $rate }} @endif/22days/8hours+50% = {{$holiday_rate}}</i></b></p>

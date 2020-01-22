@@ -155,7 +155,7 @@ class PayrollSummaryReportController extends Controller
 		# OT Regular Day
 		$days_worked_arr = json_decode($record[0]->total_overtime_arr);
 		$ot_timelogs = [];
-		if (count($days_worked_arr) > 0) {
+		if (isset($days_worked_arr)) {
 			for ($i=0; $i < count($days_worked_arr); $i++) { 
 				list($date, $timelog, $rendered) = $days_worked_arr[$i]; # [date, timelog, rendered]
 				# May 2, 2019 - 6:00pm - 9:00pm 10:00pm - 11:00pm = 4 hours

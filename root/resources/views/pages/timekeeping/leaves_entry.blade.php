@@ -171,7 +171,7 @@
 
 @section('to-modal')
 	<!-- Add Modal -->
-	<div class="modal fade" id="modal-pp" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	<div class="modal fade" id="modal-pp" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
 		<div class="modal-dialog" role="document">
 			<div class="modal-content">
 				<div class="modal-header">
@@ -267,7 +267,7 @@
 										</div>
 										<div class="row">
 											<div class="col-6">
-												<input type="text" name="dtp_lto" id="dtp_lto" class="form-control" value="{{date('Y-m-d')}}" required>
+												<input type="text" name="dtp_lto" id="dtp_lto" class="form-control" value="{{date('Y-m-d')}}">
 											</div>
 											<div hidden class="col-2">
 												<input type="checkbox" class="form-control" name="tam" id="tam">
@@ -309,6 +309,8 @@
 						</span>
 						<span class="DeleteMode">
 							<p>Are you sure you want to delete <strong><span id="TOBEDELETED" style="color:red"></span></strong> from Leave Entry list?</p>
+							<input type="hidden" name="noofdays">
+							<input type="hidden" name="type">
 						</span>
 					</form>
 				</div>
@@ -460,10 +462,10 @@
 				data.no_of_days,
 				data.leave_pay,
 				// data.leave_amount
-				'<button type="button" class="btn btn-primary" id="opt-update" onclick="row_update(this)">'+
-				'	<i class="fa fa-edit"></i>'+
-				'</button>'+
-				'<button type="button" class="btn btn-danger" id="opt-delete" onclick="row_delete(this)">'+
+				// '<button type="button" class="btn btn-primary" id="opt-update" onclick="row_update(this)">'+
+				// '	<i class="fa fa-edit"></i>'+
+				// '</button>'+
+				'<button type="button" class="btn btn-danger" leavetype="'+data.leave_type+'" days="'+data.no_of_days+'" id="opt-delete" onclick="row_delete(this)">'+
 				'	<i class="fa fa-trash"></i>'+
 				'</button',
 
@@ -658,6 +660,7 @@
 					}
 				});
 				$('#ModalLabel').text("New Leave Entry");
+				// $("#cbo_leave").attr('required',true);
 				$('#frm-pp').attr('action', '{{url('timekeeping/leaves-entry?mode=new')}}');
 				$('#cbo_employee_txt').val($('#tito_emp option:selected').text());
 				$('#cbo_employee').val($('#tito_emp').val());
@@ -710,7 +713,10 @@
 			selected_row = $($(obj).parents()[1]);
 			if (ValidateSearchFrm()) {
 				if (selected_row!=null) {
+					$('[name=noofdays]').val($(obj).attr('days'));
+					$('[name=type]').val($(obj).attr('leavetype'));
 					$('#ModalLabel').text("Delete Leave Entry");
+					// $("#cbo_leave").removeAttr('required');
 					$('#txt_code').val(selected_row.children()[0].innerText);
 					$('#frm-pp').attr('action', '{{url('timekeeping/leaves-entry/delete')}}');
 					OpenModal('.DeleteMode');
