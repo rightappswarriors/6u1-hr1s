@@ -275,6 +275,7 @@
 				Route::post('/find-emp-office', 'Timekeeping\TimeLogEntryController@get_emp');
 			});
 			/* TIMELOG ENTRY */
+
 			/* LEAVES ENTRY */
 			Route::prefix('leaves-entry')->group(function() {
 				Route::get('/', 'Timekeeping\LeavesEntryController@view');
@@ -404,6 +405,24 @@
 		// Route::prefix('reports')->group(function() {
 
 			Route::prefix('timekeeping')->group(function() {
+
+
+				/* TIMELOG ENTRY */
+				Route::prefix('timeout-dtr')->group(function() {
+					Route::get('/', 'Timekeeping\TimeLogEntryController@viewtimeout');
+					Route::post('/batch-time-log-info', 'Timekeeping\TimeLogEntryController@loadBatchTimeLogsInfo');
+					Route::post('/add-log', 'Timekeeping\TimeLogEntryController@addLog');
+					Route::post('/delete-log', 'Timekeeping\TimeLogEntryController@deleteLog');
+					Route::post('/delete-all-log', 'Timekeeping\TimeLogEntryController@deleteLog_All');
+					Route::post('/get-log', 'Timekeeping\TimeLogEntryController@GetLog');
+					Route::post('/edit-log', 'Timekeeping\TimeLogEntryController@EditLog');
+
+					Route::post('/find-id', 'Timekeeping\TimeLogEntryController@FindID');
+					Route::post('/find-emp-office', 'Timekeeping\TimeLogEntryController@get_emp');
+				});
+				/* TIMELOG ENTRY */
+
+
 				/*TIMEKEEPING NEW*/
 				Route::prefix('employee-dtr')->group(function() {
 					Route::get('/', 'Reports\PrintEmployeeDTRController@view2');

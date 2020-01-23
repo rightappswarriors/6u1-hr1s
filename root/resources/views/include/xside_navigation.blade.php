@@ -207,6 +207,10 @@
             {{-- <a href="{{url('reports/timekeeping/EmployeeDTR')}}">Print Employee DTR</a> --}}
             <a href="{{url('reports/timekeeping/employee-dtr')}}">Print Employee DTR</a>
           </li>
+          <li id="reportstimekeepingtimeout-dtr">
+            {{-- <a href="{{url('reports/timekeeping/EmployeeDTR')}}">Print Employee DTR</a> --}}
+            <a href="{{url('reports/timekeeping/timeout-dtr')}}">Time out</a>
+          </li>
           {{-- <li id="reportstimekeepingEmployeeDTRSummary"> --}}
           <li id="reportstimekeepingemployee-dtr-summary">
             {{-- <a href="{{url('reports/timekeeping/EmployeeDTRSummary')}}">Print Employee DTR Summary</a> --}}

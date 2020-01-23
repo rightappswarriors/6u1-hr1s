@@ -168,3 +168,4 @@
 01-22-2020 15:58 | GenerateDTRController | Object of class stdClass could not be converted to string (GDTRCB00000)
 01-22-2020 15:58 | GenerateDTRController | Object of class stdClass could not be converted to string (GDTRCB00000)
 01-22-2020 17:04 | GenerateDTRController | Object of class stdClass could not be converted to string (GDTRCB00000)
+01-23-2020 11:11 | TimeLogEntryController | SQLSTATE[23505]: Unique violation: 7 ERROR:  duplicate key value violates unique constraint "hr_tito2_pkey" DETAIL:  Key (work_date, empid, time_log)=(2020-01-23, 1523123, 11:09) already exists. (SQL: insert into "hr_tito2" ("work_date", "time_log", "empid", "status", "source", "logs_id") values (2020-01-23, 11:09, 1523123, 0, M, 00000596)) (TLEC00002)
