@@ -540,5 +540,18 @@
 			$('#da-date1').html('');
 			$('#da-date2').html('');
 		}
+
+		@if(isset($misc[0]) && isset($misc[1]) && $misc[2])
+		$(function(){
+			$('#tito_dateStrt, #tito_dateEnd').val('{{$misc[0]}}').trigger('change');
+			$('#office').val('{{$misc[1]}}').trigger('change');
+			setTimeout(function() {
+				$('#tito_emp').val('{{$misc[2]}}').trigger('change');
+			}, 100);
+			setTimeout(function() {
+				$('#frm-batchtimeloginfo').submit();
+			}, 500);
+		})
+		@endif
 	</script>
 @endsection

@@ -263,7 +263,7 @@
 			/* UPLOAD DTR */
 			/* TIMELOG ENTRY */
 			Route::prefix('timelog-entry')->group(function() {
-				Route::get('/', 'Timekeeping\TimeLogEntryController@view');
+				Route::get('/{workdate?}/{office?}/{empid?}', 'Timekeeping\TimeLogEntryController@view');
 				Route::post('/batch-time-log-info', 'Timekeeping\TimeLogEntryController@loadBatchTimeLogsInfo');
 				Route::post('/add-log', 'Timekeeping\TimeLogEntryController@addLog');
 				Route::post('/delete-log', 'Timekeeping\TimeLogEntryController@deleteLog');

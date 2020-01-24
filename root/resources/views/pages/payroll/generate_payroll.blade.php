@@ -8,6 +8,7 @@
 		<div class="card-body">
 			<form method="post" action="{{url('payroll/generate-payroll/find-dtr')}}" id="frm-gp">
 				{{csrf_field()}}
+				<input type="hidden" name="isForDisplay">
 				<div class="form-group">
 					<div class="form-inline">
 						<select class="form-control mr-2" id="ofc" name="ofc">

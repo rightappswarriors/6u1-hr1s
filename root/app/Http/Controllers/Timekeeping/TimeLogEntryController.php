@@ -22,11 +22,12 @@ class TimeLogEntryController extends Controller
     	$this->employees = Employee::Load_Employees();
     }
 
-    public function view()
+    public function view($workdate = null, $office = null, $empid = null)
     {
+        $misc = [$workdate, $office, $empid];
     	$data = [$this->employees, Office::get_all()];
         // dd($data);
-    	return view($this->page, compact('data'));
+    	return view($this->page, compact('data','misc'));
     }
 
     public function viewtimeout()
@@ -36,12 +37,12 @@ class TimeLogEntryController extends Controller
         $timeLogs = DB::table('hr_tito2')->join('hr_employee','hr_tito2.empid','hr_employee.empid')->orderBy('work_date','ASC')->get();
         if(isset($timeLogs)){
             foreach ($timeLogs as $key => $value) {
-                $dataRecorded[$value->empid][$value->work_date][] = [$value->status,ucfirst($value->lastname).','.ucfirst($value->firstname), $value->time_log, $value->source];
+                $dataRecorded[$value->empid][$value->work_date][] = [$value->status,ucfirst($value->lastname).','.ucfirst($value->firstname), $value->time_log, $value->source, $value->empid, $value->department];
             }
 
             foreach($dataRecorded as $keys => $val){
-                $ones = $zero = 0;
-                foreach($val as $key => $value){
+                foreach($val as $dateKey => $value){
+                    $ones = $zero = 0;
                     foreach ($value as $trueData) {
                         if($trueData[0] == 1){
                             $ones++;
@@ -50,9 +51,10 @@ class TimeLogEntryController extends Controller
                             $zero++;
                         }
                     }
-                }
-                if($ones != $zero){
-                    $filtered[$keys][] = [$key,$trueData[1], $trueData[2], $trueData[3], $key];
+                    if($ones != $zero){
+                        $filtered[$keys][] = [$dateKey,$trueData[1], $trueData[2], $trueData[3], $key, $trueData[4], $trueData[5]];
+                    }
+
                 }
             }
         }

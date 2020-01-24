@@ -1,5 +1,10 @@
 @extends('layouts.user')
-
+<style>
+	.custom-ui-widget-header-warning {
+	  background: #EBCCCC;
+	  font-size: 1em;
+	}
+</style>
 @section('to-body')
 	<div class="card">
 		<div class="card-header">
@@ -198,6 +203,9 @@
 					</div>
 				</div>
 			</div>
+			<div id="dialog" title="Unresolved Timein/Timeout">
+			  <p>DTR has unresolved tim in/ time outs. Please refer to <a target="_blank" href='{{url('reports/timekeeping/timeout-dtr')}}'><u>this link</u></a></p>
+			</div>
 		</div>
 	</div>
 @endsection
@@ -283,10 +291,23 @@
 								}
 								$('#alert-generate-error-body').append(
 									'<div class="card-body">'+
-										'<a href="{{url('timekeeping/timelog-entry')}}" style="color:white;"><i class="fa fa-hand-o-right"></i> Check missing time logs</a>'+
+										'<a href="{{url('reports/timekeeping/timeout-dtr')}}" style="color:white;"><i class="fa fa-hand-o-right"></i> Check missing time logs</a>'+
 									'</div>'
 								)
-								alert("DTR has errors. Cannot be saved.");
+								// alert("DTR has unresolved tim in/ time outs. Please refer to <a href='{{url('reports/timekeeping/timeout-dtr')}}'></a>");
+								$( "#dialog" ).dialog(
+									{
+						             minWidth: 400,
+						             minHeight: 'auto',
+						             autoOpen: false,
+						             dialogClass: 'custom-ui-widget-header-warning',
+						             position: {
+						               my: 'center',
+						               at: 'center'
+						             }
+						           }
+								);
+								$("#dialog").dialog("open").prev().css('background', '#D9534F').css('color', '#eee');
 							}
 						} else {
 							alert("No employee selected.");

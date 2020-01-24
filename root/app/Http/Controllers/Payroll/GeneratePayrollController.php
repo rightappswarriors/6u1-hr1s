@@ -64,6 +64,7 @@ class GeneratePayrollController extends Controller
             $return_val->search = date('Y-m-d', strtotime($pp->from))." to ".date('Y-m-d', strtotime($pp->to));
             // $return_val->parameters = $r->all();
             $return_val->dtr_summaries = Core::sql($sql.$con);
+            // $return_val->generateReview = self::generate_payroll($r);
             $return_val->payroll_history = Core::sql("SELECT pr.*, CONCAT(emp.lastname, ', ', emp.firstname) AS empname FROM (SELECT a.*, b.date_generated, b.time_generated FROM hris.hr_emp_payroll3 a INNER JOIN hris.hr_dtr_sum_hdr b ON a.dtr_sum_id = b.code) pr INNER JOIN ($emp_sql) emp ON pr.empid = emp.empid");
             return json_encode($return_val);
         } catch (\Exception $e) {
@@ -91,6 +92,7 @@ class GeneratePayrollController extends Controller
         * @param $r->year
         * @param $r->payroll_period
         * @param $r->gen_type
+        * @param $r->isForDisplay (boolean)
         *
         * Modules within this function is divided by different different methods
         * Please read the comments
@@ -280,7 +282,7 @@ class GeneratePayrollController extends Controller
                                             
                                             default:
                                                 # Error retrieving leave type
-                                                ErrorCode::Generate('controller', 'GeneratePayrollController', 'B00004-HOT-'.$d->empid, $e->getMessage());
+                                                ErrorCode::Generate('controller', 'GeneratePayrollController', 'B00004-HOT-'.$d->empid, 'Type not found');
                                                 array_push($errors, 'B00004-HOT-'.$d->empid."-".$j.": Holiday type not found.");
                                                 break;
                                         }
@@ -600,9 +602,14 @@ class GeneratePayrollController extends Controller
                         ];
 
                         $data = ['info' => $info, 'todbs' => $todbs, 'updateLines' => $updateLines];
-                        $response = $this->UpdatePayroll2($data, $info['payroll_version']);
-                        if ($response!="ok") {
-                            array_push($errors, 'B00005-'.$d->empid.":".$response);
+                        // for saving 
+                        if(!isset($r->isForDisplay)){
+                            $response = $this->UpdatePayroll2($data, $info['payroll_version']);
+                            if ($response!="ok") {
+                                array_push($errors, 'B00005-'.$d->empid.":".$response);
+                            }
+                        } else {
+                            return $data;
                         }
                     } catch (\Exception $e) {
                         ErrorCode::Generate('controller', 'GeneratePayrollController', 'B00003-'.$d->empid, $e->getMessage());
