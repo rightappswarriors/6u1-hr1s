@@ -137,4 +137,10 @@ class OfficeController extends Controller
     {
         return Office::OfficeEmployees_byEmpStat($r->ofc_id, $r->emp_status);
     }
+
+    public function isGeneratedDTR(Request $r)
+    {
+        // return $r->all();
+        return Employee::isGeneratedOnDTR($r->empid, $r->month, $r->pp, $r->year, $r->gtype);
+    }
 }

@@ -132,7 +132,7 @@ class LeavesEntryController extends Controller
         * @param $r->txt_reason
         * @param $r->mode
         */
-        return dd($r->all());
+        // return dd($r->all());
         $amount = "0.00";
         $lr = null;
 
@@ -169,8 +169,8 @@ class LeavesEntryController extends Controller
             Core::Set_Alert('warning', "Invalid dates.");
             return back();
         }
-
-        $leavepay_mode = ((strtoupper($r->cbo_leave_pay) == "YES" ? true : false));
+        $leavepay_mode = true;
+        // $leavepay_mode = ((strtoupper($r->cbo_leave_pay) == "YES" ? true : false));
         switch ($r->mode) {
             case 'new':
                 if (count(Leave::GetLeaveRecord($r->cbo_employee, $r->dtp_lfrm, $r->dtp_lto)) > 0) {
@@ -267,14 +267,15 @@ class LeavesEntryController extends Controller
                 return back();
             }
             DB::table(Leave::$tbl_name)->where(Leave::$pk, $r->txt_code)->update($data);
+            DB::table('hr_emp_leavecount')->where([['empid', $lr->empid],['leave_type',$r->type]])->update(['count' => $elc->count - $r->noofdays]);
             if ($leavepay_mode) {
                 $Update_LeaveLimit = EmployeeLeaveCount::Update_LeaveLimit($lr->leave_type, $lr->empid, (float)$lr->no_of_days, '-');
-                if ($Update_LeaveLimit!="ok") {
-                    $msg = 'An error occurred when updating leave limit.';
-                    ErrorCode::Generate('controller', 'LeavesEntryController', '00007', $msg);
-                    Core::Set_Alert('danger', $msg);
-                    return back();
-                }
+                // if ($Update_LeaveLimit!="ok") {
+                //     $msg = 'An error occurred when updating leave limit.';
+                //     ErrorCode::Generate('controller', 'LeavesEntryController', '00007', $msg);
+                //     Core::Set_Alert('danger', $msg);
+                //     return back();
+                // }
             }
             Core::Set_Alert('success', 'Successfully removed a Leaves Entry.');
             return back();

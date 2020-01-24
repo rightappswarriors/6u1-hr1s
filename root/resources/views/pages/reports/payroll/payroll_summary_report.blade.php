@@ -204,7 +204,7 @@
 				data.empname,
 				data.date_generated+" at "+data.time_generated,
 				data.date_from+" to "+data.date_to,
-				'<button type="button" class="btn btn-primary mr-2" onclick="PrintPayslip(this);" data="'+data.emp_pay_code+'"><i class="fa fa-print"></i></button>',
+				'<button type="button" title="View Payslip" class="btn btn-primary mr-2" onclick="PrintPayslip(this);" data="'+data.emp_pay_code+'"><i class="fa fa-print"></i></button>',
 			]).draw();
 		}
 

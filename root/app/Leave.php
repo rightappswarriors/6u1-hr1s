@@ -67,7 +67,7 @@ class Leave extends Model
     public static function GetLeaveRecord($empid, String $dateFrom, String $dateTo)
     {
     	try {
-    		return DB::table('hr_leaves')->whereBetween('leave_from', [$dateFrom, $dateTo])->where('empid', $empid)->get();
+    		return DB::table('hr_leaves')->whereBetween('leave_from', [$dateFrom, $dateTo])->where([['empid', $empid],['cancel','<>','Y']])->get();
 
     	} catch (\Exception $e) {
     		return $e->getMessage();

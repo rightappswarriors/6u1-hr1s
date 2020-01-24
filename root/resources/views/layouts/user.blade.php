@@ -236,7 +236,7 @@
         }
     </script>
     <script type="text/javascript">
-        $('select').select2();
+        $('select').select2({ width: '100%' })
     </script>
     @yield('to-bottom')
 </body>

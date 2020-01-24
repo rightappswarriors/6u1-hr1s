@@ -139,7 +139,7 @@ class Timelog extends Model
         * Must be in h:m:s format and 24 hours
         * @return "hh:mm:ss"
         */
-        return "01:00";
+        return "00:59";
     }
 
     public static function ValidateLog_AM(string $time)
@@ -181,6 +181,20 @@ class Timelog extends Model
         * @return bolean true / false
         */
         if (strtotime(Core::GET_TIME_TOTAL([self::ReqTimeOut_2(), self::MinReqOTHrs()])) <= strtotime($time)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public static function ValidateLog_OTHrs2(string $time)
+    {
+        /**
+        * @param string "00:00" format
+        * Validates a log if it is Over ReqTimeOut_2()(PM time out) + MinReqOTHrs() (Minimum OT Hrs)
+        * @return bolean true / false
+        */
+        if (strtotime(self::ReqTimeOut_2()) <= strtotime($time)) {
             return true;
         } else {
             return false;

@@ -63,6 +63,7 @@ class GenerateDTRController extends Controller
 
     public function Generate($r)
     {
+        // return $r->all();
         /*
         * Retrieves timelog info (time in / time out of selected employee)
         * Computes the total time of late, overtime, and undertime. Also sorts the records for other reports to use
@@ -95,7 +96,7 @@ class GenerateDTRController extends Controller
             $overtime = "00:00";
             $arr_overtime = [];
             $weekdayhrs = "00:00";
-            $arr_weekdayhrs = [];
+            $arr_weekdayhrs = $sample = [];
             $weekendhrs = "00:00";
             $arr_weekendhrs = [];
             $arr_daysworked = [];
@@ -169,7 +170,7 @@ class GenerateDTRController extends Controller
                     if (count($rec_to) > 0) {
                         $rec_ti = explode(",", $rec_ti[0]->time_log);
                         $rec_to = explode(",", $rec_to[0]->time_log);
-
+                        array_push($sample, [$rec_ti,$rec_to]);
                         try {
                             /**
                             * Time Validating Method
@@ -182,7 +183,7 @@ class GenerateDTRController extends Controller
                                         $tl_in_am = $tl_ti;
                                     } elseif (Timelog::ValidateLog_PM($tl_ti) && $tl_in_pm == "00:00") {
                                         $tl_in_pm = $tl_ti;
-                                    } elseif(Timelog::ValidateLog_OTHrs($tl_ti)) {
+                                    } elseif(Timelog::ValidateLog_OTHrs2($tl_ti)) {
                                         array_push($tl_in_ot, $j."|".$tl_ti);
                                     } else {
                                         array_push($tl_in_trsh, [$date, $tl_ti]);
@@ -197,7 +198,7 @@ class GenerateDTRController extends Controller
                                         $tl_out_am = $tl_ti;
                                     } elseif (Timelog::ValidateLog_PM($tl_ti) && $tl_out_pm == "00:00") {
                                         $tl_out_pm = $tl_ti;
-                                    } elseif(Timelog::ValidateLog_OTHrs($tl_ti)) {
+                                    } elseif(Timelog::ValidateLog_OTHrs2($tl_ti)) {
                                         array_push($tl_out_ot, $j."|".$tl_ti);
                                     } else {
                                         array_push($tl_out_trsh, [$date, $tl_ti]);
@@ -298,12 +299,12 @@ class GenerateDTRController extends Controller
                                     for ($k=0; $k < count($tl_out_ot); $k++) {
                                         list($ka, $kb) = explode("|", $tl_out_ot[$k]);
                                         if ($ja == $ka) {
-                                            $jk = Timelog::GetRenHours($jb, $kb, "pm");
+                                            $jk = Timelog::GetRenHours($jb, $kb);
                                             if (Timelog::IfOvertime($jk)) {
                                                 array_push($r_time_ot_arr, [$jb, $kb, $jk]);
                                             }
                                         }
-                                    }
+                                    } 
                                 }
                             }
                             if (count($r_time_ot_arr) > 0) {
@@ -470,7 +471,8 @@ class GenerateDTRController extends Controller
 
                 'errors'=>$errors,
                 '_errors2'=>$errors2,
-                '_trash' => [$tl_in_trsh, $tl_out_trsh]
+                '_trash' => [$tl_in_trsh, $tl_out_trsh],
+                'try' => $sample
             ];
 
             if ($flag) {

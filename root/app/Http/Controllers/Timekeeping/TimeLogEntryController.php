@@ -29,6 +29,36 @@ class TimeLogEntryController extends Controller
     	return view($this->page, compact('data'));
     }
 
+    public function viewtimeout()
+    {
+        $data = [$this->employees, Office::get_all()];
+        $dataRecorded = $filtered = [];
+        $timeLogs = DB::table('hr_tito2')->join('hr_employee','hr_tito2.empid','hr_employee.empid')->orderBy('work_date','ASC')->get();
+        if(isset($timeLogs)){
+            foreach ($timeLogs as $key => $value) {
+                $dataRecorded[$value->empid][$value->work_date][] = [$value->status,ucfirst($value->lastname).','.ucfirst($value->firstname), $value->time_log, $value->source];
+            }
+
+            foreach($dataRecorded as $keys => $val){
+                $ones = $zero = 0;
+                foreach($val as $key => $value){
+                    foreach ($value as $trueData) {
+                        if($trueData[0] == 1){
+                            $ones++;
+                        }
+                        if($trueData[0] == 0){
+                            $zero++;
+                        }
+                    }
+                }
+                if($ones != $zero){
+                    $filtered[$keys][] = [$key,$trueData[1], $trueData[2], $trueData[3], $key];
+                }
+            }
+        }
+        return view('pages.timekeeping.timelog_out', compact('data','filtered'));
+    }
+
     public function get_emp(Request $r)
     {
         $new_data = array();

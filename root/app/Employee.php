@@ -165,4 +165,9 @@ class Employee extends Model
         return DB::select(DB::raw($sql));
     }
 
+    public static function isGeneratedOnDTR($empid, $dfrom, $pp, $year, $generationtype){
+        $pp = Payroll::PayrollPeriod2($dfrom,$pp, $year);
+        return json_encode(DB::table('hr_dtr_sum_hdr')->where('empid', $empid)->where('date_from', $pp->from)->where('date_to', $pp->to)->where('generationtype', $generationtype)->first()!=null);
+    }
+
 }
