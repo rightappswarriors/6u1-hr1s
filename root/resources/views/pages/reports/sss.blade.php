@@ -27,7 +27,6 @@
 							<i class="fa fa-spin fa-spinner ml-3" id="loadAnimation"></i>
 						</div>
 					</div>
-					
 				</div>
 			</form>
 		</div>
@@ -119,23 +118,36 @@
 			// });
 		
 		$.ajax({
-				type: "post",
-				url: "{{url('reports/sss/find-sss-pp')}}",
-				data: data,
-				beforeSend: function(){
-				    $('#loadAnimation').show();
-				},
-				success: function(data) {
-					for(let i=0; i < data.length; i++)
+					type: "post",
+					url: "{{url('reports/sss/find-sss-pp')}}",
+					data: data,
+					beforeSend: function(){
+					    $('#loadAnimation').show();
+					},
+					success: function(data) 
 					{
-						var date_from = data[i].date_from;
-						var date_to = data[i].date_to;
-						$('#pp').append('<option value='+'"'+date_from+'|'+date_to+'"'+'>'+date_from+ ' - ' +date_to+ '</option>'); 
-					}
-					
-					$('#loadAnimation').hide();		
-				},
-			});
+						console.log(data);
+						if(data.length <= 0)
+						{
+							alert('No Payroll Period Found');
+							$('#loadAnimation').hide();	
+							return false;
+						}
+						for(let i=0; i < data.length; i++)
+						{
+							var date_from = data[i].date_from;
+							var date_to = data[i].date_to;
+							//sample array sample
+							if(date_from != null && date_to != null )
+							{
+								$('#pp').append('<option value='+'"'+date_from+'|'+date_to+'"'+'>'+date_from+ ' - ' +date_to+ '</option>');
+							}	
+							 
+						}
+						
+						$('#loadAnimation').hide();		
+					},
+				});
 
 		});
 

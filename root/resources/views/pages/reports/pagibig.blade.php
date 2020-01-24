@@ -8,16 +8,23 @@
 		<div class="card-body">
 			<form method="post" action="{{url('reports/sss/find-philhealth')}}" id="frm-gp">
 				<div class="container">
-					<div class="form-group">
-						<div class="form-inline">
-							<select class="form-control mr-2" id="ofc" name="ofc">
+					<div class="form-group row">
+						<div class="col-sm-5">
+							<select class="form-control mr-2 select2" id="ofc" name="ofc">
 								<option value="" selected="" disabled="">-Select office to generate-</option>
 								@foreach($data[0] as $office)
 								<option value="{{$office->cc_id}}">{{$office->cc_desc}}</option>
 								@endforeach
 							</select>
-						<button type="button" class="btn btn-primary " onclick="PrintAllPage();">Print <i class="fa fa-print"></i></button>
-						<i class="fa fa-spin fa-spinner ml-3" id="loadAnimation"></i>
+						</div>
+						<div class="col-sm-5">
+							<select name="pp" class="form-control mr-2" id="pp">
+								<option value="" selected="" disabled="">-Select Payroll Period-</option>
+							</select>
+						</div>
+						<div class="col-sm-2">
+							<button type="button" class="btn btn-primary " onclick="PrintAllPage();">Print <i class="fa fa-print"></i></button>
+							<i class="fa fa-spin fa-spinner ml-3" id="loadAnimation"></i>
 						</div>
 					</div>
 				</div>
@@ -53,14 +60,60 @@
 		var table = $('#dataTable').DataTable({
 			"paging": false
 		});
-		$('#loadAnimation').hide();
+		$('#loadAnimation').hide();	
 		// onchange jquery script for <select id="office">
 		$('#ofc').on('change', function() {
-			table.clear().draw();
+			$('#pp').empty();
+			$('#pp').append('<option value="">'+'-Select Payroll Period-'+'</option>');
 			var ofc_id = $('#ofc :selected').val();
 			var data = { 
                           _token : $('meta[name="csrf-token"]').attr('content'),
                           ofc_id : $('#ofc :selected').val(),
+
+                       };
+		
+		$.ajax({
+					type: "post",
+					url: "{{url('reports/sss/find-sss-pp')}}",
+					data: data,
+					beforeSend: function(){
+					    $('#loadAnimation').show();
+					},
+					success: function(data) 
+					{
+						console.log(data);
+						if(data.length <= 0)
+						{
+							alert('No Payroll Period Found');
+							$('#loadAnimation').hide();	
+							return false;
+						}
+						for(let i=0; i < data.length; i++)
+						{
+							var date_from = data[i].date_from;
+							var date_to = data[i].date_to;
+							//sample array sample
+							if(date_from != null && date_to != null )
+							{
+								$('#pp').append('<option value='+'"'+date_from+'|'+date_to+'"'+'>'+date_from+ ' - ' +date_to+ '</option>');
+							}	
+							 
+						}
+						
+						$('#loadAnimation').hide();		
+					},
+				});
+
+		});
+
+		$('#pp').on('change', function() {
+			table.clear();
+			var pp_split = $('#pp :selected').val();
+			var pp =  pp_split.split('|');
+			var data = { 
+                          _token : $('meta[name="csrf-token"]').attr('content'),
+                          ofc_id : $('#ofc :selected').val(),
+                          pp : pp,
                        };
 			$.ajax({
 				type: "post",
@@ -70,34 +123,39 @@
 				    $('#loadAnimation').show();
 				},
 				success: function(data) {
-					for(i=0; i<data.length; i++){
-						if(data[i][0].sss == ''){
-							var sss = '0-0-0';
-						}
-						else{
-							var sss = data[i][0].sss;	
+					var employer = data[0][0].comp_name;
+					for(let i=1; i < data.length; i++){
+						
+						//data[i][0].civil_status // display user details
+						//data[i][1][0].empshare_ec //payments
+						var name = data[i][0].firstname + ' ' + data[i][0].mi + ' ' + data[i][0].lastname;
+						var emp1 = parseFloat((typeof(data[i][0]) != 'undefined' ? data[i][0].pagibig_cont_b : 0.00));
+						var emp2 = parseFloat((typeof(data[i][0]) != 'undefined' ? data[i][0].pagibig_cont_c : 0.00));
+						var emp3 = parseFloat((typeof(data[i][0]) != 'undefined' ? data[i][0].pagibig_cont_d : 0.00));
+						var blank = '';
+						if(data[i].pagibig == ''){
+							var pagibig = '0-0-0';
+						}															
+						else
+						{
+							var pagibig = data[i][0].pagibig;	
 						}
 
-						var emp1 = parseFloat((typeof(data[i][1][0]) != 'undefined' ? data[i][1][0].empshare_sc : 0.00));
-						var emp2 = parseFloat((typeof(data[i][1][0]) != 'undefined' ? data[i][1][0].empshare_ec : 0.00));
-						var emp3 = parseFloat((typeof(data[i][1][0]) != 'undefined' ? data[i][1][0].s_ec : 0.00));
-						var employer = '';
-						var agency = '';
-						var branch = '';
-						var region = '';
 						var sums = emp1 + emp2;
 						table.row.add([
-							data[i][0].empname,
-							sss,
-							agency,
-							branch,
-							region,
-							data[i][0].empname,
-							sums,
+							employer,
+							pagibig,
+							blank,
+							blank,
+							blank,
+							name,
+							sums, 
 						]).draw();
-					}
+						
+						console.log(data[i]);
+					}		
 
-					$('#loadAnimation').hide();
+					$('#loadAnimation').hide();	
 				},
 			});
 		});
@@ -106,7 +164,6 @@
 		{
 			var ofc_id = parseInt($('#ofc :selected').val());
 			PrintPage("{{url('reports/pagibig/print')}}?ofc_id="+ofc_id);
-
 		}
 	</script>
 

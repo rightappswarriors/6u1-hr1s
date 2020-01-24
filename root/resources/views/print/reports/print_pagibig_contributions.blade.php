@@ -51,7 +51,7 @@
 	                <td style="font-size: 16px;"><i class="fa fa-square-o" aria-hidden="true"></i> NATIONAL GOVERNMENT AGENCY</td>
 	                <td></td>
 	                <td></td>
-	                @isset($arrRet)
+	                @isset($sql)
 	                @php
 	                	$month = date('F');
 	                	$year = date('Y');
@@ -70,7 +70,7 @@
 	                <td style="border-right: 1px solid;">REGION CODE</td>
 	            </tr>
 	            <tr>
-	                <td colspan="2" style="padding-left: 20px; font-weight: bold; border-left: 1px solid; border-right: 1px solid"> ELEGANT CIRCLE INN</td>
+	                <td colspan="2" style="padding-left: 20px; font-weight: bold; border-left: 1px solid; border-right: 1px solid">@isset($m99) {{ $m99[0]->comp_name }} @endif</td>
 	                <td colspan="2" style="border-right: 1px solid; font-weight: bold;">FOR PRIVATE EMPLOYER</td>
 	                <td>FOR GOV'T EMPLOYER</td>
 	                <td style="border-right: 1px solid;"></td>
@@ -94,22 +94,22 @@
 	      </tr>
 	    </thead>
 	    <tbody>
-	    @foreach ($arrRet as $arr)	
+	    @foreach ($sql as $s)	
 	      <tr>
 	        <td colspan="2 " class="border-ltr ">APPLIED</td>
-	        <td>1. {{ ($arr[0]->lastname ?? null) }}</td>
-	        <td>{{ ($arr[0]->firstname ?? null) }}</td>
-	        <td style="border-right: 1px solid; ">{{ ($arr[0]->mi ?? null) }}</td>
+	        <td>1. {{ ($s->lastname ?? null) }}</td>
+	        <td>{{ ($s->firstname ?? null) }}</td>
+	        <td style="border-right: 1px solid; ">{{ ($s->mi ?? null) }}</td>
 	        @php
-	        	$emp = (int)($arr[1][0]->empshare_sc ?? 0);
-	        	$emp2 = (int)($arr[1][0]->empshare_ec ?? 0);
+	        	$emp = (int)($s->pagibig_cont_b ?? 0);
+	        	$emp2 = (int)($s->pagibig_cont_c ?? 0);
 	        @endphp
 	        <td style="border-right: 1px solid; ">{{ number_format($emp,2, '.', ',') }}</td>
 	        <td style="border-right: 1px solid; ">{{ number_format($emp2,2, '.', ',') }}</td>
 	        @php
 	        	{{ 
-	        		$var1 = (int)($arr[1][0]->empshare_sc ?? null);
-	        		$var2 = (int)($arr[1][0]->empshare_ec ?? null);
+	        		$var1 = (int)($s->pagibig_cont_b ?? null);
+	        		$var2 = (int)($s->pagibig_cont_c ?? null);
 	        		$sum =  $var1 + $var2;
 	        		
 	        	}}
@@ -130,9 +130,9 @@
 					<tbody>
 	                    <tr>
 	                        <td style="border-left: 1px solid; border-top: 1px solid;">No. of Employees</td>
-	                        @if(count($arrRet) > 0)
+	                        @if(count($sql) > 0)
 	                        @php
-	                        	$counting = count($arrRet);
+	                        	$counting = count($sql);
 	                        @endphp
 	                        <td rowspan="2" style="border-top: 1px solid; font-weight: bold; font-size: 25px; vertical-align: middle; text-align: center;">{{ $counting }}</td>
 	                        <td style="border-left: 1px solid; border-top: 1px solid;">Total no. of Employees</td>
@@ -176,20 +176,20 @@
     		<div class="col-6">
     			<table class="table mb-0 pb-0" style="width: 101.5%; border: 1px solid;">
 					<tr>
-						@if(count($arrRet) > 0)
+						@if(count($sql) > 0)
 						@php
 							$sum = 0;
 							$sum2 = 0;
 							$sum3 = 0;
 						@endphp
-						@foreach($arrRet as $arr)
+						@foreach($sql as $s)
 							@php
 								
-								$var1 = (int)($arr[1][0]->empshare_sc ?? null);
+								$var1 = (int)($s->pagibig_cont_b ?? null);
 				        		$sum +=  $var1;
 
 				        		
-								$var2 = (int)($arr[1][0]->empshare_ec ?? null);
+								$var2 = (int)($s->pagibig_cont_c ?? null);
 				        		$sum2 +=  $var2;
 
 				        		$add = $sum + $sum2;
@@ -213,20 +213,20 @@
 					    <td style="border-left: 1px solid;">THIS PAGE</td>
 					</tr>
 					<tr>
-					    @if(count($arrRet) > 0)
+					    @if(count($sql) > 0)
 						@php
 							$sum = 0;
 							$sum2 = 0;
 							$sum3 = 0;
 						@endphp
-						@foreach($arrRet as $arr)
+						@foreach($sql as $s)
 							@php
 								
-								$var1 = (int)($arr[1][0]->empshare_sc ?? null);
+								$var1 = (int)($s->empshare_sc ?? null);
 				        		$sum +=  $var1;
 
 				        		
-								$var2 = (int)($arr[1][0]->empshare_ec ?? null);
+								$var2 = (int)($s->empshare_ec ?? null);
 				        		$sum2 +=  $var2;
 
 				        		$add = $sum + $sum2;

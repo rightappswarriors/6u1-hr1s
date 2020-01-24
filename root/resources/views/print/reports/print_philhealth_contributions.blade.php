@@ -1,5 +1,4 @@
 @extends('layouts.print_layout')
-
 @section('head')
 <div class="table-responsive" style="padding:20px;">       
   <table class="table table-borderless" style="width: 100%;">
@@ -28,11 +27,11 @@
           </tr>
         @endif
       <tr>
-        <td colspan="2">Registered Employer Name: <span style="font-weight: bold;">ELEGANT CIRCLE INN</span></td>
+        <td colspan="2">Registered Employer Name: <span style="font-weight: bold;">@isset($m99) {{ $m99[0]->comp_name }} @endif</span></td>
         <td style="text-align: right;">Employer SSS No.</td>
       </tr>
        <tr>
-          <td colspan="2"><span style="visibility: hidden;">RERERER</span>Employee Address: <span style="font-weight: bold;">Fuente Osmena Circle, Cebu City</span></td>
+          <td colspan="2"><span style="visibility: hidden;">RERERER</span>Employee Address: <span style="font-weight: bold;">@isset($m99) {{ $m99[0]->comp_addr }} @endif</span></td>
        </tr>
     </thead>
     <tbody style="border: 2px solid #000;">
@@ -45,7 +44,7 @@
         <td></td>
       </tr>
       <tr>
-        <td>SSS Number</td>
+        <td>Philhealth Number</td>
         <td>(Lastname, Firstname, Middlename)</td>
         <td>Contribution</td>
         <td>Contribution</td>
@@ -55,28 +54,30 @@
     </tbody>
     <tbody>
       <tr>
-        <td style="text-transform: uppercase; font-weight: bold; text-decoration: underline;">ADMINSTRATIVE DEPT.</td>
+        <td style="text-transform: uppercase; font-weight: bold; text-decoration: underline;">{{ $sql[0]->cc_desc }}</td>
       </tr>
-      @if(count($arrRet) > 0)
+      @if(count($sql) > 0)
       @php
         $sum = 0;
         $sum2 = 0;
         $sum3 = 0;
-
       @endphp
-        @foreach($arrRet as $arr)
+        @foreach($sql as $s)
+          @php
+            $fullname = $s->lastname. ', '. $s->firstname. ', '. $s->mi;
+          @endphp
           <tr>
-            <td>APPLIED</td>
-            <td>{{ $arr[0]->empname }}</td>
-            <td>{{ number_format(($arr[1][0]->empshare_sc ?? null), 2, '.', ',') }} </td>
-            <td>{{ number_format(($arr[1][0]->empshare_ec ?? null), 2, '.', ',') }}</td>
-            <td>{{ number_format(($arr[1][0]->s_ec ?? null), 2, '.', ',') }}</td>
+            <td>{{ $s->philhealth }}</td>
+            <td>{{ $fullname }}</td>
+            <td>{{ number_format(($s->philhealth_cont_b ?? null), 2, '.', ',') }} </td>
+            <td>{{ number_format(($s->philhealth_cont_c ?? null), 2, '.', ',') }}</td>
+            <td>{{ number_format(($s->philhealth_cont_d ?? null), 2, '.', ',') }}</td>
             @php
-              $sum += ($arr[1][0]->empshare_sc ?? null); //sums up all the employee contribution
-              $sum2 +=  ($arr[1][0]->empshare_ec ?? null); //sums up all the employer contribution
-              $sum3 += ($arr[1][0]->s_ec ?? null); // sums up all the ecc
+              $sum += ($s->philhealth_cont_b ?? null); //sums up all the employee contribution
+              $sum2 +=  ($s->philhealth_cont_c ?? null); //sums up all the employer contribution
+              $sum3 += ($s->philhealth_cont_d ?? null); // sums up all the ecc
 
-              $add1 = ($arr[1][0]->empshare_sc ?? null) + ($arr[1][0]->empshare_ec ?? null) + ($arr[1][0]->s_ec ?? null) //addition of employee contribution + employer contribution
+              $add1 = ($s->philhealth_cont_b ?? null) + ($s->philhealth_cont_c ?? null) + ($s->philhealth_cont_d ?? null) //addition of employee contribution + employer contribution
             @endphp
             <td>{{ number_format($add1, 2, '.', ',') }}</td>
           </tr>
