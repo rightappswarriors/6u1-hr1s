@@ -44,18 +44,21 @@ class SSSContributionsController extends Controller
     //     return $arrRet;
 
     // }    
-    
-    public function find(Request $request){
-        $ofc_id = $request->ofc_id;
-        $pp = $request->pp;
-        $sql = DB::select("SELECT emp.*, pp.* FROM (SELECT empid, department, sss, pagibig, philhealth, firstname, lastname, mi FROM hris.hr_employee WHERE cancel is null AND department = '$ofc_id') emp LEFT JOIN (SELECT * FROM hris.hr_emp_payroll3 WHERE date_from BETWEEN '$pp[0]' AND '$pp[1]') pp ON emp.empid = pp.empid");
-        return $sql;
-    }
 
     public function findPayrollPeriod(request $request)
     {
         $ofc_id = $request->ofc_id;
-        $sql = DB::select("SELECT DISTINCT pp.date_from, pp.date_to FROM (SELECT empid, department FROM hris.hr_employee WHERE cancel is null AND department = '$ofc_id') emp LEFT JOIN (SELECT * FROM hris.hr_emp_payroll3) pp ON emp.empid = pp.empid");
+        
+        $sql = DB::select("SELECT DISTINCT pp.date_from, pp.date_to FROM (SELECT empid, department FROM hris.hr_employee WHERE cancel is null AND department = '$ofc_id') emp LEFT JOIN (SELECT * FROM hris.hr_emp_payroll3) pp ON emp.empid = pp.empid WHERE pp.date_from IS NOT NULL AND pp.date_to IS NOT NULL");
+
+        return $sql;
+    }
+
+    public function find(Request $request)
+    {
+        $ofc_id = $request->ofc_id;
+        $pp = $request->pp;
+        $sql = DB::select("SELECT emp.*, pp.* FROM (SELECT empid, department, sss, pagibig, philhealth, firstname, lastname, mi FROM hris.hr_employee WHERE cancel is null AND department = '$ofc_id') emp LEFT JOIN (SELECT * FROM hris.hr_emp_payroll3 WHERE date_from BETWEEN '$pp[0]' AND '$pp[1]') pp ON emp.empid = pp.empid");
         return $sql;
     }
 
@@ -73,7 +76,6 @@ class SSSContributionsController extends Controller
         $pp = $request->pp;
         $m99 = DB::select('SELECT * FROM hris.m99');
         $sql = DB::select("SELECT emp.*, pp.* FROM (SELECT empid, department, sss, pagibig, philhealth, firstname, lastname, mi FROM hris.hr_employee WHERE cancel is null AND department = '$ofc_id') emp LEFT JOIN (SELECT * FROM hris.hr_emp_payroll3 WHERE date_from BETWEEN '$pp[0]' AND '$pp[1]') pp ON emp.empid = pp.empid");
-       
         return view('print.reports.print_sss_contributions', compact('sql', 'm99'));
     }
 }

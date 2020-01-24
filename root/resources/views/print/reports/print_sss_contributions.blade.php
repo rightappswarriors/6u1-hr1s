@@ -1,6 +1,7 @@
 @extends('layouts.print_layout')
 
 @section('head')
+
 <div class="table-responsive" style="padding:20px;">       
   <table class="table table-borderless" style="width: 100%;">
     <thead>
@@ -12,7 +13,7 @@
         <th colspan="1" style="text-align: center; font-size: 20px; padding-right: 100px;">Monthly Contribution Payment Breakdown</th>
         <td colspan="3" style="text-align: right;">Page No. 1</td>
       </tr>
-        @isset($arrRet)
+        @isset($sql)
           @php
             $currdate = date('dd/mm/yy h:i:s A');
             $month = date('M');
@@ -28,11 +29,11 @@
           </tr>
         @endif
       <tr>
-        <td colspan="2">Registered Employer Name: <span style="font-weight: bold;">@isset($m99) {{ $m99->comp_name }} @endif</span></td>
+        <td colspan="2">Registered Employer Name: <span style="font-weight: bold;">@isset($m99) {{ $m99[0]->comp_name }} @endif</span></td>
         <td style="text-align: right;">Employer SSS No.</td>
       </tr>
        <tr>
-          <td colspan="2"><span style="visibility: hidden;">RERERER</span>Employee Address: <span style="font-weight: bold;">@isset($arrRet) {{ $m99->comp_addr }} @endif </span></td>
+          <td colspan="2"><span style="visibility: hidden;">RERERER</span>Employee Address: <span style="font-weight: bold;">@isset($m99) {{ $m99[0]->comp_addr }} @endif </span></td>
        </tr>
     </thead>
     <tbody style="border: 2px solid #000;">
@@ -55,28 +56,28 @@
     </tbody>
     <tbody>
       <tr>
-        <td style="text-transform: uppercase; font-weight: bold; text-decoration: underline;">@isset($arrRet) {{ $arrRet[0][2][0]->cc_desc }} @endif</td>
+        <td style="text-transform: uppercase; font-weight: bold; text-decoration: underline;">@isset($sql) {{ $sql[0]->sss }} @endif</td>
       </tr>
-      @if(count($arrRet) > 0)
+      @if(count($sql) > 0)
       @php
         $sum = 0;
         $sum2 = 0;
         $sum3 = 0;
-
+        $fullname = $sql[0]->firstname . ' ' . $sql[0]->mi . ' ' . $sql[0]->lastname;
       @endphp
-        @foreach($arrRet as $arr)
+        @foreach($sql as $s)
           <tr>
             <td>APPLIED</td>
-            <td>{{ $arr[0]->empname }}</td>
-            <td>{{ number_format(($arr[1][0]->empshare_sc ?? null), 2, '.', ',') }} </td>
-            <td>{{ number_format(($arr[1][0]->empshare_ec ?? null), 2, '.', ',') }}</td>
-            <td>{{ number_format(($arr[1][0]->s_ec ?? null), 2, '.', ',') }}</td>
+            <td>{{ $fullname }}</td>
+            <td>{{ number_format(($s->sss_cont_b ?? null), 2, '.', ',') }} </td>
+            <td>{{ number_format(($s->sss_cont_c ?? null), 2, '.', ',') }}</td>
+            <td>{{ number_format(($s->sss_cont_d ?? null), 2, '.', ',') }}</td>
             @php
-              $sum += ($arr[1][0]->empshare_sc ?? null); //sums up all the employee contribution
-              $sum2 +=  ($arr[1][0]->empshare_ec ?? null); //sums up all the employer contribution
-              $sum3 += ($arr[1][0]->s_ec ?? null); // sums up all the ecc
+              $sum += ($s->sss_cont_b ?? null); //sums up all the employee contribution
+              $sum2 +=  ($s->sss_cont_c ?? null); //sums up all the employer contribution
+              $sum3 += ($s->sss_cont_d ?? null); // sums up all the ecc
 
-              $add1 = ($arr[1][0]->empshare_sc ?? null) + ($arr[1][0]->empshare_ec ?? null) + ($arr[1][0]->s_ec ?? null) //addition of employee contribution + employer contribution
+              $add1 = ($s->sss_cont_b ?? null) + ($s->sss_cont_c ?? null) + ($s->cont_d ?? null) //addition of employee contribution + employer contribution
             @endphp
             <td>{{ number_format($add1, 2, '.', ',') }}</td>
           </tr>
