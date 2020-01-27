@@ -39,13 +39,26 @@ class GeneratePayrollController extends Controller
     public function view()
     {
     	$data = [$this->office, $this->ghistory, $this->empstatus];
-        // dd($data);
     	return view('pages.payroll.generate_payroll', compact('data'));
+    }
+
+    public function previewPayroll(Request $r){
+        $r['isForDisplay'] = true;
+        $toAddres = [];
+        $var = self::generate_payroll($r);
+        array_push($toAddres, (object)$var['todbs']);
+        $var['info']['title'] = 'Payroll Preview';
+        $data = [
+            'inf' => $var['info'],
+            'record' => $toAddres
+        ];
+        return view('print.reports.payroll.export_payroll_summary_report',compact('data'));
     }
 
     // Find dtr function
     public function find_dtr(Request $r)
     {
+
         /**
         * @param $r->month
         * @param $r->payroll_period

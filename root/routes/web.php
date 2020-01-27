@@ -375,6 +375,7 @@
 				Route::get('/', 'Payroll\GeneratePayrollController@view');
 				Route::post('/find-dtr', 'Payroll\GeneratePayrollController@find_dtr');
 				Route::post('/generate', 'Payroll\GeneratePayrollController@generate_payroll');
+				Route::get('/preview', 'Payroll\GeneratePayrollController@previewPayroll');
 			});
 			/* GENERATE PAYROLL */
 			/* VIEW GENERATE PAYROLL */

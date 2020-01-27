@@ -63,6 +63,7 @@
 				<div class="col">
 					Available DTR Summary
 					<button type="button" class="btn btn-primary float-right" id="btn-generate" onclick="GeneratePayroll()" disabled=""><i class="fa fa-share"></i> <i class="fa fa-server"></i> Generate All</button>
+					<button type="button" class="btn btn-primary float-right" onclick="previewPayroll()" id="btn-preview" disabled=""><i class="fa fa-share"></i> <i class="fa fa-server"></i> Preview DTR</button>
 				</div>
 				<div class="col border-left">
 					Generated Payroll
@@ -187,6 +188,7 @@
 								}
 							}
 							$('#btn-generate').removeAttr('disabled');
+							$('#btn-preview').removeAttr('disabled');
 						} else {
 							alert("Error submiting your request.");
 						}
@@ -217,6 +219,7 @@
 			dataTable_gds.clear().draw();
 			dataTable_gdh.search('').draw();
 			$('#btn-generate').attr('disabled', true);
+			$('#btn-preview').attr('disabeld',true);
 			hideErrorDiv();
 		}
 
@@ -231,6 +234,10 @@
 		{
 			ClearSearch();
 			$("#frm-gp").submit();
+		}
+
+		function previewPayroll(){
+			window.open('{{url('payroll/generate-payroll/preview/?ofc=')}}'+$('#ofc').val()+'&empstatus='+$('#empstatus').val()+'&month='+$('#month').val()+'&payroll_period='+$('#payroll_period').val()+'&year='+$('#year').val()+'&gen_type='+$("#gen_type").val());
 		}
 
 		function GeneratePayroll()
