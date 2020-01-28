@@ -176,3 +176,4 @@
 01-24-2020 15:57 | GeneratePayrollController | Undefined variable: e (GPCB00003-1523123)
 01-24-2020 15:57 | GeneratePayrollController | Undefined variable: e (GPCB00003-1523123)
 01-24-2020 15:58 | GeneratePayrollController | Type not found (GPCB00004-HOT-1523123)
+01-27-2020 13:40 | GeneratePayrollController | count(): Parameter must be an array or an object that implements Countable (GPCB00001)

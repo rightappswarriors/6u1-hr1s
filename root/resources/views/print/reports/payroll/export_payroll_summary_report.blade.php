@@ -5,7 +5,6 @@
 @php
 	$inf = $data['inf'];
 	$record = $data['record'];
-
 	//initialization of array for hardcoded assigning of value by Syrel
 	$statIns = 100;
 	$runningRowTotal = [];
@@ -17,12 +16,12 @@
 		[2,3]
 	];
 @endphp
-	<table>
+	<table border="1">
 		<thead>
-			<tr><th colspan="44">{{strtoupper($inf->title)}}</th></tr>
+			<tr><th colspan="44">{{strtoupper(($inf->title ?? ''))}}</th></tr>
 			<tr><th colspan="44">{{Core::company_name()}}</th></tr>
-			<tr><th colspan="44">{{isset($inf->ofc) ? $inf->ofc->cc_desc : "OFFICE NOT FOUND"}}</th></tr>
-			<tr><th colspan="44">{{$inf->payroll_period}}</th></tr>
+			<tr><th colspan="44">{{isset($inf->ofc) ? $inf->ofc->cc_desc : ""}}</th></tr>
+			<tr><th colspan="44">{{($inf->payroll_period ?? '')}}</th></tr>
 			<tr>
 				<th rowspan="4">ITEM NO.</th>
 				<th rowspan="4">NAME</th>
@@ -117,7 +116,7 @@
 			@endphp
 			<tr>
 				<td>ACC-{{$row->emp_pay_code}}</td> {{-- Item No. --}}
-				<td>{{strtoupper($row->empname)}}</td> {{-- Name --}}
+				<td>{{strtoupper(($row->empname ?? ''))}}</td> {{-- Name --}}
 				<td>{{$no}}</td> {{-- No. --}}
 				<td>-</td> {{-- Position --}}
 				<td>{{($row->rate!=0) ? number_format($row->rate,2) : "-"}} <?php $runningRowTotal['rate'] = isset($runningRowTotal['rate']) ? ($row->rate !=0 ? $row->rate : 0) + $runningRowTotal['rate'] : ($row->rate !=0 ? $row->rate : 0) ?></td> {{-- Rate --}}
