@@ -8,26 +8,33 @@
 			</div>
 		</div>
 		<div class="card-body">
-			<div class="form-inline" id="print_hide">
-				<div class="form-group">
-
-					<label for="date_month">Office: </label>
-					<select class="form-control mr-3 w-25" name="office" id="office" onchange="">
-						<option disabled selected value="">Please select an office</option>
-						@if(!empty($data[1]))
-							@foreach($data[1] as $off)
-								<option value="{{$off->cc_id}}">{{$off->cc_desc}}</option>
-							@endforeach
-						@endif
-					</select>
-
-					<label for="date_from">Date:</label>
-					<input type="text" name="date_from" id="date_from" class="form-control mr-3" value="{{date('Y-m-d')}}" readonly>
-					<button class="btn btn-primary mr-3" id="generate_btn" disabled>Find</button>
-
-					<button class="btn btn-primary mr-3" id="print_btn" disabled><i class="fa fa-fw fa-print"></i></button>
+			{{-- <div class="form-inline" id="print_hide"> --}}
+				<div class="form-group row">
+					<label for="date_month" class="col-sm-1">Office: </label>
+					<div class="col-sm-5">
+						<select class="form-control" name="office" id="office" onchange="">
+							<option disabled selected value="">Please select an office</option>
+							@if(!empty($data[1]))
+								@foreach($data[1] as $off)
+									<option value="{{$off->cc_id}}">{{$off->cc_desc}}</option>
+								@endforeach
+							@endif
+						</select>
+					</div>
+				</div>	
+				<div class="form-group row">
+					<label for="date_from" class="col-sm-1">Date:</label>
+					<div class="col-sm-5">
+						<input type="text" name="date_from" id="date_from" class="form-control mr-3" value="{{date('Y-m-d')}}" readonly>
+					</div>
+					<div class="col-sm-1">
+						<button class="btn btn-primary mr-3" id="generate_btn" disabled>Find</button>
+					</div>
+					<div class="col-sm-1">
+						<button class="btn btn-primary mr-3" id="print_btn" disabled><i class="fa fa-fw fa-print"></i></button>
+					</div>
 				</div>
-			</div>
+			{{-- </div> --}}
 			<div class="table-responsive table-bordered mt-3" hidden id="dtr">
 				<table class="table table-hover" style="font-size: 13px;">
 					<thead>
@@ -181,10 +188,10 @@
 								td12.innerHTML = response[0][i]['_Name'];
 							var in1 = document.createElement('td');
 								in1.setAttribute('style', 'text-align: center;');
-								in1.innerHTML = response[0][i]['AM']['Arrival'];
+								in1.innerHTML = formatAMPM2(response[0][i]['AM']['Arrival']);
 							var out1 = document.createElement('td');
 								out1.setAttribute('style', 'text-align: center;');
-								out1.innerHTML = response[0][i]['AM']['Departure'];
+								out1.innerHTML = formatAMPM2(response[0][i]['AM']['Departure']);
 							var in2 = document.createElement('td');
 								in2.setAttribute('style', 'text-align: center;');
 								in2.innerHTML = formatAMPM2(response[0][i]['PM']['Arrival']);
@@ -294,6 +301,7 @@
 					tbody.appendChild(tr1);
 					tbody.appendChild(tr2);
 
+
 					for(i=0; i<response[1].length; i++) {
 
 						var time_log = false;
@@ -311,6 +319,8 @@
 						else 
 							time_log1 = new Date(response[2][1][i].work_date+" "+response[2][1][i].time_log);
 						/**/
+
+						
 
 						var tr3 = document.createElement('tr');
 							var td12 = document.createElement('td');

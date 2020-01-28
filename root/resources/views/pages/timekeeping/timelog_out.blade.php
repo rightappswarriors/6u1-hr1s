@@ -124,7 +124,7 @@
 						</div>
 						<div class="form-group">
 							<label>Time Log</label>
-							<input type="time" class="form-control" name="time_timelog" id="time_timelog" value="{{date('H:i:s')}}" required>
+							<input type="time" class="form-control" name="time_timelog" id="time_timelog" value="{{date('g:i A')}}" required>
 						</div>
 						<div class="form-group">
 							<label>Status</label>

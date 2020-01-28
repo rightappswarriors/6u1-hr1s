@@ -7,45 +7,37 @@
 		</div>
 		<div class="card-body">
 			<form method="post" action="{{url('payroll/generate-payroll/find-dtr')}}" id="frm-gp">
-				<div class="row">
-					<div class="col-6">
-						<div class="form-group">
-							<div class="form-inline">
-								<label class="mr-2">Office:</label>
-								<select class="form-control mr-2" id="ofc" name="ofc">
-									<option value="" selected="" disabled="">-Select office to generate-</option>
-									@foreach($data[0] as $office)
-									<option value="{{$office->cc_id}}">{{$office->cc_desc}}</option>
-									@endforeach
-								</select>
-							</div>
-						</div>
-					</div>
-					<div class="col-6">
-						<div class="form-group">
-							<div class="form-inline">
-								
-							</div>
-						</div>
+				<div class="form-group row">
+					<label class="col-sm-2">Office:</label>
+					<div class="col-sm-5">
+						<select class="form-control mr-2" id="ofc" name="ofc">
+							<option value="" selected="" disabled="">-Select office to generate-</option>
+							@foreach($data[0] as $office)
+							<option value="{{$office->cc_id}}">{{$office->cc_desc}}</option>
+							@endforeach
+						</select>
 					</div>
 				</div>
-				<div class="row">
-					<div class="col-6">
-						<div class="form-group">
-							<div class="form-inline">
-								<label class="mr-2">Payroll period:</label>
-								<select class="form-control mr-2" id="pp" name="pp">
-									<option value="" selected="" disabled="">-Select Generated Payroll Period-</option>
-								</select>
-								<select class="form-control mr-2" name="gen_type" id="gen_type">
-									<option Value="BASIC" selected>Basic</option>
-									<option value="OVERTIME">Overtime</option>
-								</select>
-								<i class="fa fa-spin fa-spinner" id="loading-icon-1" style="display: none;"></i>
-							</div>
-						</div>
+
+				<div class="form-group row">
+					<label class="col-sm-2">Payroll period:</label>
+					<div class="col-sm-5">
+						<select class="form-control mr-2" id="pp" name="pp">
+							<option value="" selected="" disabled="">-Select Generated Payroll Period-</option>
+						</select>
+					</div>
+					<div class="col-sm-4">
+						<select class="form-control mr-2" name="gen_type" id="gen_type">
+							<option Value="BASIC" selected>Basic</option>
+							<option value="OVERTIME">Overtime</option>
+						</select>
+					</div>
+					<div class="col-sm-1">
+						<i class="fa fa-spin fa-spinner" id="loading-icon-1" style="display: none;"></i>
 					</div>
 				</div>
+
+
 			</form>
 		</div>
 		<div class="card-header border-top">

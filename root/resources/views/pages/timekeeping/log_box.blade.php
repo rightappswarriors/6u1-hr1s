@@ -5,7 +5,7 @@
 		<div class="card-header">
 			<div class="row">
 				<div class="col-2">
-					<i class="fa fa-fw fa-lock"></i>Log Box <br>
+					<i class="fa fa-fw fa-lock"></i>Log Box<br>
 				</div>
 				<div class="col">
 					<div class="float-right">

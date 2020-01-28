@@ -156,9 +156,10 @@
 
 		function PrintAllPage(obj)
 		{
+			var pp_split = $('#pp :selected').val();
+			var pp =  pp_split.split('|');
 			var ofc_id = parseInt($('#ofc :selected').val());
-			PrintPage("{{url('reports/philhealth/print')}}?ofc_id="+ofc_id);
-
+			PrintPage("{{url('reports/philhealth/print')}}?ofc_id="+ofc_id+'&pp[]='+pp[0]+'&pp[]='+pp[1]);
 		}
 	</script>
 
