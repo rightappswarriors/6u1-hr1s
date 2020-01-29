@@ -44,9 +44,10 @@
 			</div>
 		</div>
 		<div class="card-body">
-			<div class="form-inline mb-4" id="print_hide">
-				<div class="form-group">
-					<label for="date_month">Office: </label>
+			{{-- <div class="form-inline mb-4" id="print_hide"> --}}
+			<div class="form-group row">
+				<label class="col-sm-2" for="date_month">Office: </label>
+				<div class="col-sm-5">
 					<select class="form-control mr-3 w-25" name="office" id="office" onchange="">
 						<option disabled selected value="">Please select an office</option>
 						@if(!empty($data[1]))
@@ -55,8 +56,11 @@
 							@endforeach
 						@endif
 					</select>
-
-					<label for="payroll_period">Payroll Period: </label>
+				</div>
+			</div>
+			<div class="form-group row">
+				<label class="col-sm-2" for="payroll_period">Payroll Period: </label>
+				<div class="col-sm-5">
 					<select class="form-control mr-3" name="payroll_period" id="payroll_period" onchange="">
 						{{-- <option value="15">15th Day</option>
 						<option value="30">30th Day</option> --}}
@@ -69,16 +73,27 @@
 							<option value="" disabled>No payroll generated</option>
 						@endif --}}
 					</select>
-					<label for="generationtype">Generation Type: </label>
+				</div>
+			</div>	
+			<div class="form-group row">
+				<label class="col-sm-2" for="generationtype">Generation Type: </label>
+				<div class="col-sm-5">
 					<select class="form-control mr-3" name="generationtype" id="generationtype" onchange="">
 						{{-- <option disabled selected value="">Please select a type</option> --}}
 						<option value="BASIC">BASIC</option>
 						<option value="OVERTIME">OVERTIME</option>
 					</select>
+				</div>
+				<div class="col-sm-1">
 					<button class="btn btn-primary mr-3" id="find_btn" disabled>Find</button>
+				</div>
+				<div class="col-sm-1">
 					<button class="btn btn-primary mr-3" id="print_btn" onclick="printAll()" disabled><i class="fa fa-fw fa-print"></i></button>
 				</div>
-			</div>
+			</div>	
+				
+			
+			{{-- </div> --}}
 
 			<div class="table-responsive">
 				<table class="table table-hover" style="font-size: 13px;" id="table">

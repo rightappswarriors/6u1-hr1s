@@ -5,34 +5,7 @@
 		<div class="card-header">
 			<div class="form-inline">
 				<i class="fa fa-building"></i> Other Deductions <br>
-					<div class="form-group mr-2">
-						{{-- <input type="text" name="date_from" id="date_from" class="form-control" value="SELECT DATE" readonly> --}}
-						<select class="form-control" name="ofc" id="ofc">
-							{{-- <option value="" disabled selected hidden>Office</option> --}}
-							@if(count($data[2]) > 0)
-								@foreach($data[2] as $office)
-								<option value="{{$office->cc_id}}">{{ucwords($office->cc_desc)}}</option>
-								@endforeach
-							@endif
-						</select>
-						<select class="form-control MonthSelector ml-3" name="date_month" id="date_month" onchange="">
-							
-						</select>
-						<select class="form-control YearSelector ml-3" name="date_year" id="date_year" onchange="" >
-						</select>
-						<select class="form-control ml-3" name="search_period" id="search_period" required>
-							<option value="15">15th Day</option>
-							<option value="30">30th Day</option>
-						</select>
-						<button class="ml-3 btn btn-primary mr-1" id="f_find">Find</button>
-						{{-- <button class="btn btn-primary ml-3" onclick="toPrint()"><i class="fa fa-print"></i></button> --}}
-						<button type="button" class="btn btn-success mr-1" id="opt-add">
-							<i class="fa fa-plus"></i> Add
-						</button>
-						{{-- <button type="button" class="btn btn-info" id="opt-print">
-							<i class="fa fa-print"></i> Print List
-						</button> --}}
-					</div>
+					
 				{{-- <div class="float-right">
 					<button class="btn btn-success" onclick="GenerateRata($('#date_from').val())">Generate</button>
 				</div> --}}
@@ -40,6 +13,54 @@
 		</div>
 
 		<div class="card-body">
+			<ul class="nav nav-tabs mb-3">
+				<li class="nav-item active">
+			     	<a class="nav-link active" href="#home1" data-toggle="tab">Other Deductions Entry</a>
+			  	</li>
+			  	<li>
+			    	<a class="nav-link" hidden="" href="#menu1" data-toggle="tab">RATA - Representation Allowance (RA) and Transportation Allowance (TA)</a>
+			  	</li>
+			</ul>
+			<div class="form-group row">
+				{{-- <input type="text" name="date_from" id="date_from" class="form-control" value="SELECT DATE" readonly> --}}
+				<div class="col-sm-4">
+					<select class="form-control" name="ofc" id="ofc">
+						{{-- <option value="" disabled selected hidden>Office</option> --}}
+						@if(count($data[2]) > 0)
+							@foreach($data[2] as $office)
+							<option value="{{$office->cc_id}}">{{ucwords($office->cc_desc)}}</option>
+							@endforeach
+						@endif
+					</select>
+				</div>
+				<div class="col-sm-2">
+					<select class="form-control MonthSelector ml-3" name="date_month" id="date_month" onchange="">	
+					</select>
+				</div>
+				<div class="col-sm-2">
+					<select class="form-control YearSelector ml-3" name="date_year" id="date_year" onchange="" >
+					</select>
+				</div>
+				<div class="col-sm-2">
+					<select class="form-control ml-3" name="search_period" id="search_period" required>
+						<option value="15">15th Day</option>
+						<option value="30">30th Day</option>
+					</select>
+				</div>
+				<div class="col-sm-2">
+					<button class="ml-3 btn btn-primary mr-1" id="f_find">Find</button>
+					{{-- <button class="btn btn-primary ml-3" onclick="toPrint()"><i class="fa fa-print"></i></button> --}}
+
+					<button type="button" class="btn btn-success mr-1" id="opt-add">
+						<i class="fa fa-plus"></i> Add
+					</button>
+					{{-- <button type="button" class="btn btn-info" id="opt-print">
+						<i class="fa fa-print"></i> Print List
+					</button> --}}
+				</div>
+			</div>	
+				
+			
 			<div class="row">
 				<div class="col">
 					<div class="card">
@@ -131,13 +152,13 @@
 									<div class="form-group">
 										<label>Employee:</label>
 										<input type="text" class="form-control" name="cbo_employee_txt" id="cbo_employee_txt" readonly required hidden disabled>
-										<select name="cbo_employee" id="" style="text-transform: uppercase;" class="form-control">
+										<select  name="cbo_employee" id="" style="text-transform: uppercase;" class="form-control">
 											<option disabled hidden selected value="">---</option>
 											{{-- @foreach(Employee::Load_Employees() as $key => $value)
 												<option value="{{$value->empid}}">{{$value->lastname}}, {{$value->firstname}} {{$value->mi}}</option>
 											@endforeach --}}
 										</select>
-										<input type="text" class="form-control" hidden id="cbo_employee_view" disabled>
+										<input type="text" class="form-control" hidden id="cbo_employee_view" disabled="">
 									</div>
 
 									<div class="form-group">
@@ -211,6 +232,7 @@
 @section('to-bottom')
 	<script type="text/javascript" src="{{asset('js/for-fixed-tag.js')}}"></script>
 	<script>
+
 		var table = $('#dataTable').DataTable(dataTable_short);
 		var selected_row = null;
 		$('#dataTable').on('click', 'tbody > tr', function() {

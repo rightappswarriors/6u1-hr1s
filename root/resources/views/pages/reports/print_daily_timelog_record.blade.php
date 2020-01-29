@@ -27,12 +27,12 @@
 					<div class="col-sm-5">
 						<input type="text" name="date_from" id="date_from" class="form-control mr-3" value="{{date('Y-m-d')}}" readonly>
 					</div>
-					<div class="col-sm-1">
+					<div class="col-sm-2">
 						<button class="btn btn-primary mr-3" id="generate_btn" disabled>Find</button>
-					</div>
-					<div class="col-sm-1">
+						
 						<button class="btn btn-primary mr-3" id="print_btn" disabled><i class="fa fa-fw fa-print"></i></button>
 					</div>
+
 				</div>
 			{{-- </div> --}}
 			<div class="table-responsive table-bordered mt-3" hidden id="dtr">

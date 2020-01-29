@@ -246,6 +246,16 @@
 										</select>
 									</div> --}}
 									<div class="form-group">
+										<select class="form-control w-100" name="modalOffice" id="modalOffice" required>
+											<option selected value="">Please select an office</option>
+											@if(!empty($data[2]))
+											@foreach($data[2] as $off)
+												<option value="{{$off->cc_id}}">{{$off->cc_desc}}</option>
+											@endforeach
+											@endif
+										</select>
+									</div>
+									<div class="form-group">
 										<label>Employee:</label>
 										<input type="text" class="form-control" name="cbo_employee_txt" id="cbo_employee_txt" readonly required hidden disabled>
 										<select name="cbo_employee" id="" style="text-transform: uppercase;" class="form-control">
@@ -337,31 +347,34 @@
 		});
 		var table = $('#dataTable').DataTable(dataTable_short);
 		var table1 = $('#dataTable1').DataTable(dataTable_short);
-
+		
 		$('#opt-add').on('click', function() {
-			if($('#ofc').val() == "" || $('#ofc').val() == null) {
-				$('#ofc').focus().select();
-				alert('Please select an office.');
-			} else {
+			// if($('#ofc').val() == "" || $('#ofc').val() == null) {
+			// 	$('#ofc').focus().select();
+			// 	alert('Please select an office.');
+			// } else {
 				$('#cbo_employee_view')[0].setAttribute('hidden', '');
 				$('select[name="cbo_employee"]')[0].removeAttribute('hidden');
+				$('#modalOffice').on('change', function(){
+				
 				$.ajax({
-					type: 'post',
-					url: '{{url('timekeeping/timelog-entry/find-emp-office')}}',
-					data: {ofc_id: $('#ofc').val()},
-					success: function(data) {
-						let select = $('select[name="cbo_employee"]')[0];
-							while(select.firstChild) {
-								select.removeChild(select.firstChild);
-							}
+						type: 'post',
+						url: '{{url('timekeeping/timelog-entry/find-emp-office')}}',
+						data: {ofc_id: $('select[name="modalOffice"]').val()},
+						success: function(data) {
+							let select = $('select[name="cbo_employee"]')[0];
+								while(select.firstChild) {
+									select.removeChild(select.firstChild);
+								}
 
-						for(i=0; i<data.length; i++) {
-							var opt = document.createElement('option');
-								opt.setAttribute('value', data[i].empid);
-								opt.innerText = data[i].name;
-							select.appendChild(opt);
-						}	
-					},
+							for(i=0; i<data.length; i++) {
+								var opt = document.createElement('option');
+									opt.setAttribute('value', data[i].empid);
+									opt.innerText = data[i].name;
+								select.appendChild(opt);
+							}	
+						},
+					});
 				});
 				$('#txt_hidden_id').val("");
 				$('select[name="cbo_employee"]')[0].disabled = false;
@@ -369,7 +382,7 @@
 				$('#frm-pp').attr('action', '{{url('payroll/other-earnings/add')}}');
 				ClearFields();
 				OpenModal('.AddMode');
-			}
+			// }
 		});
 
 		$('.nav-link').on('click', function() {

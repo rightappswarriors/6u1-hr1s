@@ -52,7 +52,6 @@
 				</div>
 			</div>
 		</div>
-
 		<div class="card-body mb-2 main-card-body bg-success">
 
 			<div class="row mb-3">
