@@ -68,6 +68,9 @@
 									<option value="30">30th Day</option>
 								</select>
 							</div>
+							<div class="col-1">
+								<i class="fa fa-spin fa-spinner ml-3" id="loadAnimation"></i>
+							</div>
 							{{-- <div class="col-1">
 								<button class="ml-3 btn btn-primary" id="f_find">Find</button>
 							</div> --}}
@@ -340,6 +343,7 @@
 	<script type="text/javascript" src="{{asset('js/for-fixed-tag.js')}}"></script>
 
 	<script>
+		$('#loadAnimation').hide();	
 		var selected_row = null;
 		$('#dataTable1').on('click', 'tbody > tr', function() {
 			$(this).parents('tbody').find('.table-active').removeClass('table-active');
@@ -488,6 +492,9 @@
 				url : '{{url('payroll/other-earnings/')}}/find_e',
 				data : {month: find_month, year: find_year, period: find_period, ofc: find_ofc},
 				// dataTy : 'json',
+				beforeSend: function(){
+					    $('#loadAnimation').show();
+					},
 				success : function(data) {
 					if (data!="error") {
 						if (data!="No record found.") {
@@ -496,14 +503,18 @@
 							for(var i = 0 ; i < d.length; i++) {
 								LoadTable(d[i]);
 							}
+
 						} else {
 							table1.clear().draw();
 							alert(data);
+							$('#loadAnimation').hide();
 						}
 					} else {
 						alert('Error on loading data.');
+						$('#loadAnimation').hide();
 					}
 				},
+
 			});
 		}
 
@@ -523,6 +534,8 @@
 				'</button',
 
 			]).draw();
+			$('#loadAnimation').hide();
+			
 		}
 
 		function FillFields(data,forUpdate = false) {

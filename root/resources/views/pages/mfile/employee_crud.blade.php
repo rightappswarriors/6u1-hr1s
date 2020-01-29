@@ -257,7 +257,7 @@
 							    		<div class="form-group row">
 							    			<label class="col-sm-4 col-form-label">Rate Type <strong style="color:red">*</strong></label>
 										      <div class="col-sm-8">
-										      	<select name="txt_rate_typ" class="form-control T0r" required="">
+										      	{{-- <select name="txt_rate_typ" class="form-control T0r" required="">
 										      		@isset($rate)
 										      			<option value="">Select Rate Type..</option>
 										      			@foreach ($rate as $r)
@@ -266,7 +266,9 @@
 										      		@else
 														<option value="">No Rate Type registered..</option>
 										      		@endisset
-										      	</select>
+										      	</select> --}}
+
+										      	<input type="text" placeholder="MONTHLY" class="form-control" name="txt_rate_typ" readonly="">
 										      </div>
 							    		</div>
 							    	</div>
@@ -861,7 +863,7 @@
 				$('input[name="txt_hired"]').parsley().validate();
 				$('select[name="txt_emp_stat"]').parsley().validate();
 				// $('select[name="txt_emp_type"]').parsley().validate();
-				$('select[name="txt_rate_typ"]').parsley().validate();
+				// $('input[name="txt_rate_typ"]').parsley().validate();
 				$('input[name="txt_py_rate"]').parsley().validate();
 				$('select[name="txt_tax_brac"]').parsley().validate();
 				// $('select[name="txt_ss_brac"]').parsley().validate();
@@ -876,7 +878,7 @@
 					$('input[name="txt_hired"]').parsley().validate() == true &&
 					$('select[name="txt_emp_stat"]').parsley().validate() == true &&
 					// $('select[name="txt_emp_type"]').parsley().validate() == true &&
-					$('select[name="txt_rate_typ"]').parsley().validate() == true &&
+					// $('input[name="txt_rate_typ"]').parsley().validate() == true &&
 					$('input[name="txt_py_rate"]').parsley().validate() == true &&
 					$('select[name="txt_tax_brac"]').parsley().validate() == true /*&&
 					$('select[name="txt_ss_brac"]').parsley().validate()*/

@@ -9,44 +9,56 @@
 			<form method="post" action="{{url('payroll/generate-payroll/find-dtr')}}" id="frm-gp">
 				{{csrf_field()}}
 				<input type="hidden" name="isForDisplay">
-				<div class="form-group">
-					<div class="form-inline">
-						<select class="form-control mr-2" id="ofc" name="ofc">
+				<div class="form-group row">
+					<div class="col-sm-4">		
+						<select class="form-control" id="ofc" name="ofc">
 							<option value="" selected="" disabled="">-Select Office-</option>
 							@foreach($data[0] as $office)
 							<option value="{{$office->cc_id}}">{{$office->cc_desc}}</option>
 							@endforeach
 						</select>
-						<select class="form-control mr-2" id="empstatus" name="empstatus">
+					</div>
+					<div class="col-sm-4">	
+						<select class="form-control" id="empstatus" name="empstatus">
 							<option value="" selected="" disabled="">-Select Employee Status-</option>
 							@foreach($data[2] as $empstatus)
 							<option value="{{$empstatus->status_id}}">{{$empstatus->description}}</option>
 							@endforeach
 						</select>
-					</div>
+					</div>	
 				</div>
-				<div class="form-group">
-					<div class="form-inline">
-						<select class="form-control mr-2" id="month" name="month">
+				<div class="form-group row">
+					<div class="col-sm-2">
+						<select class="form-control" id="month" name="month">
 							@foreach(Core::Months() as $key => $value)
 							<option value="{{$key}}" {{($key == date('m')) ? 'selected' : ''}}>{{$value}}</option>
 							@endforeach
 						</select>
-						<select class="form-control mr-2" name="payroll_period" id="payroll_period" required>
+					</div>
+					<div class="col-sm-2">	
+						<select class="form-control" name="payroll_period" id="payroll_period" required>
 							<option value="15D">15th Day</option>
 							<option value="30D">30th Day</option>
 						</select>
-						<select class="form-control mr-2 YearSelector" id="year" name="year">
+					</div>
+					<div class="col-sm-2">
+						<select class="form-control YearSelector" id="year" name="year">
 						</select>
-						<select class="form-control mr-2" name="gen_type" id="gen_type">
+					</div>	
+					<div class="col-sm-2">	
+						<select class="form-control" name="gen_type" id="gen_type">
 							<option Value="BASIC" selected>Basic</option>
 							<option value="OVERTIME">Overtime</option>
 						</select>
-						<div class="btn-group mr-2">
+					</div>
+				</div>	
+					<div class="form-group row">
+						<div class="col-sm-2">
 							<button type="button" class="btn btn-primary border-right" onclick="FindDTRS()"><i class="fa fa-search"></i> Search</button>
 							<button type="button" class="btn btn-primary border-left" onclick="ClearSearch()"><i class="fa fa-eraser"></i> Clear</button>
 						</div>
-					</div>
+					</div>	
+						
 				</div>
 			</form>
 			<div>

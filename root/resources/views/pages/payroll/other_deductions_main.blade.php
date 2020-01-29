@@ -51,6 +51,8 @@
 					{{-- <button class="ml-3 btn btn-primary mr-1" id="f_find">Find</button> --}}
 					{{-- <button class="btn btn-primary ml-3" onclick="toPrint()"><i class="fa fa-print"></i></button> --}}
 
+					<i class="fa fa-spin fa-spinner ml-3" id="loadAnimation"></i>
+
 					<button type="button" class="btn btn-success mr-1" id="opt-add">
 						<i class="fa fa-plus"></i> Add
 					</button>
@@ -244,7 +246,7 @@
 @section('to-bottom')
 	<script type="text/javascript" src="{{asset('js/for-fixed-tag.js')}}"></script>
 	<script>
-
+		$('#loadAnimation').hide();	
 		var table = $('#dataTable').DataTable(dataTable_short);
 		var selected_row = null;
 		$('#dataTable').on('click', 'tbody > tr', function() {
@@ -393,6 +395,9 @@
 				url : '{{url('payroll/other-deductions/')}}/find',
 				data : {month: find_month, year: find_year, period: find_period, ofc: find_ofc},
 				// dataTy : 'json',
+				beforeSend: function(){
+					$('#loadAnimation').show();
+				},
 				success : function(data) {
 					if (data!="error") {
 						if (data!="No record found.") {
@@ -404,9 +409,11 @@
 						} else {
 							table.clear().draw();
 							alert(data);
+							$('#loadAnimation').hide();
 						}
 					} else {
 						alert('Error on loading data.');
+						$('#loadAnimation').hide();
 					}
 				},
 			});
@@ -448,6 +455,7 @@
 				'</button',
 
 			]).draw();
+			 $('#loadAnimation').hide();
 		}
 
 		function OpenModal(id) {
