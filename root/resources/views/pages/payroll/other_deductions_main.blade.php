@@ -48,7 +48,7 @@
 					</select>
 				</div>
 				<div class="col-sm-2">
-					<button class="ml-3 btn btn-primary mr-1" id="f_find">Find</button>
+					{{-- <button class="ml-3 btn btn-primary mr-1" id="f_find">Find</button> --}}
 					{{-- <button class="btn btn-primary ml-3" onclick="toPrint()"><i class="fa fa-print"></i></button> --}}
 
 					<button type="button" class="btn btn-success mr-1" id="opt-add">
@@ -120,7 +120,7 @@
 
 @section('to-modal')
 	<!-- Add Modal -->
-	<div class="modal fade" id="modal-pp" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	<div class="modal fade" id="modal-pp" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
 		<div class="modal-dialog modal-lg" role="document">
 			<div class="modal-content">
 				<div class="modal-header">
@@ -149,16 +149,28 @@
 											@endif
 										</select>
 									</div> --}}
+									<div class="form-group" id="form-group-office">
+										<label for="">Office:</label>
+										<select class="form-control" name="modalOffice" id="modalOffice">
+											{{-- <option value="" disabled selected hidden>Office</option> --}}
+											@if(count($data[2]) > 0)
+												@foreach($data[2] as $office)
+												<option value="{{$office->cc_id}}">{{ucwords($office->cc_desc)}}</option>
+												@endforeach
+											@endif
+										</select>
+									</div>
 									<div class="form-group">
 										<label>Employee:</label>
 										<input type="text" class="form-control" name="cbo_employee_txt" id="cbo_employee_txt" readonly required hidden disabled>
-										<select  name="cbo_employee" id="" style="text-transform: uppercase;" class="form-control">
+										<select name="cbo_employee" id="" style="text-transform: uppercase;" class="form-control">
 											<option disabled hidden selected value="">---</option>
 											{{-- @foreach(Employee::Load_Employees() as $key => $value)
 												<option value="{{$value->empid}}">{{$value->lastname}}, {{$value->firstname}} {{$value->mi}}</option>
 											@endforeach --}}
 										</select>
-										<input type="text" class="form-control" hidden id="cbo_employee_view" disabled="">
+										<input type="text" class="form-control" hidden id="cbo_employee_view" disabled>
+										<input type="text" class="form-control" hidden name="cbo_employee" id="cbo_employee">
 									</div>
 
 									<div class="form-group">
@@ -249,16 +261,18 @@
 
 	<script>
 		$('#opt-add').on('click', function() {
-			if($('#ofc').val() == "" || $('#ofc').val() == null) {
-				$('#ofc').focus().select();
-				alert('Please select an office.');
-			} else {
-				$('#cbo_employee_view')[0].setAttribute('hidden', '');
-				$('select[name="cbo_employee"]')[0].removeAttribute('hidden');
+			// if($('#ofc').val() == "" || $('#ofc').val() == null) {
+			// 	$('#ofc').focus().select();
+			// 	alert('Please select an office.');
+			// } else {
+			
+			$('#cbo_employee_view')[0].setAttribute('hidden', '');
+			$('select[name="cbo_employee"]')[0].removeAttribute('hidden');
+			$('#modalOffice').on('change', function(){
 				$.ajax({
 					type: 'post',
 					url: '{{url('timekeeping/timelog-entry/find-emp-office')}}',
-					data: {ofc_id: $('#ofc').val()},
+					data: {ofc_id: $('select[name="modalOffice"]').val()},
 					success: function(data) {
 						let select = $('select[name="cbo_employee"]')[0];
 							while(select.firstChild) {
@@ -273,19 +287,24 @@
 						}	
 					},
 				});
+			});
+				
+				
 				$('#txt_hidden_id').val("");
 				$('select[name="cbo_employee"]')[0].disabled = false;
 				$('#exampleModalLabel').text("New Other Deductions");
 				$('#frm-pp').attr('action', '{{url('payroll/other-deductions')}}');
 				ClearFields();
 				OpenModal('.AddMode');
-			}
+			// }
 		});
 
 		// $('#opt-update').on('click', function() {
 		function row_update(obj) {
 			selected_row = $($(obj).parents()[1]);
 			if(selected_row != null) {
+				$('#modalOffice')[0].removeAttribute('required');
+				$('#form-group-office').attr('hidden', true);
 				$('#cbo_employee_view')[0].removeAttribute('hidden');
 				$('select[name="cbo_employee"]')[0].setAttribute('hidden', '');
 				$('#cbo_employee_view').val(selected_row.children()[2].innerText);
@@ -337,14 +356,31 @@
 		}
 
 
-		$('#f_find').on('click', function() {
-		// $('#date_month, #date_year, #search_period, #ofc').on('change', function() {
+		// $('#f_find').on('click', function() {
+		// // $('#date_month, #date_year, #search_period, #ofc').on('change', function() {
+		// 	Find();
+		// });
+		
+		//ON CHANGE EVENT FIND DATA ALL SELECT2 FIELDS
+		
+		$('#ofc').on('change', function(){
 			Find();
 		});
 
-		// $('#ofc').on('change', function() {
-		// 	Find();
-		// });
+		$('#date_month').on('change', function(){
+			Find();
+		});
+
+		$('#date_year').on('change', function(){
+			Find();
+		});
+
+		$('#search_period').on('change', function(){
+			Find();
+		});
+
+		//END ON CHANGE EVENT
+
 
 		function Find() {
 			let find_ofc = $('#ofc').val();
@@ -363,7 +399,7 @@
 							table.clear().draw();
 							var d = data;
 							for(var i = 0 ; i < d.length; i++) {
-								LoadTable(d[0]);
+								LoadTable(d[i]);
 							}
 						} else {
 							table.clear().draw();
@@ -377,7 +413,8 @@
 		}
 
 		function FillFields(data) {
-			$('select[name="cbo_employee"]').val(data.emp_no).trigger('change');
+
+			$('input[name="cbo_employee"]').val(data.emp_no).trigger('change');
 			$('select[name="cbo_type"]').val(data.deduction_code).trigger('change');
 			$('select[name="cbo_period"]').val(data.payroll_period).trigger('change');
 			$('select[name="cbo_month"]').val(data.month).trigger('change');
@@ -395,6 +432,7 @@
 		}
 
 		function LoadTable(data) {
+			console.log(data);
 			table.row.add([
 				data.id,
 				data.emp_no,

@@ -68,9 +68,9 @@
 									<option value="30">30th Day</option>
 								</select>
 							</div>
-							<div class="col-1">
+							{{-- <div class="col-1">
 								<button class="ml-3 btn btn-primary" id="f_find">Find</button>
-							</div>
+							</div> --}}
 						</div>
 						<div class="row mb-3 mt-1 ml-1">
 							<div class="col-3">
@@ -216,7 +216,7 @@
 
 @section('to-modal')
 	<!-- Add Modal -->
-	<div class="modal fade" id="modal-pp" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	<div class="modal fade" id="modal-pp"  role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
 		<div class="modal-dialog modal-lg" role="document">
 			<div class="modal-content">
 				<div class="modal-header">
@@ -245,7 +245,8 @@
 											@endif
 										</select>
 									</div> --}}
-									<div class="form-group">
+									<div class="form-group" id="form-group-office">
+										<label>Office:</label>
 										<select class="form-control w-100" name="modalOffice" id="modalOffice" required>
 											<option selected value="">Please select an office</option>
 											@if(!empty($data[2]))
@@ -397,6 +398,8 @@
 		function row_update(obj) {
 			selected_row = $($(obj).parents()[1]);
 			if(selected_row != null) {
+				$('#modalOffice')[0].removeAttribute('required');
+				$('#form-group-office').attr('hidden', true);
 				$('#cbo_employee_view')[0].removeAttribute('hidden');
 				$('select[name="cbo_employee"]')[0].setAttribute('hidden', '');
 				$('#cbo_employee_view').val(selected_row.children()[2].innerText);
@@ -448,10 +451,31 @@
 		// });
 		}
 
-		$('#f_find').on('click', function() {
-		// $('#date_month, #date_year, #search_period, #ofc').on('change', function() {
+		// $('#f_find').on('click', function() {
+		// // $('#date_month, #date_year, #search_period, #ofc').on('change', function() {
+		// 	Find();
+		// });
+
+		//ON CHANGE EVENT FIND DATA ALL SELECT2 FIELDS
+		
+		$('#ofc').on('change', function(){
 			Find();
 		});
+
+
+
+		$('#date_month_1').on('change', function(){
+			Find();
+		});
+
+		$('#date_year_1').on('change', function(){
+			Find();
+		});
+
+		$('#search_period_1').on('change', function(){
+			Find();
+		});
+		//END ON CHANGE EVENT
 
 		function Find() {
 			let find_ofc = $('#ofc').val();
@@ -470,7 +494,7 @@
 							table1.clear().draw();
 							var d = data;
 							for(var i = 0 ; i < d.length; i++) {
-								LoadTable(d[0]);
+								LoadTable(d[i]);
 							}
 						} else {
 							table1.clear().draw();

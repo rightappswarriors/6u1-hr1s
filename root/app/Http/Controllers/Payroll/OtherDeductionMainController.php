@@ -53,6 +53,7 @@ class OtherDeductionMainController extends Controller
 
     public function delete(Request $r)
     {
+
         if(EmployeeDeduction::Delete_Deduction($r)) {
             Core::Set_Alert('success', 'Successfully deleted new Other Deduction.');
             return back();
