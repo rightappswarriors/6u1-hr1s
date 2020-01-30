@@ -216,7 +216,7 @@
 
 @section('to-modal')
 	<!-- Add Modal -->
-	<div class="modal fade" id="modal-pp" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	<div class="modal fade" id="modal-pp" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
 		<div class="modal-dialog modal-lg" role="document">
 			<div class="modal-content">
 				<div class="modal-header">
@@ -231,14 +231,14 @@
 						<input type="hidden" class="form-control" name="empid" readonly hidden required>
 						<span class="AddMode">
 							<div class="row mb-2">
-								<div class="col-6"> 
+								<div class="col-12"> 
 									<!-- Column 1 Row 1 -->
 									<b>Basic Information</b>
 									<div class="dropdown-divider"></div>
 									<div class="form-group">
 										<label>Employee:</label>
 										<input type="text" class="form-control" name="cbo_employee_txt" id="cbo_employee_txt" readonly required>
-										<select name="cbo_employee" id="" style="text-transform: uppercase;" class="form-control" hidden>
+										<select name="cbo_employee" id="cbo_employee_select" style="text-transform: uppercase;" class="form-control" hidden>
 											<option disabled hidden selected value="">---</option>
 											@foreach(Employee::Load_Employees() as $key => $value)
 												<option value="{{$value->empid}}">{{$value->lastname}}, {{$value->firstname}} {{$value->mi}}</option>
@@ -251,13 +251,13 @@
 									</div>
 								</div>
 
-								<div class="col-6">
+								<div class="col-12">
 									<!-- Column 2 Row 1 -->
 									<b>Loan Details</b>
 									<div class="dropdown-divider"></div>
-									<div class="form-group">
+									<div hidden class="form-group">
 										<label>Stock Location:</label>
-										<select name="cbo_stocklocation" id="" style="text-transform: uppercase;" class="form-control" required>
+										<select name="cbo_stocklocation" style="text-transform: uppercase;" class="form-control">
 											<option disabled hidden selected value="">---</option>
 											@for($i=1;$i<=6;$i++)
 												<option value="Stock Location {{$i}}">Stock Location {{$i}}</option>
@@ -266,7 +266,7 @@
 									</div>
 									<div class="form-group">
 										<label>Loan Type:</label>
-										<select name="cbo_contraacct" id="" style="text-transform: uppercase;" class="form-control" required>
+										<select name="cbo_contraacct" style="text-transform: uppercase;" class="form-control" required>
 											<option disabled hidden selected value="">---</option>
 											@foreach(LoanType::Load_LoanTypes() as $key => $value)
 												<option value="{{$value->code}}">{{$value->description}}</option>
@@ -278,7 +278,7 @@
 									</div>
 									<div class="form-group exclusive_sub_hidden" id="pagibig_sub" hidden>
 										<label>Pag-Ibig Type:</label>
-										<select name="cbo_pagibig_sub" id="" style="text-transform: uppercase;" class="form-control" required>
+										<select name="cbo_pagibig_sub" style="text-transform: uppercase;" class="form-control" required>
 											<option disabled hidden selected value="">---</option>
 											@foreach(Pagibig::Get_All_Sub() as $key => $value)
 												<option value="{{$value->id}}">{{$value->description}}</option>
@@ -287,7 +287,7 @@
 									</div>
 									<div class="form-group exclusive_sub_hidden" id="sss_sub" hidden>
 										<label>GSIS Type:</label>
-										<select name="cbo_sss_sub" id="" style="text-transform: uppercase;" class="form-control" required>
+										<select name="cbo_sss_sub" style="text-transform: uppercase;" class="form-control" required>
 											<option disabled hidden selected value="">---</option>
 											@foreach(SSS::Get_All_Sub() as $key => $value)
 												<option value="{{$value->id}}">{{$value->description}}</option>
@@ -302,7 +302,7 @@
 								<div class="col-6">
 									{{-- <div class="form-group">
 										<label>Cost Center:</label>
-										<select name="cbo_costcenter" id="" style="text-transform: uppercase;" class="form-control" required>
+										<select name="cbo_costcenter" style="text-transform: uppercase;" class="form-control" required>
 											<option disabled hidden selected value="">---</option>
 											@for($i=1;$i<=6;$i++)
 												<option value="Cost Center {{$i}}">Cost Center {{$i}}</option>
@@ -311,7 +311,7 @@
 									</div> --}}
 									{{-- <div class="form-group">
 										<label>Sub Cost Center:</label>
-										<select name="cbo_scc" id="" style="text-transform: uppercase;" class="form-control" required>
+										<select name="cbo_scc" style="text-transform: uppercase;" class="form-control" required>
 											<option disabled hidden selected value="">---</option>
 											@for($i=1;$i<=6;$i++)
 												<option value="Sub Cost Center {{$i}}">Sub Cost Center {{$i}}</option>
@@ -618,12 +618,12 @@
 		// });
 
 
-		function FillFld(data){ console.log(data);
+		function FillFld(data){;
 			$('input[name="txt_code"]').val(data.loan_code);
 			$('select[name="cbo_employee"]').val(data.employee_no).trigger('change');
 			$('textarea[name="txt_desc"]').val(data.loan_desc);
 			$('select[name="cbo_contraacct"]').val(data.loan_type).trigger('change');
-			$('select[name="cbo_stocklocation"]').val(data.loan_location).trigger('change');
+			// $('select[name="cbo_stocklocation"]').val(data.loan_location).trigger('change');
 			$('input[name="dtp_trnxdt"]').val(data.loan_transdate);
 			$('select[name="cbo_costcenter"]').val(data.loan_cost_center_code).trigger('change');
 			$('select[name="cbo_scc"]').val(data.loan_sub_cost_center).trigger('change');
@@ -633,9 +633,9 @@
 			$('input[name="txt_deduction"]').val(data.loan_deduction);
 			$('input[name="dtp_deduction"]').val(data.deduction_date);
 			switch(data.loan_type) {
-				case "pagibig": $('select[name="cbo_pagibig_sub"]').val(data.loan_sub_type); break;
-				case "sss": $('select[name="cbo_sss_sub"]').val(data.loan_sub_type); break;	
-				case "gsis": $('select[name="cbo_sss_sub"]').val(data.loan_sub_type); break;
+				case "pagibig": $('select[name="cbo_pagibig_sub"]').val(data.loan_sub_type).trigger('change'); break;
+				case "sss": $('select[name="cbo_sss_sub"]').val(data.loan_sub_type).trigger('change'); break;	
+				case "gsis": $('select[name="cbo_sss_sub"]').val(data.loan_sub_type).trigger('change'); break;
 			}
 			
 
@@ -649,7 +649,7 @@
 			$('select[name="cbo_employee"]').val('').trigger('change');
 			$('textarea[name="txt_desc"]').val('');
 			$('select[name="cbo_contraacct"]').val('').trigger('change');
-			$('select[name="cbo_stocklocation"]').val('').trigger('change');
+			// $('select[name="cbo_stocklocation"]').val('').trigger('change');
 			$('input[name="dtp_trnxdt"]').val('{{date('m-d-Y')}}');
 			$('select[name="cbo_costcenter"]').val('').trigger('change');
 			$('select[name="cbo_scc"]').val('').trigger('change');
@@ -721,12 +721,17 @@
 				$('#cbo_employee_txt').val($('#tito_emp option:selected').text());
 				$('#cbo_employee').val($('#tito_emp').val());
 				// $('#dtp_filed, #dtp_lfrm, #dtp_lto').val('{{date('m/d/Y')}}');
+				$("#cbo_employee_txt").hide();
+				$("#cbo_employee_select").show();
+				$("#cbo_employee_select").val($("#tito_emp").val()).trigger('change');
 				OpenModal('.AddMode');
 			}
 		});
 
 		// $('#opt-update').on('click', function() {
 		function row_update(obj) {
+			$("#cbo_employee_select").hide();
+			$("#cbo_employee_txt").show();
 			selected_row = $($(obj).parents()[1]);
 			$('input[name="txt_code"]').attr('readonly', '');
 			// $('input[name="txt_code"]').val(selected_row.attr('data_id'));

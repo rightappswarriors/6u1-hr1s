@@ -78,10 +78,10 @@ class LoanEntryController extends Controller
             'loan_code'=>$r->txt_code, 
             'loan_desc'=>$r->txt_desc, 
             'loan_transdate'=>$r->dtp_trnxdt, 
-            'loan_location'=>$r->cbo_stocklocation, 
+            // 'loan_location'=>$r->cbo_stocklocation, 
             'loan_type'=>$r->cbo_contraacct, 
             'user_id'=>Account::CURRENT()->uid, 
-            'whs_location_code'=>$r->cbo_stocklocation/*, 'loan_cost_center_code'=>$r->cbo_costcenter*/, 
+            // 'whs_location_code'=>$r->cbo_stocklocation/*, 'loan_cost_center_code'=>$r->cbo_costcenter*/, 
             'loan_cost_center_name'=>$r->cbo_costcenter/*, 'loan_sub_cost_center'=>$r->cbo_scc*/, 
             'loan_amount'=>$r->txt_amnt_loan, 
             'loan_deduction'=>$dpm/*, 'deduction_date'=>$r->dtp_deduction*/, 
@@ -129,6 +129,7 @@ class LoanEntryController extends Controller
                 return "No record found.";
             }
         } catch (\Exception $e) {
+            return $e;
             ErrorCode::Generate('controller', 'LoanEntryController', '00003', $e->getMessage());
             return "error";
         }
@@ -157,10 +158,10 @@ class LoanEntryController extends Controller
             'loan_code'=>$r->txt_code,
             'loan_desc'=>$r->txt_desc,
             'loan_transdate'=>$r->dtp_trnxdt,
-            'loan_location'=>$r->cbo_stocklocation,
+            // 'loan_location'=>$r->cbo_stocklocation,
             'loan_type'=>$r->cbo_contraacct,
             'user_id'=>Account::CURRENT()->uid,
-            'whs_location_code'=>$r->cbo_stocklocation/*, 'loan_cost_center_code'=>$r->cbo_costcenter*/,
+            // 'whs_location_code'=>$r->cbo_stocklocation/*, 'loan_cost_center_code'=>$r->cbo_costcenter*/,
             'loan_cost_center_name'=>$r->cbo_costcenter/*, 'loan_sub_cost_center'=>$r->cbo_scc*/,
             'loan_amount'=>$r->txt_amnt_loan,
             'loan_deduction'=>$dpm/*, 'deduction_date'=>$r->dtp_deduction*/,

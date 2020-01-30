@@ -177,3 +177,5 @@
 01-24-2020 15:57 | GeneratePayrollController | Undefined variable: e (GPCB00003-1523123)
 01-24-2020 15:58 | GeneratePayrollController | Type not found (GPCB00004-HOT-1523123)
 01-27-2020 13:40 | GeneratePayrollController | count(): Parameter must be an array or an object that implements Countable (GPCB00001)
+01-30-2020 21:02 | LoanEntryController | SQLSTATE[22P02]: Invalid text representation: 7 ERROR:  invalid input syntax for integer: "" (SQL: select * from "hr_pagibig_sub" where "cancel" is null and "id" =  limit 1) (LoEC00003)
+01-30-2020 21:02 | LoanEntryController | SQLSTATE[22P02]: Invalid text representation: 7 ERROR:  invalid input syntax for integer: "" (SQL: select * from "hr_pagibig_sub" where "cancel" is null and "id" =  limit 1) (LoEC00003)

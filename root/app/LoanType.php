@@ -24,7 +24,7 @@ class LoanType extends Model
     public static function Get_LoanType($id, $sub)
     {
     	try {
-            $data = DB::table(self::$tbl_name)->where(self::$cancel, '=', null)->where('code', $id)->first()/*->description*/;
+            $data = DB::table(self::$tbl_name)/*->where(self::$cancel, '=', null)*/->where('code', $id)->first()/*->description*/;
             if($data != null) {
                 return $data->description;
             } else {
