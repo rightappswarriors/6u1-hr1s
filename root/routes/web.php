@@ -249,9 +249,9 @@
 		// Route::prefix('timekeeping')->group(function() {
 			/* LOG BOX */
 			Route::prefix('log-box')->group(function() {
-				Route::get('/', 'TimeKeeping\LogBoxController@view');
-				Route::post('/in', 'TimeKeeping\LogBoxController@getLastestTimeIn');
-				Route::post('/out', 'TimeKeeping\LogBoxController@getLastestTimeOut');
+				Route::get('/', 'Timekeeping\LogBoxController@view');
+				Route::post('/in', 'Timekeeping\LogBoxController@getLastestTimeIn');
+				Route::post('/out', 'Timekeeping\LogBoxController@getLastestTimeOut');
 			});
 			/* LOG BOX */
 			/* UPLOAD DTR */

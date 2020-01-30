@@ -17,7 +17,7 @@ class LogBoxController extends Controller
         // $this->ghistoryIn = DB::table('hr_tito2')->where('cancel', '=', null)->where('status', '=', '1')->where('work_date', date('Y-m-d'))->orderBy('work_date', 'DESC')->orderBy('time_log', 'DESC')->orderBy('logs_id', 'DESC')->take(6)->get();
         $date = date('Y-m-d');
         $this->ghistoryIn = DB::select("SELECT * from hris.hr_tito2 where cancel is null and status = 1::text and work_date = '$date' and empid not in (SELECT empid from hris.hr_tito2 where cancel is null and status = 0::text and work_date = '$date') order by work_date desc, time_log desc, logs_id desc");
-        $this->ghistoryOut = DB::table('hr_tito2')->where('cancel', '=', null)->where('status', '=', '0')->where('work_date', date('Y-m-d'))->orderBy('work_date', 'DESC')->orderBy('time_log', 'DESC')->orderBy('logs_id', 'DESC');
+        $this->ghistoryOut = DB::table('hr_tito2')->where('cancel', '=', null)->where('status', '=', '0')->where('work_date', date('Y-m-d'))->orderBy('work_date', 'DESC')->orderBy('time_log', 'DESC')->orderBy('logs_id', 'DESC')->get();
 
     }
 
