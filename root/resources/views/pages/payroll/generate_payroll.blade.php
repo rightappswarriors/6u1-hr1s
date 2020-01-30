@@ -134,8 +134,8 @@
 								@foreach($data[1] as $ghistory)
 								<tr data="{{$ghistory->item_no}}">
 									<td>{{$ghistory->date_generated}}</td>
-									<td>{{$ghistory->time_generated}}</td>
-									<td>{{$ghistory->date_from}} to {{$ghistory->date_to}}</td>
+									{{--<td>{{$ghistory->time_generated}}</td>--}}
+									{{--<td>{{$ghistory->date_from}} to {{$ghistory->date_to}}</td>--}}
 									<td>{{Employee::Name($ghistory->empid)}}</td>
 									<td>{{$ghistory->empid}}</td>
 								</tr>
