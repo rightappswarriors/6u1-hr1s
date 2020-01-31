@@ -189,9 +189,11 @@
 							var d = JSON.parse(data);
 							// dataTable_gds.search(d.search).draw();
 							// dataTable_gdh.search(d.search).draw();
+							console.log(d.dtr_summaries.length);
 							if (d.dtr_summaries.length > 0) {
 								for (var i = 0; i < d.dtr_summaries.length; i++) {
-									LoadTable_gds(d.dtr_summaries[i]);
+									//console.log(d.dtr_summaries[i])
+									//LoadTable_gds(d.dtr_summaries[i]);
 								}
 							}
 							if (d.payroll_history.length > 0) {

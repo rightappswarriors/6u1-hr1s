@@ -72,8 +72,8 @@ class GeneratePayrollController extends Controller
             $dtr_summaries = [];
             $emp_sql = Employee::$emp_sql;
             $pp = Payroll::PayrollPeriod2($r->month, $r->payroll_period, $r->year);
-            $sql = "SELECT dtr.*, emp.* FROM (SELECT * FROM hris.hr_dtr_sum_hdr a LEFT JOIN hris.hr_dtr_sum_employees b ON a.code = b.dtr_sum_id) dtr INNER JOIN ($emp_sql) emp ON dtr.empid = emp.empid";
-                $con = " WHERE isgenerated IS NOT TRUE AND date_from >= '".date('Y-m-d', strtotime($pp->from))."' AND date_to <= '".date('Y-m-d', strtotime($pp->to))."' AND empstatus = '".$r->empstatus."' AND generationtype = '".$r->gen_type."' AND department = '".$r->ofc."'";
+            $sql = "SELECT dtr.*, emp.* FROM (SELECT a.ppid, a.date_from, a.date_to, a.date_generated, a.time_generated, a.code, a.generatedby, a.generationtype, a.empid FROM hris.hr_dtr_sum_hdr a LEFT JOIN hris.hr_dtr_sum_employees b ON a.code = b.dtr_sum_id where b.isgenerated IS NOT TRUE) dtr INNER JOIN ($emp_sql) emp ON dtr.empid = emp.empid";
+                $con = " WHERE date_from >= '".date('Y-m-d', strtotime($pp->from))."' AND date_to <= '".date('Y-m-d', strtotime($pp->to))."' AND empstatus = '".$r->empstatus."' AND generationtype = '".$r->gen_type."' AND department = '".$r->ofc."'";
             $return_val->search = date('Y-m-d', strtotime($pp->from))." to ".date('Y-m-d', strtotime($pp->to));
             // $return_val->parameters = $r->all();
             $return_val->dtr_summaries = Core::sql($sql.$con);
