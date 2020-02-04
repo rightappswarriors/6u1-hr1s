@@ -177,7 +177,7 @@
     <script type="text/javascript" src="{{asset('js/multiple-select.js')}}"></script>
     <script type="text/javascript" src="{{asset('js/bootstrap-timepicker.js')}}"></script>
     <script type="text/javascript" src="{{ asset('js/select2.min.js') }}"></script>
-    
+    <script type="text/javascript" src="{{ asset('js/accounting.min.js') }}"></script>    
     @include('include.js_dateoption_config')
     <script type="text/javascript">
         let preloader_timeinseconds_before_gone = .85; // in seconds

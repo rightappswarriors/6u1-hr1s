@@ -191,6 +191,8 @@
 			$('#modal-pp').modal('show');
 		});
 
+		//Accounting number format		
+
 		// $('#opt-update').on('click', function() {
 		function row_update(obj) {
 			selected_row = $($(obj).parents()[1]);
@@ -210,38 +212,38 @@
 							$('input[name="txt_desc"]').val(d.description);
 							$('input[name="txt_desc"]').val(d.description);
 							
-							$('input[name="brk[]"]').eq(0).val(d.bracket1);
-							$('input[name="brk[]"]').eq(1).val(d.bracket2);
-							$('input[name="brk[]"]').eq(2).val(d.bracket3);
-							$('input[name="brk[]"]').eq(3).val(d.bracket4);
-							$('input[name="brk[]"]').eq(4).val(d.bracket5);
-							$('input[name="brk[]"]').eq(5).val(d.bracket6);
-							$('input[name="brk[]"]').eq(6).val(d.bracket7);
-							$('input[name="brk[]"]').eq(7).val(d.bracket8);
-							$('input[name="brk[]"]').eq(8).val(d.bracket9);
-							$('input[name="brk[]"]').eq(9).val(d.bracket10);
+							$('input[name="brk[]"]').eq(0).val(accounting.formatMoney(d.bracket1, "", 2, ",", "."));
+							$('input[name="brk[]"]').eq(1).val(accounting.formatMoney(d.bracket2, "", 2, ",", "."));
+							$('input[name="brk[]"]').eq(2).val(accounting.formatMoney(d.bracket3, "", 2, ",", "."));
+							$('input[name="brk[]"]').eq(3).val(accounting.formatMoney(d.bracket4, "", 2, ",", "."));
+							$('input[name="brk[]"]').eq(4).val(accounting.formatMoney(d.bracket5, "", 2, ",", "."));
+							$('input[name="brk[]"]').eq(5).val(accounting.formatMoney(d.bracket6, "", 2, ",", "."));
+							$('input[name="brk[]"]').eq(6).val(accounting.formatMoney(d.bracket7, "", 2, ",", "."));
+							$('input[name="brk[]"]').eq(7).val(accounting.formatMoney(d.bracket8, "", 2, ",", "."));
+							$('input[name="brk[]"]').eq(8).val(accounting.formatMoney(d.bracket9, "", 2, ",", "."));
+							$('input[name="brk[]"]').eq(9).val(accounting.formatMoney(d.bracket10, "", 2, ",", "."));
 
-							$('input[name="fct[]"]').eq(0).val(d.factor1);
-							$('input[name="fct[]"]').eq(1).val(d.factor2);
-							$('input[name="fct[]"]').eq(2).val(d.factor3);
-							$('input[name="fct[]"]').eq(3).val(d.factor4);
-							$('input[name="fct[]"]').eq(4).val(d.factor5);
-							$('input[name="fct[]"]').eq(5).val(d.factor6);
-							$('input[name="fct[]"]').eq(6).val(d.factor7);
-							$('input[name="fct[]"]').eq(7).val(d.factor8);
-							$('input[name="fct[]"]').eq(8).val(d.factor9);
-							$('input[name="fct[]"]').eq(9).val(d.factor10);
+							$('input[name="fct[]"]').eq(0).val(accounting.formatMoney(d.factor1, "", 2, ",", "."));
+							$('input[name="fct[]"]').eq(1).val(accounting.formatMoney(d.factor2, "", 2, ",", "."));
+							$('input[name="fct[]"]').eq(2).val(accounting.formatMoney(d.factor3, "", 2, ",", "."));
+							$('input[name="fct[]"]').eq(3).val(accounting.formatMoney(d.factor4, "", 2, ",", "."));
+							$('input[name="fct[]"]').eq(4).val(accounting.formatMoney(d.factor5, "", 2, ",", "."));
+							$('input[name="fct[]"]').eq(5).val(accounting.formatMoney(d.factor6, "", 2, ",", "."));
+							$('input[name="fct[]"]').eq(6).val(accounting.formatMoney(d.factor7, "", 2, ",", "."));
+							$('input[name="fct[]"]').eq(7).val(accounting.formatMoney(d.factor8, "", 2, ",", "."));
+							$('input[name="fct[]"]').eq(8).val(accounting.formatMoney(d.factor9, "", 2, ",", "."));
+							$('input[name="fct[]"]').eq(9).val(accounting.formatMoney(d.factor10, "", 2, ",", "."));
 
-							$('input[name="addon[]"]').eq(0).val(d.add_on1);
-							$('input[name="addon[]"]').eq(1).val(d.add_on2);
-							$('input[name="addon[]"]').eq(2).val(d.add_on3);
-							$('input[name="addon[]"]').eq(3).val(d.add_on4);
-							$('input[name="addon[]"]').eq(4).val(d.add_on5);
-							$('input[name="addon[]"]').eq(5).val(d.add_on6);
-							$('input[name="addon[]"]').eq(6).val(d.add_on7);
-							$('input[name="addon[]"]').eq(7).val(d.add_on8);
-							$('input[name="addon[]"]').eq(8).val(d.add_on9);
-							$('input[name="addon[]"]').eq(9).val(d.add_on10);
+							$('input[name="addon[]"]').eq(0).val(accounting.formatMoney(d.add_on1, "", 2, ",", "."));
+							$('input[name="addon[]"]').eq(1).val(accounting.formatMoney(d.add_on2, "", 2, ",", "."));
+							$('input[name="addon[]"]').eq(2).val(accounting.formatMoney(d.add_on3, "", 2, ",", "."));
+							$('input[name="addon[]"]').eq(3).val(accounting.formatMoney(d.add_on4, "", 2, ",", "."));
+							$('input[name="addon[]"]').eq(4).val(accounting.formatMoney(d.add_on5, "", 2, ",", "."));
+							$('input[name="addon[]"]').eq(5).val(accounting.formatMoney(d.add_on6, "", 2, ",", "."));
+							$('input[name="addon[]"]').eq(6).val(accounting.formatMoney(d.add_on7, "", 2, ",", "."));
+							$('input[name="addon[]"]').eq(7).val(accounting.formatMoney(d.add_on8, "", 2, ",", "."));
+							$('input[name="addon[]"]').eq(8).val(accounting.formatMoney(d.add_on9, "", 2, ",", "."));
+							$('input[name="addon[]"]').eq(9).val(accounting.formatMoney(d.add_on10, "", 2, ",", "."));
 						}
 					}
 				},

@@ -102,6 +102,8 @@
 				/*new crud 4 employee*/
 				Route::post('/office-employee', 'MFile\EmployeeController@get_employees');
 				Route::post('/upadte-flag', 'MFile\EmployeeController@updateFlag');
+				//Check if biometric id is unique
+				Route::post('/check-biometric', 'MFile\EmployeeController@checkBiometric');
 
 			});
 			/* EMPLOYEE */
