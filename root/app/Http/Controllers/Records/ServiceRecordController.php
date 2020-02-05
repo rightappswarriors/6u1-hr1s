@@ -87,6 +87,7 @@ class ServiceRecordController extends Controller
     {
         $data = $this->ghistory;
         $final_data = array();
+        
         foreach($data as $k => $v) {
             if(Employee::IfEmployeeInOffice($v->empid, $r->ofc_id)) {
                 $employee = Employee::GetEmployee($v->empid);
