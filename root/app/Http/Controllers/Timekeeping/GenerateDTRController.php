@@ -207,6 +207,7 @@ class GenerateDTRController extends Controller
                             }
                         } catch (\Exception $e) {
                             ErrorCode::Generate('controller', 'GenerateDTRController', 'A00001', $e->getMessage());
+                            return $e;
                             return "error";
                         }
 
@@ -321,6 +322,7 @@ class GenerateDTRController extends Controller
                             }
                         } catch (\Exception $e) {
                             ErrorCode::Generate('controller', 'GenerateDTRController', 'A00002', $e->getMessage());
+                            return $e;
                             return "error";
                         }
                     } else {
@@ -402,6 +404,7 @@ class GenerateDTRController extends Controller
                 }
             } catch (\Exception $e) {
                 ErrorCode::Generate('controller', 'GenerateDTRController', 'A00003', $e->getMessage());
+                return $e;
                 return "error";
             }
 

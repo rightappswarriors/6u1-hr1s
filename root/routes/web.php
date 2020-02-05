@@ -303,7 +303,7 @@
 				Route::get('/partial-generation', 'Timekeeping\GenerateDTRController@GenerateDTR');
 				Route::post('/generate-dtr', 'Timekeeping\GenerateDTRController@GenerateDTR');
 				Route::post('/save-dtr', 'Timekeeping\GenerateDTRController@SaveDTR');
-				Route::post('/save-dtr/by-department', 'TimeKeeping\GenerateDTRController@GenerateByEmployee');
+				Route::post('/save-dtr/by-department', 'Timekeeping\GenerateDTRController@GenerateByEmployee');
 			});
 			/* GENERATE DTR */
 		});

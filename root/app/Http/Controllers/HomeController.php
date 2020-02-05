@@ -22,6 +22,7 @@ class HomeController extends Controller
 
     public function view()
     {
+        // dd(json_encode(DB::table('m99')->first()));
         // dd(in_array('masterfile', explode(', ', Session::get('_user')[0]->restriction)));
         try {
 
