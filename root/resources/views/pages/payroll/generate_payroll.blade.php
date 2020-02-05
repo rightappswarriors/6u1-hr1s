@@ -75,7 +75,7 @@
 				<div class="col">
 					Available DTR Summary
 					<button type="button" class="btn btn-primary float-right" id="btn-generate" onclick="GeneratePayroll()" disabled=""><i class="fa fa-share"></i> <i class="fa fa-server"></i> Generate All</button>
-					<button type="button" class="btn btn-primary float-right" onclick="previewPayroll()" id="btn-preview" disabled=""><i class="fa fa-share"></i> <i class="fa fa-server"></i> Preview DTR</button>
+					<button type="button" class="btn btn-primary float-right" onclick="previewPayroll()" id="btn-preview" disabled=""><i class="fa fa-share"></i> <i class="fa fa-server"></i> Preview Payroll Summary Report</button>
 				</div>
 				<div class="col border-left">
 					Generated Payroll
@@ -189,7 +189,6 @@
 							var d = JSON.parse(data);
 							// dataTable_gds.search(d.search).draw();
 							// dataTable_gdh.search(d.search).draw();
-							console.log(d.dtr_summaries.length);
 							if (d.dtr_summaries.length > 0) {
 								for (var i = 0; i < d.dtr_summaries.length; i++) {
 									//console.log(d.dtr_summaries[i])
@@ -256,40 +255,43 @@
 
 		function GeneratePayroll()
 		{
-			if (ChckReqFlds()) {
-				$.ajax({
-					type : 'post',
-					url : '{{url('/payroll/generate-payroll/generate')}}',
-					data : $("#frm-gp").serialize(),
-					dataTy : 'json',
-					beforeSend : function()
-					{
-						togglePreloader();
-					},
-					success : function(data)
-					{
-						hideErrorDiv();
-						if (data[1].length > 0) {
-							$('#alert-generate-error').collapse('show');
-							for (var i = 0; i < data[1].length; i++) {
-								var data_error = data[1][i];
-								$('#alert-generate-error-body').append(data_error+'<br>');
+			let r = confirm('Are you sure you want to generate this Payroll? Please check preview payroll summary report for accuracy');
+			if(r){
+				if (ChckReqFlds()) {
+					$.ajax({
+						type : 'post',
+						url : '{{url('/payroll/generate-payroll/generate')}}',
+						data : $("#frm-gp").serialize(),
+						dataTy : 'json',
+						beforeSend : function()
+						{
+							togglePreloader();
+						},
+						success : function(data)
+						{
+							hideErrorDiv();
+							if (data[1].length > 0) {
+								$('#alert-generate-error').collapse('show');
+								for (var i = 0; i < data[1].length; i++) {
+									var data_error = data[1][i];
+									$('#alert-generate-error-body').append(data_error+'<br>');
+								}
+								alert("Some errors occured when generating.");
+							} else {
+								alert("Payroll Generated.");
+								FindDTRS();
 							}
-							alert("Some errors occured when generating.");
-						} else {
-							alert("Payroll Generated.");
-							FindDTRS();
-						}
-					},
-					error : function()
-					{
-						alert('Error in generating dtr. Please try again or reload the page.');
-					},
-					complete : function()
-					{
-						togglePreloader();
-					},
-				});
+						},
+						error : function()
+						{
+							alert('Error in generating dtr. Please try again or reload the page.');
+						},
+						complete : function()
+						{
+							togglePreloader();
+						},
+					});
+				}
 			}
 		}
 

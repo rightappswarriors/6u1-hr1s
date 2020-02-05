@@ -89,6 +89,7 @@
 			</tr>
 		</thead>
 		<tbody>
+
 			@if(count($record) > 0) @for($i=0;$i<count($record);$i++)
 			@php
 				$row = $record[$i];/* dd($row);*/
@@ -118,7 +119,7 @@
 				<td>ACC-{{$row->emp_pay_code}}</td> {{-- Item No. --}}
 				<td>{{strtoupper(($row->empname ?? ''))}}</td> {{-- Name --}}
 				<td>{{$no}}</td> {{-- No. --}}
-				<td>-</td> {{-- Position --}}
+				<td>{{ucfirst(($row->position ?? ''))}}</td> {{-- Position --}}
 				<td>{{($row->rate!=0) ? number_format($row->rate,2) : "-"}} <?php $runningRowTotal['rate'] = isset($runningRowTotal['rate']) ? ($row->rate !=0 ? $row->rate : 0) + $runningRowTotal['rate'] : ($row->rate !=0 ? $row->rate : 0) ?></td> {{-- Rate --}}
 				<td>{{($row->abcences!=9) ? $row->abcences : "-"}}</td> {{-- No. of Absence w/o Pay --}}
 				<td>{{($row->basic_pay) ? number_format($row->basic_pay,2) : "-"}}</td> {{-- Rate Computed Absences --}}
@@ -225,26 +226,28 @@
 			{{-- {{dd($runningRowTotal)}} --}}
 			<tr>
 				<th colspan="4">Total</th>
-				<th>{{number_format($runningRowTotal['rate'],2)}}</th> {{-- Rate --}}
+				<th>{{number_format(($runningRowTotal['rate'] ?? 0),2)}}</th> {{-- Rate --}}
 				<th>-</th> {{-- No. of Absence w/o Pay --}}
 				<th>-</th> {{-- Rate Computed Absences --}}
-				<th>{{number_format($runningRowTotal['pera'],2)}}</th> {{-- PERA --}}
-				<th>{{number_format($runningRowTotal['hazard_duty'],2)}}</th> {{-- Hazard Duty Pay --}}
-				<th>{{number_format($runningRowTotal['allowance_laundry'],2)}}</th> {{-- Allowance - Laundry --}}
+				<th>{{number_format(($runningRowTotal['pera'] ?? 0),2)}}</th> {{-- PERA --}}
+				<th>{{number_format(($runningRowTotal['hazard_duty'] ?? 0),2)}}</th> {{-- Hazard Duty Pay --}}
+				<th>{{number_format(($runningRowTotal['allowance_laundry'] ?? 0),2)}}</th> {{-- Allowance - Laundry --}}
 				<th>-</th> {{-- Allowance - Subsistence - Leave --}}
 				<th>-</th> {{-- Allowance - Subsistence - Travel --}}
-				<th>{{number_format($runningRowTotal['allowance'],2)}}</th> {{-- Allowance - Subsistence - Total --}}
-				<th>{{number_format($runningRowTotal['amount_earned'],2)}}</th> {{-- Amount Earned --}}
-				<th>{{number_format($runningRowTotal['withholding_tax'],2)}}</th> {{-- Personal Deductions - Withholding Tax --}}
-				<th>{{number_format($runningRowTotal['pphilhealth'],2)}}</th> {{-- Personal Deductions - Philhealth --}}
-				<th>{{number_format($runningRowTotal['pphilhealthhdmf'],2)}}</th> {{-- Personal Deductions - Pag-ibig - HDMF Cont. --}}
+				<th>{{number_format(($runningRowTotal['allowance'] ?? 0),2)}}</th> {{-- Allowance - Subsistence - Total --}}
+				<th>{{number_format(($runningRowTotal['amount_earned'] ?? 0),2)}}</th> {{-- Amount Earned --}}
+				<th>{{number_format(($runningRowTotal['withholding_tax'] ?? 0),2)}}</th> {{-- Personal Deductions - Withholding Tax --}}
+				<th>{{number_format(($runningRowTotal['pphilhealth'] ?? 0),2)}}</th> {{-- Personal Deductions - Philhealth --}}
+				<th>{{number_format(($runningRowTotal['pphilhealthhdmf'] ?? 0),2)}}</th> {{-- Personal Deductions - Pag-ibig - HDMF Cont. --}}
 
 
 				{{-- Personal Deductions - Pag-ibig - MPL. --}}
 				{{-- Personal Deductions - Pag-ibig - Housing Laon. --}}
+				@isset($runningRowTotal['pagibigDeductionLoop'])
 				@foreach($runningRowTotal['pagibigDeductionLoop'] as $thisloop)
 				<th>{{number_format($thisloop,2)}}</th>
 				@endforeach 
+				@endisset
 
 				{{-- Personal Deductions - JGM --}}
 				{{-- Personal Deductions - LBP --}}
@@ -252,11 +255,13 @@
 				{{-- Personal Deductions - DCCCO --}}
 				{{-- Personal Deductions - PEI 2014 Refund --}}
 				{{-- Personal Deductions - Refund for cash advance --}}
+				@isset($runningRowTotal['otherDeductionLoop'])
 				@foreach($runningRowTotal['otherDeductionLoop'] as $thisloop)
 				<th>{{number_format($thisloop,2)}}</th>
 				@endforeach 
+				@endisset
 
-				<th>{{number_format($runningRowTotal['gsisretirement'],2)}}</th>{{-- Personal Deductions - GSIS - Retirement & Life Insurance Premiums --}}
+				<th>{{number_format(($runningRowTotal['gsisretirement'] ?? 0),2)}}</th>{{-- Personal Deductions - GSIS - Retirement & Life Insurance Premiums --}}
 				{{-- Personal Deductions - GSIS - Edu. Asstance --}}
 				{{-- Personal Deductions - GSIS - CEAP --}}
 				{{-- Personal Deductions - GSIS - Emergency Loan --}}
@@ -266,18 +271,20 @@
 				{{-- Personal Deductions - GSIS - Ouli Permium --}}
 				{{-- Personal Deductions - GSIS - UMID E-Card Plus --}}
 				 {{-- Personal Deductions - GSIS - GSIS H/L --}}
+				@isset($runningRowTotal['gsisLoop'])
 				@foreach($runningRowTotal['gsisLoop'] as $thisloop)
 				<th>{{number_format($thisloop,2)}}</th>
 				@endforeach 
+				@endisset
 
-				<th>{{number_format($runningRowTotal['total_deductions'],2)}}</th> {{-- Total Deductions --}}
-				<th>{{number_format($runningRowTotal['gphilhealth'],2)}}</th> {{-- Government Shares - Philhealth --}}
-				<th>{{number_format($runningRowTotal['retirement'],2)}}</th> {{-- Government Shares - Retirement & Life Insurance Permiums --}}
-				<th>{{number_format($runningRowTotal['pagibighdmf'],2)}}</th> {{-- Government Shares - Pag-ibig HDMF Cont. --}}
-				<th>{{number_format($runningRowTotal['statin'],2)}}</th> {{-- Government Shares - State Ins. --}}
+				<th>{{number_format(($runningRowTotal['total_deductions'] ?? 0),2)}}</th> {{-- Total Deductions --}}
+				<th>{{number_format(($runningRowTotal['gphilhealth'] ?? 0),2)}}</th> {{-- Government Shares - Philhealth --}}
+				<th>{{number_format(($runningRowTotal['retirement'] ?? 0),2)}}</th> {{-- Government Shares - Retirement & Life Insurance Permiums --}}
+				<th>{{number_format(($runningRowTotal['pagibighdmf'] ?? 0),2)}}</th> {{-- Government Shares - Pag-ibig HDMF Cont. --}}
+				<th>{{number_format(($runningRowTotal['statin'] ?? 0),2)}}</th> {{-- Government Shares - State Ins. --}}
 				<th>-</th> {{-- No. --}}
-				<th>{{number_format($runningRowTotal['netamount'],2)}}</th> {{-- Net Amount Received --}}
-				<th>{{number_format($runningRowTotal['amountpaid'],2)}}</th> {{-- Amount Paid --}}
+				<th>{{number_format(($runningRowTotal['netamount'] ?? 0),2)}}</th> {{-- Net Amount Received --}}
+				<th>{{number_format(($runningRowTotal['amountpaid'] ?? 0),2)}}</th> {{-- Amount Paid --}}
 				<th>-</th> {{-- Signature of Payee --}}
 			</tr>
 		</tfoot>

@@ -76,14 +76,16 @@ class GeneratePayrollController extends Controller
             $emp_sql = Employee::$emp_sql;
             $pp = Payroll::PayrollPeriod2($r->month, $r->payroll_period, $r->year);
             // $sql = "SELECT dtr.*, emp.* FROM (SELECT a.ppid, a.date_from, a.date_to, a.date_generated, a.time_generated, a.code, a.generatedby, a.generationtype, a.empid FROM hris.hr_dtr_sum_hdr a LEFT JOIN hris.hr_dtr_sum_employees b ON a.code = b.dtr_sum_id where b.isgenerated IS NOT TRUE) dtr INNER JOIN ($emp_sql) emp ON dtr.empid = emp.empid";
-            $sql = "SELECT dtr.*, emp.* FROM (SELECT * FROM hris.hr_dtr_sum_hdr a LEFT JOIN hris.hr_dtr_sum_employees b ON a.code = b.dtr_sum_id) dtr INNER JOIN ($emp_sql) emp ON dtr.empid = emp.empid";
+            // $sql = "SELECT dtr.*, emp.* FROM (SELECT * FROM hris.hr_dtr_sum_hdr a LEFT JOIN hris.hr_dtr_sum_employees b ON a.code = b.dtr_sum_id) dtr INNER JOIN ($emp_sql) emp ON dtr.empid = emp.empid";
+            $sql = "SELECT distinct pay_rate, rate_type, tax_bracket, days_absent, late, undertime, leaves_arr, leaves, total_overtime_arr, holiday_arr, holiday_dates, department, sss, philhealth, pagibig, dtr_sum_id, date_generated, time_generated, empname, emp.empid FROM (SELECT * FROM hris.hr_dtr_sum_hdr a LEFT JOIN hris.hr_dtr_sum_employees b ON a.code = b.dtr_sum_id) dtr INNER JOIN ($emp_sql) emp ON dtr.empid = emp.empid";
                 // $con = " WHERE date_from >= '".date('Y-m-d', strtotime($pp->from))."' AND date_to <= '".date('Y-m-d', strtotime($pp->to))."' AND empstatus = '".$r->empstatus."' AND generationtype = '".$r->gen_type."' AND department = '".$r->ofc."'";
             $con = " WHERE isgenerated IS NOT TRUE AND date_from >= '".date('Y-m-d', strtotime($pp->from))."' AND date_to <= '".date('Y-m-d', strtotime($pp->to))."' AND empstatus = '".$r->empstatus."' AND generationtype = '".$r->gen_type."' AND department = '".$r->ofc."'";
             $return_val->search = date('Y-m-d', strtotime($pp->from))." to ".date('Y-m-d', strtotime($pp->to));
             // $return_val->parameters = $r->all();
             $return_val->dtr_summaries = Core::sql($sql.$con);
             // $return_val->generateReview = self::generate_payroll($r);
-            $return_val->payroll_history = Core::sql("SELECT pr.*, CONCAT(emp.lastname, ', ', emp.firstname) AS empname FROM (SELECT a.*, b.date_generated, b.time_generated FROM hris.hr_emp_payroll3 a INNER JOIN hris.hr_dtr_sum_hdr b ON a.dtr_sum_id = b.code) pr INNER JOIN ($emp_sql) emp ON pr.empid = emp.empid");
+            // $return_val->payroll_history = Core::sql("SELECT pr.*, CONCAT(emp.lastname, ', ', emp.firstname) AS empname FROM (SELECT a.*, b.date_generated, b.time_generated FROM hris.hr_emp_payroll3 a INNER JOIN hris.hr_dtr_sum_hdr b ON a.dtr_sum_id = b.code) pr INNER JOIN ($emp_sql) emp ON pr.empid = emp.empid");
+            $return_val->payroll_history = Core::sql("SELECT distinct date_generated, time_generated, empname, pr.empid, CONCAT(emp.lastname, ', ', emp.firstname) AS empname FROM (SELECT a.*, b.date_generated, b.time_generated FROM hris.hr_emp_payroll3 a INNER JOIN hris.hr_dtr_sum_hdr b ON a.dtr_sum_id = b.code) pr INNER JOIN ($emp_sql) emp ON pr.empid = emp.empid");
             return json_encode($return_val);
         } catch (\Exception $e) {
             ErrorCode::Generate('controller', 'GeneratePayrollController', 'A00001', $e->getMessage());
@@ -438,6 +440,7 @@ class GeneratePayrollController extends Controller
                                         $pagibig_cont_b += $pagibig_arr->emp_ee;
                                         $pagibig_cont_c += $pagibig_arr->emp_er;
                                     }
+                                    
                                 if ($withDeductions == false) {
                                     $sss_cont_a = '';
                                     $sss_cont_b = 0;
@@ -456,6 +459,7 @@ class GeneratePayrollController extends Controller
                             if ($withDeductions) {
                                 $wtax = Payroll::WithHoldingTax($rate, $tax_bracket);
                             }
+
 
                             ## Other Deductions
                             /**
