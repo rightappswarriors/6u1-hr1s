@@ -299,6 +299,9 @@
 										      <div class="col-sm-8">
 										      	<input type="text" class="form-control" name="txt_biometric" value="@isset($MYDATA){{$MYDATA->biometric}}@endisset">
 										      </div>
+										      <div class="offset-4 col-sm-8" id="bio_message">
+							    					<p style="color:red;">This biometric id is taken</p>
+							    			  </div>
 							    		</div>
 							    	</div>
 							    	<div class="col-sm-4">&nbsp;</div>
@@ -783,6 +786,7 @@
 		$('input[name=txt_dt_birth]').datepicker(date_option5);
 	</script>
 	<script type="text/javascript">
+		$('#bio_message').hide();
 		var tabs = $('#myTabContent');
 		var t_selected = null;
 		function RemoveBlink()
@@ -822,6 +826,7 @@
 		var ctab_PERBAC_TAB = false;
 		var ctab_CONT_TAB = false;
 		var ctab_EDU_TAB = false;
+
 		function checkCurrentTab(ctab, trgt)
 		{
 			if (
@@ -875,6 +880,7 @@
 				// 	$('input[name="txt_sft_2"]').parsley().destroy();
 				// }
 				if (
+					
 					$('input[name="txt_hired"]').parsley().validate() == true &&
 					$('select[name="txt_emp_stat"]').parsley().validate() == true &&
 					// $('select[name="txt_emp_type"]').parsley().validate() == true &&
@@ -883,12 +889,41 @@
 					$('select[name="txt_tax_brac"]').parsley().validate() == true /*&&
 					$('select[name="txt_ss_brac"]').parsley().validate()*/
 				) {
-					ctab_ADD_TAB = true;
-					return true;
+					//CHECK IF BIOMETRIC ID IS UNIQUE
+					var bio = $('input[name="txt_biometric"]').val();
+
+					if(bio == '' || bio == null)
+					{
+						ctab_ADD_TAB = true;
+						return true;
+					}
+					else
+					{
+						var data = 
+						{
+							bio : bio,
+						}	
+						$.ajax({
+							type: "post",
+							async: false,
+							url: "{{url('master-file/employee/check-biometric')}}",
+							data: data,
+							success: function(data) 
+							{
+								ctab_ADD_TAB = (data == 'unique');
+								(data == 'unique' ? $('#bio_message').hide() : $('#bio_message').show())
+							},
+						});	
+						return ctab_ADD_TAB
+					}
+					//END CHECK BIOMETRIC ID
+					
 				} else {
 					ctab_ADD_TAB = false;
 					return false;
 				}
+
+
 			}
 			else if (ctab == "PERBAC_TAB") {
 				// return true;
@@ -932,5 +967,6 @@
 			$('input[name="'+chc+'"]').is(':checked') ? $('input[name="'+inp+'"]').removeAttr('disabled') : $('input[name="'+inp+'"]').attr('disabled', '');
 			$('input[name="'+chc+'"]').is(':checked') ? null : $('input[name="'+inp+'"]').val('');
 		}
+
 	</script>
 @endsection

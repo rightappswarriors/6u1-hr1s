@@ -44,7 +44,10 @@ class ServiceRecordController extends Controller
         foreach($data as $key => $value) {
             // dd(Employee::GetDepartment($value->branch));
             $employee = Employee::GetEmployee($value->empid);
-            $data[$key]->employee_name = $employee->firstname.' '.$employee->mi.(($employee->mi == null)?'':' ').$employee->lastname;
+           
+            if(isset($employee)){
+                $data[$key]->employee_name = $employee->firstname.' '.$employee->mi.(($employee->mi == null)?'':' ').$employee->lastname;
+            }
         }
 
         $data = [$data, Office::get_all()];
@@ -84,6 +87,7 @@ class ServiceRecordController extends Controller
     {
         $data = $this->ghistory;
         $final_data = array();
+        
         foreach($data as $k => $v) {
             if(Employee::IfEmployeeInOffice($v->empid, $r->ofc_id)) {
                 $employee = Employee::GetEmployee($v->empid);

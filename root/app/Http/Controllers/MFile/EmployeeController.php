@@ -508,6 +508,22 @@ class EmployeeController extends Controller
                 return "not-found";
             }
         }
-
+    }
+    public function checkBiometric(Request $r)
+    {
+        $bio = $r->bio;
+        // $biocheck = DB::SELECT("SELECT biometric FROM hris.hr_employee WHERE biometric = '$bio'");
+        // $num_rows = count($biocheck);
+        
+        // if($num_rows < 1)
+        // {
+        //     $message = 'unique';
+        // }
+        // else
+        // {
+        //     $message = 'not unique';
+        // }
+        return (DB::table('hr_employee')->where('biometric',$bio)->exists()  ? 'not unique' : 'unique');
+        return $message;
     }
 }
