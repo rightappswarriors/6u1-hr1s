@@ -158,7 +158,7 @@
 	<script type="text/javascript">
 		$('#date_from').datepicker(date_option5);
 		$('#date_to').datepicker(date_option5);
-		var table = $('#dataTable').DataTable(date_option_min);
+		var table = $('#dataTable').DataTable();
 	</script>
 	<script type="text/javascript">
 		$('#dataTable').on('click', 'tbody > tr', function() {
