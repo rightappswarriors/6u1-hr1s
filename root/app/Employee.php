@@ -173,4 +173,11 @@ class Employee extends Model
         return json_encode(DB::table('hr_dtr_sum_hdr')->where('empid', $empid)->where('date_from', $pp->from)->where('date_to', $pp->to)->where('generationtype', $generationtype)->first()!=null);
     }
 
+    public static function getOfficeByID($empid){
+        $sql = DB::table(self::$tbl_name)->select('department')->where('empid', $empid)->first();
+        if(isset($sql)){
+            return $sql;
+        }
+    }   
+
 }

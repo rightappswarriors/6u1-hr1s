@@ -254,6 +254,12 @@
 				Route::get('/', 'Timekeeping\LogBoxController@view');
 				Route::post('/in', 'Timekeeping\LogBoxController@getLastestTimeIn');
 				Route::post('/out', 'Timekeeping\LogBoxController@getLastestTimeOut');
+				Route::post('/pagination', 'Timekeeping\LogBoxController@getPagination');
+				Route::post('/paginationout', 'Timekeeping\LogBoxController@getPaginationOut');
+				Route::post('/setpagination', 'Timekeeping\LogBoxController@setPaginationIn');
+				Route::post('/setpaginationout', 'Timekeeping\LogBoxController@setPaginationOut');
+				Route::post('/setfilterin', 'Timekeeping\LogBoxController@getFilteredData');
+				Route::post('/setfilterOut', 'Timekeeping\LogBoxController@getFilteredDataOut');
 			});
 			/* LOG BOX */
 			/* UPLOAD DTR */
