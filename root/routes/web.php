@@ -28,6 +28,12 @@
 	/* ONLINE APPLICATION */
 /* FRONT-END */
 
+Route::prefix('Biometric')->group(function(){
+	Route::prefix('Accept-Data')->group(function() {
+		Route::post('/{true?}', 'Biometrics\BiometricsController@ReceiveData');
+	});
+});
+
 /* AUTHENTICATED ROUTES */
 	Route::group(['middleware'=>['authenticated']], function() {
 		/* HOME */
