@@ -512,18 +512,9 @@ class EmployeeController extends Controller
     public function checkBiometric(Request $r)
     {
         $bio = $r->bio;
-        // $biocheck = DB::SELECT("SELECT biometric FROM hris.hr_employee WHERE biometric = '$bio'");
-        // $num_rows = count($biocheck);
-        
-        // if($num_rows < 1)
-        // {
-        //     $message = 'unique';
-        // }
-        // else
-        // {
-        //     $message = 'not unique';
-        // }
-        return (DB::table('hr_employee')->where('biometric',$bio)->exists()  ? 'not unique' : 'unique');
-        return $message;
+        $emp = $r->empid;
+        if(isset($bio) && isset($emp)){
+            return (DB::table('hr_employee')->where('biometric',$bio)->exists()  ? (DB::table('hr_employee')->where([['biometric',$bio],['empid',$emp]])->exists() ? 'unique' : 'not unique')  : 'unique');
+        }
     }
 }

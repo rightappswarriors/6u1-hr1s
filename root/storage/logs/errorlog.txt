@@ -1,2 +1,7 @@
 
 02-14-2020 16:03 | BiometricsController | {"data":"[{\"userid\":\"281\",\"status\":\"OUT\",\"time\":\"2020-02-14 14:03:08.000\"}]"} (00001)
+02-18-2020 16:30 | SyncSystemSettings | Undefined property: stdClass::$hy (SSS00001)
+02-18-2020 16:30 | SyncSystemSettings | Undefined property: stdClass::$hy (SSS00001)
+02-18-2020 16:44 | SyncSystemSettings | Undefined property: stdClass::$hy (SSS00001)
+02-18-2020 16:49 | SyncSystemSettings | Undefined property: stdClass::$hy (SSS00001)
+02-18-2020 17:02 | SyncSystemSettings | Undefined property: stdClass::$hy (SSS00001)

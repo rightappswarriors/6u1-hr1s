@@ -377,11 +377,11 @@
 				<div class="modal-footer">
 					<span class="AddMode">
 						<button type="submit" form="frm-pp" class="btn btn-success">Save</button>
-						<button type="button" class="btn btn-danger" data-dismiss="modal" onclick="ClearFld()">Close</button>
+						<button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
 					</span>
 					<span class="DeleteMode">
 						<button type="submit" form="frm-pp" class="btn btn-danger">Delete</button>
-						<button type="button" class="btn btn-success" data-dismiss="modal" onclick="ClearFld()">Cancel</button>
+						<button type="button" class="btn btn-success" data-dismiss="modal">Cancel</button>
 					</span>
 				</div>
 			</div>

@@ -582,12 +582,14 @@ Route::prefix('Biometric')->group(function(){
 
 						if (count($errorlogs)>0) {
 							foreach($errorlogs as $log) {
-								$a = explode(" | ", $log);
-								$n = [];
-								$n['date'] = $a[0];
-								$n['module'] = $a[1];
-								$n['msg'] = $a[2];
-								array_push($logs, $n);
+								if(!empty($log)){
+									$a = explode(" | ", $log);
+									$n = [];
+									$n['date'] = $a[0];
+									$n['module'] = $a[1];
+									$n['msg'] = $a[2];
+									array_push($logs, $n);
+								}
 							}
 						}
 					} else {
