@@ -43,6 +43,7 @@ class LeavesEntryController extends Controller
     public function view()
     {
     	$data = [$this->ghistory, $this->employees, Office::get_all()];
+        // dd(session()->all());
     	return view('pages.timekeeping.leaves_entry', compact('data'));
     }
 
@@ -118,6 +119,7 @@ class LeavesEntryController extends Controller
     */
     public function add(Request $r) 
     {
+        // return $r->all();
         /**
         * @param $r->cbo_employee_txt
         * @param $r->cbo_employee
@@ -131,6 +133,7 @@ class LeavesEntryController extends Controller
         * @param $r->cbo_leave_pay
         * @param $r->txt_reason
         * @param $r->mode
+        * @param $r->from (from application of loan)
         */
         // return dd($r->all());
         $amount = "0.00";
@@ -153,7 +156,8 @@ class LeavesEntryController extends Controller
             'leave_type'=>$r->cbo_leave,
             'leave_amount'=>$amount,
             'leave_reason'=>$r->txt_reason,
-            'generatedby'=>Account::ID()
+            'generatedby'=>Account::ID(),
+            'fromapprovalid'=>$r->from
         ];
         $ampm = [
             'leave_from'=>$r->dtp_lfrm,
@@ -165,13 +169,14 @@ class LeavesEntryController extends Controller
             'no_of_days' => $r->txt_no_of_days,
         ];
 
-        if ($r->txt_no_of_days <= 0) {
+        if (isset($r->txt_no_of_days) && $r->txt_no_of_days <= 0) {
             Core::Set_Alert('warning', "Invalid dates.");
             return back();
         }
         $leavepay_mode = true;
         // $leavepay_mode = ((strtoupper($r->cbo_leave_pay) == "YES" ? true : false));
         switch ($r->mode) {
+
             case 'new':
                 if (count(Leave::GetLeaveRecord($r->cbo_employee, $r->dtp_lfrm, $r->dtp_lto)) > 0) {
                     Core::Set_Alert('warning', "Employee is already on leave on the selected dates. Please review the records.");
@@ -179,8 +184,8 @@ class LeavesEntryController extends Controller
                 }
                 $data['lvcode'] = Core::getm99('lvcode');
                 $data['empid'] = $r->cbo_employee;
-
                 $check_ll = EmployeeLeaveCount::CheckLeaveLimit($r->cbo_leave, $r->cbo_employee, $ampm, $leavepay_mode);
+
                 $response = $check_ll->response;
                 $response_msg = $check_ll->msg;
                 if ($response=="invalid") {
@@ -231,6 +236,30 @@ class LeavesEntryController extends Controller
                     }
                 }
                 break;
+
+            case 'override':
+                $empid = $r->cbo_employee;
+                foreach ($r->except('mode','cbo_employee') as $key => $value) {
+                    $data = EmployeeLeaveCount::Update_LeaveLimit($key, $empid, $value, 'get');
+                    if(EmployeeLeaveCount::Update_LeaveLimit($key, $empid, $value, '=') == 'ok'){
+                        DB::table('hris.hr_emp_leavecount_hist')->insert(['elccode' => $data->elccode, 'leave_type' => $data->leave_type, 'empid' => $data->empid, 'count' => $data->count, 'peak' => $data->peak, 't_time' => Date('G:i:s'), 't_date' => Date('Y-m-d'), 'editby' => (Core::getSessionData()[0]->uid ?? 'NOT LOGGED IN')]);
+                    }
+                }
+                break;
+
+            case 'apply':
+                //to work here
+                unset($data['generatedby']);
+                $data['empid'] = $r->cbo_employee;
+                $data['status'] = 0;
+                $data['t_date'] = Date('Y-m-d');
+                $data['t_time'] = Date('G:i:s');
+                if(DB::table(Leave::$approval)->insert($data)){
+                    Core::Set_Alert('success', 'Applied Successfully. Please wait for notification regarding the decision');
+                }
+                break;
+
+
             
             default:
                 Core::Set_Alert('danger', 'An error occured. Please contact administrator. (No mode selected)');

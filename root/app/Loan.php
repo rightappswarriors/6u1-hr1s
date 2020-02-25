@@ -48,7 +48,7 @@ class Loan extends Model
     public static function PreviousLoanRecords($loanhdr_id)
     {
         try {
-            return DB::table('hr_loan')->where()->where('loan_hdr_code', $loanhdr_id)->get();
+            return DB::table('hr_loan')->where('loan_hdr_code', $loanhdr_id)->get();
         } catch (\Exception $e) {
             return [];
         }

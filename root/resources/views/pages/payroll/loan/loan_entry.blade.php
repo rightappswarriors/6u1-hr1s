@@ -372,7 +372,7 @@
 						<button type="button" class="btn btn-danger" data-dismiss="modal" onclick="ClearFld()">Close</button>
 					</span>
 					<span class="DeleteMode">
-						<button type="submit" form="frm-pp" class="btn btn-danger">Delete</button>
+						<button type="submit" onclick="removeRequired()" form="frm-pp" class="btn btn-danger">Delete</button>
 						<button type="button" class="btn btn-success" data-dismiss="modal" onclick="ClearFld()">Cancel</button>
 					</span>
 				</div>
@@ -662,6 +662,14 @@
 			$('select[name="cbo_sss_sub"]').val('');
 		}
 
+		function removeRequired() {
+			$('input[name="txt_code"]').removeAttr('readonly');
+			$('[name=txt_desc]').removeAttr('required');
+			$('[name=cbo_contraacct]').removeAttr('required');
+			$('[name=cbo_per_tp]').removeAttr('required');
+			$('[name=txt_amnt_loan]').removeAttr('required');
+		}
+
 		function LoadTable(data)
 		{
 			table.row.add([
@@ -794,7 +802,8 @@
 				if (selected_row!=null) {
 					ClearFld();
 					$('#exampleModalLabel').text("Delete Loan Entry");
-					$('#txt_code').val(selected_row.children()[0].innerText);
+					console.log(selected_row.children()[0].innerText);
+					$('[name=txt_code]').val(selected_row.children()[0].innerText);
 					$('#frm-pp').attr('action', '{{url('payroll/loan-entry/delete')}}');
 					OpenModal('.DeleteMode');
 				} else {

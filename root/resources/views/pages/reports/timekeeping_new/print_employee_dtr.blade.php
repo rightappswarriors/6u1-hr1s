@@ -243,6 +243,7 @@
 					url: '{{url('reports/timekeeping/employee-dtr/')}}/findnew2',
 					data: {"code":from, "type":$('#generationtype').val(), "emp":$('#employee').val()},
 					success: function(data) {
+						console.log(data);
 						// table.clear().draw();
 						// for(i=0; i<data[0].days_worked_readable.length; i++) {
 						// 	// FillTable(data[i]);

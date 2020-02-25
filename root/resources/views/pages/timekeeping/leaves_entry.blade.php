@@ -7,8 +7,14 @@
 			<button type="button" class="btn btn-success" id="opt-add">
 				<i class="fa fa-plus"></i> Add
 			</button>
+			<button type="button" class="btn btn-success" id="opt-apply">
+				<i class="fa fa-plane"></i> Apply For Leave
+			</button>
 			<button type="button" class="btn btn-info" id="opt-print">
 				<i class="fa fa-print"></i> Print List
+			</button>
+			<button type="button" class="btn btn-warning text-white" id="opt-override">
+				<i class="fa fa-edit"></i> Override Remaining Credit
 			</button>
 			<div class="float-right">
 				<a href="{{ url('master-file/leave-types') }}" class="btn btn-default btn-sm"><i class="fa fa-cogs"></i></a>
@@ -236,7 +242,7 @@
 										</div>
 										<div class="row">
 											<div class="col-6">
-												<input type="text" name="dtp_lfrm" id="dtp_lfrm" class="form-control" value="{{date('Y-m-d')}}">
+												<input type="date" name="dtp_lfrm" id="dtp_lfrm" class="form-control" value="{{date('Y-m-d')}}">
 											</div>
 											<div hidden class="col-2">
 												<input type="checkbox" class="form-control" name="fam" id="fam">
@@ -267,7 +273,7 @@
 										</div>
 										<div class="row">
 											<div class="col-6">
-												<input type="text" name="dtp_lto" id="dtp_lto" class="form-control" value="{{date('Y-m-d')}}">
+												<input type="date" name="dtp_lto" id="dtp_lto" class="form-control" value="{{date('Y-m-d')}}">
 											</div>
 											<div hidden class="col-2">
 												<input type="checkbox" class="form-control" name="tam" id="tam">
@@ -326,6 +332,41 @@
 				</div>
 			</div>
 		</div>
+	</div>
+
+
+	<div class="modal fade" id="override-pp" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+		<form method="POST" id="override-submit">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title">Override Remaining Credits</h5>
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+					<div class="modal-body">
+						<div class="table-responsive">
+							<table class="table table-bordered table-hover">
+								<thead>
+									<tr>
+										<th colspan="2">Remaining credits</th>
+										<th>Carry Over</th>
+									</tr>
+								</thead>
+								<tbody id="dataTable-leavecount-override">
+									
+								</tbody>
+							</table>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="submit" class="btn btn-success">Save</button>
+						<button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+					</div>
+				</div>
+			</div>
+		</form>
 	</div>
 @endsection
 
@@ -472,9 +513,9 @@
 			]).draw();
 		}
 
-		function UpdateLeaveCount(data = null)
+		function UpdateLeaveCount(data = null, toWhatDom = '#dataTable-leavecount')
 		{
-			var lct = '#dataTable-leavecount';
+			var lct = toWhatDom, isDefault = (toWhatDom == '#dataTable-leavecount');
 			$(lct).empty();
 			if (data==null) {
 				@php
@@ -510,7 +551,7 @@
 						d = data[i];
 						a = '<tr id="td-'+d.code+'">'+
 							'<td>'+d.description+'</td>'+
-							'<td>'+(parseFloat(d.peak)-parseFloat(d.count))+'</td>'+
+							'<td>'+(isDefault ? (parseFloat(d.peak)-parseFloat(d.count)) : '<input required class="form-control" name="'+d.code+'" type="number" value="'+(parseFloat(d.peak)-parseFloat(d.count))+'">')+'</td>'+
 							'<td>'+d.carry_over+'</td>'+
 						'</tr>'
 						$(lct).append(a);
@@ -537,7 +578,7 @@
 			}
 		}
 
-		function SubmitSearchFrm(e)
+		function SubmitSearchFrm(e,fromDom = '#dataTable-leavecount')
 		{
 			e.preventDefault();
 			var frm = $('#frm-loaddtr');
@@ -558,7 +599,7 @@
 						} else {
 							table.clear().draw();
 						}
-						UpdateLeaveCount(data[1]);
+						UpdateLeaveCount(data[1],fromDom);
 					} else {
 						alert('Error on loading data.');
 					}
@@ -651,24 +692,41 @@
 
 		$('#opt-add').on('click', function() {
 			if (ValidateSearchFrm()) {
-				$.ajax({
-					type : 'get',
-					url : '{{url('timekeeping/leaves-entry/new-entry-code')}}',
-					dataTy: 'json',
-					success : function(data){
-						$('#txt_code').val(data);
-					}
-				});
-				$('#ModalLabel').text("New Leave Entry");
-				// $("#cbo_leave").attr('required',true);
-				$('#frm-pp').attr('action', '{{url('timekeeping/leaves-entry?mode=new')}}');
-				$('#cbo_employee_txt').val($('#tito_emp option:selected').text());
-				$('#cbo_employee').val($('#tito_emp').val());
-				$('#dtp_filed, #dtp_lfrm, #dtp_lto').val('{{date('m-d-Y')}}');
-				GetNOD();
-				OpenModal('.AddMode');
+				processModalForEntry();
 			}
 		});
+		$('#opt-apply').on('click', function() {
+			if (ValidateSearchFrm()) {
+				processModalForEntry('apply');
+			}
+		});
+
+		function processModalForEntry(mode = 'new'){
+			$.ajax({
+				type : 'get',
+				url : '{{url('timekeeping/leaves-entry/new-entry-code')}}',
+				dataTy: 'json',
+				success : function(data){
+					$('#txt_code').val(data);
+				}
+			});
+			$('#ModalLabel').text("New Leave Entry");
+			// $("#cbo_leave").attr('required',true);
+			$('#frm-pp').attr('action', '{{url('timekeeping/leaves-entry?mode=')}}'+mode);
+			$('#cbo_employee_txt').val($('#tito_emp option:selected').text());
+			$('#cbo_employee').val($('#tito_emp').val());
+			$('#dtp_filed, #dtp_lfrm, #dtp_lto').val('{{date('Y-m-d')}}');
+			GetNOD();
+			OpenModal('.AddMode');
+		}
+
+		$('#opt-override').click(function(event) {
+			if(ValidateSearchFrm()){
+				SubmitSearchFrm(event,'#dataTable-leavecount-override');
+				$('#override-pp').modal('show');
+			}
+		});
+
 
 		// $('#opt-update').on('click', function() {
 		function row_update(obj) {
@@ -733,7 +791,19 @@
 
 		$('#fam, #fpm, #tam, #tpm').on('click', function() {
 			GetNOD();
-		});;
+		});
+
+		$("#override-submit").submit(function(event) {
+			event.preventDefault();
+			let thisForm = $(this).serialize()+'&cbo_employee='+$('#tito_emp').val();
+			$.ajax({
+				method: 'POST',
+				url:'{{url('timekeeping/leaves-entry?mode=override')}}',
+				data: thisForm
+			})
+			alert('Updated Successfully');
+			SubmitSearchFrm(event);
+		});
 	</script>
 	<script type="text/javascript">
 		function PrintPage(page_location) {

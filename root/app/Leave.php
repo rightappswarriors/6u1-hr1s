@@ -14,6 +14,7 @@ class Leave extends Model
 
     public static $tbl_name = "hr_leaves";
     public static $pk = "lvcode";
+    public static $approval = "hr_leaves_approval";
 
     /**
     * Get Leave Entry Info

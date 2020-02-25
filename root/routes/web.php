@@ -303,6 +303,11 @@ Route::prefix('Biometric')->group(function(){
 					return DB::table('m99')->select('lvcode')->first()->lvcode;
 				});
 			}); 
+
+			Route::prefix('leaves-entry-apply')->group(function() {
+				Route::match(['POST','GET'],'/', 'Leave\leaveApprovalController@process');
+			}); 
+
 			/* LEAVES ENTRY */
 			/* EMPLOYEE DTR */
 			Route::prefix('employee-dtr')->group(function() {
