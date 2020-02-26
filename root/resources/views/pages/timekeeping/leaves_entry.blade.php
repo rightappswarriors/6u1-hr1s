@@ -368,8 +368,8 @@
 		$('#date_from').datepicker(date_option5);
 		$('#date_to').datepicker(date_option5);
 		// $('#dtp_filed').datepicker(date_option);
-		$('#dtp_lfrm').datepicker(date_option2);
-		$('#dtp_lto').datepicker(date_option2);
+		$('#dtp_lfrm').datepicker();
+		$('#dtp_lto').datepicker();
 		var table = $('#dataTable').DataTable(dataTable_short);
 	</script>
 

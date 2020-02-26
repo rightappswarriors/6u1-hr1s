@@ -147,7 +147,7 @@
       </li> --}}
       <li class="nav-separator"></li>
       <li id="timekeepinggenerate-dtr">
-        <a href="{{url('timekeeping/generate-dtr')}}">Generate DTR Summary</a>
+        <a href="{{url('timekeeping/generate-dtr')}}">Generate DTR</a>
       </li>
     </ul>
   </li>

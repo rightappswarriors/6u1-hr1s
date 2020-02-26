@@ -233,6 +233,28 @@
 			</div>
 		</div>
 	</div>
+
+	<div class="modal fade" id="modal-update" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="exampleModalLabel">Save DTR</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<h4>This DTR is already generated. Do you want to generate again?</h4>
+				</div>
+				<div class="modal-footer">
+					<form method="post" action="#" id="frm-add">
+						<button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="ClearFld()">No</button>
+						<button type="submit" class="btn btn-primary" id="modal-add-submitbtn">Yes <i class="fa fa-spin fa-spinner" id="modal-add-submitbtn-loader" style="display: none;"></i></button>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
 @endsection
 
 @section('to-bottom')
@@ -261,13 +283,14 @@
 			$('#alert-generate-error-body').empty();
 		}
 		function LoadDtrTable()
-		{
+		{	
+			var samplecode = $('.table-active td:eq(0)').text();
 			hideErrorDiv();
 			$.ajax({
 				type : 'get',
 				url : '{{url('timekeeping/generate-dtr/partial-generation')}}',
 				data : {
-					code:selected_row.children()[0].innerText,
+					code:samplecode,
 					pp:$('#payroll_period').val(),
 					month: $('#payroll_month').val(),
 					year: $('#payroll_year').val(),
@@ -405,6 +428,10 @@
 			$('#frm-add').attr('action', '{{url('timekeeping/generate-dtr/save-dtr')}}?code='+selected_row.children()[0].innerText+'&pp='+$('#payroll_period').val()+'&ofc_id='+$('#payroll_ofc').val()+'&month='+$('#payroll_month').val()+'&year='+$('#payroll_year').val()+'&empstat='+$('#payroll_emp_stat').val()+'&gtype='+$('#payroll_gen_type').val());
 			$('#modal-add').modal('show');
 		}
+		function onToggleUpdateDTRModal_ind()
+		{
+			
+		}
 
 		function onToggleSaveDTRModal_ofc()
 		{
@@ -444,6 +471,8 @@
 										alert("Payroll period is already generated. DTR cannot be re-generated.");
 									} else {
 										alert("DTR Generated (Individual).");
+										$('.table-active td:eq(3)').text('Yes');
+										LoadDtrTable();
 									}
 									maintable.clear().draw();
 									for (var i = 0; i < parse.length; i++) {
@@ -498,6 +527,8 @@
 							alert("There are errors when generating.");
 						} else {
 							alert("DTR Generated (Group).");
+							SearchEmployees();
+
 						}
 					}
 				},
