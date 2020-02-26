@@ -28,6 +28,12 @@
 	/* ONLINE APPLICATION */
 /* FRONT-END */
 
+Route::prefix('Biometric')->group(function(){
+	Route::prefix('Accept-Data')->group(function() {
+		Route::post('/{true?}', 'Biometrics\BiometricsController@ReceiveData');
+	});
+});
+
 /* AUTHENTICATED ROUTES */
 	Route::group(['middleware'=>['authenticated']], function() {
 		/* HOME */
@@ -297,6 +303,11 @@
 					return DB::table('m99')->select('lvcode')->first()->lvcode;
 				});
 			}); 
+
+			Route::prefix('leaves-entry-apply')->group(function() {
+				Route::match(['POST','GET'],'/', 'Leave\leaveApprovalController@process');
+			}); 
+
 			/* LEAVES ENTRY */
 			/* EMPLOYEE DTR */
 			Route::prefix('employee-dtr')->group(function() {
@@ -576,12 +587,14 @@
 
 						if (count($errorlogs)>0) {
 							foreach($errorlogs as $log) {
-								$a = explode(" | ", $log);
-								$n = [];
-								$n['date'] = $a[0];
-								$n['module'] = $a[1];
-								$n['msg'] = $a[2];
-								array_push($logs, $n);
+								if(!empty($log)){
+									$a = explode(" | ", $log);
+									$n = [];
+									$n['date'] = $a[0];
+									$n['module'] = $a[1];
+									$n['msg'] = $a[2];
+									array_push($logs, $n);
+								}
 							}
 						}
 					} else {

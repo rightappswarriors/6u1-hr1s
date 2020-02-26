@@ -886,5 +886,11 @@ class Core extends Model
     	return floatval(str_replace(',', '', $val));
     }
 
+    public static function getSessionData($user = '_user'){
+    	if(isset($user) && session()->has($user)){
+    		return session()->get($user);
+    	}
+    }
+
     public static $default_img = 'root/storage/app/public/profile_images/profile_user2.jpg';
 }

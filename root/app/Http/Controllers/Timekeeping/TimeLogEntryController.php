@@ -109,7 +109,7 @@ class TimeLogEntryController extends Controller
             $month = Core::GetMonth((int)$d_m);
             $date = $month." ".$d_d.", ".$d_y;
 
-	    	if (DB::table('hr_tito2')->insert(['work_date' => date('Y-m-d', strtotime($date)), 'time_log' => date('H:i', strtotime($r->time_timelog)), 'empid' => $r->id, 'status' => $r->sel_status, 'source' => 'M', 'logs_id' => $nlogs_id])) {
+	    	if (DB::table('hr_tito2')->insert(['work_date' => date('Y-m-d', strtotime($date)), 'time_log' => date('H:i', strtotime($r->time_timelog)), 'empid' => $r->id, 'status' => $r->sel_status, 'source' => (isset($r->source) ? $r->source : 'M'), 'logs_id' => $nlogs_id])) {
 	    		Core::updatem99('logs_id',Core::get_nextincrementlimitchar($nlogs_id, 8));
 	    		$data = DB::table('hr_tito2')->where('logs_id', $nlogs_id)->first();
 	    		$data->status_desc = Core::IO((string)$data->status);

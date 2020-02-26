@@ -251,10 +251,31 @@
                       <div class="dashboard-menu-body">
                         <div class="table-wrapper-scroll-y my-custom-scrollbar">
                           <table class="table table-bordered table-sm">
+                            <thead>
+                              <th>Name</th>
+                              <th>Leave Type</th>
+                              <th>Leave Dates</th>
+                              <th>Days</th>
+                              <th>With Pay</th>
+                              <th>Status</th>
+                            </thead>
                             <tbody>
+                                @isset($data[6])
+                                @foreach($data[6] as $key=>$value)
+                                <tr>
+                                  <td>{{$value->firstname .' '. $value->lastname}}</td>
+                                  <td>{{$value->description}}</td>
+                                  <td>{{Date('F jS, Y',strtotime($value->leave_from)) .'-'. Date('F jS, Y',strtotime($value->leave_to))}}</td>
+                                  <td>{{$value->no_of_days}}</td>
+                                  <td>{{$value->leave_pay}}</td>
+                                  <td>{{($value->status == 0 ? 'Pending' : ($value->status == 1 ? 'Approved' : 'Disapproved'))}}</td>
+                                </tr>
+                                @endforeach
+                                @else
                                 <tr>
                                   <td class="text-center">No application.</td>
                                 </tr>
+                                @endisset
                               </tbody>
                           </table>
                         </div>

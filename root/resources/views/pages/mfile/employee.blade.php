@@ -45,6 +45,7 @@
 											<th>Job Title</th>
 											<th>Designation</th>
 											<th>Employment Status</th>
+											<th>Biometric ID</th>
 											<th>Head of Facility?</th>
 											<th></th>
 										</tr>
@@ -69,6 +70,7 @@
 													<td>{{$pp->jobtitle}}</td>
 													<td>{{$pp->office}}</td>
 													<td>{{$pp->emp_status}}</td>
+													<td>{{($pp->biometric ?? 'Biometric ID not set')}}</td>
 													<td>{{($pp->isheadoffacility ? 'Yes' : 'No')}}</td>
 													<td>
 														<button type="button" class="btn btn-primary mr-1" id="opt-update" onclick="row_update(this)"><i class="fa fa-edit"></i></button>
@@ -98,7 +100,7 @@
 
 @section('to-modal')
 	<!-- Add Modal -->
-	<div class="modal fade" id="modal-pp" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	<div class="modal fade" id="modal-pp" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
 		<div id="TESTDOCU" class="modal-dialog mw-100 w-75" role="document">
 			<div class="modal-content">
 				<div class="modal-header">
@@ -134,7 +136,7 @@
 		</div>
 	</div>
 	<!-- Flag Modal -->
-	<div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" id="modal-flag">
+	<div class="modal fade bd-example-modal-lg" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" id="modal-flag">
 	    <div class="modal-dialog modal-lg">
 	        <div class="modal-content">
 	            <div class="modal-header">
@@ -323,7 +325,6 @@
 				method : 'post',
 				data : {_token:$('meta[name="csrf-token"]').attr('content'), id : $(this).val()},
 				success : function(data) {
-					console.log(data);
 					if (data!="empty" && data!="error") {
 						for (var i = 0; i < data.length; i++) {
 							d = data[i];
@@ -496,7 +497,6 @@ $("#imageUpload").change(function() {
 				method : 'post',
 				data : {_token:$('meta[name="csrf-token"]').attr('content'), id : $(e).attr('id'), state : ckb},
 				success : function(data) {
-					// console.log(data);
 					if (data=="error") {
 						alert("An error occured");
 					} else {

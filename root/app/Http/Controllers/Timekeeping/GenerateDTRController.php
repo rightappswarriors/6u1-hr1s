@@ -179,11 +179,19 @@ class GenerateDTRController extends Controller
                             if (count($rec_ti) > 0) {
                                 for ($j=0; $j < count($rec_ti); $j++) { 
                                     $tl_ti = $rec_ti[$j];
-                                    if (Timelog::ValidateLog_AM($tl_ti) && $tl_in_am == "00:00") {
+                                    if($tl_in_am == "00:00"){
+                                        $tl_in_am = $tl_ti;
+                                        if(isset($rec_to[0]) && $tl_out_am == "00:00"){
+                                            $tl_out_am = $rec_to[0];
+                                        }
+                                    }
+
+                                    // commented is 1in 1 out
+                                    /*if (Timelog::ValidateLog_AM($tl_ti) && $tl_in_am == "00:00") {
                                         $tl_in_am = $tl_ti;
                                     } elseif (Timelog::ValidateLog_PM($tl_ti) && $tl_in_pm == "00:00") {
                                         $tl_in_pm = $tl_ti;
-                                    } elseif(Timelog::ValidateLog_OTHrs2($tl_ti)) {
+                                    } else*/if(Timelog::ValidateLog_OTHrs2($tl_ti)) {
                                         array_push($tl_in_ot, $j."|".$tl_ti);
                                     } else {
                                         array_push($tl_in_trsh, [$date, $tl_ti]);
@@ -194,17 +202,25 @@ class GenerateDTRController extends Controller
                             if (count($rec_to) > 0) {
                                 for ($j=0; $j < count($rec_to); $j++) { 
                                     $tl_ti = $rec_to[$j];
-                                    if (Timelog::ValidateLog_AM($tl_ti) && $tl_out_am == "00:00") {
+                                    if($tl_out_pm == "00:00" && $j > 0){
+                                        $tl_out_pm = $tl_ti;
+                                        if(isset($rec_ti[1]) && $tl_in_pm == "00:00"){
+                                            $tl_in_pm = $rec_ti[1];
+                                        }
+                                    }
+                                    // commented is 1in 1 out
+                                    /*if (Timelog::ValidateLog_AM($tl_ti) && $tl_out_am == "00:00") {
                                         $tl_out_am = $tl_ti;
                                     } elseif (Timelog::ValidateLog_PM($tl_ti) && $tl_out_pm == "00:00") {
                                         $tl_out_pm = $tl_ti;
-                                    } elseif(Timelog::ValidateLog_OTHrs2($tl_ti)) {
+                                    } else*/if(Timelog::ValidateLog_OTHrs2($tl_ti)) {
                                         array_push($tl_out_ot, $j."|".$tl_ti);
                                     } else {
                                         array_push($tl_out_trsh, [$date, $tl_ti]);
                                     }
                                 }
                             }
+                            // return [$rec_ti,$rec_to];
                         } catch (\Exception $e) {
                             ErrorCode::Generate('controller', 'GenerateDTRController', 'A00001', $e->getMessage());
                             return $e;
@@ -227,7 +243,11 @@ class GenerateDTRController extends Controller
                                 if ($tl_in_pm != "00:00" && $tl_out_pm != "00:00") { // pmi = 1, pmo = 1
                                     $r_time_am = Timelog::GetRenHours($tl_in_am, $tl_out_am);
                                     $r_time_pm = Timelog::GetRenHours($tl_in_pm, $tl_out_pm);
-                                    $r_time_total = Core::GET_TIME_DIFF(Timelog::get_lunch_break(), Core::GET_TIME_TOTAL([$r_time_am, $r_time_pm]));
+                                    // commented is 1in 1 out
+                                    // $r_time_total = Core::GET_TIME_DIFF(Timelog::get_lunch_break(), Core::GET_TIME_TOTAL([$r_time_am, $r_time_pm]));
+                                    // [$date, [$tl_in_am, $tl_out_am, $tl_in_pm, $tl_out_pm]
+                                    // return [[$r_time_am,[$tl_in_am, $tl_out_am]],[$r_time_pm,[$tl_in_pm, $tl_out_pm]]];
+                                    $r_time_total = Core::GET_TIME_TOTAL([$r_time_am, $r_time_pm]);
                                     # If Late
                                     if (Timelog::IfLate($tl_in_am)) {
                                         array_push($arr_late, [$date, [$tl_in_am, $tl_out_am, $tl_in_pm, $tl_out_pm], Core::GET_TIME_DIFF(Timelog::ReqTimeIn(), $tl_in_am)]);
@@ -256,7 +276,7 @@ class GenerateDTRController extends Controller
                                     if (Timelog::IfHoliday($date)) {
                                         array_push($arr_holidays, [[$date, Holiday::HolidayType2($date)], [$tl_in_am, $tl_out_pm], $r_time_total]);
                                     } else {
-                                        array_push($arr_daysworked, [$date, [$tl_in_am, $tl_out_pm], $r_time_total]);
+                                        array_push($arr_daysworked, /*[$date, [$tl_in_am, $tl_out_pm]*/[$date, [$tl_in_am, $tl_out_am, $tl_in_pm, $tl_out_pm], $r_time_total]);
                                     }
                                 } else { // ami = 1, amo = 1
                                     $r_time_total = Timelog::GetRenHours($tl_in_am, $tl_out_am);
@@ -272,7 +292,7 @@ class GenerateDTRController extends Controller
                                     if (Timelog::IfHoliday($date)) {
                                         array_push($arr_holidays, [[$date, Holiday::HolidayType2($date)], [$tl_in_am, $tl_out_pm], $r_time_total]);
                                     } else {
-                                        array_push($arr_daysworked, [$date, [$tl_in_am, $tl_out_pm], $r_time_total]);
+                                        array_push($arr_daysworked, /*[$date, [$tl_in_am, $tl_out_pm]*/[$date, [$tl_in_am, $tl_out_am, $tl_in_pm, $tl_out_pm], $r_time_total]);
                                     }
                                 }
                             } elseif ($tl_in_am != "00:00" && $tl_out_pm != "00:00") { // ami = 1, pmo = 1
@@ -289,7 +309,7 @@ class GenerateDTRController extends Controller
                                 if (Timelog::IfHoliday($date)) {
                                     array_push($arr_holidays, [[$date, Holiday::HolidayType2($date)], [$tl_in_am, $tl_out_pm], $r_time_total]);
                                 } else {
-                                    array_push($arr_daysworked, [$date, [$tl_in_am, $tl_out_pm], $r_time_total]);
+                                    array_push($arr_daysworked, /*[$tl_in_am, $tl_out_pm]*/[$date, [$tl_in_am, $tl_out_am, $tl_in_pm, $tl_out_pm], $r_time_total]);
                                 }
                             }
 

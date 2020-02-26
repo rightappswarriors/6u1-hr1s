@@ -902,6 +902,7 @@
 						var data = 
 						{
 							bio : bio,
+							empid: $('[name=txt_id]').val()
 						}	
 						$.ajax({
 							type: "post",

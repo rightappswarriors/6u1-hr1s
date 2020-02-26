@@ -37,8 +37,8 @@
 				            </div>
 				            @endif
 
-			            	<label class="ml-5">Search by ID:</label>
-							<input type="text" name="tito_id" id="tito_id" class="form-control float-right ml-2" placeholder="Search by ID">
+			            	<label hidden class="ml-5">Search by ID:</label>
+							<input hidden type="text" name="tito_id" id="tito_id" class="form-control float-right ml-2" placeholder="Search by ID">
 						</div>
 
 						<div class="form-group form-inline">

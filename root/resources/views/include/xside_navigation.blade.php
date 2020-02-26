@@ -142,6 +142,9 @@
       <li id="timekeepingleaves-entry">
         <a href="{{url('timekeeping/leaves-entry')}}">Leaves Entry</a>
       </li>
+      <li id="timekeepingleaves-entry-apply">
+        <a href="{{url('timekeeping/leaves-entry-apply')}}">Apply Leave Entry</a>
+      </li>
       {{-- <li id="timekeepingemployee-dtr">
         <a href="{{url('timekeeping/employee-dtr')}}">Employee DTR</a>
       </li> --}}

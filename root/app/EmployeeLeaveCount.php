@@ -126,6 +126,16 @@ class EmployeeLeaveCount extends Model
                         'count' => $elc->count-$applied_leave_count
                     ]);
                     break;
+
+                case '=':
+                    DB::table(self::$tbl_name)->where('leave_type', '=', $leave_type)->where('empid', '=', $empid)->update([
+                        'peak' => $applied_leave_count
+                    ]);
+                    break;
+
+                case 'get':
+                    return DB::table(self::$tbl_name)->where('leave_type', '=', $leave_type)->where('empid', '=', $empid)->first();
+                    break;
                 
                 default:
                     ErrorCode::Generate('model', 'EmployeeLeaveCount', '00010', "Invalid operator.");
