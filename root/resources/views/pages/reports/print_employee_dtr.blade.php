@@ -368,10 +368,10 @@
 							td8.setAttribute('colspan', '2');
 							td8.setAttribute('style', 'text-align: center; font-weight: bold');
 							td8.innerHTML = "P.M.";
-						// var td9 = document.createElement('td');
-						// 	td9.setAttribute('colspan', '2');
-						// 	td9.setAttribute('style', 'text-align: center; font-weight: bold');
-						// 	td9.innerHTML = "OT Hours";
+						var td9 = document.createElement('td');
+							td9.setAttribute('colspan', '2');
+							td9.setAttribute('style', 'text-align: center; font-weight: bold');
+							td9.innerHTML = "OT Hours";
 						var td10 = document.createElement('td');
 							td10.setAttribute('colspan', '2');
 							td10.setAttribute('style', 'text-align: center; font-weight: bold');
@@ -383,7 +383,7 @@
 						tr3.appendChild(td6);
 						tr3.appendChild(td7);
 						tr3.appendChild(td8);
-						// tr3.appendChild(td9);
+						tr3.appendChild(td9);
 						tr3.appendChild(td10);
 						tr3.appendChild(td11);
 					var tr4 = document.createElement('tr');
@@ -400,12 +400,12 @@
 						var td16 = document.createElement('td');
 							td16.setAttribute('style', 'text-align: center; width: 10%');
 							td16.innerHTML = "Departure";
-						// var td17 = document.createElement('td');
-						// 	td17.setAttribute('style', 'text-align: center; width: 10%');
-						// 	td17.innerHTML = "Am";
-						// var td18 = document.createElement('td');
-						// 	td18.setAttribute('style', 'text-align: center; width: 10%');
-						// 	td18.innerHTML = "Pm";
+						var td17 = document.createElement('td');
+							td17.setAttribute('style', 'text-align: center; width: 10%');
+							td17.innerHTML = "Am";
+						var td18 = document.createElement('td');
+							td18.setAttribute('style', 'text-align: center; width: 10%');
+							td18.innerHTML = "Pm";
 						var td19 = document.createElement('td');
 							td19.setAttribute('style', 'text-align: center; width: 10%');
 							td19.innerHTML = "Hours";
@@ -418,8 +418,8 @@
 						tr4.appendChild(td14);
 						tr4.appendChild(td15);
 						tr4.appendChild(td16);
-						// tr4.appendChild(td17);
-						// tr4.appendChild(td18);
+						tr4.appendChild(td17);
+						tr4.appendChild(td18);
 						tr4.appendChild(td19);
 						tr4.appendChild(td20);
 

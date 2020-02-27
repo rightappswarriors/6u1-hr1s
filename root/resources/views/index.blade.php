@@ -52,10 +52,19 @@
                 "#ffc107",
                 "#0033E9",
               );
+
+              if($data[5] < 0)
+              {
+                $curr_timein = 0;
+              }
+              else
+              {
+                $curr_timein = $data[5];
+              }
               $leave_amount = array(
                 \Carbon\Carbon::parse(date("Y-m-d"))->format('M d, Y'),
                 ($data[1]==null)?"None":$data[1]->description,
-                $data[5],
+                $curr_timein,
                 ($data[3]==null)?"None":count($data[3]),
               );
               $leave_icon = array(
