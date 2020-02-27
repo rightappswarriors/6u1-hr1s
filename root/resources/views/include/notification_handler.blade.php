@@ -4,6 +4,7 @@
     $xntf_id = $_GET['ntf_id'];
     Notification_N::Toggle_Notification($uid, $xntf_id, true);
   }
+  // Core::Set_Alert('danger','hehe');
 @endphp
 
 <script>
@@ -32,7 +33,6 @@
 	@endisset
 
 	function toggleAudio(uid, val, ntf) {
-		console.log(uid);
 		$.ajax({
 			type: "post",
 			url: '{{url('notification/toggle')}}',
@@ -77,7 +77,7 @@
 	        var a = document.createElement('a');
 	            a.setAttribute('class', 'dropdown-item');
 	            if(!data1.seen) a.setAttribute('style', 'background: rgb(227,232,240)');
-	            a.setAttribute('href', notif_base_yoarel+data.url_readable+'?ntf_id='+data1.ntf_id+'&uid='+data1.uid);
+	            a.setAttribute('href', notif_base_yoarel+data.url_readable);
 	            var span = document.createElement('div');
 	                span.setAttribute('class', 'text-black');
 	                var b = document.createElement('b');
@@ -91,6 +91,7 @@
 	                span1.innerHTML = moment(data.ntf_date).fromNow();
 	            var span2 = document.createElement('span');
 	                span2.setAttribute('class', 'dropdown-message small');
+	                span2.setAttribute('style', 'white-space:normal');
 	                span2.innerHTML = data.ntf_cont;
 
 	            a.appendChild(span);

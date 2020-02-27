@@ -217,7 +217,7 @@
                 }
             });
         }
-        setTimeout(CheckAuthJS, 10000);
+        // setTimeout(CheckAuthJS, 10000);
     </script>
     <script type="text/javascript">
         function NoSelectedRow()

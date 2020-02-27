@@ -50,7 +50,7 @@ foreach(Notification_N::Get_Latest_Notification(Account::CURRENT()->uid) as $k =
         {{-- @if(count($nav_notif_msg) > 0) --}}
         {{-- <span class="badge badge-danger" id="notif_count">{{(count($nav_notif_msg) > 10) ? '10+' : count($nav_notif_msg)}}</span> --}}
         {{-- @else --}}
-        <span class="badge badge-danger" id="notif_count"></span>
+        <span class="badge badge-danger" style="margin-left:0px;" id="notif_count"></span>
         {{-- @endif --}}
       </a>
       <div class="dropdown-menu dropdown-menu-right" aria-labelledby="alertsDropdown" style="width: 25vw !important; overflow-y: scroll; max-height: 40vh;" id="main_parent_div">
@@ -128,4 +128,10 @@ foreach(Notification_N::Get_Latest_Notification(Account::CURRENT()->uid) as $k =
   $('#alertsDropdown').on('click', function() {
     notif_find(); // this function is found in "include.notification_handler" blade
   });
+
+  $(function(){
+    notif_find();
+  })
+
+  setInterval(function(){ notif_find(); }, 3000);
 </script>

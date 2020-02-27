@@ -96,9 +96,38 @@ class Notification_N extends Model
     	}
     }
 
-    public static function Send(array $groups, string $content = "", string $subject, $datetime=null, $url="/home")
+    public static function sendNotificationGroupFromDB($dbid,$groupid = [],$customURL = null,$datetime = null){
+        if(isset($dbid) && isset($groupid)){
+            $datetime = ($datetime ?? date('Y-m-d H:i'));
+            $data = DB::table('notification_messages')->where('notifid',$dbid)->first();
+            if(isset($data)){
+                return self::Send($groupid,$data->content,$data->subject,$datetime,($customURL ?? $data->url));
+            }
+        }
+    }
+
+    public static function sendNotificationSingleFromDB($dbid,$uid,$datetime = null){
+        if(isset($dbid) && isset($uid)){
+            $datetime = ($datetime ?? date('Y-m-d H:i'));
+            $data = DB::table('notification_messages')->where('notifid',$dbid)->first();
+            if(isset($data)){
+                return self::sendNotificationSingle($data->content,$data->subject,$data->url,$uid,$datetime);
+            }
+        }
+    }
+
+    public static function sendNotificationSingle($content,$subject,$url = '#',$uid,$datetime = null){
+        if(isset($content) && isset($subject) && isset($uid)){
+            $datetime = ($datetime ?? date('Y-m-d H:i'));
+            return self::Send([],$content,$subject,$datetime,$url,$uid);
+        }
+    }
+
+
+    public static function Send(array $groups, string $content = "", string $subject, $datetime=null, $url="/home", $uidSolo = null)
     {
-    	$grps = array();
+    	$grps = $toSend = array();
+        $ngrps = null;
     	$x08 = X08::Load_X08();
         $ntfDate = ($datetime == null)?date('Y-m-d H:i').':00':$datetime;
 
@@ -107,8 +136,9 @@ class Notification_N extends Model
     	}
 
     	try {
-
-	    	$ngrps = implode(', ', $grps);
+            if(!empty($grps)){
+	    	  $ngrps = implode(', ', $grps);
+            }
 
     		$data = [
     			'ntf_cont' => $content,
@@ -120,21 +150,30 @@ class Notification_N extends Model
 
     		$id = DB::table(self::$tbl_name)->insertGetId($data, self::$pk);
 
-
-    		for($j=0; $j<count($x08); $j++) {
-				if(in_array(trim($x08[$j]->grp_id), $grps)) {
-					$ndata = [
-						'uid' => $x08[$j]->uid,
-						'ntf_id' => $id,
-						'seen' => 0,
-                        'played' => 0,
-					];
-					DB::table(self::$tbl_name_2)->insert($ndata);
-				}
-			}
-
-			return "Okay";
-
+            if(isset($uidSolo)){
+                $ndata = [
+                    'uid' => $uidSolo,
+                    'ntf_id' => $id,
+                    'seen' => 0,
+                    'played' => 0,
+                ];
+                array_push($toSend, $ndata);
+            } else {
+                for($j=0; $j<count($x08); $j++) {
+                    if(in_array(trim($x08[$j]->grp_id), $grps)) {
+                        $ndata = [
+                            'uid' => $x08[$j]->uid,
+                            'ntf_id' => $id,
+                            'seen' => 0,
+                            'played' => 0,
+                        ];
+                        array_push($toSend, $ndata);
+                    }
+                }
+            }
+            if(DB::table(self::$tbl_name_2)->insert($toSend)){
+                return "Okay";
+            }
     	} catch (\Exception $e) {
     		return $e->getMessage();
     	}

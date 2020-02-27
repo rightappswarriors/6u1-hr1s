@@ -22,12 +22,20 @@ class TimeLogEntryController extends Controller
     	$this->employees = Employee::Load_Employees();
     }
 
-    public function view($workdate = null, $office = null, $empid = null)
+    public function view(Request $request, $workdate = null, $office = null, $empid = null)
     {
+        $ref = null;
+        if($request->has('ref') && DB::table('biometricdata')->where('bioid',$request->ref)->exists()){
+            $data = DB::table('biometricdata')->where('bioid',$request->ref)->first();
+            $workdate = $data->date;
+            $empid = $data->empid;
+            $office = (Employee::getOfficeByID( ( Employee::Load_Employees_Dynamic([['empid',$data->empid]],true)->empid ?? Employee::Load_Employees_Dynamic([['biometric',$data->empid]],true))->empid )->department ?? null);
+            $ref = $data;
+        }
         $misc = [$workdate, $office, $empid];
     	$data = [$this->employees, Office::get_all()];
         // dd($data);
-    	return view($this->page, compact('data','misc'));
+    	return view($this->page, compact('data','misc','ref'));
     }
 
     public function viewtimeout()

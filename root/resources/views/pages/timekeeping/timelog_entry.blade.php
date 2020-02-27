@@ -15,7 +15,31 @@
 			</div>
 		</div>
 		<div class="card-body">
-            <div class="card">
+			@isset($ref)
+			<div class="mt-2 card">
+				<div class="card-header">
+					<div class="row">
+						<div class="col">
+							<i class="fa fa-calendar"></i> Employee Biometric Error Data
+						</div>
+					</div>
+				</div>
+				<div class="card-body">
+					<div class="container">
+						<div class="row">
+							<div class="col">
+								<label>Date: {{Date('F, j, Y',strtotime($ref->date))}}</label>
+							</div>
+							<div class="col text-center">
+								<label>Time: {{Date('g:iA',strtotime($ref->time))}}</label>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			@endisset
+
+            <div class="card mt-2">
 				<div class="card-header">
 					<i class="fa fa-info-circle"></i> Batch Time Log Info
 				</div>

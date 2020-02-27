@@ -83,7 +83,8 @@ class GenerateDTRController extends Controller
             $name = Employee::Name($r->code);
             // added month + 1 by Syrel on 2-27-2020
             // to work here
-            $pp = Payroll::PayrollPeriod2(($r->month < 12 ? $r->month + 1 : 1),$r->pp, $r->year);
+            // ($r->month < 12 ? $r->month + 1 : 1)
+            $pp = Payroll::PayrollPeriod2($r->month,$r->pp, $r->year);
             // $covereddates = Core::TotalDays($pp->from, $pp->to);
             $covereddates = Core::CoveredDates($pp->from, $pp->to);
 

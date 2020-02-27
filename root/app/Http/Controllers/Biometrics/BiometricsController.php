@@ -8,6 +8,7 @@ use Core;
 use DB;
 use ErrorCode;
 use TimeLogEntryController;
+use Notification_N;
 
 class BiometricsController extends Controller
 {
@@ -19,11 +20,12 @@ class BiometricsController extends Controller
     //
     public function ReceiveData(Request $request){
     	// returns : 1st array: not found on database, 2nd array: success: 3rd array: time not on span
-    	if(isset($request->data)){
+    	if(isset($request->data)){  
     		$decoded = json_decode($request->data);
-    		$noData = $successArr = $notonspan = [];
+    		$noData = $successArr = $unsuccessArr = $notonspan = [];
             $success = false;
             $toAdd = true;
+            $action = null;
     		foreach ($decoded as $key => $value) {
     			$object = [];
     			$employeeDetails = DB::table('hr_employee')->where('biometric',$value->userid)->select('empid')->first();
@@ -62,15 +64,41 @@ class BiometricsController extends Controller
                                 }
                            }
                            if($success){
+                                $action = 'saved';
                                 array_push($successArr, $value->userid);
+                           } else {
+                                array_push($unsuccessArr, $value->userid);
+                                $action = 'unsaved';
                            }
                        }
                     } else {
                         array_push($notonspan, $value->userid);
+                        $action = 'not_on_time_span';
                     }
     			} else {
     				array_push($noData, $value->userid);
+                    $action = 'not_on_employee_list';
     			}
+
+                if(DB::table('biometricdata')->where([['empid' , $value->userid],['date', Date('Y-m-d',strtotime($value->time))],['action', $action]])->doesntExist()){
+
+                    DB::table('biometricdata')->insert([
+                        'selection' => ($object['sel_status'] ?? null), 
+                        'empid' => ($employeeDetails->empid ?? $value->userid), 
+                        'time' => Date('G:i:s',strtotime($value->time)), 
+                        'date' => Date('Y-m-d',strtotime($value->time)), 
+                        'action' => $action, 
+                        't_time' => Date('G:i:s'), 
+                        't_date' => Date('Y-m-d')
+                    ]);
+                    $lastid = DB::getPdo()->lastInsertId();
+
+                    if(isset($lastid) && $action == 'not_on_time_span'){
+                        if(Notification_N::sendNotificationGroupFromDB(1,['001'],'/timekeeping/timelog-entry?ref='.$lastid) == 'Okay'){
+                            Notification_N::sendNotificationSingleFromDB(1,$value->userid);
+                        }   
+                    }
+                }
     			
     		}
 
