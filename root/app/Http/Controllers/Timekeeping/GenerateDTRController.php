@@ -81,7 +81,9 @@ class GenerateDTRController extends Controller
             $req_hrs2 = Timelog::ReqHours2();
             $employee = Employee::GetEmployee($r->code);
             $name = Employee::Name($r->code);
-            $pp = Payroll::PayrollPeriod2($r->month,$r->pp, $r->year);
+            // added month + 1 by Syrel on 2-27-2020
+            // to work here
+            $pp = Payroll::PayrollPeriod2(($r->month < 12 ? $r->month + 1 : 1),$r->pp, $r->year);
             // $covereddates = Core::TotalDays($pp->from, $pp->to);
             $covereddates = Core::CoveredDates($pp->from, $pp->to);
 
@@ -112,10 +114,8 @@ class GenerateDTRController extends Controller
             $totalovertime = 0;
             $errors = [];
             $errors2 = [];
-
             for ($i=0; $i < count($covereddates); $i++) {
                 $date = date('Y-m-d', strtotime($covereddates[$i]));
-
                 $sql_p1 = "SELECT work_date, string_agg(time_log, ',') time_log, empid, status FROM hris.hr_tito2 WHERE empid = '".$employee->empid."' AND work_date = '".$date."'";
                 $sql_p2 = " GROUP BY work_date, empid, status ORDER BY work_date DESC, status DESC";
 

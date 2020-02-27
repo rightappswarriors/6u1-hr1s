@@ -16,7 +16,7 @@ class LogBoxController extends Controller
         // $this->ghistory = DB::table('hr_tito2')->where('cancel', '=', null)->orderBy('work_date', 'DESC')->orderBy('time_log', 'DESC')->take(6)->get();
         // $this->ghistoryIn = DB::table('hr_tito2')->where('cancel', '=', null)->where('status', '=', '1')->where('work_date', date('Y-m-d'))->orderBy('work_date', 'DESC')->orderBy('time_log', 'DESC')->orderBy('logs_id', 'DESC')->take(6)->get();
         $date = date('Y-m-d');
-        $this->ghistoryIn = DB::select("SELECT * from hris.hr_tito2 where cancel is null and status = 1::text and work_date = '$date' and empid not in (SELECT empid from hris.hr_tito2 where cancel is null and status = 0::text and work_date = '$date') order by work_date desc, time_log desc, logs_id desc LIMIT 15");
+        $this->ghistoryIn = DB::select("SELECT * from hris.hr_tito2 where cancel is null and status = 1::text and work_date = '$date' /*and empid not in (SELECT empid from hris.hr_tito2 where cancel is null and status = 0::text and work_date = '$date')*/ order by work_date desc, time_log desc, logs_id desc LIMIT 15");
         $this->ghistoryOut = DB::table('hr_tito2')->where('cancel', '=', null)->where('status', '=', '0')->where('work_date', date('Y-m-d'))->orderBy('work_date', 'DESC')->orderBy('time_log', 'DESC')->orderBy('logs_id', 'DESC')->take(15)->get();
 
     }
