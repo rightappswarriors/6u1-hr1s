@@ -128,7 +128,7 @@
 
 	<script>
 		$('#btn-send').on('click', function() {
-			if(select.multipleSelect('getSelects').length < 1) {
+			if(select.val() < 1) {
 				alert('Please select at least one group to send.');
 			} else {
 				if($('input[name="txt_title"]').val() == null || $('input[name="txt_title"]').val() == "") {
@@ -139,7 +139,7 @@
 					$.ajax({
 						type: $('#announcement_form').attr('method'),
 						url: $('#announcement_form').attr('action'),
-						data: {"cbo":select.multipleSelect('getSelects'), "title":$('input[name="txt_title"]').val(), "content":$('textarea[name="txt_content"]').val(), "sched":$('input[name="txt_sched"]').val(), "date":$('#txt_sched_date').val(), "time":$('#txt_sched_time').val()},
+						data: {"cbo":select.val(), "title":$('input[name="txt_title"]').val(), "content":$('textarea[name="txt_content"]').val(), "sched":$('input[name="txt_sched"]').val(), "date":$('#txt_sched_date').val(), "time":$('#txt_sched_time').val()},
 						success: function(data) {
 							if(data == "Okay") {
 								location.reload();

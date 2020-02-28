@@ -892,5 +892,16 @@ class Core extends Model
     	}
     }
 
+    public static function convertObjectToRequestClass($object){
+    	$toReturn = null;
+    	if(isset($object)){
+    		$toReturn = new \Illuminate\Http\Request($object);
+    		foreach ($object as $key => $value) {
+    			$toReturn[$key] = $value;
+    		}
+    	}
+    	return $toReturn;
+    }
+
     public static $default_img = 'root/storage/app/public/profile_images/profile_user2.jpg';
 }

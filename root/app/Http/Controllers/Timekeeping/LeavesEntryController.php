@@ -248,13 +248,22 @@ class LeavesEntryController extends Controller
                 break;
 
             case 'apply':
-                //to work here
+                $object = [];
                 unset($data['generatedby']);
+                unset($data['fromapprovalid']);
                 $data['empid'] = $r->cbo_employee;
                 $data['status'] = 0;
                 $data['t_date'] = Date('Y-m-d');
                 $data['t_time'] = Date('G:i:s');
-                if(DB::table(Leave::$approval)->insert($data)){
+                $object['cbo'] = ['001'];
+                $object['title'] = 'Leave Application';
+                $object['content'] =  Employee::GetEmployee($r->cbo_employee)->firstname . ' ' . Employee::GetEmployee($r->cbo_employee)->lastname. ' has applied for leave. Click to see more details';
+                $object['date'] = Date('Y-m-d');
+                $object['time'] = Date('G:i:s');
+                $object['url'] = '/timekeeping/leaves-entry-apply';
+                $class = new \App\Http\Controllers\Settings\NotificationSettingsController;
+                $requestToSend = new \Illuminate\Http\Request($object);
+                if(DB::table(Leave::$approval)->insert($data) && $class->send($requestToSend) == 'Okay'){
                     Core::Set_Alert('success', 'Applied Successfully. Please wait for notification regarding the decision');
                 }
                 break;
