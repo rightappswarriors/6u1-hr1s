@@ -28,24 +28,29 @@
 					</div>	
 				</div>
 				<div class="form-group row">
-					<div class="col-sm-2">
-						<select class="form-control" id="month" name="month">
+					{{-- <div class="col-sm-2"> --}}
+						{{-- <select class="form-control" id="month" name="month">
 							@foreach(Core::Months() as $key => $value)
 							<option value="{{$key}}" {{($key == date('m')) ? 'selected' : ''}}>{{$value}}</option>
 							@endforeach
-						</select>
-					</div>
-					<div class="col-sm-2">	
-						<select class="form-control" name="payroll_period" id="payroll_period" required>
+						</select> --}}
+					{{-- </div> --}}
+					<div class="col-sm-3">	
+						{{-- <select class="form-control" name="payroll_period" id="payroll_period" required>
 							<option value="15D">15th Day</option>
 							<option value="30D">30th Day</option>
-						</select>
+						</select> --}}
+						<label class="mr-1">Payroll Period From:</label>
+						<input type="date" value="{{Date('Y-m-01')}}" name="dateFrom" id="dateFrom" class="datePicker form-control">
 					</div>
-					<div class="col-sm-2">
-						<select class="form-control YearSelector" id="year" name="year">
-						</select>
+					<div class="col-sm-3">
+						{{-- <select class="form-control YearSelector" id="year" name="year">
+						</select> --}}
+						<label class="mr-1">Payroll Period To:</label>
+						<input type="date" name="dateTo" value="{{Date('Y-m-t')}}" id="dateTo" class="datePicker form-control">
 					</div>	
 					<div class="col-sm-2">	
+						<label class="mr-1">Generation Type:</label>
 						<select class="form-control" name="gen_type" id="gen_type">
 							<option Value="BASIC" selected>Basic</option>
 							<option value="OVERTIME">Overtime</option>
@@ -158,7 +163,8 @@
 		var dtrs = [];
 	</script>
 	<script type="text/javascript">
-		$('#ofc, #empstatus, #month, #payroll_period, #year').on('change', function() {
+		// ,#payroll_period, #year
+		$('#ofc, #empstatus, #dateFrom, #dateTo').on('change', function() {
 			ClearSearch();
 		});
 		$("#frm-gp").on('submit', function(e)
@@ -250,7 +256,7 @@
 		}
 
 		function previewPayroll(){
-			window.open('{{url('payroll/generate-payroll/preview/?ofc=')}}'+$('#ofc').val()+'&empstatus='+$('#empstatus').val()+'&month='+$('#month').val()+'&payroll_period='+$('#payroll_period').val()+'&year='+$('#year').val()+'&gen_type='+$("#gen_type").val());
+			window.open('{{url('payroll/generate-payroll/preview/?ofc=')}}'+$('#ofc').val()+'&empstatus='+$('#empstatus').val()+'&dateFrom='+$('#dateFrom').val()+'&dateTo='+$('#dateTo').val()/*+'&month='+$('#month').val()+'&payroll_period='+$('#payroll_period').val()+'&year='+$('#year').val()*/+'&gen_type='+$("#gen_type").val());
 		}
 
 		function GeneratePayroll()

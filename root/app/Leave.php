@@ -76,6 +76,25 @@ class Leave extends Model
     	}
     }
 
+    public static function GetLeaveRecordPerMonth($empid,$monthFrom,$monthTo,$onleave = false){
+        $toRet = [];
+        if(isset($empid) && isset($monthFrom) && isset($monthTo)){
+            $onleave = ($onleave ? 'YES' : 'NO');
+            $from = Date('Y-m-01',strtotime($monthFrom));
+            $to = Date('Y-m-t',strtotime($monthTo));
+            $toRet = DB::table(self::$tbl_name)
+                ->where('empid', '=', $empid)
+                ->where('cancel', '=', null)
+                ->whereDate('leave_from', '>=', $from)
+                ->whereDate('leave_to', '<=', $to)
+                ->where('leave_pay', '=', $onleave)
+                ->where('isgenerated', '=', FALSE)
+                ->get();
+
+        }
+        return $toRet;
+    }
+
     /**
     * Get Leave Entry Record2
     * @param String
@@ -98,7 +117,7 @@ class Leave extends Model
             } else {
                 $onleave = "NO";
             }
-            return DB::table(self::$tbl_name)->where('empid', '=', $empid)->where('cancel', '=', null)->whereDate('leave_from', '<=', $date)->whereDate('leave_to', '>=', $date)->where('leave_pay', '=', $onleave)->first();
+            return DB::table(self::$tbl_name)->where('isgenerated', '=', FALSE)->where('empid', '=', $empid)->where('cancel', '=', null)->whereDate('leave_from', '<=', $date)->whereDate('leave_to', '>=', $date)->where('leave_pay', '=', $onleave)->first();
         } catch (\Exception $e) {
             return null;
         }

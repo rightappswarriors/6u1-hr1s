@@ -141,6 +141,6 @@ class OfficeController extends Controller
     public function isGeneratedDTR(Request $r)
     {
         // return $r->all();
-        return Employee::isGeneratedOnDTR($r->empid, Date('Y-m-d',strtotime($r->monthFrom)), Date('Y-m-d',strtotime($r->monthTo)), $r->gtype);
+        return [Employee::isGeneratedOnDTR($r->empid, Date('Y-m-d',strtotime($r->monthFrom)), Date('Y-m-d',strtotime($r->monthTo)), $r->gtype),DB::table('hr_dtr_sum_employees')->join('hr_dtr_sum_hdr','hr_dtr_sum_hdr.code','hr_dtr_sum_employees.dtr_sum_id')->where([['hr_dtr_sum_hdr.empid',$r->empid],['hr_dtr_sum_hdr.date_from',$r->monthFrom],['hr_dtr_sum_hdr.date_to',$r->monthTo]])->first()];
     }
 }

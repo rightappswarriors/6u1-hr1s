@@ -104,6 +104,7 @@ class GenerateDTRController extends Controller
             $arr_holidayDates = [];
             $arr_leavedates = [];
 
+            $leaveID = [];
             $totaldays = 0;
             $totalabsent = 0;
             $totalweekend = 0;
@@ -155,16 +156,22 @@ class GenerateDTRController extends Controller
                 /**
                 * Check Timelogs
                 */
-                if (Timelog::IfLeave($employee->empid, $date)) {
+                // if (Timelog::IfLeave($employee->empid, $date)) {
+                $empleave = Leave::GetLeaveRecordPerMonth($employee->empid,$r->monthFrom, $r->monthTo, true);
+                // return $empleave;
+                if (count($empleave) > 0) {
                     /**
                     * Leave array format : [date, leave type]
                     */
-                    $empleave = Leave::GetLeaveRecord2($employee->empid, $date, true);
-                    if ($empleave!=null) {
-                        array_push($arr_leavedates, [$date, $empleave->leave_type]);
-                        $totalleave+=1;
+                    foreach ($empleave as $key => $value) {
+                        if(!in_array($value->lvcode, $leaveID)){
+                            array_push($leaveID, $value->lvcode);
+                            array_push($arr_leavedates, [$date, $value->leave_type, $value->lvcode]);
+                            $totalleave+=1;
+                        }
                     }
-                } elseif (count($rec_ti) > 0) {
+                } 
+                if (count($rec_ti) > 0) {
                     if (count($rec_to) > 0) {
                         $rec_ti = explode(",", $rec_ti[0]->time_log);
                         $rec_to = explode(",", $rec_to[0]->time_log);
@@ -475,6 +482,7 @@ class GenerateDTRController extends Controller
                 'holiday_arr' => $arr_holidays,
                 'leaves'=> $totalleave,
                 'leaves_arr'=> $arr_leavedates,
+                'updateToGenerate' => $leaveID,
 
 
                 'errors'=>$errors,
@@ -535,22 +543,16 @@ class GenerateDTRController extends Controller
                 $codeFromSumHdr = DB::table('hr_dtr_sum_hdr')->where([['empid',$dtrs['empid']],['ppid',$dtrs['ppid']],['generationtype',$dtrs['generateType']],['date_from',$dtrs['date_from']],['date_to',$dtrs['date_to']]])->first();
                 $code = $codeFromSumHdr->code;
                 DB::table('hr_dtr_sum_hdr')->where([['empid',$dtrs['empid']],['ppid',$dtrs['ppid']],['generationtype',$dtrs['generateType']],['date_from',$dtrs['date_from']],['date_to',$dtrs['date_to']]])->delete();
-<<<<<<< HEAD
-                if(DB::table('hr_dtr_sum_employees')->where([['xempid',$dtrs['empid']],['isgenerated',TRUE],['dtr_sum_id',$code]])->delete()){
-                    $dtrs['isgenerated'] = null;
-                    $message = 'update';
-                }
-=======
                 DB::table('hr_dtr_sum_employees')->where([['xempid',$dtrs['empid']],['isgenerated',TRUE],['dtr_sum_id',$code]])->delete();
                 $dtrs['isgenerated'] = null;
                 $message = 'update';
->>>>>>> a4eee03bbab1384aac724ca0f4e662996b18fcfe
             }
             if (/*$record == null*/ $dtrs['isgenerated'] == null) {
                 
                 try {
                     $code = Core::getm99('dtr_sum_id');
                     $reply = false;
+                    // return $r;
                     try {
                         DB::table('hr_dtr_sum_hdr')->insert([
                             'empid' => $dtrs['empid'],
@@ -563,6 +565,11 @@ class GenerateDTRController extends Controller
                             'generatedby'=> Account::ID(),
                             'generationtype'=> $dtrs['generateType'],
                         ]);
+
+                        if(isset($dtrs['updateToGenerate'])){
+                            DB::table('hr_leaves')->whereIn('lvcode',$dtrs['updateToGenerate'])->update(['isgenerated' => TRUE]);
+                        }
+
                         $reply = true;
                     } catch (\Exception $e) {
                         ErrorCode::Generate('controller', 'GenerateDTRController', 'B00003', $e->getMessage());

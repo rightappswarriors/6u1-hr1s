@@ -182,4 +182,12 @@ class Employee extends Model
         }
     }   
 
+    public static function getDailyRate($rate){
+        if(isset($rate)){
+            $totalWorkingDay = Core::CountWorkingDays(Date('Y-01-01'),Date('Y-m-t',strtotime(Date('Y-12'))));
+            return round((($rate * 12) / $totalWorkingDay),2);
+        }
+        return 0.00;
+    }
+
 }

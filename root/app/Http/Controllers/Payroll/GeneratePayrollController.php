@@ -44,16 +44,31 @@ class GeneratePayrollController extends Controller
 
     public function previewPayroll(Request $r){
         $r['isForDisplay'] = true;
-        $toAddres = [];
+        $toAddres = $info = [];
         $var = self::generate_payroll($r);
-        if(isset($var['todbs'])){
-            array_push($toAddres, (object)$var['todbs']);
-            $var['info']['title'] = 'Payroll Preview';
-            $data = [
-                'inf' => $var['info'],
-                'record' => $toAddres
-            ];
-            return view('print.reports.payroll.export_payroll_summary_report',compact('data'));
+        if(isset($var)){
+            foreach ($var as $key => $value) {
+                if(isset($value['todbs'])){
+                    $value['todbs']['empname'] = Employee::GetEmployee($var[$key]['todbs']['empid'])->firstname . ' ' . Employee::GetEmployee($var[$key]['todbs']['empid'])->lastname;
+                    $value['todbs']['position'] =  Employee::GetJobTitle($var[$key]['todbs']['empid']);
+                    array_push($toAddres, (object)$value['todbs']);   
+                }
+                // if($value['todbs']['empid'] == 'WAT - 03'){
+                //     dd($value['todbs']);
+                // }
+            }
+            if(isset($toAddres)){
+                $var['info']['title'] = 'Payroll Preview';
+                $var['info']['date_from'] = $var[0]['info']['date_from'];
+                $var['info']['date_to'] = $var[0]['info']['date_to'];
+
+                $data = [
+                    'inf' => $var['info'],
+                    'record' => $toAddres
+                ];
+                
+                return view('print.reports.payroll.export_payroll_summary_report',compact('data'));
+            }
         }
         return abort(404);
     }
@@ -74,13 +89,13 @@ class GeneratePayrollController extends Controller
             $return_val = (object)[];
             $dtr_summaries = [];
             $emp_sql = Employee::$emp_sql;
-            $pp = Payroll::PayrollPeriod2($r->month, $r->payroll_period, $r->year);
+            // $pp = Payroll::PayrollPeriod2($r->month, $r->payroll_period, $r->year);
             // $sql = "SELECT dtr.*, emp.* FROM (SELECT a.ppid, a.date_from, a.date_to, a.date_generated, a.time_generated, a.code, a.generatedby, a.generationtype, a.empid FROM hris.hr_dtr_sum_hdr a LEFT JOIN hris.hr_dtr_sum_employees b ON a.code = b.dtr_sum_id where b.isgenerated IS NOT TRUE) dtr INNER JOIN ($emp_sql) emp ON dtr.empid = emp.empid";
             // $sql = "SELECT dtr.*, emp.* FROM (SELECT * FROM hris.hr_dtr_sum_hdr a LEFT JOIN hris.hr_dtr_sum_employees b ON a.code = b.dtr_sum_id) dtr INNER JOIN ($emp_sql) emp ON dtr.empid = emp.empid";
             $sql = "SELECT distinct pay_rate, rate_type, tax_bracket, days_absent, late, undertime, leaves_arr, leaves, total_overtime_arr, holiday_arr, holiday_dates, department, sss, philhealth, pagibig, dtr_sum_id, date_generated, time_generated, empname, emp.empid FROM (SELECT * FROM hris.hr_dtr_sum_hdr a LEFT JOIN hris.hr_dtr_sum_employees b ON a.code = b.dtr_sum_id) dtr INNER JOIN ($emp_sql) emp ON dtr.empid = emp.empid";
                 // $con = " WHERE date_from >= '".date('Y-m-d', strtotime($pp->from))."' AND date_to <= '".date('Y-m-d', strtotime($pp->to))."' AND empstatus = '".$r->empstatus."' AND generationtype = '".$r->gen_type."' AND department = '".$r->ofc."'";
-            $con = " WHERE isgenerated IS NOT TRUE AND date_from >= '".date('Y-m-d', strtotime($pp->from))."' AND date_to <= '".date('Y-m-d', strtotime($pp->to))."' AND empstatus = '".$r->empstatus."' AND generationtype = '".$r->gen_type."' AND department = '".$r->ofc."'";
-            $return_val->search = date('Y-m-d', strtotime($pp->from))." to ".date('Y-m-d', strtotime($pp->to));
+            $con = " WHERE isgenerated IS NOT TRUE AND date_from >= '".date('Y-m-d', strtotime($r->dateFrom))."' AND date_to <= '".date('Y-m-d', strtotime($r->dateTo))."' AND empstatus = '".$r->empstatus."' AND generationtype = '".$r->gen_type."' AND department = '".$r->ofc."'";
+            $return_val->search = date('Y-m-d', strtotime($r->dateFrom))." to ".date('Y-m-d', strtotime($r->dateTo));
             // $return_val->parameters = $r->all();
             $return_val->dtr_summaries = Core::sql($sql.$con);
             // $return_val->generateReview = self::generate_payroll($r);
@@ -89,6 +104,7 @@ class GeneratePayrollController extends Controller
             return json_encode($return_val);
         } catch (\Exception $e) {
             ErrorCode::Generate('controller', 'GeneratePayrollController', 'A00001', $e->getMessage());
+            return $e;
             return "error";
         }
     }
@@ -120,7 +136,7 @@ class GeneratePayrollController extends Controller
 
         $errors = [];
         $results = [];
-        $asd = [];
+        $asd = $toDisplay = [];
 
         # Get generated DTR Summary
         $dtr_summaries = json_decode($this->find_dtr($r))->dtr_summaries;
@@ -133,7 +149,8 @@ class GeneratePayrollController extends Controller
 
         try {
             # Get Payroll period
-            $pp = Payroll::PayrollPeriod2($r->month,$r->payroll_period, $r->year); if ($pp =="error") { return "no pp"; }
+            // $pp = Payroll::PayrollPeriod2($r->month,$r->payroll_period, $r->year); 
+            // if ($pp =="error") { return "no pp"; }
             if (count($dtr_summaries) > 0) {
                 for ($i=0; $i < count($dtr_summaries); $i++) {
                     $tmp = "";
@@ -174,7 +191,7 @@ class GeneratePayrollController extends Controller
                         $workdays = /*(float)$d->workdays;*/ 22; # Note: Monthly
                         $weekends = 0; # Not Used
                         $shift_hours = Timelog::ShiftHours();
-                        $covered_days = Core::CoveredDates($pp->from, $pp->to); # Not Used
+                        $covered_days = Core::CoveredDates($r->dateFrom, $r->dateTo); # Not Used
                         $total_days = /*$workdays + $weekends;*/ $workdays / 2;
 
                         # Regular Pay
@@ -220,17 +237,23 @@ class GeneratePayrollController extends Controller
 
                             ## Leave
                             $leaves = json_decode($d->leaves_arr);
-                            $leave_count = $d->leaves;
                             $leave_amt = 0;
                             $leave_amt_limit = 1500; /* Note: Monthly Leave Limit */
-                            if (count($leaves) > 0) {
-                                for ($j=0; $j < count($leaves); $j++) { 
-                                    $leave_amt += $daily_rate;
-                                };
-                            }
+                            if(isset($leaves)){
+                                $leave_count = $d->leaves;
+                                foreach ($leaves as $key => $value) {
+                                    if(isset($value[2]) && DB::table('hr_leaves')->where([['lvcode',$value[2]],['leave_pay','NO']])->exists()){  
+                                        if (count($leaves) > 0) {
+                                            for ($j=0; $j < count($leaves); $j++) { 
+                                                $leave_amt += $daily_rate;
+                                            };
+                                        }
 
-                            if ($leave_amt > $leave_amt_limit) {
-                                $leave_amt = $leave_amt_limit;
+                                        // if ($leave_amt > $leave_amt_limit) {
+                                        //     $leave_amt = $leave_amt_limit;
+                                        // }
+                                    }
+                                }
                             }
 
                             if ($gen_type == "OVERTIME") {
@@ -246,8 +269,9 @@ class GeneratePayrollController extends Controller
                                 $leave_count = '';
                                 $leave_amt = 0;
                             }
-
-                        $basic_pay = (round($days_worked_amt, 2) + round($leave_amt, 2)) - round($undertime_amt, 2);
+                        $daily_rate_reworked = Employee::getDailyRate($rate);
+                        $basic_pay = ($leave_amt > 0 ? ((round(abs($days_worked_amt), 2) + round(abs($leave_amt), 2)) - round(abs($undertime_amt), 2) + (abs($daily_rate_reworked) * (int)abs($days_absent) )) : 0.00);
+                        // $basic_pay = (round($days_worked_amt, 2) + round($leave_amt, 2));
 
                         # Gross Pay Computation
                             ## Regular Overtime
@@ -351,7 +375,7 @@ class GeneratePayrollController extends Controller
                             */
                             $other_earnings = [];
                             $other_earnings_amt = 0;
-                            $earnings_arr = $this->GetOtherEarnings($d->empid, $pp->from, $pp->to);
+                            $earnings_arr = $this->GetOtherEarnings($d->empid, $r->dateFrom, $r->dateTo);
                             if (count($earnings_arr) > 0) {
                                 for ($j=0; $j < count($earnings_arr); $j++) { 
                                     $ea = $earnings_arr[$j];
@@ -375,18 +399,29 @@ class GeneratePayrollController extends Controller
                                 array_push($other_earnings, ["HP1", "HAZARDPAY", $hazard_pay_amt]);
                                 ### ALLOWANCE
                                     #### LAUNDRY
-                                    $alw_laundry_amt = 150; # Note: Static Value
-                                    $other_earnings_amt += $alw_laundry_amt;
-                                    array_push($other_earnings, ["A1", "ALLOWNC", $alw_laundry_amt]);
-                                    #### CLOTHING
-                                    $alw_clothing = $this->GetAlw_Clothing($d->empid);
-                                    if (count($alw_clothing) > 0) {
-                                        if ($alw_clothing[0]->service_overall <= 6) {
-                                            $alw_clothing_amt = 6000;
-                                            $other_earnings_amt += $alw_clothing_amt;
-                                            array_push($other_earnings, ["A2", "ALLOWNC", $alw_clothing_amt]);
+
+                                    // $alw_laundry_amt = 150; # Note: Static Value
+                                    // $other_earnings_amt += $alw_laundry_amt;
+                                    $alw_laundry_amt = 0;
+                                    $laundry = $this->GetHazardPay($d->department);
+                                    if ($laundry!=null) {
+                                        if ($laundry->withpay) {
+                                           $alw_laundry_amt = 150;
                                         }
                                     }
+                                    array_push($other_earnings, ["A1", "ALLOWNC", $alw_laundry_amt]);
+
+                                    #### CLOTHING
+                                    // $alw_clothing = $this->GetAlw_Clothing($d->empid);
+                                    // if (count($alw_clothing) > 0) {
+                                    //     if ($alw_clothing[0]->service_overall <= 6) {
+                                    //         $alw_clothing_amt = 6000;
+                                    //         $other_earnings_amt += $alw_clothing_amt;
+                                    //         array_push($other_earnings, ["A2", "ALLOWNC", $alw_clothing_amt]);
+                                    //     }
+                                    // }
+                                    // clothing report for 6months(6k) per Syd
+                                    array_push($other_earnings, ["A2", "ALLOWNC", 0]);
 
                             if ($gen_type == "OVERTIME") {
                                 $legal_holiday_pay_amt = 0;
@@ -467,7 +502,7 @@ class GeneratePayrollController extends Controller
                             */
                             $other_deduction = [];
                             $other_deductions_amt = 0;
-                            $other_deduction_arr = OtherDeductions::Get_Records($d->empid, $pp->from, $pp->to);
+                            $other_deduction_arr = OtherDeductions::Get_Records($d->empid, $r->dateFrom, $r->dateTo);
                             if ($gen_type != "OVERTIME") {
                                 if (count($other_deduction_arr) > 0) {
                                     for ($j=0; $j < count($other_deduction_arr); $j++) {
@@ -548,8 +583,8 @@ class GeneratePayrollController extends Controller
                             'empid' => $d->empid,
                             'emp_pay_code' => $emp_pay_code,
                             'payroll_version' => 3,
-                            'date_from' => $pp->from,
-                            'date_to' => $pp->to,
+                            'date_from' => $r->dateFrom,
+                            'date_to' => $r->dateTo,
                             'date_generated' => $cur_date,
                             'time_generated' => $cur_time,
                             'isgenerated_by' => $isgenerated_by,
@@ -564,6 +599,7 @@ class GeneratePayrollController extends Controller
                             'rate_type' => $rate_type,
                             'rate' => $rate,
                             'dtr_sum_id' => $d->dtr_sum_id,  
+                            'daily_rate' => $daily_rate_reworked,
 
                             # Payroll Details
                             'total_workdays' => $total_days,
@@ -575,7 +611,9 @@ class GeneratePayrollController extends Controller
                             'late' => $late,
                             'late_amt' => round($late_amt, 2),
                             'leave_cnt' => $leave_count,
-                            'leave_amt' => round($leave_amt, 2),
+                            // 'leave_all_count' => count($leaves),
+                            // 'leave_amt' => round($leave_amt, 2),
+                            'leave_amt' => round(count($leaves), 2),
                             'undertime' => $undertime,
                             'undertime_amt' => round($undertime_amt, 2),
                             'basic_pay' => round($basic_pay, 2),
@@ -631,12 +669,15 @@ class GeneratePayrollController extends Controller
                                 array_push($errors, 'B00005-'.$d->empid.":".$response);
                             }
                         } else {
-                            return $data;
+                            array_push($toDisplay, $data);
                         }
                     } catch (\Exception $e) {
                         ErrorCode::Generate('controller', 'GeneratePayrollController', 'B00003-'.$d->empid, $e->getMessage());
                         array_push($errors, 'B00003-'.$d->empid.":".$e->getMessage());
                     }
+                }
+                if(isset($r->isForDisplay)){
+                    return $toDisplay;
                 }
             } else {
                 array_push($errors, "No generated DTR available.");

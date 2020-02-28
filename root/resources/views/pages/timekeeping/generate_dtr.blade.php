@@ -238,7 +238,7 @@
 		</div>
 	</div>
 
-	{{-- <div class="modal fade" id="modal-update" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	<div class="modal fade" id="modal-update" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
 		<div class="modal-dialog" role="document">
 			<div class="modal-content">
 				<div class="modal-header">
@@ -253,12 +253,12 @@
 				<div class="modal-footer">
 					<form method="post" action="#" id="frm-update">
 						<button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="ClearFld()">No</button>
-						<button type="submit" class="btn btn-primary" id="modal-add-submitbtn">Yes <i class="fa fa-spin fa-spinner" id="modal-add-submitbtn-loader" style="display: none;"></i></button>
+						<button type="submit" class="btn btn-primary">Yes <i class="fa fa-spin fa-spinner" id="modal-add-submitbtn-loader" style="display: none;"></i></button>
 					</form>
 				</div>
 			</div>
 		</div>
-	</div> --}}
+	</div>
 @endsection
 
 @section('to-bottom')
@@ -409,7 +409,7 @@
 				data.empname,
 				data.jobtitle,
 				(data.isgenerated ? 'Yes' : 'No'),
-				'<button type="button" class="btn btn-primary btn-spin mr-1" onclick="GenerateIndv('+data.isgenerated+')"><i class="fa fa-share"></i> <i class="fa fa-server"></i></button>'
+				'<button generationid="'+(data.codid === undefined ? '' : data.codid['code'])+'" type="button" class="btn btn-primary btn-spin mr-1" onclick="GenerateIndv('+data.isgenerated+')"><i class="fa fa-share"></i> <i class="fa fa-server"></i></button>'
 			]).draw();
 			hideErrorDiv();
 		}
@@ -437,7 +437,7 @@
 
 		function onToggleUpdateDTRModal_ind()
 		{
-			$('#frm-update').attr('action', '{{url('timekeeping/generate-dtr/save-dtr')}}?code='+selected_row.children()[0].innerText+'&pp='+$('#payroll_period').val()+'&ofc_id='+$('#payroll_ofc').val()+'&month='+$('#payroll_month').val()+'&year='+$('#payroll_year').val()+'&empstat='+$('#payroll_emp_stat').val()+'&gtype='+$('#payroll_gen_type').val());
+			$('#frm-update').attr('action', '{{url('timekeeping/generate-dtr/save-dtr')}}?code='+selected_row.children()[0].innerText/*+'&pp='+$('#payroll_period').val()+*/+'&monthFrom='+$('#dateFrom').val()+'&monthTo='+$('#dateTo').val()+'&ofc_id='+$('#payroll_ofc').val()/*+'&month='+$('#payroll_month').val()*/+'&year='+$('#payroll_year').val()+'&empstat='+$('#payroll_emp_stat').val()+'&gtype='+$('#payroll_gen_type').val()+'&code='+$(selected_row).find('button').attr('generationid'));
 			$('#modal-update').modal('show');
 		}
 
@@ -467,7 +467,6 @@
 					togglePreloader();
 				},
 				success : function(data) {
-					console.log(data[0]);
 					var a = data[0];
 					var b = data[1];
 					var parse = null;
@@ -477,16 +476,16 @@
 						if (a!="error") {
 							if (a!="existing-error") {
 								if (a!="max") {
-									parse = JSON.parse(a[0]);
-									if (data[0] == 'update') {
+									// parse = JSON.parse(a[0]);
+									if (data[0] === null) {
 
 										alert("DTR Updated (Individual)");
-										('.table-active td:eq(3)').text('Yes');
+										$('.table-active td:eq(3)').text('Yes');
 										LoadDtrTable();
 									}
 									else {
 										alert("DTR Generated (Individual).");
-										('.table-active td:eq(3)').text('Yes');
+										$('.table-active td:eq(3)').text('Yes');
 										LoadDtrTable();
 									}
 									maintable.clear().draw();
@@ -663,7 +662,6 @@
 		function GenerateIndv(obj)
 		{
 			
-			
 			if (obj!=null) {
 				if(obj == false)
 				{
@@ -779,7 +777,8 @@
 								success : function(data) {
 									if (data!="error") {
 										if (data!="noemp") {
-											d[i].isgenerated = JSON.parse(data);
+											d[i].isgenerated = JSON.parse(data[0]);
+											d[i].codid = (data[1] === null ? [] : data[1]);
 										}
 									}
 								},
