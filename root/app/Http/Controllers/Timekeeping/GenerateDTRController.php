@@ -519,7 +519,7 @@ class GenerateDTRController extends Controller
             }
 
             $dtrs = $r->dtrs;
-            return $r->dtrs;
+            $message = null;
             // $dtrs = (array)json_decode($this->Generate($r));
 
             // $record = DB::table('hr_dtr_sum_hdr')->where('empid', $dtrs['empid'])->where('date_from', $dtrs['date_from'])->where('date_to', $dtrs['date_to'])->where('generationtype', $data['generateType'])->first();
@@ -528,10 +528,14 @@ class GenerateDTRController extends Controller
             // to continue history 
             if($dtrs['isgenerated'] != null){
                 $codeFromSumHdr = DB::table('hr_dtr_sum_hdr')->where([['empid',$dtrs['empid']],['ppid',$dtrs['ppid']],['generationtype',$dtrs['generateType']],['date_from',$dtrs['date_from']],['date_to',$dtrs['date_to']]])->first();
+                $code = $codeFromSumHdr->code;
                 DB::table('hr_dtr_sum_hdr')->where([['empid',$dtrs['empid']],['ppid',$dtrs['ppid']],['generationtype',$dtrs['generateType']],['date_from',$dtrs['date_from']],['date_to',$dtrs['date_to']]])->delete();
-                DB::table('hr_dtr_sum_employees')->where([['xempid',$dtrs['empid']],['isgenerated',TRUE],['dtr_sum_id',$codeFromSumHdr]])->delete();
+                DB::table('hr_dtr_sum_employees')->where([['xempid',$dtrs['empid']],['isgenerated',TRUE],['dtr_sum_id',$code]])->delete();
+                $dtrs['isgenerated'] = null;
+                $message = 'update';
             }
             if (/*$record == null*/ $dtrs['isgenerated'] == null) {
+                
                 try {
                     $code = Core::getm99('dtr_sum_id');
                     $reply = false;
@@ -584,6 +588,7 @@ class GenerateDTRController extends Controller
                         if ($record->first()==null) {
                             try {
                                 $sql->insert($data);
+                                return $message;
                             } catch (\Exception $e) {
                                 ErrorCode::Generate('controller', 'GenerateDTRController', 'B00004', $e->getMessage());
                                 return "error";

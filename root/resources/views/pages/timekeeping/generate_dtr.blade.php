@@ -460,7 +460,7 @@
 					togglePreloader();
 				},
 				success : function(data) {
-					console.log(data);
+					console.log(data[0]);
 					var a = data[0];
 					var b = data[1];
 					var parse = null;
@@ -471,11 +471,15 @@
 							if (a!="existing-error") {
 								if (a!="max") {
 									parse = JSON.parse(a[0]);
-									if (a[1]=="isgenerated") {
-										alert("Payroll period is already generated. DTR cannot be re-generated.");
-									} else {
+									if (data[0] == 'update') {
+
+										alert("DTR Updated (Individual)");
+										('.table-active td:eq(3)').text('Yes');
+										LoadDtrTable();
+									}
+									else {
 										alert("DTR Generated (Individual).");
-										$('.table-active td:eq(3)').text('Yes');
+										('.table-active td:eq(3)').text('Yes');
 										LoadDtrTable();
 									}
 									maintable.clear().draw();
@@ -564,7 +568,6 @@
 					togglePreloader();
 				},
 				success : function(data) {
-					console.log(data);
 					var a = data[0];
 					var b = data[1];
 					var parse = null;
@@ -574,10 +577,13 @@
 						if (a!="error") {
 							if (a!="existing-error") {
 								if (a!="max") {
-									parse = JSON.parse(a[0]);
-									if (a[1]=="isgenerated") {
-										alert("Payroll period is already generated. DTR cannot be re-generated.");
-									} else {
+									// parse = JSON.parse(a[0]);
+									if (data[0] == "update") {
+										alert("DTR Updated (Individual)");
+										$('.table-active td:eq(3)').text('Yes');
+										LoadDtrTable();
+									}
+									else {
 										alert("DTR Generated (Individual).");
 										$('.table-active td:eq(3)').text('Yes');
 										LoadDtrTable();
