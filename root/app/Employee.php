@@ -168,9 +168,11 @@ class Employee extends Model
         return DB::select(DB::raw($sql));
     }
 
-    public static function isGeneratedOnDTR($empid, $dfrom, $pp, $year, $generationtype){
-        $pp = Payroll::PayrollPeriod2($dfrom,$pp, $year);
-        return json_encode(DB::table('hr_dtr_sum_hdr')->where('empid', $empid)->where('date_from', $pp->from)->where('date_to', $pp->to)->where('generationtype', $generationtype)->first()!=null);
+    public static function isGeneratedOnDTR($empid, $dfrom, $dto, $generationtype){
+        // $pp = Payroll::PayrollPeriod2($dfrom,$pp, $year);
+        // $covereddates = Core::CoveredDates($r->monthFrom, $r->monthTo);
+        // return [$empid, $dfrom, $dto, $generationtype];
+        return json_encode(DB::table('hr_dtr_sum_hdr')->where('empid', $empid)->where('date_from', $dfrom)->where('date_to', $dto)->where('generationtype', $generationtype)->first()!=null);
     }
 
     public static function getOfficeByID($empid){

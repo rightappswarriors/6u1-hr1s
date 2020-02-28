@@ -44,19 +44,23 @@
 				</div>
 				<div class="form-inline">
 					<div class="form-group mr-2">
-						<label class="mr-1">Month:</label>
+						{{-- <label class="mr-1">Month:</label>
 						<select class="form-control mr-2" name="payroll_month" id="payroll_month" required>
 							@foreach(Core::Months() as $key => $value)
 							<option value="{{$key}}" {{($key == date('m')) ? 'selected' : ''}}>{{$value}}</option>
 							@endforeach
-						</select>
-						<label class="mr-1">Payroll Period:</label>
+						</select> --}}
+						{{-- <label class="mr-1">Payroll Period:</label>
 						<select class="form-control mr-2" name="payroll_period" id="payroll_period" required>
 							<option value="15D">15th Day</option>
 							<option value="30D">30th Day</option>
-						</select>
-						<select class="form-control YearSelector" name="payroll_year" id="payroll_year" required>
-						</select>
+						</select> --}}
+						<label class="mr-1">Payroll Period From:</label>
+						<input type="date" value="{{Date('Y-m-01')}}" name="dateFrom" id="dateFrom" class="datePicker form-control">
+						<label class="mr-1">Payroll Period To:</label>
+						<input type="date" name="dateTo" value="{{Date('Y-m-t')}}" id="dateTo" class="datePicker form-control">
+					{{-- 	<select class="form-control YearSelector" name="payroll_year" id="payroll_year" required>
+						</select> --}}
 					</div>
 					<div class="form-group mr-2">
 						<label class="mr-1">Generation Type</label>
@@ -234,7 +238,7 @@
 		</div>
 	</div>
 
-	<div class="modal fade" id="modal-update" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	{{-- <div class="modal fade" id="modal-update" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
 		<div class="modal-dialog" role="document">
 			<div class="modal-content">
 				<div class="modal-header">
@@ -254,7 +258,7 @@
 				</div>
 			</div>
 		</div>
-	</div>
+	</div> --}}
 @endsection
 
 @section('to-bottom')
@@ -291,8 +295,10 @@
 				url : '{{url('timekeeping/generate-dtr/partial-generation')}}',
 				data : {
 					code:samplecode,
-					pp:$('#payroll_period').val(),
-					month: $('#payroll_month').val(),
+					// pp:$('#payroll_period').val(),
+					monthFrom:$('#dateFrom').val(),
+					monthTo:$('#dateTo').val(),
+					// month: $('#payroll_month').val(),
 					year: $('#payroll_year').val(),
 					gtype : $('#payroll_gen_type').val()
 				},
@@ -425,7 +431,7 @@
 
 		function onToggleSaveDTRModal_ind()
 		{
-			$('#frm-add').attr('action', '{{url('timekeeping/generate-dtr/save-dtr')}}?code='+selected_row.children()[0].innerText+'&pp='+$('#payroll_period').val()+'&ofc_id='+$('#payroll_ofc').val()+'&month='+$('#payroll_month').val()+'&year='+$('#payroll_year').val()+'&empstat='+$('#payroll_emp_stat').val()+'&gtype='+$('#payroll_gen_type').val());
+			$('#frm-add').attr('action', '{{url('timekeeping/generate-dtr/save-dtr')}}?code='+selected_row.children()[0].innerText/*+'&pp='+$('#payroll_period').val()+*/+'&monthFrom='+$('#dateFrom').val()+'&monthTo='+$('#dateTo').val()+'&ofc_id='+$('#payroll_ofc').val()/*+'&month='+$('#payroll_month').val()*/+'&year='+$('#payroll_year').val()+'&empstat='+$('#payroll_emp_stat').val()+'&gtype='+$('#payroll_gen_type').val());
 			$('#modal-add').modal('show');
 		}
 		function onToggleUpdateDTRModal_ind()
@@ -435,7 +441,8 @@
 
 		function onToggleSaveDTRModal_ofc()
 		{
-			$('#frm-add').attr('action', '{{url('timekeeping/generate-dtr/save-dtr/by-department')}}?ppid='+$('#payroll_period').val()+'&ofc_id='+$('#payroll_ofc').val()+'&month='+$('#payroll_month').val()+'&year='+$('#payroll_year').val()+'&empstat='+$('#payroll_emp_stat').val()+'&gtype='+$('#payroll_gen_type').val());
+			// ?ppid='+$('#payroll_period').val()
+			$('#frm-add').attr('action', '{{url('timekeeping/generate-dtr/save-dtr/by-department')}}?monthFrom='+$('#dateFrom').val()+'&monthTo='+$('#dateTo').val()+'&ofc_id='+$('#payroll_ofc').val()/*+'&month='+$('#payroll_month').val()*/+'&year='+$('#payroll_year').val()+'&empstat='+$('#payroll_emp_stat').val()+'&gtype='+$('#payroll_gen_type').val());
 			$('#modal-add').modal('show');
 		}
 
@@ -568,16 +575,16 @@
 			}
 		});
 
-		$('#payroll_month').on('change', function() {
+		// $('#payroll_month').on('change', function() {
 			// if (selected_row!=null) {
 			// 	LoadDtrTable();
 			// }
-			$('#payroll_period').val('15D').trigger('change');
-			SearchEmployees();
-			emptySummaryTable();
-		});
+			// $('#payroll_period').val('15D').trigger('change');
+		// 	SearchEmployees();
+		// 	emptySummaryTable();
+		// });
 
-		$('#payroll_period').on('change', function() {
+		$(/*'#payroll_period'*/'#dateFrom,#dateTo').on('change', function() {
 			// if (selected_row!=null) {
 			// 	LoadDtrTable();
 			// }
@@ -640,8 +647,10 @@
 								url : '{{url('master-file/office/is-Generated-OnDTR')}}',
 								data : {
 									empid:d[i].empid,
-									pp:$('#payroll_period').val(),
-									month: $('#payroll_month').val(),
+									// pp:$('#payroll_period').val(),
+									monthFrom:$('#dateFrom').val(),
+									monthTo:$('#dateTo').val(),
+									// month: $('#payroll_month').val(),
 									year: $('#payroll_year').val(),
 									gtype : $('#payroll_gen_type').val()
 								},

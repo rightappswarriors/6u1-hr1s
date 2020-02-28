@@ -81,12 +81,9 @@ class GenerateDTRController extends Controller
             $req_hrs2 = Timelog::ReqHours2();
             $employee = Employee::GetEmployee($r->code);
             $name = Employee::Name($r->code);
-            // added month + 1 by Syrel on 2-27-2020
-            // to work here
-            // ($r->month < 12 ? $r->month + 1 : 1)
-            $pp = Payroll::PayrollPeriod2($r->month,$r->pp, $r->year);
-            // $covereddates = Core::TotalDays($pp->from, $pp->to);
-            $covereddates = Core::CoveredDates($pp->from, $pp->to);
+            // $pp = Payroll::PayrollPeriod2($r->month,$r->pp, $r->year);
+            // $covereddates = Core::CoveredDates($pp->from, $pp->to);
+            $covereddates = Core::CoveredDates($r->monthFrom, $r->monthTo);
 
             if ($employee == null) {
                 return "noemp";
@@ -381,9 +378,16 @@ class GenerateDTRController extends Controller
                 /**
                 * Time Counting Method
                 */
-                $workdays = 22 / 2;
+                // for pp (not for monthly from and to)
+                // $workdays = 22 / 2;
+                // $totaldays = count($arr_daysworked);
+                // $totalabsent = ($workdays - $totaldays) - count($arr_leavedates);
+
+                $workdays = Core::CountWorkingDays(Date('Y-m-d',strtotime('-1 day',strtotime($r->monthFrom))),$r->monthTo);
                 $totaldays = count($arr_daysworked);
-                $totalabsent = ($workdays - $totaldays) - count($arr_leavedates);
+                // return [$totaldays, ((int)$workdays), count($arr_leavedates)];
+                $totalabsent = (((int)$workdays)) - $totaldays - count($arr_leavedates);
+
                 if (count($arr_late) > 0) { 
                     $tmp = [];
                     for ($i=0; $i < count($arr_late); $i++) { 
@@ -430,7 +434,7 @@ class GenerateDTRController extends Controller
             }
 
             $record = null;
-            if (DB::table('hr_dtr_sum_hdr')->where('empid', $employee->empid)->where('date_from', $pp->from)->where('date_to', $pp->to)->where('generationtype', $r->gtype)->first()!=null) {
+            if (DB::table('hr_dtr_sum_hdr')->where('empid', $employee->empid)->where('date_from', /*$pp->from*/$r->monthFrom)->where('date_to', /*$pp->to,*/$r->monthTo)->where('generationtype', $r->gtype)->first()!=null) {
                 $record = 1;
             }
 
@@ -454,14 +458,14 @@ class GenerateDTRController extends Controller
                 // 'employee'=>$employee,
                 'empname'=>$name,
                 'flag' => $flag,
-                'date_from2'=>date('M d, Y', strtotime($pp->from)),
-                'date_to2'=> date('M d, Y', strtotime($pp->to)),
+                'date_from2'=>date('M d, Y', strtotime(/*$pp->from*/$r->monthFrom)),
+                'date_to2'=> date('M d, Y', strtotime(/*$pp->to*/$r->monthTo)),
                 'req_hrs' => Core::ToHours($req_hrs2),
 
                 'empid'=>$employee->empid,
                 'ppid' => $r->pp,
-                'date_from'=>$pp->from,
-                'date_to'=> $pp->to,
+                'date_from'=>$r->monthFrom,
+                'date_to'=> $r->monthTo,
                 // date_generated
                 // time_generated
                 // code
@@ -517,7 +521,7 @@ class GenerateDTRController extends Controller
             return json_encode($data);
         } catch (\Exception $e) {
             ErrorCode::Generate('controller', 'GenerateDTRController', 'A00000', $e->getMessage());
-            // return $e->getMessage();
+            return $e->getMessage();
             return "error";
         }
     }
@@ -548,8 +552,12 @@ class GenerateDTRController extends Controller
             // to continue history 
             if($dtrs['isgenerated'] != null){
                 $codeFromSumHdr = DB::table('hr_dtr_sum_hdr')->where([['empid',$dtrs['empid']],['ppid',$dtrs['ppid']],['generationtype',$dtrs['generateType']],['date_from',$dtrs['date_from']],['date_to',$dtrs['date_to']]])->first();
+                $code = $codeFromSumHdr->code;
                 DB::table('hr_dtr_sum_hdr')->where([['empid',$dtrs['empid']],['ppid',$dtrs['ppid']],['generationtype',$dtrs['generateType']],['date_from',$dtrs['date_from']],['date_to',$dtrs['date_to']]])->delete();
-                DB::table('hr_dtr_sum_employees')->where([['xempid',$dtrs['empid']],['isgenerated',TRUE],['dtr_sum_id',$codeFromSumHdr]])->delete();
+                if(DB::table('hr_dtr_sum_employees')->where([['xempid',$dtrs['empid']],['isgenerated',TRUE],['dtr_sum_id',$code]])->delete()){
+                    $dtrs['isgenerated'] = null;
+                    $message = 'update';
+                }
             }
             if (/*$record == null*/ $dtrs['isgenerated'] == null) {
                 try {
@@ -570,7 +578,7 @@ class GenerateDTRController extends Controller
                         $reply = true;
                     } catch (\Exception $e) {
                         ErrorCode::Generate('controller', 'GenerateDTRController', 'B00003', $e->getMessage());
-                        return "error";
+                        return $e;
                     }
                     if ($reply) {
                         Core::updatem99('dtr_sum_id',Core::get_nextincrementlimitchar($code, 8));
@@ -606,7 +614,7 @@ class GenerateDTRController extends Controller
                                 $sql->insert($data);
                             } catch (\Exception $e) {
                                 ErrorCode::Generate('controller', 'GenerateDTRController', 'B00004', $e->getMessage());
-                                return "error";
+                                return $e;
                             }
                         } else {
                             if ($record->first()->isgenerated==0) {
@@ -614,7 +622,7 @@ class GenerateDTRController extends Controller
                                     $record->update($data);
                                 } catch (\Exception $e) {
                                     ErrorCode::Generate('controller', 'GenerateDTRController', 'B00005', $e->getMessage());
-                                    return "error";
+                                    return $e;
                                 }
                             } else {
                                 return "isgenerated";
@@ -624,14 +632,14 @@ class GenerateDTRController extends Controller
                     return [json_encode($this->LoadDTRHistory()), "ok"];
                 } catch (\Exception $e) {
                     ErrorCode::Generate('controller', 'GenerateDTRController', 'B00002', $e->getMessage());
-                    return "error";
+                    return $e;
                 }
             } else {
                 return "max";
             }
         } catch (\Exception $e) {
             ErrorCode::Generate('controller', 'GenerateDTRController', 'B00000', $e->getMessage());
-            return "error";
+            return $e;
         }
     }
 
@@ -666,8 +674,10 @@ class GenerateDTRController extends Controller
                         $s = (object)[];
                         $s->code = $emp->empid;
                         $s->pp = $r->ppid;
-                        $s->month = $r->month;
-                        $s->year = $r->year;
+                        // $s->month = $r->month;
+                        $s->monthFrom = $r->monthFrom;
+                        $s->monthTo = $r->monthTo;
+                        // $s->year = $r->year;
                         $s->gtype = $r->gtype;
                         $t = (object)[];
                         $t->dtrs = (array)json_decode($this->Generate($s));
@@ -683,7 +693,7 @@ class GenerateDTRController extends Controller
             }
         } catch (\Exception $e) {
             ErrorCode::Generate('controller', 'GenerateDTRController', 'C00000', $e->getMessage());
-            $reply = "error";
+            $reply = $e;
         }
         return [$reply, "group"];
     }

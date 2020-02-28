@@ -141,6 +141,6 @@ class OfficeController extends Controller
     public function isGeneratedDTR(Request $r)
     {
         // return $r->all();
-        return Employee::isGeneratedOnDTR($r->empid, $r->month, $r->pp, $r->year, $r->gtype);
+        return Employee::isGeneratedOnDTR($r->empid, Date('Y-m-d',strtotime($r->monthFrom)), Date('Y-m-d',strtotime($r->monthTo)), $r->gtype);
     }
 }
