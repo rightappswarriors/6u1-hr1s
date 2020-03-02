@@ -22,11 +22,13 @@ class JobTitleController extends Controller
     }
     public function add(Request $r)
     {
-    	$jt_cn = Core::getm99('jt_cn');
+    	$sql = DB::select('SELECT max(jt_cn::int) FROM hris.hr_jobtitle WHERE cancel is null');
+        $max = $sql[0]->max;
+        $jt_cn = $max + 1;
         $data = ['jtid'=> strtoupper($r->txt_code) , 'jtitle_name' => $r->txt_name, 'jt_cn' => $jt_cn];
     	try { 
     		DB::table(JobTitle::$tbl_name)->insert($data);
-            Core::updatem99('jt_cn',Core::get_nextincrementlimitchar($jt_cn, 1));
+            // Core::updatem99('jt_cn',Core::get_nextincrementlimitchar($jt_cn, 1));
     		Core::Set_Alert('success', 'Successfully added new Job Title.');
     		return back();
 
@@ -74,7 +76,7 @@ class JobTitleController extends Controller
     }
     public function check(Request $r)
     {
-        if (count(DB::table(JobTitle::$tbl_name)->where("jt_cn", '!=',$r->id)->where(JobTitle::$pk, "=", strtoupper($r->code))->get()) > 0) {
+        if (count(DB::table(JobTitle::$tbl_name)->whereNull("cancel")->where("jt_cn", '!=',$r->id)->where(JobTitle::$pk, "=", strtoupper($r->code))->get()) > 0) {
             return "true";
         }
         return "false";
