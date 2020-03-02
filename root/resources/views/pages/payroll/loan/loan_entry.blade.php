@@ -247,7 +247,7 @@
 									</div>
 									<div class="form-group">
 										<label>Reason:</label>
-										<textarea type="text" name="txt_desc" style="" class="form-control" maxlength="100" required></textarea>
+										<textarea type="text" name="txt_desc" style="" class="form-control" maxlength="100"></textarea>
 									</div>
 								</div>
 
@@ -348,7 +348,7 @@
 									<div class="dropdown-divider"></div>
 									<div class="form-group">
 										<label>Issuance No.:</label>
-										<input type="text" name="txt_code" style="text-transform: uppercase;" class="form-control" maxlength="8" placeholder="XXX" required>
+										<input type="text" name="txt_code" style="text-transform: uppercase;" class="form-control" maxlength="8" placeholder="XXX">
 									</div>
 									<div class="form-group">
 										<label>Deduction per month:</label>
@@ -522,7 +522,7 @@
 	</script>
 
 	<script type="text/javascript">
-		$('#trans_date').datepicker(date_option2);
+		$('#trans_date').datepicker(date_option3);
 		$('#deduc_date').datepicker(date_option2);
 		$('#date_from').datepicker(date_option5);
 		$('#date_to').datepicker(date_option5);

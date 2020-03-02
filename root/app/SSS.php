@@ -16,7 +16,7 @@ class SSS extends Model
 
     public static function Get_All_Sub()
     {
-    	return DB::table(self::$tbl_name_sub)->where('cancel', null)->get();
+    	return DB::table(self::$tbl_name_sub)->where('cancel', null)->orderBy('id','ASC')->get();
     }
 
     public static function Get_Sub_ById($id)

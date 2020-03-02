@@ -47,6 +47,28 @@ class SSSController extends Controller
     		return back();
     	}
 	}
+	public function addSub(Request $r)
+	{
+		if(SSS::Add(['description' => $r->desc])){
+			Core::Default_Alert_Msg('success');
+		}
+		return 'Okay';
+	}
+
+	public function editSub(Request $r)
+	{
+		if(SSS::Edit($r->sss_sub_id,['description' => $r->desc])){
+			Core::Default_Alert_Msg('success');
+		}
+		return 'Okay';
+	}
+	public function delSub(Request $r)
+	{
+		if(SSS::Del($r->sss_sub_id,['cancel' => 'Y'])){
+			Core::Default_Alert_Msg('success');
+		}
+		return 'Okay';
+	}
 	public static function getOne(Request $r)
 	{
 		try {

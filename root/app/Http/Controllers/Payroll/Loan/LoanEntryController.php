@@ -75,7 +75,7 @@ class LoanEntryController extends Controller
         }
 
         $data = [
-            'loan_code'=>$r->txt_code, 
+            // 'loan_code'=>$r->txt_code, 
             'loan_desc'=>$r->txt_desc, 
             'loan_transdate'=>$r->dtp_trnxdt, 
             // 'loan_location'=>$r->cbo_stocklocation, 
