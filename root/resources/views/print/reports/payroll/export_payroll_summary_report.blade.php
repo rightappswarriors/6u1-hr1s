@@ -94,6 +94,8 @@
 			@if(count($record) > 0) @for($i=0;$i<count($record);$i++)
 			@php
 				$row = $record[$i];/* dd($row);*/
+				$countworkingminusleave = (int)(Core::CountWorkingDays(Date('Y-m-d',strtotime('-1 day',strtotime($inf['date_from']))),$inf['date_to']) - $row->leave_amt);
+				$totalsubsistence = 1500 - round(($row->leave_amt / $countworkingminusleave) * 1500,2);
 				$no = $i+1;
 				$pera = 0;
 				$hazard_duty_pay = 0;
@@ -127,9 +129,9 @@
 				<td>{{number_format($pera,2)}}</td><?php $runningRowTotal['pera'] = isset($runningRowTotal['pera']) ? $pera + $runningRowTotal['pera'] : $pera ?> {{-- PERA --}}
 				<td>{{number_format($hazard_duty_pay,2)}}<?php $runningRowTotal['hazard_duty'] = isset($runningRowTotal['hazard_duty']) ? $hazard_duty_pay + $runningRowTotal['hazard_duty'] : $hazard_duty_pay ?></td> {{-- Hazard Duty Pay --}}
 				<td>{{number_format($allowance_laundry,2)}}<?php $runningRowTotal['allowance_laundry'] = isset($runningRowTotal['allowance_laundry']) ? $allowance_laundry + $runningRowTotal['allowance_laundry'] : $allowance_laundry ?></td> {{-- Allowance - Laundry --}}
-				<td>-</td> {{-- Allowance - Subsistence - Leave , not sure as of Paolo--}}
+				<td>{{$row->leave_amt}}</td> {{-- Allowance - Subsistence - Leave , not sure as of Paolo--}}
 				<td>-</td> {{-- Allowance - Subsistence - Travel , not sure as of Paolo --}}
-				<td>{{number_format($allowance,2)}}<?php $runningRowTotal['allowance'] = isset($runningRowTotal['allowance']) ? $allowance + $runningRowTotal['allowance'] : $allowance ?></td> {{-- Allowance - Subsistence - Total --}}
+				<td>{{$totalsubsistence}}<?php $runningRowTotal['allowance'] = isset($runningRowTotal['allowance']) ? round(1500 / $countworkingminusleave,2) + $runningRowTotal['allowance'] : round(1500 / $countworkingminusleave,2) ?></td>{{-- Allowance - Subsistence - Total --}}
 				<td>{{number_format($row->rate - $record[$i]->net_pay,2)}}<?php $runningRowTotal['amount_earned'] = isset($runningRowTotal['amount_earned']) ? ($row->rate - $record[$i]->net_pay) + $runningRowTotal['amount_earned'] : ($row->rate - $record[$i]->net_pay) ?></td> {{-- Amount Earned --}}
 				<td>{{number_format($record[$i]->w_tax,2)}}<?php $runningRowTotal['withholding_tax'] = isset($runningRowTotal['withholding_tax']) ? $record[$i]->w_tax + $runningRowTotal['withholding_tax'] : $record[$i]->w_tax ?></td> {{-- Personal Deductions - Withholding Tax --}}
 				<td>{{$record[$i]->philhealth_cont_b}}<?php $runningRowTotal['pphilhealth'] = isset($runningRowTotal['pphilhealth']) ? $record[$i]->philhealth_cont_b + $runningRowTotal['pphilhealth'] : $record[$i]->philhealth_cont_b ?></td> {{-- Personal Deductions - Philhealth --}}

@@ -424,11 +424,12 @@ class Core extends Model
 	    
 	    $interval = date_diff($datetime1, $datetime2);
 	    $interval = $interval->format('%a');
+
 	    $workdays = 0;
 	    
 	    list($year, $month, $day) = explode("-", $date_1);
 	    for ($i=0; $i < $interval; $i++) { 
-	    	$q_date = self::GetMonth($month).' '.$day.', '.$year;
+	    	$q_date = self::GetMonth((int)$month).' '.$day.', '.$year;
 	    	$dayofweek = date('l', strtotime($q_date));
 	    	if ($dayofweek != "Sunday" && $dayofweek != "Saturday") {
 	    		$workdays++;
@@ -447,6 +448,8 @@ class Core extends Model
 
 	    return $workdays;
 	}
+
+
 
 	public static function DateDiff($date_1, $date_2)
 	{

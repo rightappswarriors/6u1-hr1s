@@ -96,7 +96,8 @@ class Payroll extends Model
         $return_val->start = $f;
         $return_val->end = date('d', strtotime($return_val->to));
 
-        $pp_deduction_trigger = "30D";
+        // edited by Syrel on 2/28/2020, edited to trigger deductio on n 1st payroll not on 2nd (old: 30D)
+        $pp_deduction_trigger = "15D";
         $return_val->d_sss_c = ($return_val->id == $pp_deduction_trigger) ? "Y" : "N";
         $return_val->d_philhealth = ($return_val->id == $pp_deduction_trigger) ? "Y" : "N";
         $return_val->d_pagibig = ($return_val->id == $pp_deduction_trigger) ? "Y" : "N";
