@@ -143,7 +143,7 @@
 						  				<div class="form-group row">
 									      <label class="col-sm-4 col-form-label form-check-label">Date Hired<strong style="color:red">*</strong></label>
 									      <div class="col-sm-8">
-									      	<input type="text" class="form-control T0r" name="txt_hired" placeholder="mm-dd-yyyy" value="{{date('m-d-Y')}}" required="" value="@isset($MYDATA){{$MYDATA->date_hired}}@endisset">
+									      	<input type="text" class="form-control T0r" name="txt_hired" placeholder="mm-dd-yyyy"  required="" value="@isset($MYDATA){{$MYDATA->date_hired}} @else {{date('m-d-Y')}} @endisset">
 									      </div>
 									    </div>
 									    <div class="form-group row">
