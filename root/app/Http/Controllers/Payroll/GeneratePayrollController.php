@@ -154,7 +154,7 @@ class GeneratePayrollController extends Controller
             if (count($dtr_summaries) > 0) {
                 for ($i=0; $i < count($dtr_summaries); $i++) {
                     $tmp = "";
-                    $withDeductions = true;
+                    $withDeductions = false;
                     try {
                         # Payroll Info
                         $emp_pay_code = Core::getm99('emp_pay_code');
@@ -270,7 +270,9 @@ class GeneratePayrollController extends Controller
                                 $leave_amt = 0;
                             }
                         $daily_rate_reworked = Employee::getDailyRate($rate);
-                        $basic_pay = ($leave_amt > 0 ? ((round(abs($days_worked_amt), 2) + round(abs($leave_amt), 2)) - round(abs($undertime_amt), 2) + (abs($daily_rate_reworked) * (int)abs($days_absent) )) : 0.00);
+                        // $basic_pay = ($leave_amt > 0 ? ((round(abs($days_worked_amt), 2) + round(abs($leave_amt), 2)) - round(abs($undertime_amt), 2) + (abs($daily_rate_reworked) * (int)abs($days_absent) )) : 0.00);
+                        // $basic_pay = (round($days_worked_amt, 2) + round($leave_amt, 2));
+                        $basic_pay = ((round(abs($days_worked_amt), 2) + round(abs($leave_amt), 2)) - round(abs($undertime_amt), 2) + (abs($daily_rate_reworked) * (int)abs($days_absent) ));
                         // $basic_pay = (round($days_worked_amt, 2) + round($leave_amt, 2));
 
                         # Gross Pay Computation
@@ -604,7 +606,7 @@ class GeneratePayrollController extends Controller
                             'rate_type' => $rate_type,
                             'rate' => $rate,
                             'dtr_sum_id' => $d->dtr_sum_id,  
-                            'daily_rate' => $daily_rate_reworked,
+                            // 'daily_rate' => $daily_rate_reworked,
 
                             # Payroll Details
                             'total_workdays' => $total_days,
@@ -677,7 +679,7 @@ class GeneratePayrollController extends Controller
                             array_push($toDisplay, $data);
                         }
                     } catch (\Exception $e) {
-                        dd($e);
+                        return $e;
                         ErrorCode::Generate('controller', 'GeneratePayrollController', 'B00003-'.$d->empid, $e->getMessage());
                         array_push($errors, 'B00003-'.$d->empid.":".$e->getMessage());
                     }

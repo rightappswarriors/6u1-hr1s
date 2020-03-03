@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Timekeeping;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\MFile\OfficeController;
+use App\Http\Controllers\Biometrics\BiometricsController;
 use Core;
 use DB;
 use Account;
@@ -63,6 +64,8 @@ class GenerateDTRController extends Controller
 
     public function Generate($r)
     {
+
+
         // return $r->all();
         /*
         * Retrieves timelog info (time in / time out of selected employee)
@@ -77,6 +80,7 @@ class GenerateDTRController extends Controller
         * @param $r->gtype
         */
         try {
+            // $bio = new BiometricsController();
             $req_hrs = Timelog::ReqHours();
             $req_hrs2 = Timelog::ReqHours2();
             $employee = Employee::GetEmployee($r->code);
@@ -90,7 +94,7 @@ class GenerateDTRController extends Controller
             }
 
             $late = "00:00";
-            $arr_late = [];
+            $arr_late = $testArr = [];
             $undertime = "00:00";
             $arr_undertime = [];
             $overtime = "00:00";
@@ -171,6 +175,7 @@ class GenerateDTRController extends Controller
                         }
                     }
                 } 
+
                 if (count($rec_ti) > 0) {
                     if (count($rec_to) > 0) {
                         $rec_ti = explode(",", $rec_ti[0]->time_log);
@@ -184,11 +189,11 @@ class GenerateDTRController extends Controller
                             if (count($rec_ti) > 0) {
                                 for ($j=0; $j < count($rec_ti); $j++) { 
                                     $tl_ti = $rec_ti[$j];
-                                    if (Timelog::ValidateLog_AM($tl_ti) && $tl_in_am == "00:00") {
+                                    /*if (Timelog::ValidateLog_AM($tl_ti) && $tl_in_am == "00:00") {
                                         $tl_in_am = $tl_ti;
                                     } elseif (Timelog::ValidateLog_PM($tl_ti) && $tl_in_pm == "00:00") {
                                         $tl_in_pm = $tl_ti;
-                                    } elseif(Timelog::ValidateLog_OTHrs2($tl_ti)) {
+                                    } else*/if(Timelog::ValidateLog_OTHrs2($tl_ti)) {
                                         array_push($tl_in_ot, $j."|".$tl_ti);
                                     } else {
                                         array_push($tl_in_trsh, [$date, $tl_ti]);
@@ -199,17 +204,37 @@ class GenerateDTRController extends Controller
                             if (count($rec_to) > 0) {
                                 for ($j=0; $j < count($rec_to); $j++) { 
                                     $tl_ti = $rec_to[$j];
-                                    if (Timelog::ValidateLog_AM($tl_ti) && $tl_out_am == "00:00") {
+                                    /*if (Timelog::ValidateLog_AM($tl_ti) && $tl_out_am == "00:00") {
                                         $tl_out_am = $tl_ti;
                                     } elseif (Timelog::ValidateLog_PM($tl_ti) && $tl_out_pm == "00:00") {
                                         $tl_out_pm = $tl_ti;
-                                    } elseif(Timelog::ValidateLog_OTHrs2($tl_ti)) {
+                                    } else*/if(Timelog::ValidateLog_OTHrs2($tl_ti)) {
                                         array_push($tl_out_ot, $j."|".$tl_ti);
                                     } else {
                                         array_push($tl_out_trsh, [$date, $tl_ti]);
                                     }
                                 }
                             }
+                            $tl_ti = $tl_to = '';
+                            if(count($rec_to) == count($rec_ti)){
+                                for ($k=0; $k < count($rec_to); $k++) { 
+                                    $tl_ti = $rec_ti[$k];
+                                    $tl_to = $rec_to[$k];
+                                    
+                                    if(isset($tl_ti)){
+                                        $tl_in_am = ($rec_ti[0] ?? 00.00);
+                                        $tl_in_pm = ($rec_ti[1] ?? 00.00);
+                                    }
+
+                                    if(isset($tl_to)){
+                                        $tl_out_am = ($rec_to[0] ?? 00.00);
+                                        $tl_out_pm = ($rec_to[1] ?? 00.00);
+                                    }
+                                }
+                            }
+
+
+
                         } catch (\Exception $e) {
                             ErrorCode::Generate('controller', 'GenerateDTRController', 'A00001', $e->getMessage());
                             return $e;
@@ -261,7 +286,7 @@ class GenerateDTRController extends Controller
                                     if (Timelog::IfHoliday($date)) {
                                         array_push($arr_holidays, [[$date, Holiday::HolidayType2($date)], [$tl_in_am, $tl_out_pm], $r_time_total]);
                                     } else {
-                                        array_push($arr_daysworked, [$date, [$tl_in_am, $tl_out_pm], $r_time_total]);
+                                        array_push($arr_daysworked, [$date, [$tl_in_am, $tl_out_am, $tl_in_pm, $tl_out_pm], $r_time_total]);
                                     }
                                 } else { // ami = 1, amo = 1
                                     $r_time_total = Timelog::GetRenHours($tl_in_am, $tl_out_am);
@@ -277,7 +302,7 @@ class GenerateDTRController extends Controller
                                     if (Timelog::IfHoliday($date)) {
                                         array_push($arr_holidays, [[$date, Holiday::HolidayType2($date)], [$tl_in_am, $tl_out_pm], $r_time_total]);
                                     } else {
-                                        array_push($arr_daysworked, [$date, [$tl_in_am, $tl_out_pm], $r_time_total]);
+                                        array_push($arr_daysworked, [$date, [$tl_in_am, $tl_out_am, $tl_in_pm, $tl_out_pm], $r_time_total]);
                                     }
                                 }
                             } elseif ($tl_in_am != "00:00" && $tl_out_pm != "00:00") { // ami = 1, pmo = 1
@@ -294,7 +319,7 @@ class GenerateDTRController extends Controller
                                 if (Timelog::IfHoliday($date)) {
                                     array_push($arr_holidays, [[$date, Holiday::HolidayType2($date)], [$tl_in_am, $tl_out_pm], $r_time_total]);
                                 } else {
-                                    array_push($arr_daysworked, [$date, [$tl_in_am, $tl_out_pm], $r_time_total]);
+                                    array_push($arr_daysworked, [$date, [$tl_in_am, $tl_out_am, $tl_in_pm, $tl_out_pm], $r_time_total]);
                                 }
                             }
 
@@ -339,6 +364,7 @@ class GenerateDTRController extends Controller
                     }
                 } else {
                     // absent
+                    // array_push($testArr, [$sql_ti,$sql_to]);
                 }
 
                 // Just reference
@@ -369,10 +395,11 @@ class GenerateDTRController extends Controller
                 // $workdays = 22 / 2;
                 // $totaldays = count($arr_daysworked);
                 // $totalabsent = ($workdays - $totaldays) - count($arr_leavedates);
-
-                $workdays = Core::CountWorkingDays(Date('Y-m-d',strtotime('-1 day',strtotime($r->monthFrom))),$r->monthTo);
+                $conditionForFirstDay = (Date('d',strtotime($r->monthFrom)) != 1 ? Date('Y-m-d',strtotime('-1 day',strtotime($r->monthFrom))) : $r->monthFrom);
+                $workdays = Core::CountWorkingDays($conditionForFirstDay,$r->monthTo);
                 $totaldays = count($arr_daysworked);
                 // return [$totaldays, ((int)$workdays), count($arr_leavedates)];
+                // return $arr_daysworked;
                 $totalabsent = (((int)$workdays)) - $totaldays - count($arr_leavedates);
 
                 if (count($arr_late) > 0) { 

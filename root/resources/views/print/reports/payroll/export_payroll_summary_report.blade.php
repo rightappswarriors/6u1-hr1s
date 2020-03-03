@@ -19,10 +19,10 @@
 @endphp
 	<table border="1">
 		<thead>
-			<tr><th colspan="44">{{strtoupper(($inf->title ?? ''))}}</th></tr>
-			<tr><th colspan="44">{{Core::company_name()}}</th></tr>
-			<tr><th colspan="44">{{isset($inf->ofc) ? $inf->ofc->cc_desc : ""}}</th></tr>
-			<tr><th colspan="44">{{($inf->payroll_period ?? '')}}</th></tr>
+			<tr><th style="text-align: center;" colspan="44">{{strtoupper(($inf->title ?? ''))}}</th></tr>
+			<tr><th style="text-align: center;" colspan="44">{{Core::company_name()}}</th></tr>
+			<tr><th style="text-align: center;" colspan="44">{{isset($inf->ofc) ? $inf->ofc->cc_desc : ""}}</th></tr>
+			<tr><th style="text-align: center;" colspan="44">{{($inf->payroll_period ?? '')}}</th></tr>
 			<tr>
 				<th rowspan="4">ITEM NO.</th>
 				<th rowspan="4">NAME</th>
@@ -98,11 +98,13 @@
 			</tr>
 		</thead>
 		<tbody>
-
+			
 			@if(count($record) > 0) @for($i=0;$i<count($record);$i++)
 			@php
 				$row = $record[$i];/* dd($row);*/
-				$countworkingminusleave = (int)(Core::CountWorkingDays(Date('Y-m-d',strtotime('-1 day',strtotime($inf['date_from']))),$inf['date_to']) - $row->leave_amt);
+				$date_from = (is_array($inf) ? $inf['date_from'] : $inf->date_from);
+				$date_to = (is_array($inf) ? $inf['date_to'] : $inf->date_to);
+				$countworkingminusleave = (int)(Core::CountWorkingDays(Date('Y-m-d',strtotime('-1 day',strtotime($date_from))),$date_to) - $row->leave_amt);
 				$totalsubsistence = 1500 - round(($row->leave_amt / $countworkingminusleave) * 1500,2);
 				$no = $i+1;
 				$pera = 0;
@@ -141,7 +143,7 @@
 				<td>{{number_format($allowance_laundry,2)}}<?php $runningRowTotal['allowance_laundry'] = isset($runningRowTotal['allowance_laundry']) ? $allowance_laundry + $runningRowTotal['allowance_laundry'] : $allowance_laundry ?></td> {{-- Allowance - Laundry --}}
 				<td>{{$row->leave_amt}}</td> {{-- Allowance - Subsistence - Leave , not sure as of Paolo--}}
 				<td>-</td> {{-- Allowance - Subsistence - Travel , not sure as of Paolo --}}
-				<td>{{$totalsubsistence}}<?php $runningRowTotal['allowance'] = isset($runningRowTotal['allowance']) ? round(1500 / $countworkingminusleave,2) + $runningRowTotal['allowance'] : round(1500 / $countworkingminusleave,2) ?></td>{{-- Allowance - Subsistence - Total --}}
+				<td>{{$totalsubsistence}}<?php $runningRowTotal['allowance'] = isset($runningRowTotal['allowance']) ? $totalsubsistence + $runningRowTotal['allowance'] : $totalsubsistence ?></td>{{-- Allowance - Subsistence - Total --}}
 				<td>{{number_format($amount_earned,2)}}<?php $runningRowTotal['amount_earned'] = isset($runningRowTotal['amount_earned']) ? ($amount_earned) + $runningRowTotal['amount_earned'] : ($amount_earned) ?></td>
 				{{-- Amount Earned --}}
 				<td>{{number_format($record[$i]->w_tax,2)}}<?php $runningRowTotal['withholding_tax'] = isset($runningRowTotal['withholding_tax']) ? $record[$i]->w_tax + $runningRowTotal['withholding_tax'] : $record[$i]->w_tax ?></td> {{-- Personal Deductions - Withholding Tax --}}
@@ -244,6 +246,7 @@
 			@endfor @endif
 		</tbody>
 		{{-- work here for total --}}
+
 		<tfoot>
 			{{-- {{dd($runningRowTotal)}} --}}
 			<tr>

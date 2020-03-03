@@ -96,14 +96,17 @@ class PayrollSummaryReportController extends Controller
 			$pi->ofc = Office::GetOffice($r->ofc);
 			list($date_from, $date_to) = explode("|", $r->pp);
 			$pi->payroll_period = $date_from." to ".$date_to;
+			$pi->date_to = $date_to;
+			$pi->date_from = $date_from;
 			# Payoll Record
 			$record = $this->getRecords($r);
 			$data = [
 				'inf' => $pi,
 				'record' => $record,
 			];
-			$view = (Date('d',strtotime($date_from)) >= 10 && Date('d',strtotime($date_from)) <= 26 ? 'print.reports.payroll.export_payroll_summary_report' : 'print.reports.payroll.export_payroll_summary_report_2nd');
-			return view($view,compact('data'));
+			$view = 'print.reports.payroll.export_payroll_summary_report';
+			// $view = (Date('d',strtotime($date_from)) >= 10 && Date('d',strtotime($date_from)) <= 26 ? 'print.reports.payroll.export_payroll_summary_report' : 'print.reports.payroll.export_payroll_summary_report_2nd');
+			// return view($view,compact('data'));
 			return Excel::download(new ExportBlade($view, $data), 'general-payroll-'.date('YmdHis').'.xlsx');
 			// Export2_1::exportBlade('print.reports.payroll.export_payroll_summary_report', $data);
 		} catch (\Exception $e) {
