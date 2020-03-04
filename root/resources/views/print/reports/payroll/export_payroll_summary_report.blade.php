@@ -5,6 +5,19 @@
 @php
 	$inf = $data['inf'];
 	$record = $data['record'];
+	$ppType = ($data['payroll_period'] ?? 1);
+	$forOthers = '';
+	$forImportant = '';
+	switch ($ppType) {
+		case '1':
+			$forOthers = 'style=display:block-inline!important ';
+			$forImportant = 'style=display:block-inline!important ';
+			break;
+		case '2':
+			$forOthers = 'style=display:none!important ';
+			$forImportant = 'style=display:block-inline!important ';
+			break;
+	}
 	//initialization of array for hardcoded assigning of value by Syrel
 	$statIns = 100;
 	$runningRowTotal = [];
@@ -24,57 +37,57 @@
 			<tr><th style="text-align: center;" colspan="44">{{isset($inf->ofc) ? $inf->ofc->cc_desc : ""}}</th></tr>
 			<tr><th style="text-align: center;" colspan="44">{{($inf->payroll_period ?? '')}}</th></tr>
 			<tr>
-				<th rowspan="4">ITEM NO.</th>
-				<th rowspan="4">NAME</th>
-				<th rowspan="4">No.</th>
-				<th rowspan="4">POSITION</th>
-				<th rowspan="4">Rate</th>
-				<th rowspan="4">No. of Absences w/o Pay</th>
-				<th rowspan="4">Rate- Computed Absences</th>
-				<th rowspan="4">ALLOWANCE (PERA)</th>
-				<th rowspan="4">HAZARD DUTY PAY</th>
-				<th rowspan="2" colspan="4">ALLOWANCE</th>
-				<th rowspan="4">AMOUNT EARNED</th>
-				<th colspan="22">PERSONAL DEDUCTIONS</th>
-				<th colspan="4">GOVERNMENT SHARES</th>
-				<th rowspan="4">No.</th>
-				<th rowspan="4">NET AMOUNT RECEIVED</th>
-				<th rowspan="4">AMOUNT PAID</th>
-				<th rowspan="4">Signature of Payee</th>
+				<th {{$forImportant}} rowspan="4">ITEM NO.</th>
+				<th {{$forImportant}} rowspan="4">NAME</th>
+				<th {{$forImportant}} rowspan="4">No.</th>
+				<th {{$forImportant}} rowspan="4">POSITION</th>
+				<th {{$forImportant}} rowspan="4">Rate</th>
+				<th {{$forOthers}}rowspan="4">No. of Absences w/o Pay</th>
+				<th {{$forOthers}} rowspan="4">Rate- Computed Absences</th>
+				<th {{$forOthers}} rowspan="4">ALLOWANCE (PERA)</th>
+				<th {{$forOthers}} rowspan="4">HAZARD DUTY PAY</th>
+				<th {{$forOthers}} rowspan="2" colspan="4">ALLOWANCE</th>
+				<th {{$forOthers}} rowspan="4">AMOUNT EARNED</th>
+				<th {{$forOthers}} colspan="22">PERSONAL DEDUCTIONS</th>
+				<th {{$forOthers}} colspan="4">GOVERNMENT SHARES</th>
+				<th {{$forOthers}} rowspan="4">No.</th>
+				<th {{$forImportant}} rowspan="4">NET AMOUNT RECEIVED</th>
+				<th {{$forImportant}} rowspan="4">AMOUNT PAID</th>
+				<th {{$forImportant}} rowspan="4">Signature of Payee</th>
 			</tr>
 			<tr>
-				<th rowspan="3">Withholding TAX</th>
-				<th rowspan="3">PhilHealth</th>
+				<th {{$forOthers}} rowspan="3">Withholding TAX</th>
+				<th {{$forOthers}} rowspan="3">PhilHealth</th>
 
-				<th colspan="{{count(Pagibig::Get_All_Sub())}}">PAG-IBIG</th>
+				<th {{$forOthers}} colspan="{{count(Pagibig::Get_All_Sub())}}">PAG-IBIG</th>
 				@php
 					$pd = ['JGM', 'LBP', 'CFI', 'DCCCO', 'PEI 2014 REFUND', 'REFUND for Cash Advance'];
 				@endphp
 				@if(count($pd) > 0)
 					@for($i=0;$i<count($pd);$i++)
-						<th rowspan="3">{{$pd[$i]}}</th>					
+						<th {{$forOthers}} rowspan="3">{{$pd[$i]}}</th>					
 					@endfor
 				@endif
 
 				{{-- <th colspan="10">GSIS</th> --}}
-				<th colspan="{{count(SSS::Get_All_Sub())}}">GSIS</th>
-				<th rowspan="3">TOTAL DEDUCTIONS</th>
+				<th {{$forOthers}} colspan="{{count(SSS::Get_All_Sub())}}">GSIS</th>
+				<th {{$forOthers}} rowspan="3">TOTAL DEDUCTIONS</th>
 
-				<th rowspan="3">PhilHealth</th>
-				<th rowspan="3">RETIREMENT &amp; LIFE INSURANCE PREMIUMS</th>
-				<th rowspan="3">PAG-IBIG HDMF CONT.</th>
-				<th rowspan="3">STATE INS.</th>
+				<th {{$forOthers}} rowspan="3">PhilHealth</th>
+				<th {{$forOthers}} rowspan="3">RETIREMENT &amp; LIFE INSURANCE PREMIUMS</th>
+				<th {{$forOthers}} rowspan="3">PAG-IBIG HDMF CONT.</th>
+				<th {{$forOthers}} rowspan="3">STATE INS.</th>
 			</tr>
 			<tr>
-				<th rowspan="2">LAUNDRY</th>
-				<th colspan="3">SUBSISTENCE</th>
+				<th {{$forOthers}} rowspan="2">LAUNDRY</th>
+				<th {{$forOthers}} colspan="3">SUBSISTENCE</th>
 		
 				{{-- <th rowspan="2">HDMF CONT.</th>
 				<th rowspan="2">MPL</th>
 				<th rowspan="2">HOUSING LOAN</th> --}}
 
 				@foreach(Pagibig::Get_All_Sub() as $key => $value)
-				<th rowspan="2">{{$value->description}}</th>
+				<th {{$forOthers}} rowspan="2">{{$value->description}}</th>
 				@endforeach
 
 				{{-- <th rowspan="2">RETIREMENT &amp; LIFE INSURANCE PREMIUMS</th>
@@ -88,10 +101,10 @@
 				<th rowspan="2">UMID E-CARD PLUS</th>
 				<th rowspan="2">GSIS H/L</th> --}}
 				@foreach(SSS::Get_All_Sub() as $key => $value)
-				<th rowspan="2">{{$value->description}}</th>
+				<th {{$forOthers}} rowspan="2">{{$value->description}}</th>
 				@endforeach
 			</tr>
-			<tr>
+			<tr {{$forOthers}}>
 				<th>LEAVE</th>
 				<th>TRAVEL</th>
 				<th>TOTAL</th>
@@ -131,24 +144,24 @@
 				$net_amount_received = round((($pera+$amount_earned)-$record[$i]->total_deductions),2);
 			@endphp
 			<tr>
-				<td>ACC-{{$row->emp_pay_code}}</td> {{-- Item No. --}}
-				<td>{{strtoupper(($row->empname ?? ''))}}</td> {{-- Name --}}
-				<td>{{$no}}</td> {{-- No. --}}
-				<td>{{ucfirst(($row->position ?? ''))}}</td> {{-- Position --}}
-				<td>{{($row->rate!=0) ? number_format($row->rate,2) : "-"}} <?php $runningRowTotal['rate'] = isset($runningRowTotal['rate']) ? ($row->rate !=0 ? $row->rate : 0) + $runningRowTotal['rate'] : ($row->rate !=0 ? $row->rate : 0) ?></td> {{-- Rate --}}
-				<td>{{($row->abcences!=9) ? $row->abcences : "-"}}</td> {{-- No. of Absence w/o Pay --}}
-				<td>{{($row->basic_pay) ? number_format($row->basic_pay,2) : "-"}}</td> {{-- Rate Computed Absences --}}
-				<td>{{number_format($pera,2)}}</td><?php $runningRowTotal['pera'] = isset($runningRowTotal['pera']) ? $pera + $runningRowTotal['pera'] : $pera ?> {{-- PERA --}}
-				<td>{{number_format($hazard_duty_pay,2)}}<?php $runningRowTotal['hazard_duty'] = isset($runningRowTotal['hazard_duty']) ? $hazard_duty_pay + $runningRowTotal['hazard_duty'] : $hazard_duty_pay ?></td> {{-- Hazard Duty Pay --}}
-				<td>{{number_format($allowance_laundry,2)}}<?php $runningRowTotal['allowance_laundry'] = isset($runningRowTotal['allowance_laundry']) ? $allowance_laundry + $runningRowTotal['allowance_laundry'] : $allowance_laundry ?></td> {{-- Allowance - Laundry --}}
-				<td>{{$row->leave_amt}}</td> {{-- Allowance - Subsistence - Leave , not sure as of Paolo--}}
-				<td>-</td> {{-- Allowance - Subsistence - Travel , not sure as of Paolo --}}
-				<td>{{$totalsubsistence}}<?php $runningRowTotal['allowance'] = isset($runningRowTotal['allowance']) ? $totalsubsistence + $runningRowTotal['allowance'] : $totalsubsistence ?></td>{{-- Allowance - Subsistence - Total --}}
-				<td>{{number_format($amount_earned,2)}}<?php $runningRowTotal['amount_earned'] = isset($runningRowTotal['amount_earned']) ? ($amount_earned) + $runningRowTotal['amount_earned'] : ($amount_earned) ?></td>
+				<td {{$forImportant}} >ACC-{{$row->emp_pay_code}}</td> {{-- Item No. --}}
+				<td {{$forImportant}} >{{strtoupper(($row->empname ?? ''))}}</td> {{-- Name --}}
+				<td {{$forImportant}} >{{$no}}</td> {{-- No. --}}
+				<td {{$forImportant}} >{{ucfirst(($row->position ?? ''))}}</td> {{-- Position --}}
+				<td {{$forImportant}} >{{($row->rate!=0) ? number_format($row->rate,2) : "-"}} <?php $runningRowTotal['rate'] = isset($runningRowTotal['rate']) ? ($row->rate !=0 ? $row->rate : 0) + $runningRowTotal['rate'] : ($row->rate !=0 ? $row->rate : 0) ?></td> {{-- Rate --}}
+				<td {{$forOthers}} >{{($row->abcences!=9) ? $row->abcences : "-"}}</td> {{-- No. of Absence w/o Pay --}}
+				<td {{$forOthers}} >{{($row->basic_pay) ? number_format($row->basic_pay,2) : "-"}}</td> {{-- Rate Computed Absences --}}
+				<td {{$forOthers}} >{{number_format($pera,2)}}</td><?php $runningRowTotal['pera'] = isset($runningRowTotal['pera']) ? $pera + $runningRowTotal['pera'] : $pera ?> {{-- PERA --}}
+				<td {{$forOthers}} >{{number_format($hazard_duty_pay,2)}}<?php $runningRowTotal['hazard_duty'] = isset($runningRowTotal['hazard_duty']) ? $hazard_duty_pay + $runningRowTotal['hazard_duty'] : $hazard_duty_pay ?></td> {{-- Hazard Duty Pay --}}
+				<td {{$forOthers}} >{{number_format($allowance_laundry,2)}}<?php $runningRowTotal['allowance_laundry'] = isset($runningRowTotal['allowance_laundry']) ? $allowance_laundry + $runningRowTotal['allowance_laundry'] : $allowance_laundry ?></td> {{-- Allowance - Laundry --}}
+				<td {{$forOthers}} >{{$row->leave_amt}}</td> {{-- Allowance - Subsistence - Leave , not sure as of Paolo--}}
+				<td {{$forOthers}} >-</td> {{-- Allowance - Subsistence - Travel , not sure as of Paolo --}}
+				<td {{$forOthers}} >{{$totalsubsistence}}<?php $runningRowTotal['allowance'] = isset($runningRowTotal['allowance']) ? $totalsubsistence + $runningRowTotal['allowance'] : $totalsubsistence ?></td>{{-- Allowance - Subsistence - Total --}}
+				<td {{$forOthers}} >{{number_format($amount_earned,2)}}<?php $runningRowTotal['amount_earned'] = isset($runningRowTotal['amount_earned']) ? ($amount_earned) + $runningRowTotal['amount_earned'] : ($amount_earned) ?></td>
 				{{-- Amount Earned --}}
-				<td>{{number_format($record[$i]->w_tax,2)}}<?php $runningRowTotal['withholding_tax'] = isset($runningRowTotal['withholding_tax']) ? $record[$i]->w_tax + $runningRowTotal['withholding_tax'] : $record[$i]->w_tax ?></td> {{-- Personal Deductions - Withholding Tax --}}
-				<td>{{$record[$i]->philhealth_cont_b}}<?php $runningRowTotal['pphilhealth'] = isset($runningRowTotal['pphilhealth']) ? $record[$i]->philhealth_cont_b + $runningRowTotal['pphilhealth'] : $record[$i]->philhealth_cont_b ?></td> {{-- Personal Deductions - Philhealth --}}
-				<td>{{$record[$i]->pagibig_cont_b}}<?php $runningRowTotal['pphilhealthhdmf'] = isset($runningRowTotal['pphilhealthhdmf']) ? $record[$i]->pagibig_cont_b + $runningRowTotal['pphilhealthhdmf'] : $record[$i]->pagibig_cont_b ?></td> {{-- Personal Deductions - Pag-ibig - HDMF Cont. --}}
+				<td {{$forOthers}} >{{number_format($record[$i]->w_tax,2)}}<?php $runningRowTotal['withholding_tax'] = isset($runningRowTotal['withholding_tax']) ? $record[$i]->w_tax + $runningRowTotal['withholding_tax'] : $record[$i]->w_tax ?></td> {{-- Personal Deductions - Withholding Tax --}}
+				<td {{$forOthers}} >{{$record[$i]->philhealth_cont_b}}<?php $runningRowTotal['pphilhealth'] = isset($runningRowTotal['pphilhealth']) ? $record[$i]->philhealth_cont_b + $runningRowTotal['pphilhealth'] : $record[$i]->philhealth_cont_b ?></td> {{-- Personal Deductions - Philhealth --}}
+				<td {{$forOthers}} >{{$record[$i]->pagibig_cont_b}}<?php $runningRowTotal['pphilhealthhdmf'] = isset($runningRowTotal['pphilhealthhdmf']) ? $record[$i]->pagibig_cont_b + $runningRowTotal['pphilhealthhdmf'] : $record[$i]->pagibig_cont_b ?></td> {{-- Personal Deductions - Pag-ibig - HDMF Cont. --}}
 				
 				<?php 
 					$pagIbigDeduction = 0;
@@ -167,7 +180,7 @@
 							?>
 							{{-- Personal Deductions - Pag-ibig - MPL. --}}
 							{{-- Personal Deductions - Pag-ibig - Housing Laon. --}}
-							<td>{{number_format($pagIbigDeduction,2)}}</td>
+							<td {{$forOthers}} >{{number_format($pagIbigDeduction,2)}}</td>
 							<?php
 							$runningRowTotal['pagibigDeductionLoop'][$ini->id] = (isset($runningRowTotal['pagibigDeductionLoop'][$ini->id]) ? $pagIbigDeduction + $runningRowTotal['pagibigDeductionLoop'][$ini->id] : $pagIbigDeduction);
 							$pagIbigDeduction = 0;
@@ -195,14 +208,14 @@
 						{{-- Personal Deductions - DCCCO --}}
 						{{-- Personal Deductions - PEI 2014 Refund --}}
 						{{-- Personal Deductions - Refund for cash advance --}}
-						<td>{{number_format($otherDeductionValue,2)}}</td>
+						<td {{$forOthers}} >{{number_format($otherDeductionValue,2)}}</td>
 						<?php
 						$runningRowTotal['otherDeductionLoop'][$ini] = (isset($runningRowTotal['otherDeductionLoop'][$ini]) ? $otherDeductionValue + $runningRowTotal['otherDeductionLoop'][$ini] : $otherDeductionValue);
 						$otherDeductionValue = 0;
 					}
 				?>
 
-				<td>{{$record[$i]->sss_cont_b}}<?php $runningRowTotal['gsisretirement'] = isset($runningRowTotal['gsisretirement']) ? $record[$i]->sss_cont_b + $runningRowTotal['gsisretirement'] : $record[$i]->sss_cont_b ?></td> {{-- Personal Deductions - GSIS - Retirement & Life Insurance Premiums --}}
+				<td {{$forOthers}} >{{$record[$i]->sss_cont_b}}<?php $runningRowTotal['gsisretirement'] = isset($runningRowTotal['gsisretirement']) ? $record[$i]->sss_cont_b + $runningRowTotal['gsisretirement'] : $record[$i]->sss_cont_b ?></td> {{-- Personal Deductions - GSIS - Retirement & Life Insurance Premiums --}}
 
 				<?php 
 					$gsisValue = 0;
@@ -226,23 +239,23 @@
 							{{-- Personal Deductions - GSIS - Ouli Permium --}}
 							{{-- Personal Deductions - GSIS - UMID E-Card Plus --}}
 							{{-- Personal Deductions - GSIS - GSIS H/L --}}
-							<td>{{number_format($gsisValue,2)}}</td>
+							<td {{$forOthers}} >{{number_format($gsisValue,2)}}</td>
 							<?php
 							$runningRowTotal['gsisLoop'][$ini->id] = (isset($runningRowTotal['gsisLoop'][$ini->id]) ? $gsisValue + $runningRowTotal['gsisLoop'][$ini->id] : $gsisValue);
 							$gsisValue = 0;
 						}
 					}
 				?>
-				<td>{{number_format($record[$i]->total_deductions,2)}}<?php $runningRowTotal['total_deductions'] = isset($runningRowTotal['total_deductions']) ? $record[$i]->total_deductions + $runningRowTotal['total_deductions'] : $record[$i]->total_deductions ?></td> {{-- Total Deductions --}}
-				<td>{{$record[$i]->philhealth_cont_c}}<?php $runningRowTotal['gphilhealth'] = isset($runningRowTotal['gphilhealth']) ? $record[$i]->philhealth_cont_c + $runningRowTotal['gphilhealth'] : $record[$i]->philhealth_cont_c ?></td> {{-- Government Shares - Philhealth --}}
-				<td>{{$record[$i]->sss_cont_c}}<?php $runningRowTotal['retirement'] = isset($runningRowTotal['retirement']) ? $record[$i]->sss_cont_c + $runningRowTotal['retirement'] : $record[$i]->sss_cont_c ?></td> {{-- Government Shares - Retirement & Life Insurance Permiums --}}
-				<td>{{$record[$i]->pagibig_cont_c}}<?php $runningRowTotal['pagibighdmf'] = isset($runningRowTotal['pagibighdmf']) ? $record[$i]->pagibig_cont_c + $runningRowTotal['pagibighdmf'] : $record[$i]->pagibig_cont_c ?></td> {{-- Government Shares - Pag-ibig HDMF Cont. --}}
-				<td>{{number_format($statIns,2)}}<?php $runningRowTotal['statin'] = isset($runningRowTotal['statin']) ? $statIns + $runningRowTotal['statin'] : $statIns ?></td> {{-- Government Shares - State Ins. --}}
-				<td>{{$i+1}}</td> {{-- No. --}} {{-- running increment --}}
-				<td>{{number_format($net_amount_received,2)}}<?php $runningRowTotal['netamount'] = isset($runningRowTotal['netamount']) ? $net_amount_received + $runningRowTotal['netamount'] : $net_amount_received ?></td> {{-- Net Amount Received --}}
-				<td>{{number_format($net_amount_received,2)}}<?php $runningRowTotal['amountpaid'] = isset($runningRowTotal['amountpaid']) ? $net_amount_received + $runningRowTotal['amountpaid'] : $net_amount_received ?></td> {{-- Amount Paid --}}
-				<td>-</td> {{-- Signature of Payee --}}
-			</tr>
+				<td {{$forOthers}} >{{number_format($record[$i]->total_deductions,2)}}<?php $runningRowTotal['total_deductions'] = isset($runningRowTotal['total_deductions']) ? $record[$i]->total_deductions + $runningRowTotal['total_deductions'] : $record[$i]->total_deductions ?></td> {{-- Total Deductions --}}
+				<td {{$forOthers}} >{{$record[$i]->philhealth_cont_c}}<?php $runningRowTotal['gphilhealth'] = isset($runningRowTotal['gphilhealth']) ? $record[$i]->philhealth_cont_c + $runningRowTotal['gphilhealth'] : $record[$i]->philhealth_cont_c ?></td> {{-- Government Shares - Philhealth --}}
+				<td {{$forOthers}} >{{$record[$i]->sss_cont_c}}<?php $runningRowTotal['retirement'] = isset($runningRowTotal['retirement']) ? $record[$i]->sss_cont_c + $runningRowTotal['retirement'] : $record[$i]->sss_cont_c ?></td> {{-- Government Shares - Retirement & Life Insurance Permiums --}}
+				<td {{$forOthers}} >{{$record[$i]->pagibig_cont_c}}<?php $runningRowTotal['pagibighdmf'] = isset($runningRowTotal['pagibighdmf']) ? $record[$i]->pagibig_cont_c + $runningRowTotal['pagibighdmf'] : $record[$i]->pagibig_cont_c ?></td> {{-- Government Shares - Pag-ibig HDMF Cont. --}}
+				<td {{$forOthers}} >{{number_format($statIns,2)}}<?php $runningRowTotal['statin'] = isset($runningRowTotal['statin']) ? $statIns + $runningRowTotal['statin'] : $statIns ?></td> {{-- Government Shares - State Ins. --}}
+				<td {{$forOthers}} >{{$i+1}}</td> {{-- No. --}} {{-- running increment --}}
+				<td {{$forImportant}} >{{number_format($net_amount_received,2)}}<?php $runningRowTotal['netamount'] = isset($runningRowTotal['netamount']) ? $net_amount_received + $runningRowTotal['netamount'] : $net_amount_received ?></td> {{-- Net Amount Received --}}
+				<td {{$forImportant}} >{{number_format($net_amount_received,2)}}<?php $runningRowTotal['amountpaid'] = isset($runningRowTotal['amountpaid']) ? $net_amount_received + $runningRowTotal['amountpaid'] : $net_amount_received ?></td> {{-- Amount Paid --}}
+				<td {{$forImportant}} >-</td> {{-- Signature of Payee --}}
+			</tr> 
 			@endfor @endif
 		</tbody>
 		{{-- work here for total --}}
@@ -251,26 +264,26 @@
 			{{-- {{dd($runningRowTotal)}} --}}
 			<tr>
 				<th colspan="4">Total</th>
-				<th>{{number_format(($runningRowTotal['rate'] ?? 0),2)}}</th> {{-- Rate --}}
-				<th>-</th> {{-- No. of Absence w/o Pay --}}
-				<th>-</th> {{-- Rate Computed Absences --}}
-				<th>{{number_format(($runningRowTotal['pera'] ?? 0),2)}}</th> {{-- PERA --}}
-				<th>{{number_format(($runningRowTotal['hazard_duty'] ?? 0),2)}}</th> {{-- Hazard Duty Pay --}}
-				<th>{{number_format(($runningRowTotal['allowance_laundry'] ?? 0),2)}}</th> {{-- Allowance - Laundry --}}
-				<th>-</th> {{-- Allowance - Subsistence - Leave --}}
-				<th>-</th> {{-- Allowance - Subsistence - Travel --}}
-				<th>{{number_format(($runningRowTotal['allowance'] ?? 0),2)}}</th> {{-- Allowance - Subsistence - Total --}}
-				<th>{{number_format(($runningRowTotal['amount_earned'] ?? 0),2)}}</th> {{-- Amount Earned --}}
-				<th>{{number_format(($runningRowTotal['withholding_tax'] ?? 0),2)}}</th> {{-- Personal Deductions - Withholding Tax --}}
-				<th>{{number_format(($runningRowTotal['pphilhealth'] ?? 0),2)}}</th> {{-- Personal Deductions - Philhealth --}}
-				<th>{{number_format(($runningRowTotal['pphilhealthhdmf'] ?? 0),2)}}</th> {{-- Personal Deductions - Pag-ibig - HDMF Cont. --}}
+				<th {{$forImportant}} >{{number_format(($runningRowTotal['rate'] ?? 0),2)}}</th> {{-- Rate --}}
+				<th {{$forOthers}} >-</th> {{-- No. of Absence w/o Pay --}}
+				<th {{$forOthers}} >-</th> {{-- Rate Computed Absences --}}
+				<th {{$forOthers}} >{{number_format(($runningRowTotal['pera'] ?? 0),2)}}</th> {{-- PERA --}}
+				<th {{$forOthers}} >{{number_format(($runningRowTotal['hazard_duty'] ?? 0),2)}}</th> {{-- Hazard Duty Pay --}}
+				<th {{$forOthers}} >{{number_format(($runningRowTotal['allowance_laundry'] ?? 0),2)}}</th> {{-- Allowance - Laundry --}}
+				<th {{$forOthers}} >-</th> {{-- Allowance - Subsistence - Leave --}}
+				<th {{$forOthers}} >-</th> {{-- Allowance - Subsistence - Travel --}}
+				<th {{$forOthers}} >{{number_format(($runningRowTotal['allowance'] ?? 0),2)}}</th> {{-- Allowance - Subsistence - Total --}}
+				<th {{$forOthers}} >{{number_format(($runningRowTotal['amount_earned'] ?? 0),2)}}</th> {{-- Amount Earned --}}
+				<th {{$forOthers}} >{{number_format(($runningRowTotal['withholding_tax'] ?? 0),2)}}</th> {{-- Personal Deductions - Withholding Tax --}}
+				<th {{$forOthers}} >{{number_format(($runningRowTotal['pphilhealth'] ?? 0),2)}}</th> {{-- Personal Deductions - Philhealth --}}
+				<th {{$forOthers}} >{{number_format(($runningRowTotal['pphilhealthhdmf'] ?? 0),2)}}</th> {{-- Personal Deductions - Pag-ibig - HDMF Cont. --}}
 
 
 				{{-- Personal Deductions - Pag-ibig - MPL. --}}
 				{{-- Personal Deductions - Pag-ibig - Housing Laon. --}}
 				@isset($runningRowTotal['pagibigDeductionLoop'])
 				@foreach($runningRowTotal['pagibigDeductionLoop'] as $thisloop)
-				<th>{{number_format($thisloop,2)}}</th>
+				<th {{$forOthers}} >{{number_format($thisloop,2)}}</th>
 				@endforeach 
 				@endisset
 
@@ -282,11 +295,11 @@
 				{{-- Personal Deductions - Refund for cash advance --}}
 				@isset($runningRowTotal['otherDeductionLoop'])
 				@foreach($runningRowTotal['otherDeductionLoop'] as $thisloop)
-				<th>{{number_format($thisloop,2)}}</th>
+				<th {{$forOthers}} >{{number_format($thisloop,2)}}</th>
 				@endforeach 
 				@endisset
 
-				<th>{{number_format(($runningRowTotal['gsisretirement'] ?? 0),2)}}</th>{{-- Personal Deductions - GSIS - Retirement & Life Insurance Premiums --}}
+				<th {{$forOthers}} >{{number_format(($runningRowTotal['gsisretirement'] ?? 0),2)}}</th>{{-- Personal Deductions - GSIS - Retirement & Life Insurance Premiums --}}
 				{{-- Personal Deductions - GSIS - Edu. Asstance --}}
 				{{-- Personal Deductions - GSIS - CEAP --}}
 				{{-- Personal Deductions - GSIS - Emergency Loan --}}
@@ -298,19 +311,19 @@
 				 {{-- Personal Deductions - GSIS - GSIS H/L --}}
 				@isset($runningRowTotal['gsisLoop'])
 				@foreach($runningRowTotal['gsisLoop'] as $thisloop)
-				<th>{{number_format($thisloop,2)}}</th>
+				<th {{$forOthers}} >{{number_format($thisloop,2)}}</th>
 				@endforeach 
 				@endisset
 
-				<th>{{number_format(($runningRowTotal['total_deductions'] ?? 0),2)}}</th> {{-- Total Deductions --}}
-				<th>{{number_format(($runningRowTotal['gphilhealth'] ?? 0),2)}}</th> {{-- Government Shares - Philhealth --}}
-				<th>{{number_format(($runningRowTotal['retirement'] ?? 0),2)}}</th> {{-- Government Shares - Retirement & Life Insurance Permiums --}}
-				<th>{{number_format(($runningRowTotal['pagibighdmf'] ?? 0),2)}}</th> {{-- Government Shares - Pag-ibig HDMF Cont. --}}
-				<th>{{number_format(($runningRowTotal['statin'] ?? 0),2)}}</th> {{-- Government Shares - State Ins. --}}
-				<th>-</th> {{-- No. --}}
-				<th>{{number_format(($runningRowTotal['netamount'] ?? 0),2)}}</th> {{-- Net Amount Received --}}
-				<th>{{number_format(($runningRowTotal['amountpaid'] ?? 0),2)}}</th> {{-- Amount Paid --}}
-				<th>-</th> {{-- Signature of Payee --}}
+				<th {{$forOthers}} >{{number_format(($runningRowTotal['total_deductions'] ?? 0),2)}}</th> {{-- Total Deductions --}}
+				<th {{$forOthers}} >{{number_format(($runningRowTotal['gphilhealth'] ?? 0),2)}}</th> {{-- Government Shares - Philhealth --}}
+				<th {{$forOthers}} >{{number_format(($runningRowTotal['retirement'] ?? 0),2)}}</th> {{-- Government Shares - Retirement & Life Insurance Permiums --}}
+				<th {{$forOthers}} >{{number_format(($runningRowTotal['pagibighdmf'] ?? 0),2)}}</th> {{-- Government Shares - Pag-ibig HDMF Cont. --}}
+				<th {{$forOthers}} >{{number_format(($runningRowTotal['statin'] ?? 0),2)}}</th> {{-- Government Shares - State Ins. --}}
+				<th {{$forOthers}} >-</th> {{-- No. --}}
+				<th {{$forImportant}} >{{number_format(($runningRowTotal['netamount'] ?? 0),2)}}</th> {{-- Net Amount Received --}}
+				<th {{$forImportant}} >{{number_format(($runningRowTotal['amountpaid'] ?? 0),2)}}</th> {{-- Amount Paid --}}
+				<th {{$forImportant}} >-</th> {{-- Signature of Payee --}}
 			</tr>
 		</tfoot>
 	</table>
