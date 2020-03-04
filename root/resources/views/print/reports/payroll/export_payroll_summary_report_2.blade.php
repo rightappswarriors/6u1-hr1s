@@ -162,7 +162,7 @@
 						}
 					}
 				?>
-				<td >{{number_format($net_amount_received,2)}}<?php $runningRowTotal['netamount'] = isset($runningRowTotal['netamount']) ? $net_amount_received + $runningRowTotal['netamount'] : $net_amount_received ?></td> {{-- Net Amount Received --}}
+				<td >{{number_format($row->rate - $net_amount_received,2)}}<?php $runningRowTotal['netamount'] = isset($runningRowTotal['netamount']) ? $row->rate - $net_amount_received + $runningRowTotal['netamount'] : $row->rate - $net_amount_received ?></td> {{-- Net Amount Received --}}
 				<td >{{number_format($net_amount_received,2)}}<?php $runningRowTotal['amountpaid'] = isset($runningRowTotal['amountpaid']) ? $net_amount_received + $runningRowTotal['amountpaid'] : $net_amount_received ?></td> {{-- Amount Paid --}}
 				<td >-</td> {{-- Signature of Payee --}}
 			</tr> 
