@@ -95,7 +95,7 @@ class PayrollSummaryReportController extends Controller
 			$pi->title = "General Payroll";
 			$pi->ofc = Office::GetOffice($r->ofc);
 			list($date_from, $date_to) = explode("|", $r->pp);
-			$pi->payroll_period = $date_from." to ".$date_to;
+			$pi->payroll_period = Date('Y-m-16',strtotime($date_from))." to ".Date('Y-m-t',strtotime($date_to));
 			$pi->date_to = $date_to;
 			$pi->date_from = $date_from;
 			# Payoll Record
