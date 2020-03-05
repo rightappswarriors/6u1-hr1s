@@ -159,6 +159,9 @@ Route::prefix('Biometric')->group(function(){
 			Route::prefix('sss')->group(function(){
 				Route::get('/', 'MFile\SSSController@view');
 				Route::post('/', 'MFile\SSSController@add');
+				Route::post('/sss-add', 'MFile\SSSController@addSub');
+				Route::post('/sss-edit', 'MFile\SSSController@editSub');
+				Route::post('/sss-del', 'MFile\SSSController@delSub');
 				Route::get('/getOne', 'MFile\SSSController@getOne');
 				Route::post('/update', 'MFile\SSSController@update');
 				Route::post('/delete', 'MFile\SSSController@delete');
@@ -177,6 +180,9 @@ Route::prefix('Biometric')->group(function(){
 			Route::prefix('hdmf')->group(function(){
 				Route::get('', 'MFile\HDMFController@view');
 				Route::post('', 'MFile\HDMFController@add');
+				Route::post('pagibig-add', 'MFile\HDMFController@pagibig_add');
+				Route::post('pagibig-edit', 'MFile\HDMFController@pagibig_edit');
+				Route::post('pagibig-del', 'MFile\HDMFController@pagibig_del');
 				Route::get('getOne', 'MFile\HDMFController@getOne');
 				Route::post('update', 'MFile\HDMFController@update');
 				Route::post('delete', 'MFile\HDMFController@delete');
@@ -334,7 +340,7 @@ Route::prefix('Biometric')->group(function(){
 			/* LOAN ENTRY */
 			Route::prefix('loan-entry')->group(function() {
 				Route::get('/', 'Payroll\Loan\LoanEntryController@view');
-				Route::post('/', 'Payroll\Loan\LoanEntryController@add');
+				Route::post('/add', 'Payroll\Loan\LoanEntryController@add');
 				Route::post('/update', 'Payroll\Loan\LoanEntryController@update');
 				Route::post('/find', 'Payroll\Loan\LoanEntryController@find');
 				Route::get('/get-entry', 'Payroll\Loan\LoanEntryController@get_entry');

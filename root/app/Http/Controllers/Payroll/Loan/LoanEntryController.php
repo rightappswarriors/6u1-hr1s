@@ -55,6 +55,7 @@ class LoanEntryController extends Controller
     */
     public function add(Request $r) 
     {
+        
         $emp=Employee::GetEmployee($r->empid);
         // dd($emp);
 
@@ -75,7 +76,7 @@ class LoanEntryController extends Controller
         }
 
         $data = [
-            'loan_code'=>$r->txt_code, 
+            // 'loan_code'=>$r->txt_code, 
             'loan_desc'=>$r->txt_desc, 
             'loan_transdate'=>$r->dtp_trnxdt, 
             // 'loan_location'=>$r->cbo_stocklocation, 
@@ -95,14 +96,19 @@ class LoanEntryController extends Controller
 
         try {
 
+            // DB::table(Loan::$tbl_name)->insert($data);
+            // Core::Set_Alert('success', 'Successfully added new Loan Entry.');
+            // return back();
+            
             DB::table(Loan::$tbl_name)->insert($data);
-            Core::Set_Alert('success', 'Successfully added new Loan Entry.');
-            return back();
+            return $r->dtp_trnxdt;
 
         } catch (\Illuminate\Database\QueryException $e) {
-            Core::Set_Alert('danger', $e->getMessage());
-            ErrorCode::Generate('controller', 'LoanEntryController', '00000', $e->getMessage());
-            return back();
+            // Core::Set_Alert('danger', $e->getMessage());
+            // ErrorCode::Generate('controller', 'LoanEntryController', '00000', $e->getMessage());
+            // return back();
+            
+            return 'error';
         }
     }
 
@@ -143,14 +149,21 @@ class LoanEntryController extends Controller
     */
     public function update(Request $r)
     {
-        $emp=Employee::GetEmployee($r->cbo_employee);
+        $emp=Employee::GetEmployee($r->empid);
 
         $dpm = number_format( floatval($r->txt_amnt_loan) / floatval($r->txt_mo_tbp) , 2, '.', ''); // deduc per month
         $loan_sub_type = "";
 
         switch($r->cbo_contraacct) {
-            case "pagibig": $loan_sub_type = $r->cbo_pagibig_sub; break;
-            case "sss": $loan_sub_type = $r->cbo_sss_sub; break;
+            case "pagibig":
+                $loan_sub_type = $r->cbo_pagibig_sub;
+                break;
+            case "sss":
+                $loan_sub_type = $r->cbo_sss_sub;
+                break;
+            case "gsis":
+                $loan_sub_type = $r->cbo_sss_sub;
+                break;
             default: $loan_sub_type = "";
         }
 
@@ -172,13 +185,17 @@ class LoanEntryController extends Controller
             'loan_sub_type'=>$loan_sub_type
         ];
         try {
-            DB::table(Loan::$tbl_name)->where(Loan::$pk, $r->txt_code)->update($data);
-            Core::Set_Alert('success', 'Successfully modified a Loan Entry.');
-            return back();
+            // DB::table(Loan::$tbl_name)->where(Loan::$pk, $r->txt_code)->update($data);
+            // Core::Set_Alert('success', 'Successfully modified a Loan Entry.');
+            // return back();
+
+            DB::table('hr_loanhdr')->where('loan_code', $r->txt_code)->update($data);
+            return $r->dtp_trnxdt;
+
         } catch (\Illuminate\Database\QueryException $e) {
-            Core::Set_Alert('danger', $e->getMessage());
-            ErrorCode::Generate('controller', 'LoanEntryController', '00001', $e->getMessage());
-            return back();
+            // Core::Set_Alert('danger', $e->getMessage());
+            // ErrorCode::Generate('controller', 'LoanEntryController', '00001', $e->getMessage());
+            return 'error';
         }
     }
 

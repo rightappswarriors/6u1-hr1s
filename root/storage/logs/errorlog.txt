@@ -1,5 +1,6 @@
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 02-26-2020 18:27 | GenerateDTRController | Object of class stdClass could not be converted to string (GDTRCB00000)
 02-26-2020 18:59 | GenerateDTRController | Object of class stdClass could not be converted to string (GDTRCB00000)
 02-26-2020 19:01 | GenerateDTRController | Object of class stdClass could not be converted to string (GDTRCB00000)
@@ -27859,3 +27860,26 @@
 03-03-2020 19:16 | SyncSystemSettings | Trying to get property 'hy' of non-object (SSS00001)
 03-03-2020 19:18 | EmployeeController | SQLSTATE[23505]: Unique violation: 7 ERROR:  duplicate key value violates unique constraint "srpk" DETAIL:  Key (sr_code)=(00000050) already exists. (SQL: insert into "hr_service_record" ("sr_code", "empid", "service_from", "designation", "status", "salary", "branch", "leave_wo_pay", "remarks") values (00000050, 12345678, 03-03-2020, 15, JO, 148152, 183, , )) (EC00001)
 03-03-2020 19:19 | EmployeeController | SQLSTATE[22003]: Numeric value out of range: 7 ERROR:  numeric field overflow DETAIL:  A field with precision 11, scale 2 must round to an absolute value less than 10^9. (SQL: insert into "hr_employee" ("empid", "isheadoffacility", "lastname", "firstname", "mi", "department", "positions", "date_hired", "contractual_date", "date_resigned", "date_terminated", "prohibition_date", "date_regular", "empstatus", "emptype", "contract_days", "prc", "ctc", "rate_type", "pay_rate", "biometric", "sss", "pagibig", "philhealth", "payroll_account", "tin", "tax_bracket", "sex", "birth", "civil_status", "religion", "height", "weight", "father", "father_address", "father_contact", "father_job", "mother", "mother_address", "mother_contact", "mother_job", "emp_contact", "home_tel", "email", "home_address", "emergency_name", "emergency_contact", "em_home_address", "relationship", "fixed_rate", "primary_ed", "secondary_ed", "tertiary_ed", "graduate", "post_graduate", "fixed_sched", "accountnumber") values (789987, 0, PACLIBAR, DONUEL, V., 183, 15, 03-03-2020, , , , , , 4, , 0, , , M, 1324695789, , , , , , , D, Male, 2020-03-03, SINGLE, , 0, 0, , , , , , , , , , , , , , , , , , , , , , , N, 213456789)) (EC00001)
+=======
+03-03-2020 12:02 | SyncSystemSettings | Undefined property: stdClass::$hy (SSS00001)
+03-03-2020 12:03 | SyncSystemSettings | Undefined property: stdClass::$hy (SSS00001)
+03-03-2020 12:04 | SyncSystemSettings | Undefined property: stdClass::$hy (SSS00001)
+03-03-2020 12:04 | SyncSystemSettings | Undefined property: stdClass::$hy (SSS00001)
+03-03-2020 12:07 | SyncSystemSettings | Undefined property: stdClass::$hy (SSS00001)
+03-03-2020 12:07 | SyncSystemSettings | Undefined property: stdClass::$hy (SSS00001)
+03-03-2020 12:12 | SyncSystemSettings | Undefined property: stdClass::$hy (SSS00001)
+03-03-2020 12:12 | SyncSystemSettings | Undefined property: stdClass::$hy (SSS00001)
+03-03-2020 12:13 | SyncSystemSettings | Undefined property: stdClass::$hy (SSS00001)
+03-03-2020 14:50 | GenerateDTRController | Undefined offset: 0 (GDTRCA00000)
+03-03-2020 15:43 | GenerateDTRController | count(): Parameter must be an array or an object that implements Countable (GDTRCA00001)
+03-03-2020 15:44 | GenerateDTRController | count(): Parameter must be an array or an object that implements Countable (GDTRCA00001)
+03-03-2020 16:16 | GenerateDTRController | json_decode() expects parameter 1 to be string, array given (GDTRCA00001)
+03-03-2020 18:35 | GenerateDTRController | Missing Parameter (DTRS) (GDTRCB00001)
+03-03-2020 18:35 | GenerateDTRController | Missing Parameter (DTRS) (GDTRCB00001)
+03-03-2020 18:35 | GenerateDTRController | Missing Parameter (DTRS) (GDTRCB00001)
+03-03-2020 18:35 | GenerateDTRController | Missing Parameter (DTRS) (GDTRCB00001)
+03-03-2020 19:20 | EmployeeController | SQLSTATE[23505]: Unique violation: 7 ERROR:  duplicate key value violates unique constraint "srpk" DETAIL:  Key (sr_code)=(00000050) already exists. (SQL: insert into "hr_service_record" ("sr_code", "empid", "service_from", "designation", "status", "salary", "branch", "leave_wo_pay", "remarks") values (00000050, 789456, 03-03-2020, 144, JO, 14808, 95, , )) (EC00001)
+>>>>>>> 068171cfe9fc81082ea01bc8408b7d2bf91ff3a1
+
+03-04-2020 14:01 | EmployeeController | SQLSTATE[22003]: Numeric value out of range: 7 ERROR:  numeric field overflow DETAIL:  A field with precision 10, scale 2 must round to an absolute value less than 10^8. (SQL: insert into "hr_service_record" ("sr_code", "empid", "service_from", "designation", "status", "salary", "branch", "leave_wo_pay", "remarks") values (00000050, 789654, 03-04-2020, 15, JO, 1482561468, 183, , )) (EC00001)
+03-04-2020 17:25 | EmployeeController | SQLSTATE[23505]: Unique violation: 7 ERROR:  duplicate key value violates unique constraint "hr_employee_pkey" DETAIL:  Key (empid)=(1234) already exists. (SQL: insert into "hr_employee" ("empid", "isheadoffacility", "lastname", "firstname", "mi", "department", "positions", "date_hired", "contractual_date", "date_resigned", "date_terminated", "prohibition_date", "date_regular", "empstatus", "emptype", "contract_days", "prc", "ctc", "rate_type", "pay_rate", "biometric", "sss", "pagibig", "philhealth", "payroll_account", "tin", "tax_bracket", "sex", "birth", "civil_status", "religion", "height", "weight", "father", "father_address", "father_contact", "father_job", "mother", "mother_address", "mother_contact", "mother_job", "emp_contact", "home_tel", "email", "home_address", "emergency_name", "emergency_contact", "em_home_address", "relationship", "fixed_rate", "primary_ed", "secondary_ed", "tertiary_ed", "graduate", "post_graduate", "fixed_sched", "accountnumber") values (1234, 0, SAMPLE, SAMPLE, V., 121, 116, 03-04-2020, , , , , , 4, , 0, , , M, 123, , , , , , , Z, Male, 2020-03-04, MARRIED, , 0, 0, , , , , , , , , , , , , , , , , , , , , , , N, 1234)) (EC00001)

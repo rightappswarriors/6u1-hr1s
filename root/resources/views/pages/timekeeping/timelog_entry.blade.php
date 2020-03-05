@@ -368,7 +368,7 @@
 								$('#frm-editlog').attr('action', '{{url('timekeeping/timelog-entry/edit-log')}}?logid='+log.logs_id);
 								$('#date_workdate2').val(log.work_date);
 								$('#time_timelog2').val(log.time_log);
-								$('#sel_status2').val(log.status);
+								$('#sel_status2').val(log.status).trigger('change');
 								$('#modal-editlog').modal('show');
 							} else {
 								alert("No record found. Refresh the table.");

@@ -270,7 +270,9 @@ class GeneratePayrollController extends Controller
                                 $leave_amt = 0;
                             }
                         $daily_rate_reworked = Employee::getDailyRate($rate);
-                        $basic_pay = ($leave_amt > 0 ? ((round(abs($days_worked_amt), 2) + round(abs($leave_amt), 2)) - round(abs($undertime_amt), 2) + (abs($daily_rate_reworked) * (int)abs($days_absent) )) : 0.00);
+                        // $basic_pay = ($leave_amt > 0 ? ((round(abs($days_worked_amt), 2) + round(abs($leave_amt), 2)) - round(abs($undertime_amt), 2) + (abs($daily_rate_reworked) * (int)abs($days_absent) )) : 0.00);
+                        // $basic_pay = (round($days_worked_amt, 2) + round($leave_amt, 2));
+                        $basic_pay = ((round(abs($days_worked_amt), 2) + round(abs($leave_amt), 2)) - round(abs($undertime_amt), 2) + (abs($daily_rate_reworked) * (int)abs($days_absent) ));
                         // $basic_pay = (round($days_worked_amt, 2) + round($leave_amt, 2));
 
                         # Gross Pay Computation
@@ -449,8 +451,10 @@ class GeneratePayrollController extends Controller
                                     $sss_arr = ($d->sss!=""||$d->sss!=null) ? SSS::Get_SSS_Deduction($rate) : null;
                                     if ($sss_arr != null) {
                                         $sss_cont_a = $sss_arr->code;
-                                        $sss_cont_b += $sss_arr->empshare_ec;
-                                        $sss_cont_c += $sss_arr->empshare_sc;
+                                        // $sss_cont_b += $sss_arr->empshare_ec;
+                                        $sss_cont_b += ($rate * .09);
+                                        // $sss_cont_c += $sss_arr->empshare_sc;
+                                        $sss_cont_c += ($rate * .12);
                                     }
 
                                 ### PHILHEALTH
@@ -466,14 +470,15 @@ class GeneratePayrollController extends Controller
                                     }
 
                                 ### PAG-IBIG
-                                    $pagibig_cont_a = '';
+                                    $pagibig_cont_a = [];
                                     $pagibig_cont_b = 0;
                                     $pagibig_cont_c = 0;
                                     $pagibig_arr = ($d->pagibig!=""||$d->pagibig!=null) ? Pagibig::Get_PagIbig_Deduction($rate) : null;
                                     if ($pagibig_arr != null) {
-                                        $pagibig_cont_a = $pagibig_arr->code;
-                                        $pagibig_cont_b += $pagibig_arr->emp_ee;
-                                        $pagibig_cont_c += $pagibig_arr->emp_er;
+                                        // $pagibig_cont_a = $pagibig_arr->code;
+                                        // $pagibig_cont_a = null;
+                                        $pagibig_cont_b += $rate * ($pagibig_arr->pct / 100);
+                                        $pagibig_cont_c += $rate * ($pagibig_arr->pct / 100);
                                     }
                                     
                                 if ($withDeductions == false) {
@@ -483,7 +488,7 @@ class GeneratePayrollController extends Controller
                                     $philhealth_cont_a = '';
                                     $philhealth_cont_b = 0;
                                     $philhealth_cont_c = 0;
-                                    $pagibig_cont_a = '';
+                                    $pagibig_cont_a = [];
                                     $pagibig_cont_b = 0;
                                     $pagibig_cont_c = 0;
                                 }
@@ -546,7 +551,7 @@ class GeneratePayrollController extends Controller
                                                     'remarks' => "balance:0",
                                                 ]);
                                             } else {
-                                                $loan_tbp = ((float)$la->loan_amount / 2);
+                                                $loan_tbp = ((float)$la->loan_amount / $la->months_to_be_paid);
                                                 $loans_amt += $loan_tbp;
                                                 array_push($updatehdr_loan, [
                                                     'loan_amount' => $loan_tbp,
@@ -563,13 +568,15 @@ class GeneratePayrollController extends Controller
                                                     'payment_desc' => "Deducted from payroll",
                                                     'emp_pay_code' => $emp_pay_code,
                                                 ]);
+                                                if(strtolower($la->loan_type) == 'pagibig'){
+                                                    array_push($pagibig_cont_a, [$la->loan_code, $la->loan_type, $la->loan_sub_type, $loan_tbp]);
+                                                }
                                                 array_push($loans, [$la->loan_code, $la->loan_type, $la->loan_sub_type, $loan_tbp]);
                                             }
                                         }
                                     }
                                 }
                             }
-
                         $deductions = round($personal_deductions, 2) + round($wtax, 2) + round($other_deductions_amt, 2) + round($loans_amt, 2);
 
                         # Net
@@ -599,7 +606,7 @@ class GeneratePayrollController extends Controller
                             'rate_type' => $rate_type,
                             'rate' => $rate,
                             'dtr_sum_id' => $d->dtr_sum_id,  
-                            'daily_rate' => $daily_rate_reworked,
+                            // 'daily_rate' => $daily_rate_reworked,
 
                             # Payroll Details
                             'total_workdays' => $total_days,
@@ -642,7 +649,7 @@ class GeneratePayrollController extends Controller
                             'philhealth_cont_a' => $philhealth_cont_a,
                             'philhealth_cont_b' => round($philhealth_cont_b, 2),
                             'philhealth_cont_c' => round($philhealth_cont_c, 2),
-                            'pagibig_cont_a' => $pagibig_cont_a,
+                            'pagibig_cont_a' => json_encode($pagibig_cont_a),
                             'pagibig_cont_b' => round($pagibig_cont_b, 2),
                             'pagibig_cont_c' => round($pagibig_cont_c, 2),
                             'w_tax' => round($wtax, 2),
@@ -672,6 +679,7 @@ class GeneratePayrollController extends Controller
                             array_push($toDisplay, $data);
                         }
                     } catch (\Exception $e) {
+                        return $e;
                         ErrorCode::Generate('controller', 'GeneratePayrollController', 'B00003-'.$d->empid, $e->getMessage());
                         array_push($errors, 'B00003-'.$d->empid.":".$e->getMessage());
                     }

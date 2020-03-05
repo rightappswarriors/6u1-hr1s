@@ -19,10 +19,10 @@
 @endphp
 	<table border="1">
 		<thead>
-			<tr><th colspan="44">{{strtoupper(($inf->title ?? ''))}}</th></tr>
-			<tr><th colspan="44">{{Core::company_name()}}</th></tr>
-			<tr><th colspan="44">{{isset($inf->ofc) ? $inf->ofc->cc_desc : ""}}</th></tr>
-			<tr><th colspan="44">{{($inf->payroll_period ?? '')}}</th></tr>
+			<tr><th style="text-align: center;" colspan="44">{{strtoupper(($inf->title ?? ''))}}</th></tr>
+			<tr><th style="text-align: center;" colspan="44">{{Core::company_name()}}</th></tr>
+			<tr><th style="text-align: center;" colspan="44">{{isset($inf->ofc) ? $inf->ofc->cc_desc : ""}}</th></tr>
+			<tr><th style="text-align: center;" colspan="44">{{($inf->payroll_period ?? '')}}</th></tr>
 			<tr>
 				<th rowspan="4">ITEM NO.</th>
 				<th rowspan="4">NAME</th>
@@ -46,7 +46,7 @@
 				<th rowspan="3">Withholding TAX</th>
 				<th rowspan="3">PhilHealth</th>
 
-				<th colspan="3">PAG-IBIG</th>
+				<th colspan="{{count(Pagibig::Get_All_Sub())}}">PAG-IBIG</th>
 				@php
 					$pd = ['JGM', 'LBP', 'CFI', 'DCCCO', 'PEI 2014 REFUND', 'REFUND for Cash Advance'];
 				@endphp
@@ -56,7 +56,8 @@
 					@endfor
 				@endif
 
-				<th colspan="10">GSIS</th>
+				{{-- <th colspan="10">GSIS</th> --}}
+				<th colspan="{{count(SSS::Get_All_Sub())}}">GSIS</th>
 				<th rowspan="3">TOTAL DEDUCTIONS</th>
 
 				<th rowspan="3">PhilHealth</th>
@@ -67,12 +68,16 @@
 			<tr>
 				<th rowspan="2">LAUNDRY</th>
 				<th colspan="3">SUBSISTENCE</th>
-
-				<th rowspan="2">HDMF CONT.</th>
+		
+				{{-- <th rowspan="2">HDMF CONT.</th>
 				<th rowspan="2">MPL</th>
-				<th rowspan="2">HOUSING LOAN</th>
+				<th rowspan="2">HOUSING LOAN</th> --}}
 
-				<th rowspan="2">RETIREMENT &amp; LIFE INSURANCE PREMIUMS</th>
+				@foreach(Pagibig::Get_All_Sub() as $key => $value)
+				<th rowspan="2">{{$value->description}}</th>
+				@endforeach
+
+				{{-- <th rowspan="2">RETIREMENT &amp; LIFE INSURANCE PREMIUMS</th>
 				<th rowspan="2">EDU. ASSISTANCE</th>
 				<th rowspan="2">CEAP</th>
 				<th rowspan="2">EMERGENCY LOAN</th>
@@ -81,7 +86,10 @@
 				<th rowspan="2">OPTIONAL POLICY LOAN</th>
 				<th rowspan="2">OULI PREMIUM</th>
 				<th rowspan="2">UMID E-CARD PLUS</th>
-				<th rowspan="2">GSIS H/L</th>
+				<th rowspan="2">GSIS H/L</th> --}}
+				@foreach(SSS::Get_All_Sub() as $key => $value)
+				<th rowspan="2">{{$value->description}}</th>
+				@endforeach
 			</tr>
 			<tr>
 				<th>LEAVE</th>
@@ -90,11 +98,13 @@
 			</tr>
 		</thead>
 		<tbody>
-
+			
 			@if(count($record) > 0) @for($i=0;$i<count($record);$i++)
 			@php
 				$row = $record[$i];/* dd($row);*/
-				$countworkingminusleave = (int)(Core::CountWorkingDays(Date('Y-m-d',strtotime('-1 day',strtotime($inf['date_from']))),$inf['date_to']) - $row->leave_amt);
+				$date_from = (is_array($inf) ? $inf['date_from'] : $inf->date_from);
+				$date_to = (is_array($inf) ? $inf['date_to'] : $inf->date_to);
+				$countworkingminusleave = (int)(Core::CountWorkingDays(Date('Y-m-d',strtotime('-1 day',strtotime($date_from))),$date_to) - $row->leave_amt);
 				$totalsubsistence = 1500 - round(($row->leave_amt / $countworkingminusleave) * 1500,2);
 				$no = $i+1;
 				$pera = 0;
@@ -117,6 +127,8 @@
 						}
 					}
 				}
+				$amount_earned = round(($row->rate-($pera))-((($row->rate-$record[$i]->total_deductions)-($pera))/2),2);
+				$net_amount_received = round((($pera+$amount_earned)-$record[$i]->total_deductions),2);
 			@endphp
 			<tr>
 				<td>ACC-{{$row->emp_pay_code}}</td> {{-- Item No. --}}
@@ -131,31 +143,37 @@
 				<td>{{number_format($allowance_laundry,2)}}<?php $runningRowTotal['allowance_laundry'] = isset($runningRowTotal['allowance_laundry']) ? $allowance_laundry + $runningRowTotal['allowance_laundry'] : $allowance_laundry ?></td> {{-- Allowance - Laundry --}}
 				<td>{{$row->leave_amt}}</td> {{-- Allowance - Subsistence - Leave , not sure as of Paolo--}}
 				<td>-</td> {{-- Allowance - Subsistence - Travel , not sure as of Paolo --}}
-				<td>{{$totalsubsistence}}<?php $runningRowTotal['allowance'] = isset($runningRowTotal['allowance']) ? round(1500 / $countworkingminusleave,2) + $runningRowTotal['allowance'] : round(1500 / $countworkingminusleave,2) ?></td>{{-- Allowance - Subsistence - Total --}}
-				<td>{{number_format($row->rate - $record[$i]->net_pay,2)}}<?php $runningRowTotal['amount_earned'] = isset($runningRowTotal['amount_earned']) ? ($row->rate - $record[$i]->net_pay) + $runningRowTotal['amount_earned'] : ($row->rate - $record[$i]->net_pay) ?></td> {{-- Amount Earned --}}
+				<td>{{$totalsubsistence}}<?php $runningRowTotal['allowance'] = isset($runningRowTotal['allowance']) ? $totalsubsistence + $runningRowTotal['allowance'] : $totalsubsistence ?></td>{{-- Allowance - Subsistence - Total --}}
+				<td>{{number_format($amount_earned,2)}}<?php $runningRowTotal['amount_earned'] = isset($runningRowTotal['amount_earned']) ? ($amount_earned) + $runningRowTotal['amount_earned'] : ($amount_earned) ?></td>
+				{{-- Amount Earned --}}
 				<td>{{number_format($record[$i]->w_tax,2)}}<?php $runningRowTotal['withholding_tax'] = isset($runningRowTotal['withholding_tax']) ? $record[$i]->w_tax + $runningRowTotal['withholding_tax'] : $record[$i]->w_tax ?></td> {{-- Personal Deductions - Withholding Tax --}}
 				<td>{{$record[$i]->philhealth_cont_b}}<?php $runningRowTotal['pphilhealth'] = isset($runningRowTotal['pphilhealth']) ? $record[$i]->philhealth_cont_b + $runningRowTotal['pphilhealth'] : $record[$i]->philhealth_cont_b ?></td> {{-- Personal Deductions - Philhealth --}}
 				<td>{{$record[$i]->pagibig_cont_b}}<?php $runningRowTotal['pphilhealthhdmf'] = isset($runningRowTotal['pphilhealthhdmf']) ? $record[$i]->pagibig_cont_b + $runningRowTotal['pphilhealthhdmf'] : $record[$i]->pagibig_cont_b ?></td> {{-- Personal Deductions - Pag-ibig - HDMF Cont. --}}
-
+				
 				<?php 
 					$pagIbigDeduction = 0;
 					$otherDeduction = json_decode($record[$i]->pagibig_cont_a);
-					foreach($initilize[2] as $ini){
-						if(isset($otherDeduction)){
-							foreach($otherDeduction as $od){ 
-								if($ini === $od[0]){
-									$pagIbigDeduction = $od[2];
+					foreach(Pagibig::Get_All_Sub() as $ini){
+						if($ini->id != 1){
+							if(isset($otherDeduction)){
+								foreach($otherDeduction as $od){
+									if($ini->id == $od[2]){
+										$pagIbigDeduction = $od[3];
+									} 
 								}
 							}
+
+						
+							?>
+							{{-- Personal Deductions - Pag-ibig - MPL. --}}
+							{{-- Personal Deductions - Pag-ibig - Housing Laon. --}}
+							<td>{{number_format($pagIbigDeduction,2)}}</td>
+							<?php
+							$runningRowTotal['pagibigDeductionLoop'][$ini->id] = (isset($runningRowTotal['pagibigDeductionLoop'][$ini->id]) ? $pagIbigDeduction + $runningRowTotal['pagibigDeductionLoop'][$ini->id] : $pagIbigDeduction);
+							$pagIbigDeduction = 0;
 						}
-						?>
-						{{-- Personal Deductions - Pag-ibig - MPL. --}}
-						{{-- Personal Deductions - Pag-ibig - Housing Laon. --}}
-						<td>{{number_format($pagIbigDeduction,2)}}</td>
-						<?php
-						$runningRowTotal['pagibigDeductionLoop'][$ini] = (isset($runningRowTotal['pagibigDeductionLoop'][$ini]) ? $pagIbigDeduction + $runningRowTotal['pagibigDeductionLoop'][$ini] : $pagIbigDeduction);
-						$pagIbigDeduction = 0;
 					}
+
 				?>
 
 				<?php 
@@ -189,28 +207,30 @@
 				<?php 
 					$gsisValue = 0;
 					$gsis = json_decode($record[$i]->sss_cont_a);
-					foreach($initilize[0] as $ini){
-						if(isset($gsis)){
-							foreach($gsis as $sss){ 
-								if($ini === $sss[0]){
-									$gsisValue = $sss[2];
+					foreach(SSS::Get_All_Sub() as $ini){
+						if($ini->id != 1){
+							if(isset($gsis)){
+								foreach($gsis as $key => $sss){
+									if($ini->id === $sss[0]){
+										$gsisValue = $sss[2];
+									}
 								}
 							}
-						}
 
-						?>
-						{{-- Personal Deductions - GSIS - Edu. Asstance --}}
-						{{-- Personal Deductions - GSIS - Emergency Loan --}}
-						{{-- Personal Deductions - GSIS - Combo Loan --}}
-						{{-- Personal Deductions - GSIS - Policy Loan Reg --}}
-						{{-- Personal Deductions - GSIS - Optional Policy Loan --}}
-						{{-- Personal Deductions - GSIS - Ouli Permium --}}
-						{{-- Personal Deductions - GSIS - UMID E-Card Plus --}}
-						{{-- Personal Deductions - GSIS - GSIS H/L --}}
-						<td>{{number_format($gsisValue,2)}}</td>
-						<?php
-						$runningRowTotal['gsisLoop'][$ini] = (isset($runningRowTotal['gsisLoop'][$ini]) ? $gsisValue + $runningRowTotal['gsisLoop'][$ini] : $gsisValue);
-						$gsisValue = 0;
+							?>
+							{{-- Personal Deductions - GSIS - Edu. Asstance --}}
+							{{-- Personal Deductions - GSIS - Emergency Loan --}}
+							{{-- Personal Deductions - GSIS - Combo Loan --}}
+							{{-- Personal Deductions - GSIS - Policy Loan Reg --}}
+							{{-- Personal Deductions - GSIS - Optional Policy Loan --}}
+							{{-- Personal Deductions - GSIS - Ouli Permium --}}
+							{{-- Personal Deductions - GSIS - UMID E-Card Plus --}}
+							{{-- Personal Deductions - GSIS - GSIS H/L --}}
+							<td>{{number_format($gsisValue,2)}}</td>
+							<?php
+							$runningRowTotal['gsisLoop'][$ini->id] = (isset($runningRowTotal['gsisLoop'][$ini->id]) ? $gsisValue + $runningRowTotal['gsisLoop'][$ini->id] : $gsisValue);
+							$gsisValue = 0;
+						}
 					}
 				?>
 				<td>{{number_format($record[$i]->total_deductions,2)}}<?php $runningRowTotal['total_deductions'] = isset($runningRowTotal['total_deductions']) ? $record[$i]->total_deductions + $runningRowTotal['total_deductions'] : $record[$i]->total_deductions ?></td> {{-- Total Deductions --}}
@@ -219,12 +239,14 @@
 				<td>{{$record[$i]->pagibig_cont_c}}<?php $runningRowTotal['pagibighdmf'] = isset($runningRowTotal['pagibighdmf']) ? $record[$i]->pagibig_cont_c + $runningRowTotal['pagibighdmf'] : $record[$i]->pagibig_cont_c ?></td> {{-- Government Shares - Pag-ibig HDMF Cont. --}}
 				<td>{{number_format($statIns,2)}}<?php $runningRowTotal['statin'] = isset($runningRowTotal['statin']) ? $statIns + $runningRowTotal['statin'] : $statIns ?></td> {{-- Government Shares - State Ins. --}}
 				<td>{{$i+1}}</td> {{-- No. --}} {{-- running increment --}}
-				<td>{{number_format($record[$i]->net_pay,2)}}<?php $runningRowTotal['netamount'] = isset($runningRowTotal['netamount']) ? $record[$i]->net_pay + $runningRowTotal['netamount'] : $record[$i]->net_pay ?></td> {{-- Net Amount Received --}}
-				<td>{{number_format($record[$i]->net_pay,2)}}<?php $runningRowTotal['amountpaid'] = isset($runningRowTotal['amountpaid']) ? $record[$i]->net_pay + $runningRowTotal['amountpaid'] : $record[$i]->net_pay ?></td> {{-- Amount Paid --}}
+				<td>{{number_format($net_amount_received,2)}}<?php $runningRowTotal['netamount'] = isset($runningRowTotal['netamount']) ? $net_amount_received + $runningRowTotal['netamount'] : $net_amount_received ?></td> {{-- Net Amount Received --}}
+				<td>{{number_format($net_amount_received,2)}}<?php $runningRowTotal['amountpaid'] = isset($runningRowTotal['amountpaid']) ? $net_amount_received + $runningRowTotal['amountpaid'] : $net_amount_received ?></td> {{-- Amount Paid --}}
 				<td>-</td> {{-- Signature of Payee --}}
 			</tr>
 			@endfor @endif
 		</tbody>
+		{{-- work here for total --}}
+
 		<tfoot>
 			{{-- {{dd($runningRowTotal)}} --}}
 			<tr>

@@ -229,7 +229,7 @@
 					<form method="post" action="#" id="frm-pp" data="#">
 						@csrf
 						<input type="hidden" class="form-control" name="empid" readonly hidden required>
-						<span class="AddMode">
+						<span class="AddMode EditMode">
 							<div class="row mb-2">
 								<div class="col-12"> 
 									<!-- Column 1 Row 1 -->
@@ -238,16 +238,18 @@
 									<div class="form-group">
 										<label>Employee:</label>
 										<input type="text" class="form-control" name="cbo_employee_txt" id="cbo_employee_txt" readonly required>
-										<select name="cbo_employee" id="cbo_employee_select" style="text-transform: uppercase;" class="form-control" hidden>
-											<option disabled hidden selected value="">---</option>
-											@foreach(Employee::Load_Employees() as $key => $value)
-												<option value="{{$value->empid}}">{{$value->lastname}}, {{$value->firstname}} {{$value->mi}}</option>
-											@endforeach
-										</select>
+										<span id="cbo_select">
+											<select name="cbo_employee" id="cbo_employee_select" style="text-transform: uppercase;" class="form-control" >
+												<option disabled hidden selected value="">---</option>
+												@foreach(Employee::Load_Employees() as $key => $value)
+													<option value="{{$value->empid}}">{{$value->lastname}}, {{$value->firstname}} {{$value->mi}}</option>
+												@endforeach
+											</select>
+										</span>
 									</div>
 									<div class="form-group">
 										<label>Reason:</label>
-										<textarea type="text" name="txt_desc" style="" class="form-control" maxlength="100" required></textarea>
+										<textarea type="text" name="txt_desc" style="" class="form-control" maxlength="100"></textarea>
 									</div>
 								</div>
 
@@ -266,7 +268,7 @@
 									</div>
 									<div class="form-group">
 										<label>Loan Type:</label>
-										<select name="cbo_contraacct" style="text-transform: uppercase;" class="form-control" required>
+										<select name="cbo_contraacct" id="cbo_contraacct" style="text-transform: uppercase;" class="form-control" required>
 											<option disabled hidden selected value="">---</option>
 											@foreach(LoanType::Load_LoanTypes() as $key => $value)
 												<option value="{{$value->code}}">{{$value->description}}</option>
@@ -278,7 +280,7 @@
 									</div>
 									<div class="form-group exclusive_sub_hidden" id="pagibig_sub" hidden>
 										<label>Pag-Ibig Type:</label>
-										<select name="cbo_pagibig_sub" style="text-transform: uppercase;" class="form-control" required>
+										<select name="cbo_pagibig_sub" id="cbo_pagibig_sub" style="text-transform: uppercase;" class="form-control" required>
 											<option disabled hidden selected value="">---</option>
 											@foreach(Pagibig::Get_All_Sub() as $key => $value)
 												<option value="{{$value->id}}">{{$value->description}}</option>
@@ -287,7 +289,7 @@
 									</div>
 									<div class="form-group exclusive_sub_hidden" id="sss_sub" hidden>
 										<label>GSIS Type:</label>
-										<select name="cbo_sss_sub" style="text-transform: uppercase;" class="form-control" required>
+										<select name="cbo_sss_sub" id="cbo_sss_sub" style="text-transform: uppercase;" class="form-control" required>
 											<option disabled hidden selected value="">---</option>
 											@foreach(SSS::Get_All_Sub() as $key => $value)
 												<option value="{{$value->id}}">{{$value->description}}</option>
@@ -327,7 +329,7 @@
 									</div>
 									<div class="form-group">
 										<label>Period to pay:</label>
-										<select name="cbo_per_tp" style="text-transform: uppercase;" class="form-control" required>
+										<select name="cbo_per_tp" id="cbo_per_tp" style="text-transform: uppercase;" class="form-control" required>
 											<option value="" selected hidden disabled>---</option>
 											<option value="15">15th Day</option>
 											<option value="30">30th Day</option>
@@ -348,7 +350,7 @@
 									<div class="dropdown-divider"></div>
 									<div class="form-group">
 										<label>Issuance No.:</label>
-										<input type="text" name="txt_code" style="text-transform: uppercase;" class="form-control" maxlength="8" placeholder="XXX" required>
+										<input type="text" name="txt_code" style="text-transform: uppercase;" class="form-control" maxlength="8" placeholder="XXX">
 									</div>
 									<div class="form-group">
 										<label>Deduction per month:</label>
@@ -368,7 +370,13 @@
 				</div>
 				<div class="modal-footer">
 					<span class="AddMode">
-						<button type="submit" form="frm-pp" class="btn btn-success">Save</button>
+						{{-- <button type="submit" form="frm-pp" class="btn btn-success">Save</button> --}}
+						<button type="button" class="btn btn-success" id="add_btn">Save</button>
+						<button type="button" class="btn btn-danger" data-dismiss="modal" onclick="ClearFld()">Close</button>
+					</span>
+					<span class="EditMode">
+						{{-- <button type="submit" form="frm-pp" class="btn btn-success">Save</button> --}}
+						<button type="button" class="btn btn-warning" id="edit_btn">Save</button>
 						<button type="button" class="btn btn-danger" data-dismiss="modal" onclick="ClearFld()">Close</button>
 					</span>
 					<span class="DeleteMode">
@@ -522,7 +530,7 @@
 	</script>
 
 	<script type="text/javascript">
-		$('#trans_date').datepicker(date_option2);
+		$('#trans_date').datepicker(date_option3);
 		$('#deduc_date').datepicker(date_option2);
 		$('#date_from').datepicker(date_option5);
 		$('#date_to').datepicker(date_option5);
@@ -736,9 +744,81 @@
 			}
 		});
 
+		$('#add_btn').on('click', function(){
+			add_loan();
+		})
+
+		$('#edit_btn').on('click', function(){
+			edit_loan();
+		})
+
+		function add_loan()
+		{
+			var data = {
+				empid : $('input[name="empid"').val(),
+				txt_amnt_loan : $('input[name="txt_amnt_loan"]').val(),
+				txt_mo_tbp : $('input[name="txt_mo_tbp"]').val(),
+				cbo_contraacct : $('#cbo_contraacct option:selected').val(),
+				cbo_pagibig_sub : $('#cbo_pagibig_sub option:selected').val(),
+				cbo_sss_sub : $('#cbo_sss_sub option:selected').val(),
+				txt_desc : $('textarea[name="txt_desc"]').val(),
+				dtp_trnxdt : $('input[name="dtp_trnxdt"]').val(),
+				cbo_costcenter : $('#cbo_costcenter option:selected').val(),
+				cbo_per_tp : $('#cbo_per_tp option:selected').val(),
+			}
+			$.ajax({
+						
+						type: "post",
+						url: "{{url('payroll/loan-entry/add')}}",
+						data: data,
+						success : function(data) {
+							ClearFld();
+							$('.AddMode').modal('hide');
+							$('#modal-pp').modal('hide');
+							alert('Successfully added new Loan Entry.');
+							returnDataToday(data);
+						}
+					});
+		}
+
+		function edit_loan()
+		{
+			var data = {
+				txt_code : $('input[name="txt_code"]').val(),
+				empid : $('input[name="empid"').val(),
+				txt_amnt_loan : $('input[name="txt_amnt_loan"]').val(),
+				txt_mo_tbp : $('input[name="txt_mo_tbp"]').val(),
+				cbo_contraacct : $('#cbo_contraacct option:selected').val(),
+				cbo_pagibig_sub : $('#cbo_pagibig_sub option:selected').val(),
+				cbo_sss_sub : $('#cbo_sss_sub option:selected').val(),
+				txt_desc : $('textarea[name="txt_desc"]').val(),
+				dtp_trnxdt : $('input[name="dtp_trnxdt"]').val(),
+				cbo_costcenter : $('#cbo_costcenter option:selected').val(),
+				cbo_per_tp : $('#cbo_per_tp option:selected').val(),
+			}
+			$.ajax({
+						
+						type: "post",
+						url: "{{url('payroll/loan-entry/update')}}",
+						data: data,
+						success : function(data) {
+							ClearFld();
+							$('.EditMode').modal('hide');
+							$('#modal-pp').modal('hide');
+							alert('Successfully Modified Loan Entry.');
+							returnDataToday(data);
+						}
+					});
+		}
+		function returnDataToday(date)
+		{
+			$('#date_from').val(date);
+			$('#date_to').val(date);
+			$('#opt-submit').click();
+		}
 		// $('#opt-update').on('click', function() {
 		function row_update(obj) {
-			$("#cbo_employee_select").hide();
+			$("#cbo_select").hide();
 			$("#cbo_employee_txt").show();
 			selected_row = $($(obj).parents()[1]);
 			$('input[name="txt_code"]').attr('readonly', '');
@@ -783,13 +863,12 @@
 					$('#frm-pp').attr('action', '#');
 					$('#cbo_employee_txt').val($('#tito_emp option:selected').text());
 					$('#cbo_employee').val($('#tito_emp').val());
-					OpenModal('.AddMode');
+					OpenModal('.EditMode');
 				} else {
 					NoSelectedRow();
 				}
 			}
-
-			$('.AddMode').show();
+			$('.EditMode').show();
 			$('.DeleteMode').hide();
 		// });
 		}
