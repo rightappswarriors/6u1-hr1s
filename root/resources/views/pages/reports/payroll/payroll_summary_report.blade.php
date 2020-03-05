@@ -17,6 +17,12 @@
 							@endforeach
 						</select>
 					</div>
+					<div class="col-sm-4">
+						<select class="form-control mr-2" name="pptype" id="pptype">
+							<option Value="1" selected>1st</option>
+							<option value="2">2nd</option>
+						</select>
+					</div>
 				</div>
 
 				<div class="form-group row">
@@ -101,11 +107,11 @@
 				$.ajax({
 					type : 'get',
 					url : '{{url('reports/payroll-summary-report/export')}}',
-					data : {pp: $("#pp").val(), ofc:$('#ofc').val(), gen_type:$('#gen_type').val()},
+					data : {pp: $("#pp").val(), ofc:$('#ofc').val(), gen_type:$('#gen_type').val(), pptype: $('#pptype').val()},
 					dataTy : 'json',
 					success : function(data) {
 						if (data!="error") {
-							PrintPage('{{url('reports/payroll-summary-report/export')}}?pp='+$('#pp').val()+'&ofc='+$('#ofc').val()+'&gen_type='+$('#gen_type').val());
+							PrintPage('{{url('reports/payroll-summary-report/export')}}?pp='+$('#pp').val()+'&ofc='+$('#ofc').val()+'&gen_type='+$('#gen_type').val()+'&pptype='+$('#pptype').val());
 							// alert("Payroll generated.");
 						} else {
 							alert("Error in exporting payroll.");

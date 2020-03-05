@@ -103,12 +103,11 @@ class PayrollSummaryReportController extends Controller
 			$data = [
 				'inf' => $pi,
 				'record' => $record,
+				'payroll_period' => ($r->pptype ?? 1)
 			];
-			$view = 'print.reports.payroll.export_payroll_summary_report';
-			// $view = (Date('d',strtotime($date_from)) >= 10 && Date('d',strtotime($date_from)) <= 26 ? 'print.reports.payroll.export_payroll_summary_report' : 'print.reports.payroll.export_payroll_summary_report_2nd');
+			$view = (($r->pptype ?? 1) == 1 ? 'print.reports.payroll.export_payroll_summary_report' : 'print.reports.payroll.export_payroll_summary_report_2');
 			// return view($view,compact('data'));
 			return Excel::download(new ExportBlade($view, $data), 'general-payroll-'.date('YmdHis').'.xlsx');
-			// Export2_1::exportBlade('print.reports.payroll.export_payroll_summary_report', $data);
 		} catch (\Exception $e) {
 			return $e;
 			ErrorCode::Generate('controller', 'PayrollSummaryReportController', '00003', $e->getMessage());
