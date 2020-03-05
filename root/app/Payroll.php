@@ -184,6 +184,7 @@ class Payroll extends Model
                     return (($rate * ($wtax->$factor / 100)) + $wtax->$add_on);
                 }
             }
+            return $amt;
         } catch (\Exception $e) {
             return $e;
             return $amt;

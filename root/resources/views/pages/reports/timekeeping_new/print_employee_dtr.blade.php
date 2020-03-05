@@ -262,6 +262,7 @@
 
 
 		function MakeDTR(data) {
+			let trigger = '-';
 			$('#print_btn')[0].removeAttribute('disabled');
 			var divX = document.getElementById('dtr');
 				divX.setAttribute('style', 'overflow-x: hidden !important');
@@ -338,6 +339,7 @@
 				tr4.appendChild(td16);
 				tr4.appendChild(td19);
 				tr4.appendChild(td20);
+				// tr4.appendChild(td21);
 
 			var tr5 = document.createElement('tr');
 				var td22 = document.createElement('td');
@@ -391,11 +393,27 @@
 
 				var undertime_in = document.createElement('td');
 					undertime_in.setAttribute('style', 'text-align: center;');
-					undertime_in.innerHTML = "";
+					for(k=0; k<data.undertime_readable.length; k++) {
+						let readableUndertime = data.undertime_readable[k];
+						if(readableUndertime[0] == data.covered_dates[i][1]){
+							trigger = readableUndertime[2];
+							break;
+						}
+					}
+					undertime_in.innerHTML = trigger;
+					trigger = '';
 
 				var undertime_out = document.createElement('td');
 					undertime_out.setAttribute('style', 'text-align: center;');
-					undertime_out.innerHTML = "";
+					for(j=0; j<data.undertime_readable.length; j++) {
+						let readableUndertime = data.undertime_readable[j];
+						if(readableUndertime[0] == data.covered_dates[i][1]){
+							trigger = readableUndertime[2];
+							break;
+						}
+					}
+					undertime_out.innerHTML = trigger;
+					trigger = '';
 
 				if(data.days_worked_readable.length > 0) {
 					for(j=0; j<data.days_worked_readable.length; j++) {
@@ -508,7 +526,7 @@
 			var H = +timeString.substr(0, 2);
 			var h = H % 12 || 12;
 			var ampm = (H < 12 || H === 24) ? "am" : "pm";
-			timeString = h + timeString.substr(2, 3) + ampm;
+			timeString = h + timeString.substr(2, 3)/* + ampm*/;
 			return timeString;
 		}
 

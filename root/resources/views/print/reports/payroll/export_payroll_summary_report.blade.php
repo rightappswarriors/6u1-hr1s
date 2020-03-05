@@ -5,21 +5,20 @@
 @php
 	$inf = $data['inf'];
 	$record = $data['record'];
-	$ppType = ($data['payroll_period'] ?? 1);
+	// $ppType = ($data['payroll_period'] ?? 1);
 	$forOthers = '';
 	$forImportant = '';
-	switch ($ppType) {
-		case '1':
-			$forOthers = 'style=display:block-inline!important ';
-			$forImportant = 'style=display:block-inline!important ';
-			break;
-		case '2':
-			$forOthers = 'style=display:none!important ';
-			$forImportant = 'style=display:block-inline!important ';
-			break;
-	}
+	// switch ($ppType) {
+	// 	case '1':
+	// 		$forOthers = 'style=display:block-inline!important ';
+	// 		$forImportant = 'style=display:block-inline!important ';
+	// 		break;
+	// 	case '2':
+	// 		$forOthers = 'style=display:none!important ';
+	// 		$forImportant = 'style=display:block-inline!important ';
+	// 		break;
+	// }
 	//initialization of array for hardcoded assigning of value by Syrel
-	$statIns = 100;
 	$runningRowTotal = [];
 	$initilize = [
 		//for gsis
@@ -115,10 +114,12 @@
 			@if(count($record) > 0) @for($i=0;$i<count($record);$i++)
 			@php
 				$row = $record[$i];/* dd($row);*/
+				$statIns = ($row->rate <= 10000 ? (Core::getm99One('iraterate')->iraterate / 100) * $row->rate : Core::getm99One('iratemax')->iratemax);
 				$date_from = (is_array($inf) ? $inf['date_from'] : $inf->date_from);
 				$date_to = (is_array($inf) ? $inf['date_to'] : $inf->date_to);
 				$countworkingminusleave = (int)(Core::CountWorkingDays(Date('Y-m-d',strtotime('-1 day',strtotime($date_from))),$date_to) - $row->leave_amt);
-				$totalsubsistence = 1500 - round(($row->leave_amt / $countworkingminusleave) * 1500,2);
+				$totalsubsistence = (DB::table('hr_hazardpay')->where('cc_id', Employee::getOfficeByID($row->empid)->department)->first() != null ? 1500 - round(($row->leave_amt / $countworkingminusleave) * 1500,2) : 0);
+				// $totalsubsistence = 1500 - round(($row->leave_amt / $countworkingminusleave) * 1500,2);
 				$no = $i+1;
 				$pera = 0;
 				$hazard_duty_pay = 0;
@@ -144,13 +145,15 @@
 				$net_amount_received = round((($pera+$amount_earned)-$record[$i]->total_deductions),2);
 			@endphp
 			<tr>
-				<td {{$forImportant}} >ACC-{{$row->emp_pay_code}}</td> {{-- Item No. --}}
+				<td {{$forImportant}} >{{$row->empid}}</td> {{-- Item No. --}}
 				<td {{$forImportant}} >{{strtoupper(($row->empname ?? ''))}}</td> {{-- Name --}}
 				<td {{$forImportant}} >{{$no}}</td> {{-- No. --}}
 				<td {{$forImportant}} >{{ucfirst(($row->position ?? ''))}}</td> {{-- Position --}}
 				<td {{$forImportant}} >{{($row->rate!=0) ? number_format($row->rate,2) : "-"}} <?php $runningRowTotal['rate'] = isset($runningRowTotal['rate']) ? ($row->rate !=0 ? $row->rate : 0) + $runningRowTotal['rate'] : ($row->rate !=0 ? $row->rate : 0) ?></td> {{-- Rate --}}
+
 				<td {{$forOthers}} >{{($row->abcences!=9) ? $row->abcences : "-"}}</td> {{-- No. of Absence w/o Pay --}}
-				<td {{$forOthers}} >{{($row->basic_pay) ? number_format($row->basic_pay,2) : "-"}}</td> {{-- Rate Computed Absences --}}
+				<td {{$forOthers}} >{{($row->rate - ($row->abcences!=9 ? $row->abcences : 0)) ? number_format($row->rate - ($row->abcences!=9 ? $row->abcences : 0),2) : "-"}}</td> {{-- Rate Computed Absences --}}
+
 				<td {{$forOthers}} >{{number_format($pera,2)}}</td><?php $runningRowTotal['pera'] = isset($runningRowTotal['pera']) ? $pera + $runningRowTotal['pera'] : $pera ?> {{-- PERA --}}
 				<td {{$forOthers}} >{{number_format($hazard_duty_pay,2)}}<?php $runningRowTotal['hazard_duty'] = isset($runningRowTotal['hazard_duty']) ? $hazard_duty_pay + $runningRowTotal['hazard_duty'] : $hazard_duty_pay ?></td> {{-- Hazard Duty Pay --}}
 				<td {{$forOthers}} >{{number_format($allowance_laundry,2)}}<?php $runningRowTotal['allowance_laundry'] = isset($runningRowTotal['allowance_laundry']) ? $allowance_laundry + $runningRowTotal['allowance_laundry'] : $allowance_laundry ?></td> {{-- Allowance - Laundry --}}
@@ -224,8 +227,8 @@
 						if($ini->id != 1){
 							if(isset($gsis)){
 								foreach($gsis as $key => $sss){
-									if($ini->id === $sss[0]){
-										$gsisValue = $sss[2];
+									if($ini->id == $sss[2]){
+										$gsisValue = $sss[3];
 									}
 								}
 							}

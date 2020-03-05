@@ -489,8 +489,8 @@
 										LoadDtrTable();
 									}
 									maintable.clear().draw();
-									for (var i = 0; i < parse.length; i++) {
-										LoadHistoryTable(parse[i]);
+									for (var i = 0; i < a; i++) {
+										LoadHistoryTable(a[i]);
 									}
 									$('#sum-stat').html('<span class="btn btn-success">Yes</span>');
 									SearchTable();
@@ -595,8 +595,8 @@
 										LoadDtrTable();
 									}
 									maintable.clear().draw();
-									for (var i = 0; i < parse.length; i++) {
-										LoadHistoryTable(parse[i]);
+									for (var i = 0; i < a; i++) {
+										LoadHistoryTable(a[i]);
 									}
 									$('#sum-stat').html('<span class="btn btn-success">Yes</span>');
 									SearchTable();

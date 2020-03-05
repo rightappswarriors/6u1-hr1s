@@ -82,10 +82,10 @@ class PrintEmployeeDTRController extends Controller
             $v->employee_readable = Employee::Name($v->empid);
             $v->date_from_readable = \Carbon\Carbon::parse($v->date_from)->format('M d, Y');
             $v->date_to_readable = \Carbon\Carbon::parse($v->date_to)->format('M d, Y');
-            $v->covered_dates = Core::CoveredDates($v->date_from, $v->date_to);
+            $v->covered_dates = Core::CoveredDates(Date('Y-m-01',strtotime($v->date_from)), Date('Y-m-t',strtotime($v->date_to)));
 
             for($i=0; $i<count($v->covered_dates); $i++) {
-                $v->covered_dates[$i] = [$v->covered_dates[$i], date('Y-m-d', strtotime($v->covered_dates[$i]))];
+                $v->covered_dates[$i] = [Date('j',strtotime($v->covered_dates[$i])), date('Y-m-d', strtotime($v->covered_dates[$i]))];
             }
         }
         return $data;

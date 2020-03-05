@@ -27,8 +27,10 @@ class LoanType extends Model
             $data = DB::table(self::$tbl_name)/*->where(self::$cancel, '=', null)*/->where('code', $id)->first()/*->description*/;
             if($data != null) {
                 return $data->description;
-            } else {
+            } else if(Pagibig::Get_Sub_ById($sub) != null) {
                 return Pagibig::Get_Sub_ById($sub)->description;
+            } else {
+                return SSS::Get_Sub_ById($sub)->description;
             }
     	} catch (Exception $e) {
     		return $e;

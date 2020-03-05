@@ -325,9 +325,9 @@
 										<label>Transaction Date:</label>
 										<input type="text" name="dtp_trnxdt" class="form-control" id="trans_date" value="{{date('m/d/Y')}}" required readonly>
 									</div>
-									<div class="form-group">
+									<div class="form-group" hidden>
 										<label>Period to pay:</label>
-										<select name="cbo_per_tp" style="text-transform: uppercase;" class="form-control" required>
+										<select name="cbo_per_tp" style="text-transform: uppercase;" class="form-control">
 											<option value="" selected hidden disabled>---</option>
 											<option value="15">15th Day</option>
 											<option value="30">30th Day</option>
@@ -335,24 +335,25 @@
 									</div>
 									<div class="form-group">
 										<label>Amount of loan:</label>
-										<input type="number" name="txt_amnt_loan" class="form-control" required>
+										<input type="number" name="txt_amnt_loan" class="form-control" step="any" required>
 									</div>
-									<div class="form-group">
-										<label>Months to be paid:</label>
-										<input type="number" name="txt_mo_tbp" class="form-control" required>
-									</div>
+									
 								</div>
 								<div class="col-6">
 									<!-- Column 2 Row 2 -->
 									<b>Summary</b>
 									<div class="dropdown-divider"></div>
-									<div class="form-group">
+									<div class="form-group" hidden="">
 										<label>Issuance No.:</label>
 										<input type="text" name="txt_code" style="text-transform: uppercase;" class="form-control" maxlength="8" placeholder="XXX">
 									</div>
 									<div class="form-group">
 										<label>Deduction per month:</label>
 										<input type="number" name="txt_deduction" class="form-control" readonly required>
+									</div>
+									<div class="form-group">
+										<label>Months to be paid:</label>
+										<input type="number" name="txt_mo_tbp" class="form-control" required>
 									</div>
 									{{-- <div class="form-group">
 										<label>Start deduction on:</label>

@@ -66,8 +66,8 @@ class GeneratePayrollController extends Controller
                     'inf' => $var['info'],
                     'record' => $toAddres
                 ];
-                
-                return view('print.reports.payroll.export_payroll_summary_report',compact('data'));
+                $view = (($r->pptype ?? 1) == 1 ? 'print.reports.payroll.export_payroll_summary_report' : 'print.reports.payroll.export_payroll_summary_report_2');
+                return view($view,compact('data'));
             }
         }
         return abort(404);
@@ -154,7 +154,7 @@ class GeneratePayrollController extends Controller
             if (count($dtr_summaries) > 0) {
                 for ($i=0; $i < count($dtr_summaries); $i++) {
                     $tmp = "";
-                    $withDeductions = false;
+                    $withDeductions = true;
                     try {
                         # Payroll Info
                         $emp_pay_code = Core::getm99('emp_pay_code');
@@ -445,12 +445,12 @@ class GeneratePayrollController extends Controller
                             */
                                 ### SSS
                                     #### Contribution
-                                    $sss_cont_a = '';
+                                    $sss_cont_a = [];
                                     $sss_cont_b = 0;
                                     $sss_cont_c = 0;
                                     $sss_arr = ($d->sss!=""||$d->sss!=null) ? SSS::Get_SSS_Deduction($rate) : null;
                                     if ($sss_arr != null) {
-                                        $sss_cont_a = $sss_arr->code;
+                                        // $sss_cont_a = $sss_arr->code;
                                         // $sss_cont_b += $sss_arr->empshare_ec;
                                         $sss_cont_b += ($rate * .09);
                                         // $sss_cont_c += $sss_arr->empshare_sc;
@@ -478,11 +478,12 @@ class GeneratePayrollController extends Controller
                                         // $pagibig_cont_a = $pagibig_arr->code;
                                         // $pagibig_cont_a = null;
                                         $pagibig_cont_b += $rate * ($pagibig_arr->pct / 100);
-                                        $pagibig_cont_c += $rate * ($pagibig_arr->pct / 100);
+                                        // $pagibig_cont_c += $rate * ($pagibig_arr->pct / 100);
+                                        $pagibig_cont_c += 100;
                                     }
                                     
                                 if ($withDeductions == false) {
-                                    $sss_cont_a = '';
+                                    $sss_cont_a = [];
                                     $sss_cont_b = 0;
                                     $sss_cont_c = 0;
                                     $philhealth_cont_a = '';
@@ -571,6 +572,9 @@ class GeneratePayrollController extends Controller
                                                 if(strtolower($la->loan_type) == 'pagibig'){
                                                     array_push($pagibig_cont_a, [$la->loan_code, $la->loan_type, $la->loan_sub_type, $loan_tbp]);
                                                 }
+                                                if(strtolower($la->loan_type) == 'gsis'){
+                                                    array_push($sss_cont_a, [$la->loan_code, $la->loan_type, $la->loan_sub_type, $loan_tbp]);
+                                                }
                                                 array_push($loans, [$la->loan_code, $la->loan_type, $la->loan_sub_type, $loan_tbp]);
                                             }
                                         }
@@ -643,7 +647,7 @@ class GeneratePayrollController extends Controller
                             'gross_pay' => round($gross_pay, 2),
 
                             # Deductions
-                            'sss_cont_a' => $sss_cont_a,
+                            'sss_cont_a' => json_encode($sss_cont_a),
                             'sss_cont_b' => round($sss_cont_b, 2),
                             'sss_cont_c' => round($sss_cont_c, 2),
                             'philhealth_cont_a' => $philhealth_cont_a,

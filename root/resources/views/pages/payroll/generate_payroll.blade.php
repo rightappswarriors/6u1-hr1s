@@ -35,7 +35,7 @@
 							@endforeach
 						</select> --}}
 					{{-- </div> --}}
-					<div class="col-sm-3">	
+					<div class="col-sm-2">	
 						{{-- <select class="form-control" name="payroll_period" id="payroll_period" required>
 							<option value="15D">15th Day</option>
 							<option value="30D">30th Day</option>
@@ -43,12 +43,19 @@
 						<label class="mr-1">Payroll Period From:</label>
 						<input type="date" value="{{Date('Y-m-01')}}" name="dateFrom" id="dateFrom" class="datePicker form-control">
 					</div>
-					<div class="col-sm-3">
+					<div class="col-sm-2">
 						{{-- <select class="form-control YearSelector" id="year" name="year">
 						</select> --}}
 						<label class="mr-1">Payroll Period To:</label>
 						<input type="date" name="dateTo" value="{{Date('Y-m-t')}}" id="dateTo" class="datePicker form-control">
 					</div>	
+					<div class="col-sm-2">
+						<label class="mr-1">Payroll Preview Type:</label>
+						<select class="form-control" name="pptype" id="pptype">
+							<option Value="1" selected>1st</option>
+							<option value="2">2nd</option>
+						</select>
+					</div>
 					<div class="col-sm-2">	
 						<label class="mr-1">Generation Type:</label>
 						<select class="form-control" name="gen_type" id="gen_type">
@@ -256,7 +263,7 @@
 		}
 
 		function previewPayroll(){
-			window.open('{{url('payroll/generate-payroll/preview/?ofc=')}}'+$('#ofc').val()+'&empstatus='+$('#empstatus').val()+'&dateFrom='+$('#dateFrom').val()+'&dateTo='+$('#dateTo').val()/*+'&month='+$('#month').val()+'&payroll_period='+$('#payroll_period').val()+'&year='+$('#year').val()*/+'&gen_type='+$("#gen_type").val());
+			window.open('{{url('payroll/generate-payroll/preview/?ofc=')}}'+$('#ofc').val()+'&empstatus='+$('#empstatus').val()+'&dateFrom='+$('#dateFrom').val()+'&dateTo='+$('#dateTo').val()/*+'&month='+$('#month').val()+'&payroll_period='+$('#payroll_period').val()+'&year='+$('#year').val()*/+'&gen_type='+$("#gen_type").val()+'&pptype='+$('#pptype').val());
 		}
 
 		function GeneratePayroll()
