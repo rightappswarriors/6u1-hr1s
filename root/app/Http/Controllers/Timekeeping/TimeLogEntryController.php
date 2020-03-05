@@ -111,8 +111,11 @@ class TimeLogEntryController extends Controller
 
     public function addLog(Request $r)
     {
+        $nlogs_id = Core::getm99One('logs_id')->logs_id;
+            return $nlogs_id;
 	    try {
-	    	$nlogs_id = Core::getm99One('logs_id')->logs_id;
+
+	    	
             list($d_y, $d_m, $d_d) = explode("-", $r->date_workdate);
             $month = Core::GetMonth((int)$d_m);
             $date = $month." ".$d_d.", ".$d_y;

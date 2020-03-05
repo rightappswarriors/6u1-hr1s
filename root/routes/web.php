@@ -340,7 +340,7 @@ Route::prefix('Biometric')->group(function(){
 			/* LOAN ENTRY */
 			Route::prefix('loan-entry')->group(function() {
 				Route::get('/', 'Payroll\Loan\LoanEntryController@view');
-				Route::post('/', 'Payroll\Loan\LoanEntryController@add');
+				Route::post('/add', 'Payroll\Loan\LoanEntryController@add');
 				Route::post('/update', 'Payroll\Loan\LoanEntryController@update');
 				Route::post('/find', 'Payroll\Loan\LoanEntryController@find');
 				Route::get('/get-entry', 'Payroll\Loan\LoanEntryController@get_entry');
