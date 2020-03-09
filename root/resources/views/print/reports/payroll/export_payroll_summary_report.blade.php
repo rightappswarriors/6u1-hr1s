@@ -132,7 +132,9 @@
 						if ($code == "PERA") {
 							$pera += $amt;
 						} elseif ($code == "HAZARDPAY") {
-							$hazard_duty_pay += $amt;
+							// $hazard_duty_pay += $amt;
+							$hazard_duty_pay = ($row->rate >= 9000 ? ($row->rate * .25) : ($row->rate * .01));
+							// dd($hazard_duty_pay);
 						} elseif ($code == "ALLOWNC") {
 							if ($id == "A1") {
 								$allowance_laundry += $amt;
@@ -141,7 +143,8 @@
 						}
 					}
 				}
-				$amount_earned = round(($row->rate-($pera))-((($row->rate-$record[$i]->total_deductions)-($pera))/2),2);
+				// $amount_earned = round(($row->rate-($pera))-((($row->rate-$record[$i]->total_deductions)-($pera))/2),2);
+				$amount_earned = $row->days_worked * $row->rate_computed_absences[2];
 				$net_amount_received = round((($pera+$amount_earned)-$record[$i]->total_deductions),2);
 			@endphp
 			<tr>
@@ -151,8 +154,8 @@
 				<td {{$forImportant}} >{{ucfirst(($row->position ?? ''))}}</td> {{-- Position --}}
 				<td {{$forImportant}} >{{($row->rate!=0) ? number_format($row->rate,2) : "-"}} <?php $runningRowTotal['rate'] = isset($runningRowTotal['rate']) ? ($row->rate !=0 ? $row->rate : 0) + $runningRowTotal['rate'] : ($row->rate !=0 ? $row->rate : 0) ?></td> {{-- Rate --}}
 
-				<td {{$forOthers}} >{{($row->abcences!=9) ? $row->abcences : "-"}}</td> {{-- No. of Absence w/o Pay --}}
-				<td {{$forOthers}} >{{($row->rate - ($row->abcences!=9 ? $row->abcences : 0)) ? number_format($row->rate - ($row->abcences!=9 ? $row->abcences : 0),2) : "-"}}</td> {{-- Rate Computed Absences --}}
+				<td {{$forOthers}} >{{($row->rate_computed_absences[1] > 0 ? $row->rate_computed_absences[1] : '-')}}</td> {{-- No. of Absence w/o Pay --}}
+				<td {{$forOthers}} >{{$row->rate_computed_absences[0] ? number_format($row->rate_computed_absences[0],2) : "-"}}</td> {{-- Rate Computed Absences --}}
 
 				<td {{$forOthers}} >{{number_format($pera,2)}}</td><?php $runningRowTotal['pera'] = isset($runningRowTotal['pera']) ? $pera + $runningRowTotal['pera'] : $pera ?> {{-- PERA --}}
 				<td {{$forOthers}} >{{number_format($hazard_duty_pay,2)}}<?php $runningRowTotal['hazard_duty'] = isset($runningRowTotal['hazard_duty']) ? $hazard_duty_pay + $runningRowTotal['hazard_duty'] : $hazard_duty_pay ?></td> {{-- Hazard Duty Pay --}}

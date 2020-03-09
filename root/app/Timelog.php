@@ -425,9 +425,11 @@ class Timelog extends Model
         * @return false if not
         */
 
+        /*
+        * reworked for grace period
+        */
         $time_in = $time;
         $r_time_in = self::ReqTimeIn();
-
         if (strtotime($time) > strtotime($r_time_in)) {
             return true;
         }

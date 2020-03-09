@@ -64,7 +64,7 @@ class GenerateDTRController extends Controller
 
     public function Generate($r)
     {
-
+        
 
         // return $r->all();
         /*
@@ -242,8 +242,7 @@ class GenerateDTRController extends Controller
                         }
 
                         $temp_tl = "";
-
-                        try {
+                        try {   
                             /**
                             * Time Sorting Method
                             * -------------------------------------------------------
@@ -259,6 +258,7 @@ class GenerateDTRController extends Controller
                                     $r_time_pm = Timelog::GetRenHours($tl_in_pm, $tl_out_pm);
                                     $r_time_total = Core::GET_TIME_DIFF(Timelog::get_lunch_break(), Core::GET_TIME_TOTAL([$r_time_am, $r_time_pm]));
                                     # If Late
+
                                     if (Timelog::IfLate($tl_in_am)) {
                                         array_push($arr_late, [$date, [$tl_in_am, $tl_out_am, $tl_in_pm, $tl_out_pm], Core::GET_TIME_DIFF(Timelog::ReqTimeIn(), $tl_in_am)]);
                                     }
@@ -395,12 +395,13 @@ class GenerateDTRController extends Controller
                 // $workdays = 22 / 2;
                 // $totaldays = count($arr_daysworked);
                 // $totalabsent = ($workdays - $totaldays) - count($arr_leavedates);
-                $conditionForFirstDay = (Date('d',strtotime($r->monthFrom)) != 1 ? Date('Y-m-d',strtotime('-1 day',strtotime($r->monthFrom))) : $r->monthFrom);
+                $conditionForFirstDay = (Date('j',strtotime($r->monthFrom)) != 1 ? Date('Y-m-d',strtotime('-1 day',strtotime($r->monthFrom))) : $r->monthFrom);
                 $workdays = Core::CountWorkingDays($conditionForFirstDay,$r->monthTo);
                 $totaldays = count($arr_daysworked);
                 // return [$totaldays, ((int)$workdays), count($arr_leavedates)];
                 // return $arr_daysworked;
-                $totalabsent = (((int)$workdays)) - $totaldays - count($arr_leavedates);
+                // $totalabsent = (((int)$workdays)) - $totaldays - count($arr_leavedates);
+                $totalabsent = ((((int)$workdays)) - $totaldays - count($arr_leavedates)/* - $totaldays*/);
 
                 if (count($arr_late) > 0) { 
                     $tmp = [];

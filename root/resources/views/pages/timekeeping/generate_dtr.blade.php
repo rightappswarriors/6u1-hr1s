@@ -129,10 +129,10 @@
 										<th style="text-align: center;" colspan="2">{{-- Total Overtime --}} Generate Type</th>
 										<td id="sum-to" colspan="2"></td>
 									</tr>
-									<tr>
+									{{-- <tr>
 										<th style="text-align: center;" colspan="2">Total Workdays</th>
 										<td id="sum-tw" colspan="2"></td>
-									</tr>
+									</tr> --}}
 									<tr>
 										<th style="text-align: center;" colspan="2">Days Worked</th>
 										<td id="sum-dw" colspan="2"></td>
@@ -357,7 +357,7 @@
 		function LoadSummaryTable(data)
 		{
 			var a = ($('#payroll_gen_type').val() == "OVERTIME") ? "N/A" : data.workdays+((data.req_hrs!=null) ? " ("+data.req_hrs+" hrs/day)" : "");
-			$('#sum-tw').text(a);
+			// $('#sum-tw').text(a);
 			$('#sum-dw').text(data.daysworked);
 			$('#sum-a').text(data.absences);
 			$('#sum-l').text(data.late);

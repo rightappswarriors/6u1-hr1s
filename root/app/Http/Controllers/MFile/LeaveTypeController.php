@@ -23,7 +23,7 @@ class LeaveTypeController extends Controller
     public function add(Request $r)
     {
         // return dd($r->all());
-    	$data = ['code'=>strtoupper($r->txt_code) , 'description' => strtoupper($r->txt_name), 'leave_limit' => $r->txt_limit, 'carry_over' => $r->txt_carry_over];
+    	$data = ['code'=>strtoupper($r->txt_code) , 'description' => strtoupper($r->txt_name), 'leave_limit' => $r->txt_limit, 'carry_over' => $r->txt_carry_over, 'incremental' => $r->increment];
     	try {
 
     		DB::table(LeaveType::$tbl_name)->insert($data);
@@ -37,7 +37,7 @@ class LeaveTypeController extends Controller
     }
     public function update(Request $r)
     {
-    	$data = ['description' => strtoupper($r->txt_name), 'leave_limit' => $r->txt_limit, 'carry_over' => $r->txt_carry_over];
+    	$data = ['description' => strtoupper($r->txt_name), 'leave_limit' => $r->txt_limit, 'carry_over' => $r->txt_carry_over, 'incremental' => $r->increment];
     	try {
 
     		DB::table(LeaveType::$tbl_name)->where(LeaveType::$pk, strtoupper($r->txt_code))->update($data);

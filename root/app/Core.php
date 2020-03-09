@@ -424,11 +424,10 @@ class Core extends Model
 	    
 	    $interval = date_diff($datetime1, $datetime2);
 	    $interval = $interval->format('%a');
-
 	    $workdays = 0;
 	    
 	    list($year, $month, $day) = explode("-", $date_1);
-	    for ($i=0; $i < $interval; $i++) { 
+	    for ($i=Date('j',strtotime($date_1)); $i <= Date('j',strtotime($date_2)); $i++) { 
 	    	$q_date = self::GetMonth((int)$month).' '.$day.', '.$year;
 	    	$dayofweek = date('l', strtotime($q_date));
 	    	if ($dayofweek != "Sunday" && $dayofweek != "Saturday") {
@@ -904,6 +903,10 @@ class Core extends Model
     		}
     	}
     	return $toReturn;
+    }
+
+    public static function operateMonthly(){
+
     }
 
     public static $default_img = 'root/storage/app/public/profile_images/profile_user2.jpg';

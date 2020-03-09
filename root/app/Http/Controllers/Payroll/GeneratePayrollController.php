@@ -197,6 +197,7 @@ class GeneratePayrollController extends Controller
                         # Regular Pay
                         $regular_pay = 0;
                         $daily_rate = 0;
+                        $rate_computed_absences = 0;
                         /*if ($rate_type == "D") {
                             $regular_pay = $rate * $workdays;
                         } else {
@@ -220,6 +221,7 @@ class GeneratePayrollController extends Controller
 
                         # Basic Pay
                             ## Absent
+                            $rate_computed_absences = $this->computeRateWithUndertimeAndAbsent($rate,$d->late,$d->undertime,$d->days_absent);
                             $days_absent = 0; $days_absent = $d->days_absent;
                             $days_absent_amt = 0; $days_absent_amt = $days_absent * $daily_rate;
 
@@ -396,9 +398,9 @@ class GeneratePayrollController extends Controller
                                     if ($hazard_pay->withpay) {
                                         $hazard_pay_amt = (float)$basic_pay * ((float)$hazard_pay->hp_pct / 100);
                                     }
+                                    $other_earnings_amt += $hazard_pay_amt;
+                                    array_push($other_earnings, ["HP1", "HAZARDPAY", $hazard_pay_amt]);
                                 }
-                                $other_earnings_amt += $hazard_pay_amt;
-                                array_push($other_earnings, ["HP1", "HAZARDPAY", $hazard_pay_amt]);
                                 ### ALLOWANCE
                                     #### LAUNDRY
 
@@ -667,6 +669,9 @@ class GeneratePayrollController extends Controller
 
                             # Net Pay
                             'net_pay' => $net_pay,
+
+                            #rate computed
+                            'rate_computed_absences' =>$rate_computed_absences
                         ];
                         $updateLines = [
                             'loans' => $updateln_loan,
@@ -873,5 +878,28 @@ class GeneratePayrollController extends Controller
         } catch (\Exception $e) {
             return 0;
         }
+    }
+
+    public static function computeRateWithUndertimeAndAbsent($rate,$late,$undertime,$absent){
+        //return: 1st: rate deducted with late, undertime, absent, 2nd:late, undertime, absent total, 3rd: dailyrate, 4th: hourlyrate, 5th: minuterate
+        if(isset($rate) && isset($late) && isset($undertime)){
+            list($formattedLateHour, $formattedLateMinute) = explode(":", $late);
+            list($formattedUndertimeHour, $formattedUndertimeMinute) = explode(":", $undertime);
+
+            $remainingMinute = (($formattedLateMinute + $formattedUndertimeMinute) % 60);
+            $formattedLateHour += (($formattedLateMinute + $formattedUndertimeMinute) / 60);
+            $remaininghour = ($formattedLateHour + $formattedUndertimeHour) % 24;
+
+            $toAdd = (int)((($formattedLateHour + $formattedUndertimeHour) / 24) > 0 ? (($formattedLateHour + $formattedUndertimeHour) / 24): 0);
+            $absent += $toAdd;
+            
+
+            $dailyRate = Round(($rate / 22),2);
+            $hourlyRate = Round(($dailyRate / 24),2);
+            $minuteRate = Round(($hourlyRate / 60),2);
+            return [$rate - (($absent * $dailyRate) + ($hourlyRate * $remaininghour) + ($minuteRate * $remainingMinute)),(($absent * $dailyRate) + ($hourlyRate * $remaininghour) + ($minuteRate * $remainingMinute)),$dailyRate,$hourlyRate,$minuteRate];
+            
+        }
+        return 0;
     }
 }

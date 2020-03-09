@@ -396,7 +396,7 @@
 					for(k=0; k<data.undertime_readable.length; k++) {
 						let readableUndertime = data.undertime_readable[k];
 						if(readableUndertime[0] == data.covered_dates[i][1]){
-							trigger = readableUndertime[2];
+							// trigger = readableUndertime[2];
 							break;
 						}
 					}
@@ -408,7 +408,7 @@
 					for(j=0; j<data.undertime_readable.length; j++) {
 						let readableUndertime = data.undertime_readable[j];
 						if(readableUndertime[0] == data.covered_dates[i][1]){
-							trigger = readableUndertime[2];
+							// trigger = readableUndertime[2];
 							break;
 						}
 					}
