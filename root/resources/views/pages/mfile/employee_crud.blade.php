@@ -585,7 +585,7 @@
 							    <div class="form-group row">
 							      	<label class="col-sm-4 col-form-label">Home Address {{-- <strong style="color:red">*</strong> --}}</label>
 							      	<div class="col-sm-8">
-							      		<input type="text" class="form-control" name="txt_home_add" value="@isset($MYDATA){{$MYDATA->email}}@endisset">
+							      		<input type="text" class="form-control" name="txt_home_add" value="@isset($MYDATA){{$MYDATA->home_address}}@endisset">
 							      	</div>
 							    </div>
 							    <br>

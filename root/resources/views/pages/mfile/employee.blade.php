@@ -31,7 +31,7 @@
 					<div class="card">
 						<div class="card-body">
 							<div class="table-responsive">
-								<table class="table table-hover table-bordered" id="dataTable">
+								<table class="table table-hover table-bordered" id="dataTeable">
 									<col>
 									<col>
 									<col>
@@ -292,7 +292,7 @@
 	<script type="text/javascript">
 		$('#date_from').datepicker(date_option5);
 		$('#date_to').datepicker(date_option5);
-		var table = $('#dataTable').DataTable(dataTable_config);
+		var table = $('#dataTeable').DataTable({"order": []});
 		var flag_table = $('#dataTable-flag').DataTable(dataTable_short);
 	</script>
 	<script type="text/javascript">

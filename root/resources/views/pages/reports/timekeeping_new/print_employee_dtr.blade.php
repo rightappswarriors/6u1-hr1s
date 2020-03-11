@@ -396,7 +396,7 @@
 					for(k=0; k<data.undertime_readable.length; k++) {
 						let readableUndertime = data.undertime_readable[k];
 						if(readableUndertime[0] == data.covered_dates[i][1]){
-							// trigger = readableUndertime[2];
+							trigger = readableUndertime[2].split(':')[0];
 							break;
 						}
 					}
@@ -408,7 +408,7 @@
 					for(j=0; j<data.undertime_readable.length; j++) {
 						let readableUndertime = data.undertime_readable[j];
 						if(readableUndertime[0] == data.covered_dates[i][1]){
-							// trigger = readableUndertime[2];
+							trigger = readableUndertime[2].split(':')[1];
 							break;
 						}
 					}
@@ -417,20 +417,27 @@
 
 				if(data.days_worked_readable.length > 0) {
 					for(j=0; j<data.days_worked_readable.length; j++) {
+
 						if(data.covered_dates[i][1] == data.days_worked_readable[j][0]) {
 							in1.innerHTML = formatAMPM2(data.days_worked_readable[j][1][0]);
+							// arrival am
 							out1.innerHTML = '12:00nn';
 							in2.innerHTML = '1:00pm';
 
 							if(data.days_worked_readable[j][1].length > 2) {
+								
 								out1.innerHTML = formatAMPM2(data.days_worked_readable[j][1][1]);
+								// departure am
 								in2.innerHTML = formatAMPM2(data.days_worked_readable[j][1][2]);
+								// arrival pm
 								out2.innerHTML = formatAMPM2(data.days_worked_readable[j][1][3]);
+								// departure pm
 							} else {
 								out2.innerHTML = formatAMPM2(data.days_worked_readable[j][1][1]);
 							}
 						}
 					}
+
 				}
 
 				tr.appendChild(number);
@@ -520,6 +527,7 @@
 		}
 
 		function formatAMPM2(time) {
+			if(isNaN( parseInt(time) )){return time}
 			if(time=="") return "";
 			if(time=="<span class='text-danger'>missing</span>") return "";
 			var timeString = time;

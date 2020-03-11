@@ -36,13 +36,17 @@ class EmployeeController extends Controller
         $this->days= DB::select($SQLDays);
         $SQLCivilStatus = "SELECT * FROM hris.hr_civil_status";
         $this->civil_stat = DB::select($SQLCivilStatus);
-        $SQLEmployee = "SELECT isheadoffacility,empid,lastname,firstname,mi,positions,department,section,date_hired,contractual_date,date_resigned,date_terminated,prohibition_date,date_regular,empstatus,contract_days,prc,ctc,rate_type,pay_rate,biometric,sss,pagibig,philhealth,payroll_account,tin,tax_bracket,shift_sched_from,dayoff1,dayoff2,sex,birth,civil_status,religion,height,weight,father,father_address,father_contact,father_job,mother,mother_address,mother_contact,mother_job,emp_contact,home_tel,email,home_address,emergency_name,emergency_contact,em_home_address,relationship,shift_sched_sat_from,shift_sched_to,shift_sched_sat_to,fixed_rate,primary_ed,secondary_ed,tertiary_ed,graduate,post_graduate, sss_bracket,fixed_sched FROM hris.hr_employee WHERE COALESCE(cancel, cancel, '')<>'Y'";
+        $SQLEmployee = "SELECT increment,isheadoffacility,empid,lastname,firstname,mi,positions,department,section,date_hired,contractual_date,date_resigned,date_terminated,prohibition_date,date_regular,empstatus,contract_days,prc,ctc,rate_type,pay_rate,biometric,sss,pagibig,philhealth,payroll_account,tin,tax_bracket,shift_sched_from,dayoff1,dayoff2,sex,birth,civil_status,religion,height,weight,father,father_address,father_contact,father_job,mother,mother_address,mother_contact,mother_job,emp_contact,home_tel,email,home_address,emergency_name,emergency_contact,em_home_address,relationship,shift_sched_sat_from,shift_sched_to,shift_sched_sat_to,fixed_rate,primary_ed,secondary_ed,tertiary_ed,graduate,post_graduate, sss_bracket,fixed_sched FROM hris.hr_employee WHERE COALESCE(cancel, cancel, '')<>'Y' order by increment DESC";
         $this->employee = DB::select($SQLEmployee);
     }
     public function view()
     {
         for ($i=0; $i < count($this->employee); $i++) { 
+            // $inc =(empty(DB::table('hr_employee')->max('increment')) ? 1 : DB::table('hr_employee')->max('increment') + 1);
             $emp = $this->employee[$i];
+            // if(!isset($emp->increment)){
+                // DB::table('hr_employee')->where('empid',$emp->empid)->update(['increment' => $inc]);
+            // }
             $emp->office = (Office::GetOffice($emp->department)!=null) ? Office::GetOffice($emp->department)->cc_desc : "office-not-found";
             $emp->jobtitle = JobTitle::Get_JobTitle($emp->positions);
             $emp->emp_status = (EmployeeStatus::find($emp->empstatus)!=null) ? EmployeeStatus::find($emp->empstatus)->description : "employee-status-not-found";
@@ -62,6 +66,7 @@ class EmployeeController extends Controller
     }
     public function add2(Request $r)
     {
+        $increment = (empty(DB::table('hr_employee')->max('increment')) ? 1 : DB::table('hr_employee')->max('increment') + 1);
         $data = [
             'empid' => strtoupper($r->txt_id),
             'isheadoffacility' => (isset($r->isHeadOfFaci) ? true : false),
@@ -131,6 +136,7 @@ class EmployeeController extends Controller
             // 'sss_bracket' => $r->txt_ss_brac,
             'fixed_sched' => ($r->txt_fx_sched == 'Yes') ? "Y": "N",
             'accountnumber' => ($r->txt_accountnumber != '') ? $r->txt_accountnumber : '',
+            'increment' => $increment,
         ];
         $status = 'JO';
         $service_record_data = [
@@ -288,6 +294,7 @@ class EmployeeController extends Controller
     }
     public function update(Request $r)
     {
+        $increment = (empty(DB::table('hr_employee')->max('increment')) ? 1 : DB::table('hr_employee')->max('increment') + 1);
         $old_data = Employee::GetEmployee($r->txt_id);
         // dd($old_data);
         $data = [
@@ -359,6 +366,7 @@ class EmployeeController extends Controller
             // 'sss_bracket' => $r->txt_ss_brac,
             'fixed_sched' => ($r->txt_fx_sched == 'Yes') ? "Y": "N",
             'accountnumber' => ($r->txt_accountnumber != '') ? $r->txt_accountnumber : '',
+            'increment' => $increment
         ];
         // dd(Core::get_nextincrementlimitchar(Core::getm99One('sr_code')->sr_code, 8));
         // dd($data);

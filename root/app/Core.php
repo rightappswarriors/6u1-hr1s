@@ -147,6 +147,28 @@ class Core extends Model
 		return sprintf('%02d:%02d', $hours, $minutes);
 	}
 
+	public static function GET_TIME_DIFF_ADD_MINUTE($time1, $time2) {
+		/*
+		| Added by Syrel
+		| Returns the time difference between time1 and  time2
+		| Return value is in string having the format of "00:00:00"
+		*/
+		$time1_h = date('H', strtotime($time1));
+		$time1_m = date('i', strtotime($time1));
+		$time2_h = date('H', strtotime($time2));
+		$time2_m = date('i', strtotime($time2));
+		
+		$hours = $time2_h - $time1_h;
+		if ((int)$time2_m < (int)$time1_m) {
+			$hours = $hours - 1;
+			$time2_m = $time2_m + 60;
+		}
+		$minutes = $time2_m + $time1_m;
+
+		// return $hours.":".$minutes;
+		return sprintf('%02d:%02d', $hours, $minutes);
+	}
+
 	public static function GET_TIME_TOTAL(Array $times)
 	{
 		$minutes = 0; //declare minutes either it gives Notice: Undefined variable
@@ -508,6 +530,13 @@ class Core extends Model
 
 	    return $workdays;
     }
+
+    public static function isCoveredInBetweenDate($datefrom, $dateto, $date){
+    	$date = Date('F j, Y',strtotime($date));
+    	return in_array($date, self::CoveredDates($datefrom,$dateto));
+    }
+
+
 
 	// Set Alert Session
     public static function Set_Alert($alertType, $alertMsg = null)
@@ -905,8 +934,37 @@ class Core extends Model
     	return $toReturn;
     }
 
-    public static function operateMonthly(){
+    public static function convertHourDay($day,$operation = '*'){
+    	switch ($operation) {
+    		case '/':
+    			return round($day / 24,2);
+    			break;
+    		
+    		default:
+    			return $day * 24;
+    			break;
+    	}
+    	return $day * 24;
+    }
 
+    public static function isEnoughLeave($totalTime,$empid){
+    	if(isset($totalTime)){
+    		list($hour,$minute) = explode(':', $totalTime);
+    		$totalHour = self::convertHourDay($hour+(round($minute / 60,2)),'/');
+	    	$m99Leave = json_decode((self::getm99One('leavestoremove')->leavestoremove ?? '["VL","SL"]'));
+	    	if(isset($m99Leave)){
+	    		foreach ($m99Leave as $key => $value) {
+	    			$leavecount = DB::table('hr_emp_leavecount')->where([['empid',$empid],['leave_type',$value]])->get();
+	    			foreach ($leavecount as $lkey => $lvalue) {
+	    				$calculated = $lvalue->peak - $lvalue->count;
+	    				if( ($calculated) > 0 ){
+	    					return [true,$totalHour - $calculated, $lvalue->elccode, $totalTime, $totalHour ,$calculated];
+	    				}
+	    			}
+	    		}
+	    	}
+    	}
+    	return false;
     }
 
     public static $default_img = 'root/storage/app/public/profile_images/profile_user2.jpg';
