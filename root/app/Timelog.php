@@ -116,7 +116,7 @@ class Timelog extends Model
        // return "17:40";
         $fy = DB::table('hris.m99')->first()->fy;
         $d = DB::table('hris.m99')->where('fy', $fy)->first()->req_time_out_2;
-        return ($d == null || $d == "")?"17:40":$d;
+        return ($d == null || $d == "")?"17:00":$d;
     }
 
     // public static $lunchbreak = self::get_lunch_break(); // Must be in h:m:s format and 24 hours
@@ -478,6 +478,7 @@ class Timelog extends Model
         return false;
     }
 
+
     public static function IfUndertime(string $rendered_time, string $required_time)
     {
         /**
@@ -503,6 +504,59 @@ class Timelog extends Model
             return true;
         }
         return false;
+    }
+
+    public static function toMinuteCustom($time){
+        // should be from hour
+        list($hour,$minute) = explode(':', $time);
+        return ($hour * 60) + $minute;
+    }
+
+    public static function toHourCustom($time){
+        // should be from hour
+        list($hour,$minute) = explode(':', $time);
+        return ($minute / 60) + $hour;
+    }
+
+    public static function isUndertime(string $out, string $ampm = 'am', $getResult = false){
+        if(isset($out)){
+            switch ($ampm) {
+                case 'pm':
+                    $toCompare = Timelog::ReqTimeOut_2();
+                    break;
+                
+                default:
+                    $toCompare = Timelog::ReqTimeOut();
+                    break;
+            }
+            $booleanReturn = self::toMinuteCustom($out) < self::toMinuteCustom($toCompare);
+            if($getResult && $booleanReturn){
+                list($hourOut,$minuteOut) = explode(':', $out);
+                list($hourCompare,$minuteCompare) = explode(':', $toCompare);
+                return [true, (sprintf("%02d", ($hourCompare - $hourOut) - 1)).':'.(60 - $minuteOut)];
+            }
+            return $booleanReturn;
+        }
+    }
+
+    public static function computeUndertime($am,$pm){
+        $amData = self::isUndertime($am,'am',true);
+        $pmData = self::isUndertime($pm,'pm',true);
+        $amCompute = $pmCompute = "00:00";
+
+        if($amData){
+            $amCompute = $amData[1];
+        }
+        if($pmData){
+            $pmCompute = $pmData[1];
+        }
+
+        $amExplode = list($hourAM,$minuteAM) = explode(":", $amCompute);
+        $pmExplode = list($hourPM,$minutePM) = explode(":", $pmCompute);
+        $computedMinute =  (($minuteAM + $minutePM) % 60);
+        $computedHour = $hourAM + $hourPM + (($minuteAM + $minutePM) / 60);
+        return sprintf("%02d",$computedHour).':'.sprintf("%02d",$computedMinute);
+
     }
 
     // public static function IfOvertime(string $rendered_time, string $required_time)

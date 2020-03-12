@@ -365,7 +365,7 @@
 						if (data!="no user") {
 							if (data!="no record") {
 								var log = JSON.parse(data);
-								$('#frm-editlog').attr('action', '{{url('timekeeping/timelog-entry/edit-log')}}?logid='+log.logs_id);
+								$('#frm-editlog').attr('action', '{{url('timekeeping/timelog-entry/edit-log')}}?logid='+log.logs_id+'&empid='+emp);
 								$('#date_workdate2').val(log.work_date);
 								$('#time_timelog2').val(log.time_log);
 								$('#sel_status2').val(log.status).trigger('change');
