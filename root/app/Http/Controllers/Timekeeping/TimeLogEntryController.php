@@ -112,7 +112,7 @@ class TimeLogEntryController extends Controller
     public function addLog(Request $r)
     {
         $nlogs_id = Core::getm99One('logs_id')->logs_id;
-            return $nlogs_id;
+            // return $nlogs_id;
 	    try {
 
 	    	
@@ -122,13 +122,14 @@ class TimeLogEntryController extends Controller
 
 	    	if (DB::table('hr_tito2')->insert(['work_date' => date('Y-m-d', strtotime($date)), 'time_log' => date('H:i', strtotime($r->time_timelog)), 'empid' => $r->id, 'status' => $r->sel_status, 'source' => (isset($r->source) ? $r->source : 'M'), 'logs_id' => $nlogs_id])) {
 	    		Core::updatem99('logs_id',Core::get_nextincrementlimitchar($nlogs_id, 8));
-	    		$data = DB::table('hr_tito2')->where('logs_id', $nlogs_id)->first();
+	    		$data = DB::table('hr_tito2')->where([['logs_id', $nlogs_id],['empid',$r->id]])->first();
 	    		$data->status_desc = Core::IO((string)$data->status);
 	    		$data->source_desc = Core::source($data->source);
 	    		return json_encode($data);
 	    	}
 	    	return "error";
 	    } catch (\Exception $e) {
+            return $e;
             ErrorCode::Generate('controller', 'TimeLogEntryController', '00002', $e->getMessage());
 	    	return "error";
 	    }
@@ -189,7 +190,7 @@ class TimeLogEntryController extends Controller
         try {
             $emp = DB::table('hr_employee')->where('empid', $r->id)->first();
             if ($emp!=null) {
-                $log = DB::table('hr_tito2')->where('logs_id', $r->log)->first();
+                $log = DB::table('hr_tito2')->where([['logs_id', $r->log],['empid',$r->id]])->first();
                 if ($log!=null) {
                     $log->status_type = Core::IO2('capital', $log->status);
                     return json_encode($log);
@@ -215,7 +216,7 @@ class TimeLogEntryController extends Controller
                     'time_log' => $r->time_timelog2,
                     'status' => $r->sel_status2,
                 ]);
-                $newlog = DB::table('hr_tito2')->where('logs_id', $r->logid)->first();
+                $newlog = DB::table('hr_tito2')->where([['logs_id', $r->logid],['empid',$r->empid]])->first();
                 $newlog->status_desc = Core::io((string)$newlog->status);
                 $newlog->source_desc = Core::source($newlog->source);
                 return json_encode($newlog);

@@ -92,7 +92,7 @@ class GeneratePayrollController extends Controller
             // $pp = Payroll::PayrollPeriod2($r->month, $r->payroll_period, $r->year);
             // $sql = "SELECT dtr.*, emp.* FROM (SELECT a.ppid, a.date_from, a.date_to, a.date_generated, a.time_generated, a.code, a.generatedby, a.generationtype, a.empid FROM hris.hr_dtr_sum_hdr a LEFT JOIN hris.hr_dtr_sum_employees b ON a.code = b.dtr_sum_id where b.isgenerated IS NOT TRUE) dtr INNER JOIN ($emp_sql) emp ON dtr.empid = emp.empid";
             // $sql = "SELECT dtr.*, emp.* FROM (SELECT * FROM hris.hr_dtr_sum_hdr a LEFT JOIN hris.hr_dtr_sum_employees b ON a.code = b.dtr_sum_id) dtr INNER JOIN ($emp_sql) emp ON dtr.empid = emp.empid";
-            $sql = "SELECT distinct pay_rate, rate_type, tax_bracket, days_absent, late, undertime, leaves_arr, leaves, total_overtime_arr, holiday_arr, holiday_dates, department, sss, philhealth, pagibig, dtr_sum_id, date_generated, time_generated, empname, emp.empid FROM (SELECT * FROM hris.hr_dtr_sum_hdr a LEFT JOIN hris.hr_dtr_sum_employees b ON a.code = b.dtr_sum_id) dtr INNER JOIN ($emp_sql) emp ON dtr.empid = emp.empid";
+            $sql = "SELECT distinct pay_rate, rate_type, tax_bracket, days_absent, late, undertime, leaves_arr, leaves, total_overtime_arr, holiday_arr, holiday_dates, department, sss, philhealth, pagibig, dtr_sum_id, date_generated, time_generated, empname, emp.empid, ob_arr FROM (SELECT * FROM hris.hr_dtr_sum_hdr a LEFT JOIN hris.hr_dtr_sum_employees b ON a.code = b.dtr_sum_id) dtr INNER JOIN ($emp_sql) emp ON dtr.empid = emp.empid";
                 // $con = " WHERE date_from >= '".date('Y-m-d', strtotime($pp->from))."' AND date_to <= '".date('Y-m-d', strtotime($pp->to))."' AND empstatus = '".$r->empstatus."' AND generationtype = '".$r->gen_type."' AND department = '".$r->ofc."'";
             $con = " WHERE isgenerated IS NOT TRUE AND date_from >= '".date('Y-m-d', strtotime($r->dateFrom))."' AND date_to <= '".date('Y-m-d', strtotime($r->dateTo))."' AND empstatus = '".$r->empstatus."' AND generationtype = '".$r->gen_type."' AND department = '".$r->ofc."'";
             $return_val->search = date('Y-m-d', strtotime($r->dateFrom))." to ".date('Y-m-d', strtotime($r->dateTo));
@@ -133,7 +133,7 @@ class GeneratePayrollController extends Controller
         * Modules within this function is divided by different different methods
         * Please read the comments
         */
-
+        $obCount = 0;
         $errors = [];
         $results = [];
         $asd = $toDisplay = [];
@@ -197,6 +197,7 @@ class GeneratePayrollController extends Controller
                         # Regular Pay
                         $regular_pay = 0;
                         $daily_rate = 0;
+                        $rate_computed_absences = 0;
                         /*if ($rate_type == "D") {
                             $regular_pay = $rate * $workdays;
                         } else {
@@ -218,8 +219,12 @@ class GeneratePayrollController extends Controller
                         $hourly_rate = 0; $hourly_rate = $daily_rate / $shift_hours;
                         $minute_rate = 0; $minute_rate = $hourly_rate / 60;
 
+                        #ob
+                        $obCount = count(json_decode($d->ob_arr));
+
                         # Basic Pay
                             ## Absent
+                            $rate_computed_absences = $this->computeRateWithUndertimeAndAbsent($rate,$d->late,$d->undertime,$d->days_absent);
                             $days_absent = 0; $days_absent = $d->days_absent;
                             $days_absent_amt = 0; $days_absent_amt = $days_absent * $daily_rate;
 
@@ -396,9 +401,9 @@ class GeneratePayrollController extends Controller
                                     if ($hazard_pay->withpay) {
                                         $hazard_pay_amt = (float)$basic_pay * ((float)$hazard_pay->hp_pct / 100);
                                     }
+                                    $other_earnings_amt += $hazard_pay_amt;
+                                    array_push($other_earnings, ["HP1", "HAZARDPAY", $hazard_pay_amt]);
                                 }
-                                $other_earnings_amt += $hazard_pay_amt;
-                                array_push($other_earnings, ["HP1", "HAZARDPAY", $hazard_pay_amt]);
                                 ### ALLOWANCE
                                     #### LAUNDRY
 
@@ -667,6 +672,12 @@ class GeneratePayrollController extends Controller
 
                             # Net Pay
                             'net_pay' => $net_pay,
+
+                            #rate computed
+                            'rate_computed_absences' => json_encode($rate_computed_absences),
+
+                            #ob
+                            'obcount' => $obCount
                         ];
                         $updateLines = [
                             'loans' => $updateln_loan,
@@ -873,5 +884,28 @@ class GeneratePayrollController extends Controller
         } catch (\Exception $e) {
             return 0;
         }
+    }
+
+    public static function computeRateWithUndertimeAndAbsent($rate,$late,$undertime,$absent){
+        //return: 1st: rate deducted with late, undertime, absent, 2nd:late, undertime, absent total, 3rd: dailyrate, 4th: hourlyrate, 5th: minuterate
+        if(isset($rate) && isset($late) && isset($undertime)){
+            list($formattedLateHour, $formattedLateMinute) = explode(":", $late);
+            list($formattedUndertimeHour, $formattedUndertimeMinute) = explode(":", $undertime);
+
+            $remainingMinute = (($formattedLateMinute + $formattedUndertimeMinute) % 60);
+            $formattedLateHour += (($formattedLateMinute + $formattedUndertimeMinute) / 60);
+            $remaininghour = ($formattedLateHour + $formattedUndertimeHour) % 24;
+
+            $toAdd = (int)((($formattedLateHour + $formattedUndertimeHour) / 24) > 0 ? (($formattedLateHour + $formattedUndertimeHour) / 24): 0);
+            $absent += $toAdd;
+            
+
+            $dailyRate = Round(($rate / 22),2);
+            $hourlyRate = Round(($dailyRate / 24),2);
+            $minuteRate = Round(($hourlyRate / 60),2);
+            return [$rate - (($absent * $dailyRate) + ($hourlyRate * $remaininghour) + ($minuteRate * $remainingMinute)),(($absent * $dailyRate) + ($hourlyRate * $remaininghour) + ($minuteRate * $remainingMinute)),$dailyRate,$hourlyRate,$minuteRate];
+            
+        }
+        return 0;
     }
 }

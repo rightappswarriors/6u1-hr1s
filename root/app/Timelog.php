@@ -67,6 +67,19 @@ class Timelog extends Model
         return ($d == null || $d == "")?"08:00":$d;
     }
 
+    public static function ReqTimeInWithoutGracePeriod()
+    {
+        /**
+        * Returns the required time in (morning).
+        * Value returned must be in string format
+        * @return "hh:mm:ss"
+        */
+        // return "08:00";
+        $fy = DB::table('hris.m99')->first()->fy;
+        $d = DB::table('hris.m99')->where('fy', $fy)->first()->req_time_in_wo_grace_period;
+        return ($d == null || $d == "")?"08:00":$d;
+    }
+
     public static function ReqTimeIn_2()
     {
         /**
@@ -103,7 +116,7 @@ class Timelog extends Model
        // return "17:40";
         $fy = DB::table('hris.m99')->first()->fy;
         $d = DB::table('hris.m99')->where('fy', $fy)->first()->req_time_out_2;
-        return ($d == null || $d == "")?"17:40":$d;
+        return ($d == null || $d == "")?"17:00":$d;
     }
 
     // public static $lunchbreak = self::get_lunch_break(); // Must be in h:m:s format and 24 hours
@@ -214,17 +227,16 @@ class Timelog extends Model
         return Core::ToHours(Core::GET_TIME_DIFF($lb, Core::GET_TIME_DIFF($ti, $to)));
     }
 
-    public static function ReqHours2()
+    public static function ReqHours2($isGracePeriod = false)
     {
         /**
         * Returns the time difference between start time and end time in "00:00" format
         * Values must be in 24 hours format
         * @return "hh:mm"
         */
-        list($ti_h, $ti_m/*, $ti_sec*/) = explode(":", self::ReqTimeIn());
+        list($ti_h, $ti_m/*, $ti_sec*/) = explode(":", ($isGracePeriod ? self::ReqTimeInWithoutGracePeriod() : self::ReqTimeIn()) );
         list($to_h, $to_m/*, $to_sec*/) = explode(":", self::ReqTimeOut_2());
         list($lb_h, $lb_m/*, $lb_sec*/) = explode(":", self::get_lunch_break());
-
         $ti_h = (int)$ti_h;
         $ti_m = (int)$ti_m;
         /*$ti_sec = (int)$ti_sec;*/
@@ -272,6 +284,18 @@ class Timelog extends Model
             $time = Core::GET_TIME_DIFF(self::get_lunch_break(), $time);
         }
         return $time;
+    }
+
+    public static function GetRenHours2(string $time_1, string $time_2)
+    {
+        /**
+        * @param string $time_1 timed in or time start "hh:mm"
+        * @param string $time_2 timed out or time end "hh:mm"
+        * @param string $type "am" or "pm"
+        * Returns the value of required hours in timestamp format "hh:mm"
+        * @return "hh:mm"
+        */
+        return Core::GET_TIME_DIFF_ADD_MINUTE($time_1, $time_2);
     }
 
     public static function RetrieveRenHours($empid, string $date)
@@ -425,9 +449,11 @@ class Timelog extends Model
         * @return false if not
         */
 
+        /*
+        * reworked for grace period
+        */
         $time_in = $time;
         $r_time_in = self::ReqTimeIn();
-
         if (strtotime($time) > strtotime($r_time_in)) {
             return true;
         }
@@ -451,6 +477,7 @@ class Timelog extends Model
         }
         return false;
     }
+
 
     public static function IfUndertime(string $rendered_time, string $required_time)
     {
@@ -477,6 +504,59 @@ class Timelog extends Model
             return true;
         }
         return false;
+    }
+
+    public static function toMinuteCustom($time){
+        // should be from hour
+        list($hour,$minute) = explode(':', $time);
+        return ($hour * 60) + $minute;
+    }
+
+    public static function toHourCustom($time){
+        // should be from hour
+        list($hour,$minute) = explode(':', $time);
+        return ($minute / 60) + $hour;
+    }
+
+    public static function isUndertime(string $out, string $ampm = 'am', $getResult = false){
+        if(isset($out)){
+            switch ($ampm) {
+                case 'pm':
+                    $toCompare = Timelog::ReqTimeOut_2();
+                    break;
+                
+                default:
+                    $toCompare = Timelog::ReqTimeOut();
+                    break;
+            }
+            $booleanReturn = self::toMinuteCustom($out) < self::toMinuteCustom($toCompare);
+            if($getResult && $booleanReturn){
+                list($hourOut,$minuteOut) = explode(':', $out);
+                list($hourCompare,$minuteCompare) = explode(':', $toCompare);
+                return [true, (sprintf("%02d", ($hourCompare - $hourOut) - 1)).':'.(60 - $minuteOut)];
+            }
+            return $booleanReturn;
+        }
+    }
+
+    public static function computeUndertime($am,$pm){
+        $amData = self::isUndertime($am,'am',true);
+        $pmData = self::isUndertime($pm,'pm',true);
+        $amCompute = $pmCompute = "00:00";
+
+        if($amData){
+            $amCompute = $amData[1];
+        }
+        if($pmData){
+            $pmCompute = $pmData[1];
+        }
+
+        $amExplode = list($hourAM,$minuteAM) = explode(":", $amCompute);
+        $pmExplode = list($hourPM,$minutePM) = explode(":", $pmCompute);
+        $computedMinute =  (($minuteAM + $minutePM) % 60);
+        $computedHour = $hourAM + $hourPM + (($minuteAM + $minutePM) / 60);
+        return sprintf("%02d",$computedHour).':'.sprintf("%02d",$computedMinute);
+
     }
 
     // public static function IfOvertime(string $rendered_time, string $required_time)

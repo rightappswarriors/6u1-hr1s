@@ -36,13 +36,17 @@ class EmployeeController extends Controller
         $this->days= DB::select($SQLDays);
         $SQLCivilStatus = "SELECT * FROM hris.hr_civil_status";
         $this->civil_stat = DB::select($SQLCivilStatus);
-        $SQLEmployee = "SELECT isheadoffacility,empid,lastname,firstname,mi,positions,department,section,date_hired,contractual_date,date_resigned,date_terminated,prohibition_date,date_regular,empstatus,contract_days,prc,ctc,rate_type,pay_rate,biometric,sss,pagibig,philhealth,payroll_account,tin,tax_bracket,shift_sched_from,dayoff1,dayoff2,sex,birth,civil_status,religion,height,weight,father,father_address,father_contact,father_job,mother,mother_address,mother_contact,mother_job,emp_contact,home_tel,email,home_address,emergency_name,emergency_contact,em_home_address,relationship,shift_sched_sat_from,shift_sched_to,shift_sched_sat_to,fixed_rate,primary_ed,secondary_ed,tertiary_ed,graduate,post_graduate, sss_bracket,fixed_sched FROM hris.hr_employee WHERE COALESCE(cancel, cancel, '')<>'Y'";
+        $SQLEmployee = "SELECT increment,isheadoffacility,empid,lastname,firstname,mi,positions,department,section,date_hired,contractual_date,date_resigned,date_terminated,prohibition_date,date_regular,empstatus,contract_days,prc,ctc,rate_type,pay_rate,biometric,sss,pagibig,philhealth,payroll_account,tin,tax_bracket,shift_sched_from,dayoff1,dayoff2,sex,birth,civil_status,religion,height,weight,father,father_address,father_contact,father_job,mother,mother_address,mother_contact,mother_job,emp_contact,home_tel,email,home_address,emergency_name,emergency_contact,em_home_address,relationship,shift_sched_sat_from,shift_sched_to,shift_sched_sat_to,fixed_rate,primary_ed,secondary_ed,tertiary_ed,graduate,post_graduate, sss_bracket,fixed_sched FROM hris.hr_employee WHERE COALESCE(cancel, cancel, '')<>'Y' order by increment DESC";
         $this->employee = DB::select($SQLEmployee);
     }
     public function view()
     {
         for ($i=0; $i < count($this->employee); $i++) { 
+            // $inc =(empty(DB::table('hr_employee')->max('increment')) ? 1 : DB::table('hr_employee')->max('increment') + 1);
             $emp = $this->employee[$i];
+            // if(!isset($emp->increment)){
+                // DB::table('hr_employee')->where('empid',$emp->empid)->update(['increment' => $inc]);
+            // }
             $emp->office = (Office::GetOffice($emp->department)!=null) ? Office::GetOffice($emp->department)->cc_desc : "office-not-found";
             $emp->jobtitle = JobTitle::Get_JobTitle($emp->positions);
             $emp->emp_status = (EmployeeStatus::find($emp->empstatus)!=null) ? EmployeeStatus::find($emp->empstatus)->description : "employee-status-not-found";
@@ -62,6 +66,7 @@ class EmployeeController extends Controller
     }
     public function add2(Request $r)
     {
+        $increment = (empty(DB::table('hr_employee')->max('increment')) ? 1 : DB::table('hr_employee')->max('increment') + 1);
         $data = [
             'empid' => strtoupper($r->txt_id),
             'isheadoffacility' => (isset($r->isHeadOfFaci) ? true : false),
@@ -131,6 +136,7 @@ class EmployeeController extends Controller
             // 'sss_bracket' => $r->txt_ss_brac,
             'fixed_sched' => ($r->txt_fx_sched == 'Yes') ? "Y": "N",
             'accountnumber' => ($r->txt_accountnumber != '') ? $r->txt_accountnumber : '',
+            'increment' => $increment,
         ];
         $status = 'JO';
         $service_record_data = [
@@ -288,6 +294,7 @@ class EmployeeController extends Controller
     }
     public function update(Request $r)
     {
+        $increment = (empty(DB::table('hr_employee')->max('increment')) ? 1 : DB::table('hr_employee')->max('increment') + 1);
         $old_data = Employee::GetEmployee($r->txt_id);
         // dd($old_data);
         $data = [
@@ -359,6 +366,7 @@ class EmployeeController extends Controller
             // 'sss_bracket' => $r->txt_ss_brac,
             'fixed_sched' => ($r->txt_fx_sched == 'Yes') ? "Y": "N",
             'accountnumber' => ($r->txt_accountnumber != '') ? $r->txt_accountnumber : '',
+            'increment' => $increment
         ];
         // dd(Core::get_nextincrementlimitchar(Core::getm99One('sr_code')->sr_code, 8));
         // dd($data);
@@ -423,10 +431,89 @@ class EmployeeController extends Controller
         // Core::Set_Alert('danger', 'Unable to use this process.');
         try {
             $data = ['cancel' => 'Y'];
-            DB::table(Employee::$tbl_name)->where(Employee::$pk, $r->txt_id)->update($data);
+            // DB::table(Employee::$tbl_name)->where(Employee::$pk, $r->txt_id)->update($data);
+
+            $fromdb = DB::table(Employee::$tbl_name)->where(Employee::$pk, $r->txt_id)->first();
+
+            $data = [
+                'empid' => strtoupper($fromdb->empid),
+                'isheadoffacility' => (isset($fromdb->isHeadOfFaci) ? true : false),
+                'lastname' => strtoupper($fromdb->lastname),
+                'firstname' => strtoupper($fromdb->firstname),
+                'mi' => $fromdb->mi,
+                'department' => $fromdb->department,
+                // 'section' => $fromdb->txt_deptsec,
+                'positions' => $fromdb->positions,
+                'date_hired' => $fromdb->date_hired,
+                'contractual_date' => $fromdb->contractual_date,
+                'date_resigned' => $fromdb->date_resigned,
+                'date_terminated' => $fromdb->date_terminated,
+                'prohibition_date' => $fromdb->prohibition_date,
+                'date_regular' => $fromdb->date_regular,
+                'empstatus' => $fromdb->empstatus,
+                'emptype' => $fromdb->emptype,
+                'contract_days' => $fromdb->contract_days,
+                'prc' => $fromdb->prc,
+                'ctc' => $fromdb->ctc,
+                'rate_type' => 'M',
+                // 'pay_rate' => floatval($fromdb->txt_py_rate),
+                'pay_rate' => $fromdb->pay_rate,
+                'biometric' => $fromdb->biometric,
+                'sss' => $fromdb->sss,
+                'pagibig' => $fromdb->pagibig,
+                'philhealth' => $fromdb->philhealth,
+                'payroll_account' => $fromdb->payroll_account,
+                'tin' => $fromdb->tin,
+                'tax_bracket' => $fromdb->tax_bracket,
+                // 'shift_sched_from' => $fromdb->txt_sft_1,
+                // 'dayoff1' => $fromdb->txt_day_off_1,
+                // 'dayoff2' => $fromdb->txt_day_off_2,
+                'sex' => $fromdb->sex,
+                'birth' => $fromdb->birth,
+                'civil_status' => $fromdb->civil_status,
+                'religion' => $fromdb->religion,
+                // 'height' => ($fromdb->txt_height != '') ? floatval($fromdb->txt_height) : floatval(0),
+                'height' => $fromdb->height,
+                // 'weight' => ($fromdb->txt_weight != '') ? floatval($fromdb->txt_weight) : floatval(0),
+                'weight' => $fromdb->weight,
+                'father' => $fromdb->father,
+                'father_address' => $fromdb->father_address,
+                'father_contact' => $fromdb->father_contact,
+                'father_job' => $fromdb->father_job,
+                'mother'=> $fromdb->mother,
+                'mother_address' => $fromdb->mother_address,
+                'mother_contact' => $fromdb->mother_contact,
+                'mother_job' => $fromdb->mother_job,
+                'emp_contact' => $fromdb->emp_contact,
+                'home_tel' => $fromdb->home_tel,
+                'email' => $fromdb->email,
+                'home_address' => $fromdb->home_address,
+                'emergency_name' => $fromdb->emergency_name,
+                'emergency_contact' => $fromdb->emergency_contact,
+                'em_home_address' => $fromdb->em_home_address,
+                'relationship' => $fromdb->relationship,
+                // 'shift_sched_sat_from' => $fromdb->txt_sat_sft_1,
+                // 'shift_sched_to' => $fromdb->txt_sft_2,
+                // 'shift_sched_sat_to' => $fromdb->txt_sat_sft_2,
+                'fixed_rate' => $fromdb->fixed_rate,
+                'primary_ed' => $fromdb->primary_ed,
+                'secondary_ed' => $fromdb->secondary_ed,
+                'tertiary_ed' => $fromdb->tertiary_ed,
+                'graduate' => $fromdb->graduate,
+                'post_graduate' => $fromdb->post_graduate,
+                // 'sss_bracket' => $fromdb->txt_ss_brac,
+                'fixed_sched' => $fromdb->fixed_sched,
+                'accountnumber' => $fromdb->accountnumber,
+                'increment' => $fromdb->increment,
+                'deletedby' => Core::getSessionData()[0]->uid,
+                't_date' => Date('Y-m-d'),
+                't_time' => Date('H:i:s')
+            ];
+            DB::table('hr_employee_history')->insert($data);
+            // DB::table(Employee::$tbl_name)->where(Employee::$pk, $r->txt_id)->delete();
             Core::Set_Alert('success', 'Successfully deleted an Employee.');
-             return back();
-        //  DB::table(Employee::$tbl_name)->where(Employee::$pk, $r->txt_id)->delete();
+            DB::table(Employee::$tbl_name)->where(Employee::$pk, $r->txt_id)->delete();
+            return back();
         //  Core::Set_Alert('success', 'Successfully removed an Employee.');
         //  return back();
 

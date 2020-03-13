@@ -117,9 +117,10 @@
 				$statIns = ($row->rate <= 10000 ? (Core::getm99One('iraterate')->iraterate / 100) * $row->rate : Core::getm99One('iratemax')->iratemax);
 				$date_from = (is_array($inf) ? $inf['date_from'] : $inf->date_from);
 				$date_to = (is_array($inf) ? $inf['date_to'] : $inf->date_to);
-				$countworkingminusleave = (int)(Core::CountWorkingDays(Date('Y-m-d',strtotime('-1 day',strtotime($date_from))),$date_to) - $row->leave_amt);
-				$totalsubsistence = (DB::table('hr_hazardpay')->where('cc_id', Employee::getOfficeByID($row->empid)->department)->first() != null ? 1500 - round(($row->leave_amt / $countworkingminusleave) * 1500,2) : 0);
-				// $totalsubsistence = 1500 - round(($row->leave_amt / $countworkingminusleave) * 1500,2);
+				$countworkingminusleave = (int)(Core::CountWorkingDays($date_from,$date_to) - $row->leave_amt);
+				$totalsubsistence = (DB::table('hr_hazardpay')->where('cc_id', Employee::getOfficeByID($row->empid)->department)->first() != null ? 1500 - round(( ($row->leave_amt + $row->obcount) / $countworkingminusleave) * 1500,2) : 0);
+				$rate_computed_absences = json_decode($row->rate_computed_absences);
+				// $totalsubsistence = 1500 - round(( ($row->leave_amt + $row->obcount) / $countworkingminusleave ) * 1500,2);
 				$no = $i+1;
 				$pera = 0;
 				$hazard_duty_pay = 0;
@@ -132,7 +133,9 @@
 						if ($code == "PERA") {
 							$pera += $amt;
 						} elseif ($code == "HAZARDPAY") {
-							$hazard_duty_pay += $amt;
+							// $hazard_duty_pay += $amt;
+							$hazard_duty_pay = ($row->rate >= 9000 ? ($row->rate * .25) : ($row->rate * .01));
+							// dd($hazard_duty_pay);
 						} elseif ($code == "ALLOWNC") {
 							if ($id == "A1") {
 								$allowance_laundry += $amt;
@@ -141,7 +144,8 @@
 						}
 					}
 				}
-				$amount_earned = round(($row->rate-($pera))-((($row->rate-$record[$i]->total_deductions)-($pera))/2),2);
+				// $amount_earned = round(($row->rate-($pera))-((($row->rate-$record[$i]->total_deductions)-($pera))/2),2);
+				$amount_earned = $row->days_worked * $rate_computed_absences[2];
 				$net_amount_received = round((($pera+$amount_earned)-$record[$i]->total_deductions),2);
 			@endphp
 			<tr>
@@ -151,14 +155,14 @@
 				<td {{$forImportant}} >{{ucfirst(($row->position ?? ''))}}</td> {{-- Position --}}
 				<td {{$forImportant}} >{{($row->rate!=0) ? number_format($row->rate,2) : "-"}} <?php $runningRowTotal['rate'] = isset($runningRowTotal['rate']) ? ($row->rate !=0 ? $row->rate : 0) + $runningRowTotal['rate'] : ($row->rate !=0 ? $row->rate : 0) ?></td> {{-- Rate --}}
 
-				<td {{$forOthers}} >{{($row->abcences!=9) ? $row->abcences : "-"}}</td> {{-- No. of Absence w/o Pay --}}
-				<td {{$forOthers}} >{{($row->rate - ($row->abcences!=9 ? $row->abcences : 0)) ? number_format($row->rate - ($row->abcences!=9 ? $row->abcences : 0),2) : "-"}}</td> {{-- Rate Computed Absences --}}
+				<td {{$forOthers}} >{{($rate_computed_absences[1] > 0 ? $rate_computed_absences[1] : '-')}}</td> {{-- No. of Absence w/o Pay --}}
+				<td {{$forOthers}} >{{$rate_computed_absences[0] ? number_format($rate_computed_absences[0],2) : "-"}}</td> {{-- Rate Computed Absences --}}
 
 				<td {{$forOthers}} >{{number_format($pera,2)}}</td><?php $runningRowTotal['pera'] = isset($runningRowTotal['pera']) ? $pera + $runningRowTotal['pera'] : $pera ?> {{-- PERA --}}
 				<td {{$forOthers}} >{{number_format($hazard_duty_pay,2)}}<?php $runningRowTotal['hazard_duty'] = isset($runningRowTotal['hazard_duty']) ? $hazard_duty_pay + $runningRowTotal['hazard_duty'] : $hazard_duty_pay ?></td> {{-- Hazard Duty Pay --}}
 				<td {{$forOthers}} >{{number_format($allowance_laundry,2)}}<?php $runningRowTotal['allowance_laundry'] = isset($runningRowTotal['allowance_laundry']) ? $allowance_laundry + $runningRowTotal['allowance_laundry'] : $allowance_laundry ?></td> {{-- Allowance - Laundry --}}
 				<td {{$forOthers}} >{{$row->leave_amt}}</td> {{-- Allowance - Subsistence - Leave , not sure as of Paolo--}}
-				<td {{$forOthers}} >-</td> {{-- Allowance - Subsistence - Travel , not sure as of Paolo --}}
+				<td {{$forOthers}} >{{$row->obcount}}</td> {{-- Allowance - Subsistence - Travel , not sure as of Paolo --}}
 				<td {{$forOthers}} >{{$totalsubsistence}}<?php $runningRowTotal['allowance'] = isset($runningRowTotal['allowance']) ? $totalsubsistence + $runningRowTotal['allowance'] : $totalsubsistence ?></td>{{-- Allowance - Subsistence - Total --}}
 				<td {{$forOthers}} >{{number_format($amount_earned,2)}}<?php $runningRowTotal['amount_earned'] = isset($runningRowTotal['amount_earned']) ? ($amount_earned) + $runningRowTotal['amount_earned'] : ($amount_earned) ?></td>
 				{{-- Amount Earned --}}

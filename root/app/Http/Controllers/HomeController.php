@@ -25,7 +25,6 @@ class HomeController extends Controller
         // dd(json_encode(DB::table('m99')->first()));
         // dd(in_array('masterfile', explode(', ', Session::get('_user')[0]->restriction)));
         try {
-
             $dtr = DTR::GetTimedInToday(); /*dd($dtr[0]->status);*/
             $dtr_timeout = DTR::GetTimedOutToday(); 
             $upHolidy = Holiday::GetUpcomingHoliday();

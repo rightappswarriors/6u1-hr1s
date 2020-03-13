@@ -64,8 +64,7 @@ class GenerateDTRController extends Controller
 
     public function Generate($r)
     {
-
-
+        
         // return $r->all();
         /*
         * Retrieves timelog info (time in / time out of selected employee)
@@ -82,21 +81,21 @@ class GenerateDTRController extends Controller
         try {
             // $bio = new BiometricsController();
             $req_hrs = Timelog::ReqHours();
-            $req_hrs2 = Timelog::ReqHours2();
+            $req_hrs2 = Timelog::ReqHours2(true);
             $employee = Employee::GetEmployee($r->code);
             $name = Employee::Name($r->code);
             // $pp = Payroll::PayrollPeriod2($r->month,$r->pp, $r->year);
             // $covereddates = Core::CoveredDates($pp->from, $pp->to);
             $covereddates = Core::CoveredDates($r->monthFrom, $r->monthTo);
-
+            // return $covereddates;
             if ($employee == null) {
                 return "noemp";
             }
 
             $late = "00:00";
-            $arr_late = $testArr = [];
+            $arr_late = $obArr = [];
             $undertime = "00:00";
-            $arr_undertime = [];
+            $arr_undertime = $arr_leave_data = $arr_leave_deduction = [];
             $overtime = "00:00";
             $arr_overtime = [];
             $weekdayhrs = "00:00";
@@ -242,8 +241,7 @@ class GenerateDTRController extends Controller
                         }
 
                         $temp_tl = "";
-
-                        try {
+                        try {   
                             /**
                             * Time Sorting Method
                             * -------------------------------------------------------
@@ -255,16 +253,32 @@ class GenerateDTRController extends Controller
                             */
                             if ($tl_in_am != "00:00" && $tl_out_am != "00:00") { // ami = 1, amo = 1
                                 if ($tl_in_pm != "00:00" && $tl_out_pm != "00:00") { // pmi = 1, pmo = 1
-                                    $r_time_am = Timelog::GetRenHours($tl_in_am, $tl_out_am);
+                                    $r_time_am = Timelog::GetRenHours2($tl_in_am, $tl_out_am);
                                     $r_time_pm = Timelog::GetRenHours($tl_in_pm, $tl_out_pm);
-                                    $r_time_total = Core::GET_TIME_DIFF(Timelog::get_lunch_break(), Core::GET_TIME_TOTAL([$r_time_am, $r_time_pm]));
+                                    // return [$tl_in_am, $tl_out_am,$r_time_am];
+                                    // $r_time_total = Core::GET_TIME_DIFF(Timelog::get_lunch_break(), Core::GET_TIME_TOTAL([$r_time_am, $r_time_pm]));
+                                    $r_time_total = Core::GET_TIME_TOTAL([$r_time_am, $r_time_pm]);
+                                    // return [$r_time_am,$r_time_pm,$r_time_total,$req_hrs2];
+                                    // return [[$r_time_am,$tl_in_am,$tl_out_am],[$r_time_pm,$tl_in_pm,$tl_out_pm],[$r_time_total],[Core::GET_TIME_TOTAL([$r_time_am, $r_time_pm])]];
+
                                     # If Late
                                     if (Timelog::IfLate($tl_in_am)) {
                                         array_push($arr_late, [$date, [$tl_in_am, $tl_out_am, $tl_in_pm, $tl_out_pm], Core::GET_TIME_DIFF(Timelog::ReqTimeIn(), $tl_in_am)]);
                                     }
                                     # If Undertime
-                                    if (Timelog::IfUndertime($r_time_total, $req_hrs2)) {
-                                        array_push($arr_undertime, [$date, [$tl_in_am, $tl_out_am, $tl_in_pm, $tl_out_pm], Core::GET_TIME_DIFF($r_time_total, $req_hrs2)]); 
+                                    // if (Timelog::IfUndertime($r_time_total, $req_hrs2)) {
+                                    if(Timelog::isUndertime($tl_out_am,'am') || Timelog::isUndertime($tl_out_pm,'pm')){
+                                        $forLeaveDeduction = Core::isEnoughLeave(Core::GET_TIME_DIFF($r_time_total, $req_hrs2),$employee->empid);
+                                        // array_push($arr_undertime, [$date, [$tl_in_am, $tl_out_am, $tl_in_pm, $tl_out_pm], Core::GET_TIME_DIFF($r_time_total, $req_hrs2)]); 
+                                        if(!$forLeaveDeduction){
+                                            // array_push($arr_undertime, [$date, [$tl_in_am, $tl_out_am, $tl_in_pm, $tl_out_pm], Core::GET_TIME_DIFF($r_time_total, $req_hrs2) ]);
+                                            array_push($arr_undertime, [$date, [$tl_in_am, $tl_out_am, $tl_in_pm, $tl_out_pm], Timelog::computeUndertime($tl_out_am,$tl_out_pm) ]); 
+                                        } else {
+                                            if($forLeaveDeduction[1] > 0){
+                                                array_push($arr_leave_deduction, [$forLeaveDeduction]);
+                                            }
+                                            array_push($arr_leave_data, [$forLeaveDeduction]);
+                                        }
                                     }
                                     # If Holiday
                                     if (Timelog::IfHoliday($date)) {
@@ -279,8 +293,18 @@ class GenerateDTRController extends Controller
                                         array_push($arr_late, [$date, [$tl_in_am, $tl_out_pm], Core::GET_TIME_DIFF(Timelog::ReqTimeIn(), $tl_in_am)]);
                                     }
                                     # If Undertime
-                                    if (Timelog::IfUndertime($r_time_total, $req_hrs2)) {
-                                        array_push($arr_undertime, [$date, [$tl_in_am, $tl_out_pm], Core::GET_TIME_DIFF($r_time_total, $req_hrs2)]); 
+                                    // if (Timelog::IfUndertime($r_time_total, $req_hrs2)) {
+                                    if(Timelog::isUndertime($tl_out_am,'am') || Timelog::isUndertime($tl_out_pm,'pm')){
+                                        // array_push($arr_undertime, [$date, [$tl_in_am, $tl_out_pm], Core::GET_TIME_DIFF($r_time_total, $req_hrs2)]); 
+                                        if(!$forLeaveDeduction){
+                                            // array_push($arr_undertime, [$date, [$tl_in_am, $tl_out_am, $tl_in_pm, $tl_out_pm], Core::GET_TIME_DIFF($r_time_total, $req_hrs2)]); 
+                                            array_push($arr_undertime, [$date, [$tl_in_am, $tl_out_am, $tl_in_pm, $tl_out_pm], Timelog::computeUndertime($tl_out_am,$tl_out_pm) ]); 
+                                        } else {
+                                            if($forLeaveDeduction[1] > 0){
+                                                array_push($arr_leave_deduction, [$forLeaveDeduction]);
+                                            }
+                                            array_push($arr_leave_data, [$forLeaveDeduction]);
+                                        }
                                     }
                                     # If Holiday
                                     if (Timelog::IfHoliday($date)) {
@@ -295,8 +319,18 @@ class GenerateDTRController extends Controller
                                         array_push($arr_late, [$date, [$tl_in_am, $tl_out_am], Core::GET_TIME_DIFF(Timelog::ReqTimeIn(), $tl_in_am)]);
                                     }
                                     # If Undertime
-                                    if (Timelog::IfUndertime($r_time_total, $req_hrs2)) {
-                                        array_push($arr_undertime, [$date, [$tl_in_am, $tl_out_pm], Core::GET_TIME_DIFF($r_time_total, $req_hrs2)]); 
+                                    // if (Timelog::IfUndertime($r_time_total, $req_hrs2)) {
+                                    if(Timelog::isUndertime($tl_out_am,'am') || Timelog::isUndertime($tl_out_pm,'pm')){
+                                        // array_push($arr_undertime, [$date, [$tl_in_am, $tl_out_pm], Core::GET_TIME_DIFF($r_time_total, $req_hrs2)]); 
+                                        if(!$forLeaveDeduction){
+                                            // array_push($arr_undertime, [$date, [$tl_in_am, $tl_out_am, $tl_in_pm, $tl_out_pm], Core::GET_TIME_DIFF($r_time_total, $req_hrs2)]); 
+                                            array_push($arr_undertime, [$date, [$tl_in_am, $tl_out_am, $tl_in_pm, $tl_out_pm], Timelog::computeUndertime($tl_out_am,$tl_out_pm) ]); 
+                                        } else {
+                                            if($forLeaveDeduction[1] > 0){
+                                                array_push($arr_leave_deduction, [$forLeaveDeduction]);
+                                            }
+                                            array_push($arr_leave_data, [$forLeaveDeduction]);
+                                        }
                                     }
                                     # If Holiday
                                     if (Timelog::IfHoliday($date)) {
@@ -312,8 +346,18 @@ class GenerateDTRController extends Controller
                                     array_push($arr_late, [$date, [$tl_in_am, $tl_out_pm], Core::GET_TIME_DIFF(Timelog::ReqTimeIn(), $tl_in_am)]);
                                 }
                                 # If Undertime
-                                if (Timelog::IfUndertime($r_time_total, $req_hrs2)) {
-                                    array_push($arr_undertime, [$date, [$tl_in_am, $tl_out_pm], Core::GET_TIME_DIFF($r_time_total, $req_hrs2)]); 
+                                // if (Timelog::IfUndertime($r_time_total, $req_hrs2)) {
+                                if(Timelog::isUndertime($tl_out_am,'am') || Timelog::isUndertime($tl_out_pm,'pm')){
+                                    // array_push($arr_undertime, [$date, [$tl_in_am, $tl_out_pm], Core::GET_TIME_DIFF($r_time_total, $req_hrs2)]); 
+                                    if(!$forLeaveDeduction){
+                                            // array_push($arr_undertime, [$date, [$tl_in_am, $tl_out_am, $tl_in_pm, $tl_out_pm], Core::GET_TIME_DIFF($r_time_total, $req_hrs2)]);
+                                            array_push($arr_undertime, [$date, [$tl_in_am, $tl_out_am, $tl_in_pm, $tl_out_pm], Timelog::computeUndertime($tl_out_am,$tl_out_pm) ]);  
+                                        } else {
+                                            if($forLeaveDeduction[1] > 0){
+                                                array_push($arr_leave_deduction, [$forLeaveDeduction]);
+                                            }
+                                            array_push($arr_leave_data, [$forLeaveDeduction]);
+                                        }
                                 }
                                 # If Holiday
                                 if (Timelog::IfHoliday($date)) {
@@ -364,7 +408,17 @@ class GenerateDTRController extends Controller
                     }
                 } else {
                     // absent
-                    // array_push($testArr, [$sql_ti,$sql_to]);
+                    // array_push($obArr, [$sql_ti,$sql_to]);
+                    /*
+                    *for checking of OB
+                    */
+                    $forOB = DB::table('hr_ob')->where([['empid',$employee->empid],['datefrom','>=',$date],['dateto','<=',$date]])->first();
+                    // return $forOB;
+                    if(isset($forOB)){
+                        array_push($obArr, json_encode($forOB));
+                        array_push($arr_daysworked, [$date, ["OB", "OB", "OB", "OB"], "08:00"]);
+                    }
+
                 }
 
                 // Just reference
@@ -395,12 +449,13 @@ class GenerateDTRController extends Controller
                 // $workdays = 22 / 2;
                 // $totaldays = count($arr_daysworked);
                 // $totalabsent = ($workdays - $totaldays) - count($arr_leavedates);
-                $conditionForFirstDay = (Date('d',strtotime($r->monthFrom)) != 1 ? Date('Y-m-d',strtotime('-1 day',strtotime($r->monthFrom))) : $r->monthFrom);
+                $conditionForFirstDay = (Date('j',strtotime($r->monthFrom)) != 1 ? Date('Y-m-d',strtotime('-1 day',strtotime($r->monthFrom))) : $r->monthFrom);
                 $workdays = Core::CountWorkingDays($conditionForFirstDay,$r->monthTo);
                 $totaldays = count($arr_daysworked);
                 // return [$totaldays, ((int)$workdays), count($arr_leavedates)];
                 // return $arr_daysworked;
-                $totalabsent = (((int)$workdays)) - $totaldays - count($arr_leavedates);
+                // $totalabsent = (((int)$workdays)) - $totaldays - count($arr_leavedates);
+                $totalabsent = ((((int)$workdays)) - $totaldays - count($arr_leavedates)/* - $totaldays*/);
 
                 if (count($arr_late) > 0) { 
                     $tmp = [];
@@ -510,7 +565,9 @@ class GenerateDTRController extends Controller
                 'leaves'=> $totalleave,
                 'leaves_arr'=> $arr_leavedates,
                 'updateToGenerate' => $leaveID,
-
+                'ob' => json_encode($obArr),
+                'forDeductOnLeave' => json_encode($arr_leave_data),
+                'forDeductNextPayroll' => json_encode($arr_leave_deduction),
 
                 'errors'=>$errors,
                 '_errors2'=>$errors2,
@@ -630,10 +687,24 @@ class GenerateDTRController extends Controller
                             'holiday_arr' => ((isset($dtrs['holiday_arr'])) ? json_encode($dtrs['holiday_arr']) : null),
                             'leaves' => $dtrs['leaves'],
                             'leaves_arr' => ((isset($dtrs['leaves_arr'])) ? json_encode($dtrs['leaves_arr']) : null),
+                            'ob_arr' => $dtrs['ob'],
+                            'arr_leave' => $dtrs['forDeductOnLeave'],
+
                         ];
                         if ($record->first()==null) {
                             try {
                                 $sql->insert($data);
+                                if(isset($dtrs['forDeductOnLeave'])){
+                                    $decoded = json_decode($dtrs['forDeductOnLeave']);
+                                    foreach ($decoded as $key => $value) {
+                                        if($value[0][1] <= 0){
+                                            DB::table('hr_emp_leavecount')->where('elccode',$value[0][2])->update(['count' => abs($value[0][4])]);
+                                        }
+                                    }
+                                }
+                                if(isset($dtrs['forDeductNextPayroll'])){
+                                    DB::table('hr_leave_deduct_next')->insert(['leavedata' => $dtrs['forDeductNextPayroll'], 't_date' => Date('Y-m-d'), 't_time' => Date('H:i:s'), 'dtr_id' => $code ]);
+                                }
                                 return $message;
                             } catch (\Exception $e) {
                                 ErrorCode::Generate('controller', 'GenerateDTRController', 'B00004', $e->getMessage());

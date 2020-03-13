@@ -4,7 +4,7 @@
 	<div class="card">
 		<div class="card-header">
 			<i class="fa fa-building"></i> Loan Type
-			<i class="fa fa-clock-o"></i> Witholding Tax
+			{{-- <i class="fa fa-clock-o"></i> Witholding Tax --}}
 			<button type="button" class="btn btn-success" id="opt-add">
 				<i class="fa fa-plus"></i> Add
 			</button>

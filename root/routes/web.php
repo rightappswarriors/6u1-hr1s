@@ -314,6 +314,13 @@ Route::prefix('Biometric')->group(function(){
 				Route::match(['POST','GET'],'/', 'Leave\leaveApprovalController@process');
 			}); 
 
+			Route::prefix('OB-Entry')->group(function() {
+				Route::get('', 'Timekeeping\OBController@view');
+				Route::post('', 'Timekeeping\OBController@add');
+				Route::post('update', 'Timekeeping\OBController@update');
+				Route::post('delete', 'Timekeeping\OBController@delete');
+			}); 
+
 			/* LEAVES ENTRY */
 			/* EMPLOYEE DTR */
 			Route::prefix('employee-dtr')->group(function() {

@@ -78,11 +78,20 @@ class PrintEmployeeDTRController extends Controller
     {
         // $data = DTR::GetAllHDRSummaryByCode($r->code);
         $data = DTR::GetAllHDRSummaryByDateWithEmployee($r->code, $r->type, $r->emp);
+        // $obArr = [];
         foreach($data as $k => $v) {
+            $decodedOB = json_decode($v->ob_arr);
             $v->employee_readable = Employee::Name($v->empid);
             $v->date_from_readable = \Carbon\Carbon::parse($v->date_from)->format('M d, Y');
             $v->date_to_readable = \Carbon\Carbon::parse($v->date_to)->format('M d, Y');
             $v->covered_dates = Core::CoveredDates(Date('Y-m-01',strtotime($v->date_from)), Date('Y-m-t',strtotime($v->date_to)));
+            // if(isset($decodedOB)){
+            //     foreach ($decodedOB as $key => $value) {
+            //         $value = json_decode($value);
+            //         array_push($obArr, [$value->obid,$value->dateto,$value->datefrom]);
+            //     }
+            //     $v->ob = $obArr;
+            // }
 
             for($i=0; $i<count($v->covered_dates); $i++) {
                 $v->covered_dates[$i] = [Date('j',strtotime($v->covered_dates[$i])), date('Y-m-d', strtotime($v->covered_dates[$i]))];
