@@ -518,6 +518,25 @@ class Timelog extends Model
         return ($minute / 60) + $hour;
     }
 
+    public static function isLate($in,$ampm = 'am', $getResult = false){
+        switch ($ampm) {
+            case 'pm':
+                $toCompare = Timelog::ReqTimeIn_2();
+                break;
+            
+            default:
+                $toCompare = Timelog::ReqTimeIn();
+                break;
+        }
+        $booleanReturn = self::toMinuteCustom($in) > self::toMinuteCustom($toCompare);
+        if($getResult && $booleanReturn){
+            list($hourIn,$minuteIn) = explode(':', $in);
+            list($hourCompare,$minuteCompare) = explode(':', $toCompare);
+            return [true, (sprintf("%02d", ($hourIn - $hourCompare))).':'.sprintf("%02d", ($minuteIn - $minuteCompare))];
+        }
+        return $booleanReturn;
+    }
+
     public static function isUndertime(string $out, string $ampm = 'am', $getResult = false){
         if(isset($out)){
             switch ($ampm) {
@@ -539,11 +558,20 @@ class Timelog extends Model
         }
     }
 
-    public static function computeUndertime($am,$pm){
-        $amData = self::isUndertime($am,'am',true);
-        $pmData = self::isUndertime($pm,'pm',true);
+    public static function computeForDeduction($am,$pm,$for = 'undertime'){
         $amCompute = $pmCompute = "00:00";
-
+        switch ($for) {
+            case 'late':
+                $amData = self::isLate($am,'am',true);
+                $pmData = self::isLate($pm,'pm',true);
+                break;
+            
+            default:
+                $amData = self::isUndertime($am,'am',true);
+                $pmData = self::isUndertime($pm,'pm',true);
+                break;
+        }
+        
         if($amData){
             $amCompute = $amData[1];
         }
@@ -551,12 +579,16 @@ class Timelog extends Model
             $pmCompute = $pmData[1];
         }
 
+        return self::computeTimeFormatted($amCompute,$pmCompute);
+
+    }
+
+    public static function computeTimeFormatted($amCompute,$pmCompute){
         $amExplode = list($hourAM,$minuteAM) = explode(":", $amCompute);
         $pmExplode = list($hourPM,$minutePM) = explode(":", $pmCompute);
         $computedMinute =  (($minuteAM + $minutePM) % 60);
         $computedHour = $hourAM + $hourPM + (($minuteAM + $minutePM) / 60);
         return sprintf("%02d",$computedHour).':'.sprintf("%02d",$computedMinute);
-
     }
 
     // public static function IfOvertime(string $rendered_time, string $required_time)

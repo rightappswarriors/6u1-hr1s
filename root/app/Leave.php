@@ -76,7 +76,7 @@ class Leave extends Model
     	}
     }
 
-    public static function GetLeaveRecordPerMonth($empid,$monthFrom,$monthTo,$onleave = false){
+    public static function GetLeaveRecordPerMonth($empid,$monthFrom,$monthTo,$appendLeave = false,$onleave = false){
         $toRet = [];
         if(isset($empid) && isset($monthFrom) && isset($monthTo)){
             $onleave = ($onleave ? 'YES' : 'NO');
@@ -87,9 +87,9 @@ class Leave extends Model
                 ->where('cancel', '=', null)
                 ->whereDate('leave_from', '>=', $from)
                 ->whereDate('leave_to', '<=', $to)
-                ->where('leave_pay', '=', $onleave)
-                ->where('isgenerated', '=', FALSE)
-                ->get();
+                ->where('isgenerated', '=', FALSE);
+                $toRet = ($appendLeave ? $toRet->where('leave_pay', '=', $onleave)->get() : $toRet->get());
+                
 
         }
         return $toRet;

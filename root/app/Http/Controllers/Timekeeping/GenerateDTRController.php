@@ -160,7 +160,7 @@ class GenerateDTRController extends Controller
                 * Check Timelogs
                 */
                 // if (Timelog::IfLeave($employee->empid, $date)) {
-                $empleave = Leave::GetLeaveRecordPerMonth($employee->empid,$r->monthFrom, $r->monthTo, true);
+                $empleave = Leave::GetLeaveRecordPerMonth($employee->empid,$r->monthFrom, $r->monthTo);
                 // return $empleave;
                 if (count($empleave) > 0) {
                     /**
@@ -262,8 +262,10 @@ class GenerateDTRController extends Controller
                                     // return [[$r_time_am,$tl_in_am,$tl_out_am],[$r_time_pm,$tl_in_pm,$tl_out_pm],[$r_time_total],[Core::GET_TIME_TOTAL([$r_time_am, $r_time_pm])]];
 
                                     # If Late
-                                    if (Timelog::IfLate($tl_in_am)) {
-                                        array_push($arr_late, [$date, [$tl_in_am, $tl_out_am, $tl_in_pm, $tl_out_pm], Core::GET_TIME_DIFF(Timelog::ReqTimeIn(), $tl_in_am)]);
+                                    // if (Timelog::IfLate($tl_in_am)) {
+                                    if (Timelog::isLate($tl_in_am,'am') || Timelog::isLate($tl_in_pm,'pm')) {
+                                        // array_push($arr_late, [$date, [$tl_in_am, $tl_out_am, $tl_in_pm, $tl_out_pm], Core::GET_TIME_DIFF(Timelog::ReqTimeIn(), $tl_in_am) ]);
+                                        array_push($arr_late, [$date, [$tl_in_am, $tl_out_am, $tl_in_pm, $tl_out_pm], Timelog::computeForDeduction($tl_in_am,$tl_in_pm,'late') ]);
                                     }
                                     # If Undertime
                                     // if (Timelog::IfUndertime($r_time_total, $req_hrs2)) {
@@ -272,7 +274,7 @@ class GenerateDTRController extends Controller
                                         // array_push($arr_undertime, [$date, [$tl_in_am, $tl_out_am, $tl_in_pm, $tl_out_pm], Core::GET_TIME_DIFF($r_time_total, $req_hrs2)]); 
                                         if(!$forLeaveDeduction){
                                             // array_push($arr_undertime, [$date, [$tl_in_am, $tl_out_am, $tl_in_pm, $tl_out_pm], Core::GET_TIME_DIFF($r_time_total, $req_hrs2) ]);
-                                            array_push($arr_undertime, [$date, [$tl_in_am, $tl_out_am, $tl_in_pm, $tl_out_pm], Timelog::computeUndertime($tl_out_am,$tl_out_pm) ]); 
+                                            array_push($arr_undertime, [$date, [$tl_in_am, $tl_out_am, $tl_in_pm, $tl_out_pm], Timelog::computeForDeduction($tl_out_am,$tl_out_pm) ]); 
                                         } else {
                                             if($forLeaveDeduction[1] > 0){
                                                 array_push($arr_leave_deduction, [$forLeaveDeduction]);
@@ -289,8 +291,10 @@ class GenerateDTRController extends Controller
                                 } elseif ($tl_in_am != "00:00" && $tl_out_pm != "00:00") { // ami = 1, pmo = 1
                                     $r_time_total = Timelog::GetRenHours($tl_in_am, $tl_out_pm, true);
                                     # If Late
-                                    if (Timelog::IfLate($tl_in_am)) {
-                                        array_push($arr_late, [$date, [$tl_in_am, $tl_out_pm], Core::GET_TIME_DIFF(Timelog::ReqTimeIn(), $tl_in_am)]);
+                                    // if (Timelog::IfLate($tl_in_am)) {
+                                    if (Timelog::isLate($tl_in_am,'am') || Timelog::isLate($tl_in_pm,'pm')) {
+                                        // array_push($arr_late, [$date, [$tl_in_am, $tl_out_pm], Core::GET_TIME_DIFF(Timelog::ReqTimeIn(), $tl_in_am)]);
+                                        array_push($arr_late, [$date, [$tl_in_am, $tl_out_am, $tl_in_pm, $tl_out_pm], Timelog::computeForDeduction($tl_in_am,$tl_in_pm,'late') ]);
                                     }
                                     # If Undertime
                                     // if (Timelog::IfUndertime($r_time_total, $req_hrs2)) {
@@ -298,7 +302,7 @@ class GenerateDTRController extends Controller
                                         // array_push($arr_undertime, [$date, [$tl_in_am, $tl_out_pm], Core::GET_TIME_DIFF($r_time_total, $req_hrs2)]); 
                                         if(!$forLeaveDeduction){
                                             // array_push($arr_undertime, [$date, [$tl_in_am, $tl_out_am, $tl_in_pm, $tl_out_pm], Core::GET_TIME_DIFF($r_time_total, $req_hrs2)]); 
-                                            array_push($arr_undertime, [$date, [$tl_in_am, $tl_out_am, $tl_in_pm, $tl_out_pm], Timelog::computeUndertime($tl_out_am,$tl_out_pm) ]); 
+                                            array_push($arr_undertime, [$date, [$tl_in_am, $tl_out_am, $tl_in_pm, $tl_out_pm], Timelog::computeForDeduction($tl_out_am,$tl_out_pm) ]); 
                                         } else {
                                             if($forLeaveDeduction[1] > 0){
                                                 array_push($arr_leave_deduction, [$forLeaveDeduction]);
@@ -315,8 +319,10 @@ class GenerateDTRController extends Controller
                                 } else { // ami = 1, amo = 1
                                     $r_time_total = Timelog::GetRenHours($tl_in_am, $tl_out_am);
                                     # If Late
-                                    if (Timelog::IfLate($tl_in_am)) {
-                                        array_push($arr_late, [$date, [$tl_in_am, $tl_out_am], Core::GET_TIME_DIFF(Timelog::ReqTimeIn(), $tl_in_am)]);
+                                    // if (Timelog::IfLate($tl_in_am)) {
+                                    if (Timelog::isLate($tl_in_am,'am') || Timelog::isLate($tl_in_pm,'pm')) {
+                                        // array_push($arr_late, [$date, [$tl_in_am, $tl_out_am], Core::GET_TIME_DIFF(Timelog::ReqTimeIn(), $tl_in_am)]);
+                                        array_push($arr_late, [$date, [$tl_in_am, $tl_out_am, $tl_in_pm, $tl_out_pm], Timelog::computeForDeduction($tl_in_am,$tl_in_pm,'late') ]);
                                     }
                                     # If Undertime
                                     // if (Timelog::IfUndertime($r_time_total, $req_hrs2)) {
@@ -324,7 +330,7 @@ class GenerateDTRController extends Controller
                                         // array_push($arr_undertime, [$date, [$tl_in_am, $tl_out_pm], Core::GET_TIME_DIFF($r_time_total, $req_hrs2)]); 
                                         if(!$forLeaveDeduction){
                                             // array_push($arr_undertime, [$date, [$tl_in_am, $tl_out_am, $tl_in_pm, $tl_out_pm], Core::GET_TIME_DIFF($r_time_total, $req_hrs2)]); 
-                                            array_push($arr_undertime, [$date, [$tl_in_am, $tl_out_am, $tl_in_pm, $tl_out_pm], Timelog::computeUndertime($tl_out_am,$tl_out_pm) ]); 
+                                            array_push($arr_undertime, [$date, [$tl_in_am, $tl_out_am, $tl_in_pm, $tl_out_pm], Timelog::computeForDeduction($tl_out_am,$tl_out_pm) ]); 
                                         } else {
                                             if($forLeaveDeduction[1] > 0){
                                                 array_push($arr_leave_deduction, [$forLeaveDeduction]);
@@ -342,8 +348,10 @@ class GenerateDTRController extends Controller
                             } elseif ($tl_in_am != "00:00" && $tl_out_pm != "00:00") { // ami = 1, pmo = 1
                                 $r_time_total = Timelog::GetRenHours($tl_in_am, $tl_out_pm, true); 
                                 # If Late
-                                if (Timelog::IfLate($tl_in_am)) {
-                                    array_push($arr_late, [$date, [$tl_in_am, $tl_out_pm], Core::GET_TIME_DIFF(Timelog::ReqTimeIn(), $tl_in_am)]);
+                                // if (Timelog::IfLate($tl_in_am)) {
+                                if (Timelog::isLate($tl_in_am,'am') || Timelog::isLate($tl_in_pm,'pm')) {
+                                    // array_push($arr_late, [$date, [$tl_in_am, $tl_out_pm], Core::GET_TIME_DIFF(Timelog::ReqTimeIn(), $tl_in_am)]);
+                                    array_push($arr_late, [$date, [$tl_in_am, $tl_out_am, $tl_in_pm, $tl_out_pm], Timelog::computeForDeduction($tl_in_am,$tl_in_pm,'late') ]);
                                 }
                                 # If Undertime
                                 // if (Timelog::IfUndertime($r_time_total, $req_hrs2)) {
@@ -351,7 +359,7 @@ class GenerateDTRController extends Controller
                                     // array_push($arr_undertime, [$date, [$tl_in_am, $tl_out_pm], Core::GET_TIME_DIFF($r_time_total, $req_hrs2)]); 
                                     if(!$forLeaveDeduction){
                                             // array_push($arr_undertime, [$date, [$tl_in_am, $tl_out_am, $tl_in_pm, $tl_out_pm], Core::GET_TIME_DIFF($r_time_total, $req_hrs2)]);
-                                            array_push($arr_undertime, [$date, [$tl_in_am, $tl_out_am, $tl_in_pm, $tl_out_pm], Timelog::computeUndertime($tl_out_am,$tl_out_pm) ]);  
+                                            array_push($arr_undertime, [$date, [$tl_in_am, $tl_out_am, $tl_in_pm, $tl_out_pm], Timelog::computeForDeduction($tl_out_am,$tl_out_pm) ]);  
                                         } else {
                                             if($forLeaveDeduction[1] > 0){
                                                 array_push($arr_leave_deduction, [$forLeaveDeduction]);

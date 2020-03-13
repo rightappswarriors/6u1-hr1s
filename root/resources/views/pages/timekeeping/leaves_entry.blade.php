@@ -283,8 +283,8 @@
 											</div>
 											<div class="col-6">
 												<select name="cbo_leave_pay" id="cbo_leave_pay" style="text-transform: uppercase;" class="form-control" {{-- onchange="leavewithpay(this)" --}}>
-													<option value="NO" selected>No</option>
-													<option value="YES">Yes</option>
+													<option value="NO" >No</option>
+													<option value="YES" selected>Yes</option>
 												</select>
 											</div>
 										</div>
@@ -551,7 +551,7 @@
 						d = data[i];
 						a = '<tr id="td-'+d.code+'">'+
 							'<td>'+d.description+'</td>'+
-							'<td>'+(isDefault ? (parseFloat(d.peak)-parseFloat(d.count)) : '<input required class="form-control" name="'+d.code+'" type="number" value="'+(parseFloat(d.peak)-parseFloat(d.count))+'">')+'</td>'+
+							'<td>'+(isDefault ? (parseFloat(d.peak)-parseFloat(d.count)) : '<input step="any" required class="form-control" name="'+d.code+'" type="number" value="'+(parseFloat(d.peak)-parseFloat(d.count))+'">')+'</td>'+
 							'<td>'+d.carry_over+'</td>'+
 						'</tr>'
 						$(lct).append(a);
