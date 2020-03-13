@@ -209,15 +209,13 @@ class LoanEntryController extends Controller
     {
         try {
             $data = ['cancel'=>"Y"];
-            DB::table(Loan::$tbl_name)->where(Loan::$pk, $r->txt_code)->update($data);
-            Core::Set_Alert('success', 'Successfully removed a Loan Entry.');
-            return back();
+            DB::table(Loan::$tbl_name)->where(Loan::$pk, $r->code)->update($data);
+            return 'Successfully removed a Loan Entry.';
 
         } catch (\Illuminate\Database\QueryException $e) {
-            Core::Set_Alert('danger', $e->getMessage());
-            ErrorCode::Generate('controller', 'LoanEntryController', '00002', $e->getMessage());
-            return back();
+            return 'Error in Removing Loan Entry.';
         }
+        
     }
 
     /**

@@ -381,7 +381,8 @@
 						<button type="button" class="btn btn-danger" data-dismiss="modal" onclick="ClearFld()">Close</button>
 					</span>
 					<span class="DeleteMode">
-						<button type="submit" onclick="removeRequired()" form="frm-pp" class="btn btn-danger">Delete</button>
+						<input type="text" id="obj_holder" hidden>
+						<button type="button" id="delete_btn" onclick="DeleteLoanEntry()" class="btn btn-danger">Delete</button>
 						<button type="button" class="btn btn-success" data-dismiss="modal" onclick="ClearFld()">Cancel</button>
 					</span>
 				</div>
@@ -705,6 +706,7 @@
 		{
 			$('.AddMode').hide();
 			$('.DeleteMode').hide();
+			$('.EditMode').hide();
 
 			$(id).show();
 			$('#modal-pp').modal('show');
@@ -877,15 +879,13 @@
 		// $('#opt-delete').on('click', function() {
 		function row_delete(obj) {
 			selected_row = $($(obj).parents()[1]);
-
 			if (ValidateSearchFrm()) {
 				if (selected_row!=null) {
 					ClearFld();
 					$('#exampleModalLabel').text("Delete Loan Entry");
-					console.log(selected_row.children()[0].innerText);
 					$('[name=txt_code]').val(selected_row.children()[0].innerText);
-					$('#frm-pp').attr('action', '{{url('payroll/loan-entry/delete')}}');
-					OpenModal('.DeleteMode');
+					$('.EditMode').hide();
+					DeleteModal('.DeleteMode',selected_row.children()[0].innerText);				
 				} else {
 					NoSelectedRow();
 				}
@@ -918,5 +918,31 @@
 			// $('#modal-pp').modal('show');
 		// });
 		}
+
+		function DeleteModal(id,obj){
+			$('.AddMode').hide();
+			$('.DeleteMode').hide();
+			$('#obj_holder').val(obj);
+			$(id).show();
+			$('#modal-pp').modal('show');
+		}
+
+		function DeleteLoanEntry(){
+			var obj = $('#obj_holder').val();
+			$.ajax({
+					type: 'post',
+					url: '{{url('payroll/loan-entry/delete')}}',
+					data: {code: obj},
+					success: function(data) 
+					{
+						alert(data);
+						ClearFld();
+						$('.DeleteMode').modal('hide');
+						$('#modal-pp').modal('hide');
+						$('#opt-submit').click();
+					},
+				});	
+		}
+		
 	</script>
 @endsection
