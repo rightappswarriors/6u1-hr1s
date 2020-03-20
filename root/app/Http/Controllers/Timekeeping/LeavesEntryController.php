@@ -241,8 +241,12 @@ class LeavesEntryController extends Controller
                 $empid = $r->cbo_employee;
                 foreach ($r->except('mode','cbo_employee') as $key => $value) {
                     $data = EmployeeLeaveCount::Update_LeaveLimit($key, $empid, $value, 'get');
-                    if(EmployeeLeaveCount::Update_LeaveLimit($key, $empid, $value, '=') == 'ok'){
+                    $toUpdateValue = $value + ($value - ($data->peak - $data->count));
+                    if(isset($data)){
+                        DB::table('hr_emp_leavecount')->where([['leave_type', $key],['empid',$empid]])->update(['peak' => $toUpdateValue]);
+                        // if(EmployeeLeaveCount::Update_LeaveLimit($key, $empid, $value, '=') == 'ok'){
                         DB::table('hris.hr_emp_leavecount_hist')->insert(['elccode' => $data->elccode, 'leave_type' => $data->leave_type, 'empid' => $data->empid, 'count' => $data->count, 'peak' => $data->peak, 't_time' => Date('G:i:s'), 't_date' => Date('Y-m-d'), 'editby' => (Core::getSessionData()[0]->uid ?? 'NOT LOGGED IN')]);
+                        // }
                     }
                 }
                 break;

@@ -163,7 +163,7 @@ class Employee extends Model
     }
 
     public static function getGeneratedEmployee($gentype,$datefrom,$dateto){
-        $sql = "SELECT emp.*, dtr.* FROM hris.hr_employee emp LEFT JOIN (SELECT * FROM hris.hr_dtr_sum_hdr hdr INNER JOIN hris.hr_dtr_sum_employees ln ON hdr.code = ln.dtr_sum_id) dtr ON emp.empid = dtr.empid WHERE dtr.generationtype = '$gentype' AND dtr.date_from = '$datefrom' AND dtr.date_to = '$dateto' AND emp.cancel IS NULL";
+        $sql = "SELECT distinct /*emp.*, dtr.**/emp.lastname,emp.empid FROM hris.hr_employee emp LEFT JOIN (SELECT * FROM hris.hr_dtr_sum_hdr hdr INNER JOIN hris.hr_dtr_sum_employees ln ON hdr.code = ln.dtr_sum_id) dtr ON emp.empid = dtr.empid WHERE dtr.generationtype = '$gentype' AND dtr.date_from = '$datefrom' AND dtr.date_to = '$dateto' AND emp.cancel IS NULL";
 
         return DB::select(DB::raw($sql));
     }

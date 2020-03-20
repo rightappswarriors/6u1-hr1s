@@ -1,19 +1,26 @@
 @extends('layouts.user')
 
 <style>
+	table{
+		width:100%;
+	}
+	table td{
+		padding: 0.35rem;
+	}
 	@media print{
 		#wholeBody{
 			width: 700px!important;
-			margin-top: 100px!important;
 		}
-		.border{
-			border:0px solid black!important;
+		@page{
+			margin: 0;
 		}
 
 /*		table, thead, tbody, tr, td{
 			border: 2px solid black!important;
 		}*/
+		
 	}
+
 </style>
 
 @section('to-body')
@@ -111,8 +118,76 @@
 					<button class="btn btn-primary mr-3" id="print_btn" disabled><i class="fa fa-fw fa-print"></i></button>
 				</div>
 			</div>-->
-			
-			<div class="table-responsive hidden mt-3">
+						<table border="0">
+				<tr>
+					<td>CSC FORM No. 48</td>
+				</tr>
+				<tr>
+					<td class="text-center"><b>DAILY TIME RECORD</b></td>
+				</tr>
+				<tr>
+					<td class="text-center namesection">Sample Name</td>
+				</tr>
+				<tr>
+					<td class="text-center" style="border-top: 1px solid #000;">Name</td>
+				</tr>
+				<tr>
+					<td>For the Month of <u><span class="formonth">______________________ 2020</span></u></td>
+				</tr>
+				<tr>
+					<td>official hours of arrival(Regular Days) _______________________</td>
+				</tr>
+				<tr>
+					<td>and Department (Saturday) ______________________</td>
+				</tr>
+			</table>
+			<table border="1">
+				<thead>
+					<tr>
+						<td rowspan="2" style="vertical-align: middle;" class="text-center">DAY</td>
+						<td colspan="2" class="text-center">AM</td>
+						<td colspan="2" class="text-center">PM</td>
+						<td colspan="2" class="text-center">UNDERTIME</td>
+					</tr>
+					<tr>
+						<td class="text-center">Arrival</td>
+						<td class="text-center">Departure</td>
+						<td class="text-center">Arrival</td>
+						<td class="text-center">Departure</td>
+						<td class="text-center">Hours</td>
+						<td class="text-center">Minutes</td>
+					</tr>
+				</thead>
+				<tbody id="mainTable">
+					
+				</tbody>
+			</table>
+			<table border="1" >
+				<tr>
+					<td style="width: 50%;border: 2px solid #000;" class="text-center"><strong>TOTAL</strong></td>
+					<td style="width: 50%;border: 2px solid #000;" class="totalhours"></td>
+				</tr>
+			</table>
+			<table>
+				<tr>
+					<td>I CERTIFY on my honor that the above is a true and correct report of the hours of work perform, record of which was made daily at the time of arrival and departure from office.</td>
+				</tr>
+				<tr>
+					{{-- Sample Verified --}}
+					<td class="text-center"></td>
+				</tr>
+				<tr>
+					<td style="border-top: 1px solid #000;">Verified as to prescribed office hours.</td>
+				</tr>
+				<tr>
+					<td class="text-center"  style="padding-top: 4%;">CARLO JORGE JOAN L. REYES</td>
+				</tr>
+				<tr>
+					<td class="text-center">City Mayor</td>
+
+				</tr>
+			</table>
+			{{-- <div class="table-responsive hidden mt-3">
 				<table class="table table-hover" style="font-size: 13px;" id="table">
 					<thead>
 						<tr>
@@ -121,14 +196,14 @@
 							<th>Departure (AM)</th>
 							<th>Arrival (PM)</th>
 							<th>Departure (PM)</th>
-							{{-- <th>Undertime</th> --}}
+							<th>Undertime</th>
 						</tr>
 					</thead>
 					<tbody></tbody>
 				</table>
-			</div>
+			</div> --}}
 
-			<div class="table-responsive table-bordered mt-3" id="dtr">
+			{{-- <div class="table-responsive table-bordered mt-3" id="dtr">
 				<table class="table table-hover" style="font-size: 13px;">
 					<thead>
 						<tr>
@@ -137,7 +212,7 @@
 					</thead>
 					<tbody id="timelogs"></tbody>
 				</table>
-			</div>
+			</div> --}}
 			<div class="jumbotron" style="background: transparent; border:none;" id="loadAnimation">
 				<center><i class="fa fa-spin fa-spinner" style="font-size: 50px;"></i></center>
 			</div>
@@ -243,7 +318,6 @@
 					url: '{{url('reports/timekeeping/employee-dtr/')}}/findnew2',
 					data: {"code":from, "type":$('#generationtype').val(), "emp":$('#employee').val()},
 					success: function(data) {
-						console.log(data);
 						// table.clear().draw();
 						// for(i=0; i<data[0].days_worked_readable.length; i++) {
 						// 	// FillTable(data[i]);
@@ -262,242 +336,63 @@
 
 
 		function MakeDTR(data) {
-			let trigger = '-';
-			$('#print_btn')[0].removeAttribute('disabled');
-			var divX = document.getElementById('dtr');
-				divX.setAttribute('style', 'overflow-x: hidden !important');
+			$('#mainTable').empty();
+			let string = '';
 
-			var tbody = document.getElementById('timelogs');
-
-			while(tbody.firstChild) {
-				tbody.removeChild(tbody.firstChild);
-			}
-
-			var tr1 = document.createElement('tr');
-				var td1 = document.createElement('td');
-					td1.setAttribute('colspan', '7');
-					td1.innerHTML = "Name: <b>"+data.employee_readable+"</b>";
-				tr1.appendChild(td1);
-			var tr2 = document.createElement('tr');
-				var td2 = document.createElement('td');
-					td2.setAttribute('colspan', '7');
-					td2.innerHTML = "Payroll Period: <b>"+data.date_from_readable+" to "+data.date_to_readable+"</b>";
-				// var td3 = document.createElement('td');
-				// 	td3.setAttribute('colspan', '4');
-				// var td4 = document.createElement('td');
-				// 	td4.setAttribute('colspan', '3');
-				// 	td4.innerHTML = "Year: <b>"+response[1].Year+"</b>";
-				tr2.appendChild(td2);
-				// tr2.appendChild(td3);
-				// tr2.appendChild(td4);
-			var tr3 = document.createElement('tr');
-				var td6 = document.createElement('td');
-					td6.setAttribute('style', 'text-align: center; width: 10%');
-					td6.innerHTML = "<b>Day</b>";
-				var td7 = document.createElement('td');
-					td7.setAttribute('colspan', '2');
-					td7.setAttribute('style', 'text-align: center; font-weight: bold');
-					td7.innerHTML = "A.M.";
-				var td8 = document.createElement('td');
-					td8.setAttribute('colspan', '2');
-					td8.setAttribute('style', 'text-align: center; font-weight: bold');
-					td8.innerHTML = "P.M.";
-				var td10 = document.createElement('td');
-					td10.setAttribute('colspan', '2');
-					td10.setAttribute('style', 'text-align: center; font-weight: bold');
-					td10.innerHTML = "Undertime";
-				tr3.appendChild(td6);
-				tr3.appendChild(td7);
-				tr3.appendChild(td8);
-				tr3.appendChild(td10);
-			var tr4 = document.createElement('tr');
-				var td12 = document.createElement('td');
-				var td13 = document.createElement('td');
-					td13.setAttribute('style', 'text-align: center; width: 10%');
-					td13.innerHTML = "Arrival";
-				var td14 = document.createElement('td');
-					td14.setAttribute('style', 'text-align: center; width: 10%');
-					td14.innerHTML = "Departure";
-				var td15 = document.createElement('td');
-					td15.setAttribute('style', 'text-align: center; width: 10%');
-					td15.innerHTML = "Arrival";
-				var td16 = document.createElement('td');
-					td16.setAttribute('style', 'text-align: center; width: 10%');
-					td16.innerHTML = "Departure";
-				var td19 = document.createElement('td');
-					td19.setAttribute('style', 'text-align: center; width: 10%');
-					td19.innerHTML = "Hours";
-				var td20 = document.createElement('td');
-					td20.setAttribute('style', 'text-align: center; width: 10%');
-					td20.innerHTML = "Minutes";
-				var td21 = document.createElement('td');
-
-				tr4.appendChild(td12);
-				tr4.appendChild(td13);
-				tr4.appendChild(td14);
-				tr4.appendChild(td15);
-				tr4.appendChild(td16);
-				tr4.appendChild(td19);
-				tr4.appendChild(td20);
-				// tr4.appendChild(td21);
-
-			var tr5 = document.createElement('tr');
-				var td22 = document.createElement('td');
-					td22.setAttribute('colspan', '7');
-					td22.innerHTML = 'Note:';
-			var tr6 = document.createElement('tr');
-				var td23 = document.createElement('td');
-					td23.setAttribute('colspan', '7');
-			var tr7 = document.createElement('tr');
-				var td24 = document.createElement('td');
-					td24.setAttribute('colspan', '7');
-					td24.innerHTML = 'Employer Signature:';
-			var tr8 = document.createElement('tr');
-				var td25 = document.createElement('td');
-					td25.setAttribute('colspan', '7');
-					td25.innerHTML = 'Date Sign in:';
-
-				tr5.appendChild(td22);
-				tr6.appendChild(td23);
-				tr7.appendChild(td24);
-				tr8.appendChild(td25);
-
-
-			tbody.appendChild(tr1);
-			tbody.appendChild(tr2);
-			tbody.appendChild(tr3);
-			tbody.appendChild(tr4);
-
+			$('.namesection').html(data.employee_readable);
+			$('.formonth').html(data.date_from_month_readable);
+			$('.totalhours').html(data.weekdayhrs);
 
 			for(i=0; i<data.covered_dates.length; i++) {
-				var tr = document.createElement('tr');
+				let amin = '', pmout = '', amout = '', pmin = '', trigger = ['',''];
+				if(data.days_worked_readable.length > 0) {
 
-				var number = document.createElement('td');
-					number.innerHTML = data.covered_dates[i][0];
-
-				var in1 = document.createElement('td');
-					in1.setAttribute('style', 'text-align: center;');
-					in1.innerHTML = "";
-
-				var out1 = document.createElement('td');
-					out1.setAttribute('style', 'text-align: center;');
-					out1.innerHTML = "";
-
-				var in2 = document.createElement('td');
-					in2.setAttribute('style', 'text-align: center;');
-					in2.innerHTML = "";
-
-				var out2 = document.createElement('td');
-					out2.setAttribute('style', 'text-align: center;');
-					out2.innerHTML = "";
-
-				var undertime_in = document.createElement('td');
-					undertime_in.setAttribute('style', 'text-align: center;');
 					for(k=0; k<data.undertime_readable.length; k++) {
 						let readableUndertime = data.undertime_readable[k];
 						if(readableUndertime[0] == data.covered_dates[i][1]){
-							trigger = readableUndertime[2].split(':')[0];
+							trigger = readableUndertime[2].split(':');
 							break;
 						}
 					}
-					undertime_in.innerHTML = trigger;
-					trigger = '';
 
-				var undertime_out = document.createElement('td');
-					undertime_out.setAttribute('style', 'text-align: center;');
-					for(j=0; j<data.undertime_readable.length; j++) {
-						let readableUndertime = data.undertime_readable[j];
-						if(readableUndertime[0] == data.covered_dates[i][1]){
-							trigger = readableUndertime[2].split(':')[1];
-							break;
-						}
-					}
-					undertime_out.innerHTML = trigger;
-					trigger = '';
-
-				if(data.days_worked_readable.length > 0) {
 					for(j=0; j<data.days_worked_readable.length; j++) {
-
 						if(data.covered_dates[i][1] == data.days_worked_readable[j][0]) {
-							in1.innerHTML = formatAMPM2(data.days_worked_readable[j][1][0]);
+							amin = formatAMPM2(data.days_worked_readable[j][1][0]);
 							// arrival am
-							out1.innerHTML = '12:00nn';
-							in2.innerHTML = '1:00pm';
+							pmout = '';
+							amout = '12:00nn';
+							pmin = '1:00pm';
 
 							if(data.days_worked_readable[j][1].length > 2) {
 								
-								out1.innerHTML = formatAMPM2(data.days_worked_readable[j][1][1]);
+								amout = formatAMPM2(data.days_worked_readable[j][1][1]);
 								// departure am
-								in2.innerHTML = formatAMPM2(data.days_worked_readable[j][1][2]);
+								pmin = formatAMPM2(data.days_worked_readable[j][1][2]);
 								// arrival pm
-								out2.innerHTML = formatAMPM2(data.days_worked_readable[j][1][3]);
+								pmout = formatAMPM2(data.days_worked_readable[j][1][3]);
 								// departure pm
 							} else {
-								out2.innerHTML = formatAMPM2(data.days_worked_readable[j][1][1]);
+								pmout = formatAMPM2(data.days_worked_readable[j][1][1]);
 							}
+							
 						}
 					}
 
 				}
-
-				tr.appendChild(number);
-				tr.appendChild(in1);
-				tr.appendChild(out1);
-				tr.appendChild(in2);
-				tr.appendChild(out2);
-				tr.appendChild(undertime_in);
-				tr.appendChild(undertime_out);
-
-				tbody.appendChild(tr);
-
-			}
-				tbody.appendChild(tr5);
-				tbody.appendChild(tr6);
-				tbody.appendChild(tr7);
-				tbody.appendChild(tr8);
-
-			// for (i = 0; i < response[0].length; i++) {
-			// 	var tr = document.createElement('tr');
-
-			// 	var number = document.createElement('td');
-			// 		number.innerHTML = response[0][i]['_Date'];
-
-			// 	var in1 = document.createElement('td');
-			// 		in1.setAttribute('style', 'text-align: center;');
-			// 		in1.innerHTML = formatAMPM2(response[0][i]['AM']['Arrival']);
-
-			// 	var out1 = document.createElement('td');
-			// 		out1.setAttribute('style', 'text-align: center;');
-			// 		out1.innerHTML = formatAMPM2(response[0][i]['AM']['Departure']);
-
-			// 	var in2 = document.createElement('td');
-			// 		in2.setAttribute('style', 'text-align: center;');
-			// 		in2.innerHTML = formatAMPM2(response[0][i]['PM']['Arrival']);
-			// 		// console.log("1 "+response[0][i]['PM']['Arrival']);
-			// 		// console.log("2 "+formatAMPM2(response[0][i]['PM']['Arrival']));
-
-			// 	var out2 = document.createElement('td');
-			// 		out2.setAttribute('style', 'text-align: center;');
-			// 		out2.innerHTML = formatAMPM2(response[0][i]['PM']['Departure']);
-
-			// 	var undertime_in = document.createElement('td');
-			// 		undertime_in.setAttribute('style', 'text-align: center;');
-			// 		undertime_in.innerHTML = Math.floor(response[0][i]['_Rendered'] / 60);
-
-			// 	var undertime_out = document.createElement('td');
-			// 		undertime_out.setAttribute('style', 'text-align: center;');
-			// 		undertime_out.innerHTML = Math.floor(response[0][i]['_Rendered'] % 60);
-			// 	tr.appendChild(number);
-			// 	tr.appendChild(in1);
-			// 	tr.appendChild(out1);
-			// 	tr.appendChild(in2);
-			// 	tr.appendChild(out2);
-			// 	tr.appendChild(undertime_in);
-			// 	tr.appendChild(undertime_out);
-
-			// 	tbody.appendChild(tr);
+				string += 
+				'<tr>'+
+					'<td class="text-center">'+data.covered_dates[i][0]+'</td>'+
+					'<td>'+amin+'</td>'+
+					'<td>'+amout+'</td>'+
+					'<td>'+pmin+'</td>'+
+					'<td>'+pmout+'</td>'+
+					'<td>'+trigger[0]+'</td>'+
+					'<td>'+trigger[1]+'</td>'+
+				'</tr>';
 				
-			// }
+			}
+			$('#mainTable').append(string);
+			
 		}
 
 		function FillTable(data) {

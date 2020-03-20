@@ -133,5 +133,5 @@ foreach(Notification_N::Get_Latest_Notification(Account::CURRENT()->uid) as $k =
     notif_find();
   })
 
-  setInterval(function(){ notif_find(); }, 3000);
+  // setInterval(function(){ notif_find(); }, 3000);
 </script>

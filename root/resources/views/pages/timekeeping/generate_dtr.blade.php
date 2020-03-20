@@ -408,7 +408,7 @@
 				data.empid,
 				data.empname,
 				data.jobtitle,
-				(data.isgenerated ? 'Yes' : 'No'),
+				(data.isgenerated == 'true' ? 'Yes' : 'No'),
 				'<button generationid="'+(data.codid === undefined ? '' : data.codid['code'])+'" type="button" class="btn btn-primary btn-spin mr-1" onclick="GenerateIndv('+data.isgenerated+')"><i class="fa fa-share"></i> <i class="fa fa-server"></i></button>'
 			]).draw();
 			hideErrorDiv();
@@ -437,7 +437,7 @@
 
 		function onToggleUpdateDTRModal_ind()
 		{
-			$('#frm-update').attr('action', '{{url('timekeeping/generate-dtr/save-dtr')}}?code='+selected_row.children()[0].innerText/*+'&pp='+$('#payroll_period').val()+*/+'&monthFrom='+$('#dateFrom').val()+'&monthTo='+$('#dateTo').val()+'&ofc_id='+$('#payroll_ofc').val()/*+'&month='+$('#payroll_month').val()*/+'&year='+$('#payroll_year').val()+'&empstat='+$('#payroll_emp_stat').val()+'&gtype='+$('#payroll_gen_type').val()+'&code='+$(selected_row).find('button').attr('generationid'));
+			$('#frm-update').attr('action', '{{url('timekeeping/generate-dtr/save-dtr')}}?code='+selected_row.children()[0].innerText/*+'&pp='+$('#payroll_period').val()+*/+'&monthFrom='+$('#dateFrom').val()+'&monthTo='+$('#dateTo').val()+'&ofc_id='+$('#payroll_ofc').val()/*+'&month='+$('#payroll_month').val()*/+'&year='+$('#payroll_year').val()+'&empstat='+$('#payroll_emp_stat').val()+'&gtype='+$('#payroll_gen_type').val()+'&codeGeneration='+$(selected_row).find('button').attr('generationid'));
 			$('#modal-update').modal('show');
 		}
 
@@ -495,7 +495,7 @@
 									$('#sum-stat').html('<span class="btn btn-success">Yes</span>');
 									SearchTable();
 								} else {
-									alert("DTR is already generated. Cannot generated DTR again. Failed on saving.");
+									alert("DTR is already generated. Cannot generate DTR again. Failed on saving.");
 								}
 							} else {
 								alert("There still errors on the timelog entry. Unable to save DTR summary.");
@@ -745,10 +745,13 @@
 			} else {
 				$.ajax({
 					type : 'get',
-					url : '{{url('master-file/office/get-employees')}}',
+					url : '{{url('timekeeping/generate-dtr/get-employees')}}',
 					data : {
 						ofc_id : $('#payroll_ofc').val(),
-						emp_status : $('#payroll_emp_stat').val()
+						emp_status : $('#payroll_emp_stat').val(),
+						monthFrom : $('#dateFrom').val(),
+						monthTo : $('#dateTo').val(),
+						gtype : $('#payroll_gen_type').val()
 					},
 					dataTy : 'json',
 					beforeSend : function()
@@ -756,35 +759,37 @@
 						$('#hdr-tbl-employee').html('Loading Employees <i class="fa fa-spin fa-spinner"></i>');
 					},
 					success : function(data) {
-						// console.log(data);
 						let d = JSON.parse(data);
-						emp_count = d.length;
-						for (var i = 0; i < d.length; i++) {		
-							$.ajax({
-								type : 'get',
-								url : '{{url('master-file/office/is-Generated-OnDTR')}}',
-								data : {
-									empid:d[i].empid,
-									// pp:$('#payroll_period').val(),
-									monthFrom:$('#dateFrom').val(),
-									monthTo:$('#dateTo').val(),
-									// month: $('#payroll_month').val(),
-									year: $('#payroll_year').val(),
-									gtype : $('#payroll_gen_type').val()
-								},
-								async: false,
-								dataTy : 'json',
-								success : function(data) {
-									if (data!="error") {
-										if (data!="noemp") {
-											d[i].isgenerated = JSON.parse(data[0]);
-											d[i].codid = (data[1] === null ? [] : data[1]);
-										}
-									}
-								},
-							})
+						for (var i = 0; i < d.length; i++) {	
 							LoadEmployeeTable(d[i]);
 						}
+						// emp_count = d.length;
+						// for (var i = 0; i < d.length; i++) {		
+						// 	$.ajax({
+						// 		type : 'get',
+						// 		url : '{{url('master-file/office/is-Generated-OnDTR')}}',
+						// 		data : {
+						// 			empid:d[i].empid,
+						// 			// pp:$('#payroll_period').val(),
+						// 			monthFrom:$('#dateFrom').val(),
+						// 			monthTo:$('#dateTo').val(),
+						// 			// month: $('#payroll_month').val(),
+						// 			year: $('#payroll_year').val(),
+						// 			gtype : $('#payroll_gen_type').val()
+						// 		},
+						// 		async: false,
+						// 		dataTy : 'json',
+						// 		success : function(data) {
+						// 			if (data!="error") {
+						// 				if (data!="noemp") {
+						// 					d[i].isgenerated = JSON.parse(data[0]);
+						// 					d[i].codid = (data[1] === null ? [] : data[1]);
+						// 				}
+						// 			}
+						// 		},
+						// 	})
+						// 	LoadEmployeeTable(d[i]);
+						// }
 					},
 					error : function()
 					{

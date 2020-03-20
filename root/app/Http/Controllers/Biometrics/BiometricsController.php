@@ -19,10 +19,10 @@ class BiometricsController extends Controller
 
     //
     public function ReceiveData(Request $request){
-    	// returns : 1st array: not found on database, 2nd array: success: 3rd array: time not on span
+    	// returns : 1st array: not found on database, 2nd array: success: 3rd array: time not on span: 4th: exceed
     	if(isset($request->data)){  
     		$decoded = json_decode($request->data);
-    		$noData = $successArr = $unsuccessArr = $notonspan = [];
+    		$noData = $successArr = $unsuccessArr = $notonspan = $exceedArr = [];
             $success = false;
             $toAdd = true;
             $action = null;
@@ -58,8 +58,10 @@ class BiometricsController extends Controller
                                     $var = new \App\Http\Controllers\Timekeeping\TimeLogEntryController;
                                     $requestToSend = new \Illuminate\Http\Request($object);
                                     $return = $var->addLog($requestToSend);
-                                    if($return){
+                                    if($return != 'exceed'){
                                         $success = $return;
+                                    } else {
+                                        array_push($exceedArr, $value->userid);
                                     }
                                 }
                            }
@@ -102,7 +104,7 @@ class BiometricsController extends Controller
     			
     		}
 
-    		return response()->json([$noData,$successArr,$notonspan]);
+    		return response()->json([$noData,$successArr,$notonspan,$exceedArr]);
     	}
 
     }

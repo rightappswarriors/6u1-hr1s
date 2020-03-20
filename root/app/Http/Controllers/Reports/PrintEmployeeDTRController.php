@@ -85,6 +85,7 @@ class PrintEmployeeDTRController extends Controller
             $v->date_from_readable = \Carbon\Carbon::parse($v->date_from)->format('M d, Y');
             $v->date_to_readable = \Carbon\Carbon::parse($v->date_to)->format('M d, Y');
             $v->covered_dates = Core::CoveredDates(Date('Y-m-01',strtotime($v->date_from)), Date('Y-m-t',strtotime($v->date_to)));
+            $v->date_from_month_readable = Date('F Y',strtotime($v->date_from));
             // if(isset($decodedOB)){
             //     foreach ($decodedOB as $key => $value) {
             //         $value = json_decode($value);

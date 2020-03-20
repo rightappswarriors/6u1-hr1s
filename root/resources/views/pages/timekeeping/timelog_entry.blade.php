@@ -47,6 +47,7 @@
 					<form method="post" action="{{url('timekeeping/timelog-entry/batch-time-log-info')}}" id="frm-batchtimeloginfo">
 						{{csrf_field()}}
 						<div class="form-group form-inline">
+							<input type="hidden" name="forGroup">
 							<label>Work Dates</label>
 							<input type="input" name="tito_dateStrt" id="tito_dateStrt" class="form-control ml-2" value="{{date('Y-m-1')}}" required> <span class="ml-2">to</span> 
 							<input type="input" name="tito_dateEnd" id="tito_dateEnd" class="form-control ml-2" value="{{date('Y-m-d')}}" required>
@@ -122,13 +123,24 @@
 					<div class="table-responsive">
 						<table class="table table-bordered table-hover" id="dataTable">
 							<thead>
-								<tr>
-									<th>Work Date</th>
-									<th>Time Log</th>
-									<th>Status</th>
-									<th>Source</th>
+								 <tr>
+								 	<th rowspan="2" width="10%" style="white-space: nowrap;" >Work Date</th>
+					                <th style="text-align: center;" colspan="3">AM</th>
+					                <th style="text-align: center;" colspan="3">PM</th>
+					                <th></th>
+					            </tr>
+					            <tr>
+					                <th width="10%">In</th>
+					                <th width="10%">Out</th>
+					                <th>Source</th>
+					                <th width="10%">In</th>
+					                <th width="10%">Out</th>
+					                <th>Source</th>
+					                <th>Option</th>
+					            </tr>
+								{{-- <tr>
 									<th width="15%">Option</th>
-								</tr>
+								</tr> --}}
 							</thead>
 							<tbody class="text-center"></tbody>
 						</table>
@@ -158,11 +170,11 @@
 						</div>
 						<div class="form-group">
 							<label>Time Log</label>
-							<input type="time" class="form-control" name="time_timelog" id="time_timelog" value="{{date('H:i:s')}}" required>
+							<input type="time" class="form-control hasDatepicker" name="time_timelog" id="time_timelog" value="{{date('H:i:s')}}" required>
 						</div>
 						<div class="form-group">
 							<label>Status</label>
-							<select class="form-control" name="sel_status" id="sel_status" required>
+							<select class="form-control hasDatepicker" name="sel_status" id="sel_status" required>
 								<option selected disabled value="">---</option>
 								<option value="1">In</option>
 								<option value="0">Out</option>
@@ -180,7 +192,7 @@
 
 	<!-- Edit Entry Modal -->
 	<div class="modal fade" id="modal-editlog" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-		<div class="modal-dialog" role="document">
+		<div class="modal-dialog modal-lg" role="document">
 			<div class="modal-content">
 				<div class="modal-header">
 					<h5 class="modal-title" id="exampleModalLabel">Edit Log</h5>
@@ -189,16 +201,78 @@
 					</button>
 				</div>
 				<div class="modal-body">
-					<form method="post" action="#" id="frm-editlog">
-						<div class="form-group">
-							<label>Work Date</label>
-							<input type="text" class="form-control" name="date_workdate2" id="date_workdate2" required>
+				<form method="post" action="#" id="frm-editlog">
+					<div class="row">
+						<div class="col-sm-4 offset-4">
+								<input type="text" placeholder="Work Date" class="form-control" name="date_workdate2" id="date_workdate2" required>
 						</div>
-						<div class="form-group">
+					</div>
+					<div class="row">
+						<div class="col-sm-6">
+							<center><strong>AM IN</strong></center>
+							<input type="time" class="form-control" name="time_timelog2" id="time_timelog2" required>
+							<select class="form-control" name="sel_status2" id="sel_status2" required>
+								<option selected disabled value="">---</option>
+								<option value="1">In</option>
+								<option value="0">Out</option>
+							</select>
+						</div>
+						<div class="col-sm-6">
+							<center><strong>AM OUT</strong></center>
+							<input type="time" class="form-control" name="time_timelog3" id="time_timelog3" required>
+							<select class="form-control" name="sel_status3" id="sel_status3" required>
+								<option selected disabled value="">---</option>
+								<option value="1">In</option>
+								<option value="0">Out</option>
+							</select>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-sm-6">
+							<center><strong>PM IN</strong></center>
+							<input type="time" class="form-control" name="time_timelog4" id="time_timelog4" required>
+							<select class="form-control" name="sel_status4" id="sel_status4" required>
+								<option selected disabled value="">---</option>
+								<option value="1">In</option>
+								<option value="0">Out</option>
+							</select>
+						</div>
+						<div class="col-sm-6">
+							<center><strong>PM OUT</strong></center>
+							<input type="time" class="form-control" name="time_timelog5" id="time_timelog5" required>
+							<select class="form-control" name="sel_status5" id="sel_status5" required>
+								<option selected disabled value="">---</option>
+								<option value="1">In</option>
+								<option value="0">Out</option>
+							</select>
+						</div>
+					</div>
+					<div class="row" style="padding-top: 2%;">
+						<div class="col-sm-12" style="border: 1px solid;color: #D8000C;background-color: #FFBABA;border-radius: 3px;">
+							
+						<div style="padding: 15px 10px 15px 50px;background-repeat: no-repeat;	background-position: 10px center;background-image: url('https://i.imgur.com/GnyDvKN.png');">ERROR</div>
+						<!--Diri ibutang ang mga errors kol-->
+ 						<div class="row" id="arikol">
+							
+						</div>
+						</div>
+
+					</div>
+					{{-- <div class="row">
+						<div class="col-sm-6 text-center"><strong>AM IN</strong></div><div class="col-sm-6 text-center"><strong>AM OUT</strong></div>
+					</div>
+					<div class="row">
+			
+						<div class="col-sm-6" style="border: 1px solid #ddd;border-radius: 6px;">
+							<div style="padding: 1% 1% 0 1%;" class="form-group">
+								<label>Work Date</label>
+								<input type="text" class="form-control" name="date_workdate2" id="date_workdate2" required>
+							</div>
+						<div style="padding: 1% 1% 0 1%;" class="form-group">
 							<label>Time Log</label>
 							<input type="time" class="form-control" name="time_timelog2" id="time_timelog2" required>
 						</div>
-						<div class="form-group">
+						<div style="padding: 1% 1% 0 1%;" class="form-group">
 							<label>Status</label>
 							<select class="form-control" name="sel_status2" id="sel_status2" required>
 								<option selected disabled value="">---</option>
@@ -206,7 +280,72 @@
 								<option value="0">Out</option>
 							</select>
 						</div>
+						</div>
+						
+						<div class="col-sm-6" style="border: 1px solid #ddd;border-radius: 6px;">
+							<div style="padding: 1% 1% 0 1%;" class="form-group">
+								<label>Work Date</label>
+								<input type="text" class="form-control" name="date_workdate3" id="date_workdate3" required>
+							</div>
+						<div style="padding: 1% 1% 0 1%;" class="form-group">
+							<label>Time Log</label>
+							<input type="time" class="form-control" name="time_timelog3" id="time_timelog3" required>
+						</div>
+						<div style="padding: 1% 1% 0 1%;" class="form-group">
+							<label>Status</label>
+							<select class="form-control" name="sel_status3" id="sel_status3" required>
+								<option selected disabled value="">---</option>
+								<option value="1">In</option>
+								<option value="0">Out</option>
+							</select>
+						</div>
+						</div>
+					</div> --}}
+					{{-- <div class="row">
+						<div class="col-sm-6 text-center"><strong>PM IN</strong></div><div class="col-sm-6 text-center"><strong>PM OUT</strong></div>
+					</div> --}}
+					{{-- <div class="row">
+						<div class="col-sm-6" style="border: 1px solid #ddd;border-radius: 6px;">
+							<div style="padding: 1% 1% 0 1%;" class="form-group">
+								<label>Work Date</label>
+								<input type="text" class="form-control" name="date_workdate4" id="date_workdate4" required>
+							</div>
+						<div style="padding: 1% 1% 0 1%;" class="form-group">
+							<label>Time Log</label>
+							<input type="time" class="form-control" name="time_timelog4" id="time_timelog4" required>
+						</div>
+						<div style="padding: 1% 1% 0 1%;" class="form-group">
+							<label>Status</label>
+							<select class="form-control" name="sel_status4" id="sel_status4" required>
+								<option selected disabled value="">---</option>
+								<option value="1">In</option>
+								<option value="0">Out</option>
+							</select>
+						</div>
+						</div>
+						<div class="col-sm-6" style="border: 1px solid #ddd;border-radius: 6px;">
+							<div style="padding: 1% 1% 0 1%;" class="form-group">
+								<label>Work Date</label>
+								<input type="text" class="form-control" name="date_workdate5" id="date_workdate5" required>
+							</div>
+						<div style="padding: 1% 1% 0 1%;" class="form-group">
+							<label>Time Log</label>
+							<input type="time" class="form-control" name="time_timelog5" id="time_timelog5" required>
+						</div>
+						<div style="padding: 1% 1% 0 1%;" class="form-group">
+							<label>Status</label>
+							<select class="form-control" name="sel_status5" id="sel_status5" required>
+								<option selected disabled value="">---</option>
+								<option value="1">In</option>
+								<option value="0">Out</option>
+							</select>
+						</div>
+						</div>
+					</div> --}}
+				
+						
 					</form>
+
 				</div>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="ClearFld()">Close</button>
@@ -264,9 +403,21 @@
 		$( "#tito_dateStrt").datepicker(date_option);
 		$( "#tito_dateEnd").datepicker(date_option);
 		$( "#date_workdate").datepicker(date_option);
-		$( "#date_workdate2").datepicker(date_option);
+		$( "#date_workdate2, #date_workdate3, #date_workdate4, #date_workdate5").datepicker(date_option);
 	</script>
 	<script type="text/javascript">
+		function formatAMPM2(time) {
+			if(isNaN( parseInt(time) )){return time}
+			if(time=="") return "";
+			if(time=="<span class='text-danger'>missing</span>") return "";
+			var timeString = time;
+			var H = +timeString.substr(0, 2);
+			var h = H % 12 || 12;
+			var ampm = (H < 12 || H === 24) ? "am" : "pm";
+			timeString = h + timeString.substr(2, 3) + ampm;
+			return timeString;
+		}
+
 		var table = $('#dataTable').DataTable();
 		var selected_row = "";
 		$('#dataTable').on('click', '.btn-delete', function() {
@@ -353,6 +504,7 @@
 
 		$('#dataTable').on('click', '.btn-edit', function() {
 			var emp = $('#tito_emp').val();
+			let stringFix = '';
 
 			selected_row = $(this).parents('tr');
 			$.ajax({
@@ -365,11 +517,59 @@
 						if (data!="no user") {
 							if (data!="no record") {
 								var log = JSON.parse(data);
-								$('#frm-editlog').attr('action', '{{url('timekeeping/timelog-entry/edit-log')}}?logid='+log.logs_id+'&empid='+emp);
-								$('#date_workdate2').val(log.work_date);
-								$('#time_timelog2').val(log.time_log);
-								$('#sel_status2').val(log.status).trigger('change');
+								let unfined = [];
+								// $('#frm-editlog').attr('action', '{{url('timekeeping/timelog-entry/edit-log')}}?logid='+log.logs_id+'&empid='+emp);
+								$('#frm-editlog').attr('action', '{{url('timekeeping/timelog-entry/edit-log')}}?empid='+emp);
+								// $('#date_workdate2').val(log.work_date);
+								// $('#time_timelog2').val(log.time_log);
+								// $('#sel_status2').val(log.status).trigger('change');
+								let suffix = '';
+								$('#date_workdate2').val('');
+								$('[id*="time_timelog"]:not(.hasDatepicker), [id*="sel_status"]:not(.hasDatepicker)' ).val('').removeAttr('name required').attr('disabled',true);
+								for (var i = 0; i < log.length; i++) {
+									let dataParsed = log[i];
+									if(dataParsed['ampm'][1] == 'am'){
+										if(dataParsed['status'] == '1' && dataParsed['ampm'][0] == '1'){
+											suffix = '2';
+										} else if(dataParsed['status'] == '0' && dataParsed['ampm'][0] == '0'){
+											suffix = '3';
+										} else {
+											unfined.push(dataParsed);
+										}
+										// pm
+									} else if(dataParsed['ampm'][1] == 'pm'){
+										if(dataParsed['status'] == '1' && dataParsed['ampm'][0] == '1'){
+											suffix = '4';
+										} else if(dataParsed['status'] == '0' && dataParsed['ampm'][0] == '0'){
+											suffix = '5';
+										} else {
+											unfined.push(dataParsed);
+										}
+									}
+									// $('#date_workdate'+suffix).val(dataParsed['work_date']);
+									if(suffix != ''){
+										$('#time_timelog'+suffix).val(dataParsed['time_log']).trigger('change').attr({'name':'timelog['+dataParsed['logs_id']+'][]','required':true}).removeAttr('disabled');
+										$('#sel_status'+suffix).val(dataParsed['status']).trigger('change').attr({'name':'timelog['+dataParsed['logs_id']+'][]','required':true}).removeAttr('disabled');
+										$('#date_workdate2').val(dataParsed['work_date']);
+									}
+								}
 								$('#modal-editlog').modal('show');
+								$('#arikol').empty();
+								if(unfined.length){
+									for (var j = 0; j < unfined.length; j++) {
+										stringFix += 
+										'<div class="col-sm-6">'+
+											'<input style="border: 1px solid #D8000C;" type="time" class="form-control" name="timelog['+unfined[j]['logs_id']+'][]" id="timelog['+unfined[j]['logs_id']+'][]" required value="'+unfined[j]['time_log']+'">'+
+											'<select class="form-control" value="'+unfined[j]['status']+'" name="timelog['+unfined[j]['logs_id']+'][]" id="sel_status['+unfined[j]['logs_id']+'][]" required>'+
+												'<option selected disabled value="">---</option>'+
+												'<option value="1">In</option>'+
+												'<option value="0">Out</option>'+
+											'</select>'+
+										'</div>'
+										$('#arikol').append(stringFix);
+										$('select[name="timelog['+unfined[j]['logs_id']+'][]"]').val(unfined[j]['status']).trigger('change');
+									}
+								}
 							} else {
 								alert("No record found. Refresh the table.");
 							}
@@ -384,13 +584,46 @@
 		});
 
 		function LoadTable(data) {
-			table.row.add([
-				data.work_date,
-				data.time_log,
-				data.status_desc,
-				data.source_desc,
-				'<button type="button" class="btn btn-success btn-edit mr-1" data="'+data.logs_id+'"><i class="fa fa-edit"></i></button><button type="button" class="btn btn-danger btn-delete" data="'+data.logs_id+'"><i class="fa fa-trash"></i></button>'
-			]).draw();
+			for (x in data) {
+				let amin = '', amout = '', amsource = '', pmin = '', pmout = '', pmsource = '';
+				let log_id = [];
+				for (var i = 0; i < data[x].length; i++) {
+					// am
+					let dataParsed = data[x][i];
+					log_id.push(dataParsed['logs_id']);
+					if(dataParsed['ampm'][1] == 'am'){
+						amsource = dataParsed['source_desc'];
+						if(dataParsed['status'] == '1' && dataParsed['ampm'][0] == '1'){
+							amin = formatAMPM2(dataParsed['time_log']);
+						} else if(dataParsed['status'] == '0' && dataParsed['ampm'][0] == '0'){
+							amout = formatAMPM2(dataParsed['time_log']);
+						}
+						// pm
+					} else if(dataParsed['ampm'][1] == 'pm'){
+						pmsource = dataParsed['source_desc'];
+						if(dataParsed['status'] == '1' && dataParsed['ampm'][0] == '1'){
+							pmin = formatAMPM2(dataParsed['time_log']);
+						} else if(dataParsed['status'] == '0' && dataParsed['ampm'][0] == '0'){
+							pmout = formatAMPM2(dataParsed['time_log']);
+						}
+					}
+				}
+
+
+				table.row.add([
+					x,
+					amin,
+					amout,
+					amsource,
+					pmin,
+					pmout,
+					pmsource,
+					'<button type="button" class="btn btn-success btn-edit mr-1" data="'+log_id.toString()+'"><i class="fa fa-edit"></i></button><button type="button" class="btn btn-danger btn-delete" data="'+log_id.toString()+'"><i class="fa fa-trash"></i></button>'
+				]).draw();
+				amin = '', amout = '', amsource = '', pmin = '', pmout = '', pmsource = '';
+				log_id = [];
+			}
+			
 		}
 
 		function RefreshRow(data) {
@@ -439,9 +672,10 @@
 				success : function(data) {
 					if (data!="error") {
 						if (data!="empty") {
-							for(var i = 0 ; i < data.length; i++) {
-								LoadTable(data[i]);
-							}
+							// for(var i = 0 ; i < data.length; i++) {
+							// 	LoadTable(data[i]);
+							// }
+							LoadTable(data);
 						} else {
 							alert("No record.");
 						}
@@ -460,9 +694,13 @@
 				data : $('#frm-addlog').serialize(),
 				dataTy : 'json',
 				success : function(data) {
-					if (data!="error") {
-						LoadTable(JSON.parse(data));
+					if (data!="error" && data!="exceed") {
+						// LoadTable(JSON.parse(data));
+						$('#frm-batchtimeloginfo').submit();
 						alert("Time log added.");
+					}
+					else if('exceed'){
+						alert("Time log for daily entry exceeded. Please edit entries already existed.");
 					}
 					else {
 						alert("Error in Adding Log");
@@ -484,7 +722,8 @@
 					if (data!="error") {
 						if (data!="no record") {
 							alert("Log updated.");
-							RefreshRow(JSON.parse(data));
+							// RefreshRow(JSON.parse(data));
+							$('#frm-batchtimeloginfo').submit();
 						} else{
 							alert("No record found.");
 						}
@@ -507,7 +746,8 @@
 				success : function(data) {
 					if (data!="error") {
 						alert("Time Log Deleted.");
-						table.row(selected_row).remove().draw();
+						// table.row(selected_row).remove().draw();
+						$('#frm-batchtimeloginfo').submit();
 						
 					} else {
 						alert("Error in Removing. Row was not deleted");

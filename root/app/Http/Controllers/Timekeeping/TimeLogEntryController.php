@@ -10,6 +10,7 @@ use Core;
 use ErrorCode;
 use Timelog;
 use Office;
+use App\Http\Controllers\Biometrics\BiometricsController;
 
 class TimeLogEntryController extends Controller
 {
@@ -83,6 +84,7 @@ class TimeLogEntryController extends Controller
     public function loadBatchTimeLogsInfo(Request $r)
     {
 	    try {
+            $timeTemp = [];
 	    	$error_msg = [
 		        'required' => 'Some fields are missing.',
 		        'tito_emp.exists' => 'Account ID DOES NOT EXISTS',
@@ -99,6 +101,14 @@ class TimeLogEntryController extends Controller
 		    		$timelogs[$i]->status_desc = Core::io((string)$timelogs[$i]->status);
 		    		$timelogs[$i]->source_desc = Core::source($timelogs[$i]->source);
 		    	}
+                if($r->has('forGroup')){
+                    $bio = new BiometricsController();
+                    foreach ($timelogs as $key => $value) {
+                        $value->ampm = $bio->processTimeForSpan($bio->databaseData,$value->time_log);
+                        $timeTemp[$value->work_date][] = $value;
+                    }
+                    $timelogs = $timeTemp;
+                }
 		    }
 		    if (count($timelogs)==0) {
 		    	$timelogs = "empty";
@@ -119,14 +129,18 @@ class TimeLogEntryController extends Controller
             list($d_y, $d_m, $d_d) = explode("-", $r->date_workdate);
             $month = Core::GetMonth((int)$d_m);
             $date = $month." ".$d_d.", ".$d_y;
+            if(DB::table('hr_tito2')->where([['work_date',date('Y-m-d', strtotime($date))],['empid',$r->id]])->count() + 1 <= 4){
+    	    	if (DB::table('hr_tito2')->insert(['work_date' => date('Y-m-d', strtotime($date)), 'time_log' => date('H:i', strtotime($r->time_timelog)), 'empid' => $r->id, 'status' => $r->sel_status, 'source' => (isset($r->source) ? $r->source : 'M'), 'logs_id' => $nlogs_id])) {
+    	    		Core::updatem99('logs_id',Core::get_nextincrementlimitchar($nlogs_id, 8));
+    	    		$data = DB::table('hr_tito2')->where([['logs_id', $nlogs_id],['empid',$r->id]])->first();
+    	    		$data->status_desc = Core::IO((string)$data->status);
+    	    		$data->source_desc = Core::source($data->source);
+    	    		return json_encode($data);
+    	    	}
+            } else {
+                return 'exceed';
+            }
 
-	    	if (DB::table('hr_tito2')->insert(['work_date' => date('Y-m-d', strtotime($date)), 'time_log' => date('H:i', strtotime($r->time_timelog)), 'empid' => $r->id, 'status' => $r->sel_status, 'source' => (isset($r->source) ? $r->source : 'M'), 'logs_id' => $nlogs_id])) {
-	    		Core::updatem99('logs_id',Core::get_nextincrementlimitchar($nlogs_id, 8));
-	    		$data = DB::table('hr_tito2')->where([['logs_id', $nlogs_id],['empid',$r->id]])->first();
-	    		$data->status_desc = Core::IO((string)$data->status);
-	    		$data->source_desc = Core::source($data->source);
-	    		return json_encode($data);
-	    	}
 	    	return "error";
 	    } catch (\Exception $e) {
             return $e;
@@ -153,8 +167,8 @@ class TimeLogEntryController extends Controller
     {
     	try {
     		if ($r->row!=null) {
-    			if (DB::table('hr_tito2')->where('logs_id', $r->row)->first()!=null) {
-    				DB::table('hr_tito2')->where('logs_id', $r->row)->delete();
+    			if (DB::table('hr_tito2')->whereIn('logs_id', explode(',',$r->row))->first()!=null) {
+    				DB::table('hr_tito2')->whereIn('logs_id', explode(',',$r->row))->delete();
     				return "Time Log Deleted.";
     			}
     			return "error";
@@ -190,9 +204,15 @@ class TimeLogEntryController extends Controller
         try {
             $emp = DB::table('hr_employee')->where('empid', $r->id)->first();
             if ($emp!=null) {
-                $log = DB::table('hr_tito2')->where([['logs_id', $r->log],['empid',$r->id]])->first();
+                // $log = DB::table('hr_tito2')->where([['logs_id', $r->log],['empid',$r->id]])->first();
+                $log = DB::table('hr_tito2')->whereIn('logs_id',explode(',', $r->log))->where([['empid',$r->id]])->get();
                 if ($log!=null) {
-                    $log->status_type = Core::IO2('capital', $log->status);
+                    $bio = new BiometricsController();
+                    foreach ($log as $key => $value) {
+                        $value->status_type = Core::IO2('capital', $value->status);
+                        $value->ampm = $bio->processTimeForSpan($bio->databaseData,$value->time_log);
+                    }
+                    // $log->status_type = Core::IO2('capital', $log->status);
                     return json_encode($log);
                 } else {
                     return "no record";
@@ -202,6 +222,7 @@ class TimeLogEntryController extends Controller
             }
             return "error";
         } catch (\Exception $e) {
+            return $e;
             return "error";
         }
     }
@@ -209,22 +230,27 @@ class TimeLogEntryController extends Controller
     public function EditLog(Request $r)
     {
         try {
-            $log = DB::table('hr_tito2')->where('logs_id', $r->logid)->first();
+            $log = DB::table('hr_tito2')->where([['empid',$r->empid]])->whereIn('logs_id',array_keys($r->timelog))->get();
             if ($log!=null) {
-                DB::table('hr_tito2')->where('logs_id', $log->logs_id)->update([
-                    'work_date' => $r->date_workdate2,
-                    'time_log' => $r->time_timelog2,
-                    'status' => $r->sel_status2,
-                ]);
-                $newlog = DB::table('hr_tito2')->where([['logs_id', $r->logid],['empid',$r->empid]])->first();
-                $newlog->status_desc = Core::io((string)$newlog->status);
-                $newlog->source_desc = Core::source($newlog->source);
-                return json_encode($newlog);
+                $values = array_values($r->timelog);
+                for ($i=0; $i < count($log); $i++) { 
+                     DB::table('hr_tito2')->where('logs_id', $log[$i]->logs_id)->update([
+                        'time_log' => $values[$i][0],
+                        'status' => $values[$i][1],
+                        'work_date' => $r->date_workdate2
+                    ]);
+                }
+                return 'done';
+                // $newlog = DB::table('hr_tito2')->where([['logs_id', $r->logid],['empid',$r->empid]])->first();
+                // $newlog->status_desc = Core::io((string)$newlog->status);
+                // $newlog->source_desc = Core::source($newlog->source);
+                // return json_encode($newlog);
             } else {
                 return "no record";
             }
             return "error";
         } catch (\Exception $e) {
+            return $e;
             return "error";
         }
     }
