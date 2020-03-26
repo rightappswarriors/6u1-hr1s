@@ -19,6 +19,7 @@
 
 @php
   $NoPageRoute = route('redirect', ['page'=> '6']);
+  $session = Session::get('_user');
 @endphp
 
 <ul class="sidebar navbar-nav no-print" style="background-color: #343a40;" id="sidebar-parent">
@@ -47,6 +48,8 @@
     </a>
   </li>
   {{-- USER MENU --}}
+
+  @if(DB::table('x06')->where([['grp_id',$session[0]->grp_id],['mod_id','M0000000'],['restrict','=',0]])->exists())
   <li class="nav-item" id="masterfile">
     <a class="nav-link nav-link-collapse collapsed" data-toggle="collapse" href="#MF" aria-expanded="false">
       <i class="fa fa-fw fa-key"></i>
@@ -116,12 +119,16 @@
       </li> --}}
     </ul>
   </li>
+  @endif
+  @if(DB::table('x06')->where([['grp_id',$session[0]->grp_id],['mod_id','M0000007'],['restrict','=',0]])->exists())
   <li class="nav-item" id="calendar">
     <a class="nav-link" href="{{url('calendar/')}}">
       <i class="fa fa-fw fa-calendar"></i>
       <span> Holidays</span>
     </a>
   </li>
+  @endif
+  @if(DB::table('x06')->where([['grp_id',$session[0]->grp_id],['mod_id','T0000000'],['restrict','=',0]])->exists())
   <li class="nav-item" id="timekeeping">
     <a class="nav-link nav-link-collapse collapsed" data-toggle="collapse" href="#TK" aria-expanded="false">
       <i class="fa fa-fw fa-clock-o"></i>
@@ -157,6 +164,8 @@
       </li>
     </ul>
   </li>
+  @endif
+  @if(DB::table('x06')->where([['grp_id',$session[0]->grp_id],['mod_id','P0000000'],['restrict','=',0]])->exists())
   <li class="nav-item" id="payroll">
     <a class="nav-link nav-link-collapse collapsed" data-toggle="collapse" href="#PR" aria-expanded="false">
       <i class="fa fa-fw fa-money"></i>
@@ -199,6 +208,8 @@
       </li> --}}
     </ul>
   </li>
+  @endif
+  @if(DB::table('x06')->where([['grp_id',$session[0]->grp_id],['mod_id','R0000000'],['restrict','=',0]])->exists())
   <li class="nav-item" id="reps">
     <a class="nav-link nav-link-collapse collapsed" data-toggle="collapse" href="#Reports" aria-expanded="false">
       <i class="fa fa-fw fa-file"></i>
@@ -291,6 +302,10 @@
       </li> --}}
     </ul>
   </li>
+  @endif
+
+  {{-- please create a record first, then change mod_id --}}
+  @if(DB::table('x06')->where([['grp_id',$session[0]->grp_id],['mod_id','M0000000'],['restrict','=',0]])->exists())
   <li class="nav-item" id="recs">
     <a class="nav-link nav-link-collapse collapsed" data-toggle="collapse" href="#Records" aria-expanded="false">
       <i class="fa fa-fw fa-book"></i>
@@ -305,6 +320,8 @@
       </li> --}}
     </ul>
   </li>
+  @endif
+  @if(DB::table('x06')->where([['grp_id',$session[0]->grp_id],['mod_id','M0000000'],['restrict','=',0]])->exists())
   <li class="nav-item" id="setts">
     <a class="nav-link nav-link-collapse collapsed" data-toggle="collapse" href="#Settings" aria-expanded="false">
       <i class="fa fa-fw fa-wrench"></i>
@@ -343,12 +360,15 @@
       </li> --}}
     </ul>
   </li>
+  @endif
+  @if(DB::table('x06')->where([['grp_id',$session[0]->grp_id],['mod_id','M0000000'],['restrict','=',0]])->exists())
   <li class="nav-item" id="abts">
     <a class="nav-link" href="{{route('home')}}">
       <i class="fa fa-fw fa-question"></i>
       <span>About</span>
     </a>
   </li>
+  @endif
   {{-- Distance from the bottom page --}}
   <li class="nav-item mb-5"></li>
 </ul>
