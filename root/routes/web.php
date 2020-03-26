@@ -557,11 +557,15 @@ Route::prefix('Biometric')->group(function(){
 			Route::prefix('group-rights')->group(function() {
 				Route::get('', 'Settings\GroupRightsSettingsController@viewUserGroup');
 				Route::get('info', 'Settings\GroupRightsSettingsController@LoadLevel2');
-				Route::post('add-rights', 'Settings\GroupRightsSettingsController@AddRights');
+				Route::post('add-rights/{true?}', 'Settings\GroupRightsSettingsController@AddRights');
 
 				Route::post('/edit-rights', 'Settings\GroupRightsSettingsController@EditRights');
 				Route::post('/add-rights-new', 'Settings\GroupRightsSettingsController@AddRights_New');
 				Route::post('/delete-rights-new', 'Settings\GroupRightsSettingsController@DeleteRights');
+				Route::get('action', 'Settings\GroupRightsSettingsController@viewModules');
+				Route::post('/add-group-rights-new', 'Settings\GroupRightsSettingsController@AddGroupRights_New');
+				Route::post('/edit-group-rights-new', 'Settings\GroupRightsSettingsController@EditGroupRights_New');
+				Route::post('/delete-group-rights-new', 'Settings\GroupRightsSettingsController@DeleteGroupRights_New');
 			});
 			/* GROUP RIGHTS SETTINGS */
 			/* USER SETTINGS */

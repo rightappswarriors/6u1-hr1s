@@ -318,6 +318,9 @@
         <a href="{{url('settings/payrollsettings')}}">Payroll Settings</a>
       </li>
       <li class="nav-separator"></li>
+      <li id="settingsgroup-rightsaction">
+        <a href="{{url('settings/group-rights/action')}}">Group Rights Actions</a>
+      </li>
       <li id="settingsgroup-rights">
         <a href="{{url('settings/group-rights')}}">Group Rights Settings</a>
       </li>

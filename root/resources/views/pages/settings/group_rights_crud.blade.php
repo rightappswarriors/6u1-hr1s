@@ -3,7 +3,7 @@
 @section('to-body')
 	<div class="card">
 		<div class="card-header">
-			<i class="fa fa-fw fa-wrench"></i> Group Right Settings
+			<i class="fa fa-fw fa-wrench"></i> Group Right Actions
 		</div>
 		<div class="card-body">
 			<div class="card mb-3">
@@ -11,37 +11,33 @@
 					<div class="form-inline">
 						<div class="form-inline">
 							<div class="form-group">
-								<a href="#" class="btn btn-primary mr-2" id="btn-add"><i class="fa fa-plus"></i> Add New</a>
+								<a class="btn btn-primary mr-2 text-white" id="btn-add"><i class="fa fa-plus"></i> Add New</a>
 							</div>
 						</div>
-						@if($data['nogr'] != 0)
-							<form method="post" action="{{url('settings/group-rights/add-rights')}}">{{csrf_field()}}<button type="submit" class="btn btn-danger"><i class="fa fa-exclamation"></i> There are new User Groups.Click to integrate rules</button></form>
-						@endif
 					</div>
 				</div>
 			</div>
 
 			<div class="table-responsive" id="div-table">
 				<table class="table table-bordered table-hover" id="dataTable">
-					<col width="10%">
-					<col>
-					<col width="10%">
 					<thead>
 						<tr>
-							<th>Group ID</th>
-							<th>Group Description</th>
+							<th>Module ID</th>
+							<th>Module Description</th>
+							<th>Module URL</th>
 							<th>Action</th>
 						</tr>
 					</thead>
 					<tbody>
-						@if(count($data[1])!=0)
-							@foreach($data[1] as $row)
+						@if(isset($data))
+							@foreach($data as $row)
 								<tr>
-									<td>{{$row->grp_id}}</td>
+									<td>{{$row->mod_id}}</td>
 									<td>{{$row->grp_desc}}</td>
+									<td>{{url('') . '/' .$row->path}}</td>
 									<td>
-										<button class="btn btn-warning btn-edit exclusive-edit-btn" data="{{$row->grp_id}}" restr="{{X05::GetGroup($row->grp_id)}}"><i class="fa fa-pencil"></i></button>
-										<button class="btn btn-danger exclusive-delete-btn" data="{{$row->grp_desc}}" restid="{{$row->grp_id}}"><i class="fa fa-close"></i></button>
+										<button class="btn btn-warning btn-edit exclusive-edit-btn" dataid="{{$row->mod_id}}" data-description="{{addslashes(trim($row->grp_desc))}}" data-url="{{addslashes(trim($row->path))}}"><i class="fa fa-pencil"></i></button>
+										<button class="btn btn-danger exclusive-delete-btn" data="{{$row->grp_desc}}" restid="{{$row->mod_id}}"><i class="fa fa-close"></i></button>
 									</td>
 								</tr>
 							@endforeach
@@ -102,11 +98,22 @@
 					</button>
 				</div>
 				<div class="modal-body">
-					<form action="" id="add-frm">
+					<form id="add-frm" method="POST" action="{{url('settings/group-rights/add-group-rights-new')}}">
 						<span class="AddMode">
+							{{csrf_field()}}
 							<div class="form-group">
-								<label>Group Description:</label>
-								<input type="text" name="txt_grp" class="form-control" placeholder="ACCOUNTING" style="text-transform: uppercase;">
+								<label>Module ID:</label>
+								<input type="text" name="txt_grp" class="form-control" placeholder="ID" style="text-transform: uppercase;">
+								<label class="mt-1">Module Description:</label>
+								<input type="text" name="id_grp" class="form-control" placeholder="Description">
+								<label class="mt-1">Module URL:</label>
+								<div class="input-group mt-1">
+								  <div class="input-group-prepend">
+								    <span class="input-group-text" id="basic-addon1">{{url('') . '/'}}</span>
+								  </div>
+								  <input type="text" name="url_grp" class="form-control" placeholder="URL">
+								</div>
+								<span class="text-danger">Warning: Please remove trailing slashes(/) on URL and make sure the URL is correct for it may not work if the URL is incorrect</span>
 							</div>
 						</span>
 						<span class="DeleteMode">
@@ -117,7 +124,7 @@
 				</div>
 				<div class="modal-footer">
 					<span class="AddMode">
-						<button type="button" class="btn btn-success" id="btn-add-sub">Add</button>
+						<button type="submit" form="add-frm" class="btn btn-success" id="btn-add-sub">Add</button>
 						<button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
 					</span>
 					<span class="DeleteMode">
@@ -142,19 +149,17 @@
 				<form id="edit-restr-form">
 					<input type="hidden" name="restriction_grpid" value="">
 					<div class="modal-body">
-						<span class="bg-info pl-2 pr-2 text-white">
+						{{-- <span class="bg-info pl-2 pr-2 text-white">
 							Uncheck module/s to restrict
 						</span>
 						@isset($data[2])
 							@foreach($data[2] as $k => $v)
 								<div class="custom-control custom-checkbox">
 									<input type="checkbox" class="custom-control-input" id="{{$k}}" value="{{$v->mod_id}}" name="restrictions[]">
-									{{-- <input type="checkbox" class="custom-control-input" id="{{$k}}" value="{{$v->id}}" name="restrictions[]"> --}}
-									{{-- <label class="custom-control-label" for="{{$k}}">{{$v->mod_name}}</label> --}}
 									<label class="custom-control-label" for="{{$k}}">{{$v->grp_desc}}</label>
 								</div>
 							@endforeach
-						@endisset
+						@endisset --}}
 					</div>
 					<div class="modal-footer">
 						<span>
@@ -172,42 +177,47 @@
 
 @section('to-bottom')
 	<script type="text/javascript">
-		var table = $('#dataTable').DataTable(dataTable_config3);
-		var table1 = $('#dataTable1').DataTable(dataTable_config3);
+		var table = $('#dataTable').DataTable();
+		var table1 = $('#dataTable1').DataTable();
 	</script>
 	<script type="text/javascript">
 		$('#btn-add').on('click', function() {
+			$("[name=txt_grp], [name=id_grp], [name=url_grp]").val('');
+			$("[name=txt_grp]").removeAttr('readonly');
 			$('#exampleModalLabel111').text("Add new");
 			$('input[name="txt_grp"]').val('');
 
 			$('.AddMode').show();
 			$('.DeleteMode').hide();
+			$("#add-frm").attr('action','{{url('settings/group-rights/add-group-rights-new')}}');
 
 			$('#md-grp').modal('show');
 		});
 
-		$('#btn-add-sub').on('click', function() {
-			$.ajax({
-				type: 'post',
-				url: '{{url('settings/group-rights/add-rights-new')}}',
-				data: $('#add-frm').serialize(),
-				success: function(data) {
-					if(data == 'okay'){
-						alert('Success');
-						location.reload();
-					}
-				},
-			});
-		});
+		// $('#btn-add-sub').on('click', function() {
+		// 	$.ajax({
+		// 		type: 'post',
+		// 		url: '{{url('settings/group-rights/add-group-rights-new')}}',
+		// 		data: $('#add-frm').serialize(),
+		// 		success: function(data) {
+		// 			if(data == 'okay'){
+		// 				alert('Success');
+		// 				location.reload();
+		// 			} else {
+		// 				alert(data);
+		// 			}
+		// 		},
+		// 	});
+		// });
 
-		$('.exclusive-delete-btn').on('click', function() {
+		$('#dataTable').on('click', '.exclusive-delete-btn', function(event) {
 			$('#del-msg').text($(this).attr('data'));
 			$('#exampleModalLabel111').text('Delete');
 			$('input[name="hidden_txt_id"]').val($(this).attr('restid'));
 
 			$('.AddMode').hide();
 			$('.DeleteMode').show();
-
+			$("#add-frm").attr('action','{{url('settings/group-rights/delete-group-rights-new')}}');
 			$('#md-grp').modal('show');
 		});
 
@@ -215,11 +225,12 @@
 			$('#preloader').show();
 			$.ajax({
 				type: 'post',
-				url: '{{url('settings/group-rights/delete-rights-new')}}',
+				url: '{{url('settings/group-rights/delete-group-rights-new')}}',
 				data: $('#add-frm').serialize(),
 				success: function(data) {
 					if(data == "okay" || data == "1" || data == 1) {
-						window.location = "{{url('settings/group-rights')}}";
+						alert('Deleted Successfully');
+						location.reload();
 					} else {
 						alert(data);
 					}
@@ -248,72 +259,21 @@
 			});
 		});
 
-		$('.exclusive-edit-btn').on('click', function() {
-			$('input[name="restriction_grpid"]').val($(this).attr('data'));
-
-			var that = this;
-
-			// setTimeout(function() {
-			// 	@foreach($data[2] as $k => $v)
-			// 		// console.log($('#'+'{{$k}}')[0]);
-			// 		$('#'+'{{$k}}')[0].removeAttribute('checked');
-			// 		$('#'+'{{$k}}')[0].checked = false;
-			// 	@endforeach
-			// }, 50);
-				
-			// setTimeout(function() {
-			// 	@foreach($data[2] as $k => $v)
-			// 		{{--if($(that).attr('restr').split(', ').includes('{{$v->id}}')) {--}} 
-			// 		if($(that).attr('restr').split(', ').includes('{{$v->mod_id}}')) {
-			// 		{{--console.log('{{$k}} '+' {{$v->mod_name}}');--}}
-			// 			$('#'+'{{$k}}')[0].setAttribute('checked', '');
-			// 			$('#'+'{{$k}}')[0].checked = true;
-			// 		}
-			// 	@endforeach
-			// }, 100);
-
-			// for reworkdd group rights
-			$("[type=checkbox]").prop('checked',false);
-			let decoded = JSON.parse($(that).attr('restr'));
-			decoded.forEach(function(el, index) {
-				$("[type=checkbox][value="+el.mod_id+"]").prop('checked',true);
+		$(function(){
+			$('#dataTable').on('click', '.btn-edit', function(event) {
+				var that = this;
+				$('#exampleModalLabel111').text("Edit Group right");
+				$("[name=txt_grp]").val($(that).attr('dataid'));
+				$("[name=txt_grp]").attr('readonly',true);
+				$("[name=id_grp]").val($(that).attr('data-description'));
+				$("[name=url_grp]").val($(that).attr('data-url'));
+				$("#add-frm").attr('action','{{url('settings/group-rights/edit-group-rights-new')}}');
+				$('.AddMode').show();
+				$('.DeleteMode').hide();
+				$('#md-grp').modal('show');
 			});
-			// $(that).attr('restr').each( function(element, index) {
-			// 	console.log(element,index);
-			// });
-			
-			$('#modal-pp-r').modal('show');
-		});
+		})
 
-		// $('.btn-edit').on('click', function(){
-		// 	showTable1();
-
-		// 	$.ajax({
-		// 		type : 'get',
-		// 		url : '{{url('settings/group-rights/info')}}',
-		// 		data : {id : $(this).attr('data')},
-		// 		dataTy : 'json',
-		// 		success : function(data) {
-		// 			console.log(data);
-		// 			// LoadTable(data);
-		// 		}
-		// 	});
-		// });
-
-		// function LoadTable(data)
-		// {
-		// 	table1.row.add([
-		// 		'id',
-		// 		'desc',
-		// 		'<input type="checkbox" class="form-control checkbox-solo" name="c_allow[]">',
-		// 		'<input type="checkbox" class="form-control checkbox-solo" name="c_add[]">',
-		// 		'<input type="checkbox" class="form-control checkbox-solo" name="c_update[]">',
-		// 		'<input type="checkbox" class="form-control checkbox-solo" name="c_delete[]">',
-		// 		'<input type="checkbox" class="form-control checkbox-solo" name="c_print[]">',
-		// 		'<button class="btn btn-warning" data-toggle="modal" data-target="#md-grp"><i class="fa fa-pencil"></i></button>'+
-		// 		'<button class="btn btn-danger" data-toggle="modal" data-target="#md-grp"><i class="fa fa-close"></i></button>',
-		// 	]);
-		// }
 	</script>
 	<script type="text/javascript">
 		$('#btn-back').on('click', function()

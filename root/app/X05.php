@@ -10,6 +10,7 @@ class X05 extends Model
 {
     public static $tbl_name = "x05";
     public static $pk = "mod_id";
+    public static $fk = "grp_id";
 
     public static function Load_X05()
     {
@@ -23,5 +24,10 @@ class X05 extends Model
         } catch (Exception $e) {
             return $e->getMessage();
         }
+    }
+
+    // added by Syrel for Reworked group rights even though this table is for x06
+    public static function GetGroup($id) {
+        return json_encode(DB::table('x06')->select('mod_id')->where([[self::$fk, $id],['restrict','>',0]])->get());
     }
 }

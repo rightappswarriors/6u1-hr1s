@@ -9,6 +9,8 @@ use Core;
 use Employee;
 use X05S;
 use X07;
+use Auth;
+use X05;
 
 class GroupRightsSettingsController extends Controller
 {
@@ -16,6 +18,13 @@ class GroupRightsSettingsController extends Controller
     {
         $this->employees = Employee::Load_Employees();
         $this->ag = X07::Load_X07();
+    }
+
+    public function viewModules()
+    {
+        $data = X05::Load_X05();
+        
+        return view('pages.settings.group_rights_crud', compact('data'));
     }
 
     public function viewUserGroup()
@@ -30,7 +39,7 @@ class GroupRightsSettingsController extends Controller
                 }
             }
         }
-        $data = [$this->employees, $groups, 'nogr' => $a, X05S::Load_All()];
+        $data = [$this->employees, $groups, 'nogr' => $a, /*X05S::Load_All()*/X05::Load_X05()];
     	return view('pages.settings.group_rights_settings', compact('data'));
     }
 
@@ -52,7 +61,7 @@ class GroupRightsSettingsController extends Controller
         }
     }
 
-    public function AddRights()
+    public function AddRights($alertCore = true)
     {
         try {
             $groups = $this->ag;
@@ -72,7 +81,9 @@ class GroupRightsSettingsController extends Controller
                     }
                 }
             }
-            Core::Set_Alert('success', 'Default group rights are added to new groups.');
+            if($alertCore){
+                Core::Set_Alert('success', 'Default group rights are added to new groups.');
+            }
             return back();
         } catch (\Exception $e) {
             return "error";
@@ -84,9 +95,16 @@ class GroupRightsSettingsController extends Controller
     public function EditRights(Request $r)
     {
         try {
-            $res = implode(', ', $r->restrictions);
-            $data = ['restrictions' => $res];
-            return DB::table('x07')->where('grp_id', $r->restriction_grpid)->update($data);
+            // $res = implode(', ', $r->restrictions);
+            // $data = ['restrictions' => $res];
+            $data = ['restrict' => 0];
+            // return DB::table('x07')->where('grp_id', $r->restriction_grpid)->update($data);
+            $query = DB::table('x06')->where('grp_id', $r->restriction_grpid);
+            if(isset($r->restrictions) && !empty($r->restrictions)){
+                $data = ['restrict' => 1];
+                $query = $query->whereIn('mod_id',$r->restrictions);
+            }
+            return $query->update($data);
         } catch (Exception $e) {
             return "error";
         }
@@ -115,10 +133,38 @@ class GroupRightsSettingsController extends Controller
         }
     }
 
+    public function AddGroupRights_New(Request $r)
+    {
+        if(DB::table('x05')->where('mod_id',$r->txt_grp)->exists()){
+            return 'ID already Exist. Please try another ID';
+        }
+        $url = ltrim(rtrim($r->url_grp,'/'), '/');
+        if(DB::table('x05')->insert(['mod_id' => $r->txt_grp, 'grp_desc' => $r->id_grp, 'path' => $url])){
+            self::AddRights(false);
+            Core::Set_Alert('success', 'Added new group right successfully.');
+            return back();
+        }
+    }
+
+    public function EditGroupRights_New(Request $r){
+        $url = ltrim(rtrim($r->url_grp,'/'), '/');
+        if(DB::table('x05')->where('mod_id',$r->txt_grp)->update(['grp_desc' => $r->id_grp, 'path' => $url])){
+            Core::Set_Alert('success', 'Edited successfully.');
+            return back();
+        }
+    }
+
+    public function DeleteGroupRights_New(Request $r){
+        if(DB::table('x05')->where('mod_id',$r->hidden_txt_id)->delete() && DB::table('x06')->where('mod_id',$r->hidden_txt_id)->delete()){
+            return 'okay';
+            return back();
+        }
+    }
+
     public function DeleteRights(Request $r)
     {
         try {
-            return DB::table('x07')->where('grp_id', $r->hidden_txt_id)->update(['cancel'=> true]);
+            return DB::table('x07')->where('grp_id', $r->hidden_txt_id)->update(['cancel'=> true]) && DB::table('x06')->where('grp_id', $r->hidden_txt_id)->delete();
         } catch (Exception $e) {
             return "error";
         }

@@ -31,7 +31,7 @@ class HomeController extends Controller
             $count_in = count(DB::table('hr_tito2')->where('cancel', '=', null)->where('status', '=', '1')->where('work_date', date('Y-m-d'))->orderBy('work_date', 'DESC')->orderBy('time_log', 'DESC')->orderBy('logs_id', 'DESC')->get());
             $count_out = count(DB::table('hr_tito2')->where('cancel', '=', null)->where('status', '=', '0')->where('work_date', date('Y-m-d'))->orderBy('work_date', 'DESC')->orderBy('time_log', 'DESC')->orderBy('logs_id', 'DESC')->get());
             $count_sum = $count_in - $count_out;
-            $whereForLeave = (Core::getSessionData()[0]->grp_id == 001 ? [] :[['empid',Core::getSessionData()[0]->uid]]);
+            $whereForLeave = (Core::getSessionData()[0]->grp_id == 001 ? [] :[['hr_leaves_approval.empid',Core::getSessionData()[0]->uid]]);
             $leaveList = DB::table('hris.hr_leaves_approval')->leftJoin('hris.hr_employee','hr_employee.empid','hr_leaves_approval.empid')->leftJoin('hris.hr_leave_type','hr_leave_type.code','hr_leaves_approval.leave_type')->where($whereForLeave)->select('hr_leave_type.description','hr_leaves_approval.*','hr_employee.lastname','hr_employee.firstname')->get();
             $count_leave = Leave::GetTodayLeave();
 

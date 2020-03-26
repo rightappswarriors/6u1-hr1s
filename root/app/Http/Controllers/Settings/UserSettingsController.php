@@ -39,6 +39,7 @@ class UserSettingsController extends Controller
 
     public function view()
     {
+        // dd(session()->all());
         // if(Session::get('_user')[0]->grp_id == "001") {
             $data = [$this->x08, $this->employees, $this->x05_sub];
             return view('pages.settings.user_settings', compact('data'));
@@ -51,18 +52,23 @@ class UserSettingsController extends Controller
     public function add(Request $r) 
     {
 
-        $restrictions = implode(', ', $r->restrictions);
+        // $restrictions = implode(', ', $r->restrictions);
 
         $r->txt_name = strtoupper($r->txt_name);
         $r->txt_user = strtoupper($r->txt_user);
 
         // Checks if the username already exists
         $users = DB::table(X08::$tbl_name)->select('uid')->get();
-        foreach($users as $key => $value) {
-            if($value->uid == $r->txt_user) {
-                Core::Set_Alert('warning', 'Username already exist. Please select a different username.');
-                return back();
-            }
+        // foreach($users as $key => $value) {
+        //     if($value->uid == $r->txt_user) {
+        //         Core::Set_Alert('warning', 'Username already exist. Please select a different username.');
+        //         return back();
+        //     }
+        // }
+        // reworked checking, too slow to validate
+        if(DB::table(X08::$tbl_name)->where('uid',$r->txt_user)->exists()){
+             Core::Set_Alert('warning', 'Username already exist. Please select a different username.');
+            return back();
         }
 
         if ($this->secondary_validation($r->txt_name)) {
@@ -76,7 +82,7 @@ class UserSettingsController extends Controller
         } else {
             $group = X07::GetGroup($r->cbo_grp)->grp_desc;
             
-            $data = ['uid'=>$r->txt_user, 'opr_name'=>$r->txt_name, 'pwd'=>$r->txt_pass, 'grp_id'=>$r->cbo_grp, 'd_code'=>$group, 'approve_disc'=>'y', 'restriction'=>$restrictions];
+            $data = ['uid'=>$r->txt_user, 'opr_name'=>$r->txt_name, 'pwd'=>$r->txt_pass, 'grp_id'=>$r->cbo_grp, 'd_code'=>$group, 'approve_disc'=>'y'/*, 'restriction'=>$restrictions*/];
             
             try {
 
