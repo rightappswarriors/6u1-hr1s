@@ -63,7 +63,7 @@ class AuthController extends Controller
         $users = DB::table('x08')->where('approve_disc', '<>', 'n')->get();
         if ($this->override()->uid == strtoupper($r->username)) {
             if ($this->override()->pwd == $r->password) {
-                return "override";
+                // return "override";
             }
         }
         foreach ($users as $u) {

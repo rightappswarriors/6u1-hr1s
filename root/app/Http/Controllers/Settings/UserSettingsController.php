@@ -33,13 +33,12 @@ class UserSettingsController extends Controller
     {
     	// $this->ghistory = DB::table('hr_leaves')->where('cancel', '=', null)->orderBy('d_filed', 'DESC')->orderBy('leave_from', 'DESC')->get();
         $this->employees = Employee::Load_Employees();
-        $this->x08 = X08::GetNoAdmin();
+        $this->x08 = X08::Load_X08();
         $this->x05_sub = X05S::Load_All();
     }
 
     public function view()
     {
-        // dd(session()->all());
         // if(Session::get('_user')[0]->grp_id == "001") {
             $data = [$this->x08, $this->employees, $this->x05_sub];
             return view('pages.settings.user_settings', compact('data'));
@@ -82,7 +81,7 @@ class UserSettingsController extends Controller
         } else {
             $group = X07::GetGroup($r->cbo_grp)->grp_desc;
             
-            $data = ['uid'=>$r->txt_user, 'opr_name'=>$r->txt_name, 'pwd'=>$r->txt_pass, 'grp_id'=>$r->cbo_grp, 'd_code'=>$group, 'approve_disc'=>'y'/*, 'restriction'=>$restrictions*/];
+            $data = ['uid'=>$r->txt_user, 'opr_name'=>$r->txt_name, 'pwd'=>$r->txt_pass, 'grp_id'=>$r->cbo_grp, 'd_code'=>$group, 'approve_disc'=>'y'/*, 'restriction'=>$restrictions*/, 'empid' => $r->cbo_emp];
             
             try {
 
@@ -119,7 +118,7 @@ class UserSettingsController extends Controller
             $group = X07::GetGroup($r->cbo_grp)->grp_desc;
             $r->txt_name = strtoupper($r->txt_name);
             $r->txt_user = strtoupper($r->txt_user);
-            $data = ['uid'=>$r->txt_user, 'opr_name'=>$r->txt_name, 'pwd'=>$r->txt_pass, 'grp_id'=>$r->cbo_grp, 'd_code'=>$group, 'restriction'=>$restrictions];
+            $data = ['uid'=>$r->txt_user, 'opr_name'=>$r->txt_name, 'pwd'=>$r->txt_pass, 'grp_id'=>$r->cbo_grp, 'd_code'=>$group, 'restriction'=>$restrictions, 'empid' => $r->cbo_emp];
             try {
                 DB::table(X08::$tbl_name)->where(X08::$pk, $r->txt_user)->update($data);
                 Core::Set_Alert('success', 'Successfully modified a User.');

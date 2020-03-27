@@ -18,14 +18,11 @@
 						<div class="card-body">
 							<div class="table-responsive">
 								<table class="table table-hover table-bordered" id="dataTable">
-									<col>
-									<col>
-									<col>
-									<col width="15%">
 									<thead>
 										<tr>
-											<th>User</th>
+											<th>User ID</th>
 											<th>Name</th>
+											<th>Associated Employee</th>
 											<th>Group Description</th>
 											<th></th>
 										</tr>
@@ -38,11 +35,13 @@
 														opr_name="{{$value->opr_name}}"
 														pwd="{{$value->pwd}}"
 														grp_id="{{$value->grp_id}}"
+														empid="{{$value->empid}}"
 														d_code="{{$value->d_code}}"
 														approve_disc="{{$value->approve_disc}}"
 														restr="{{$value->restriction}}">
 														<td>{{$value->uid}}</td>
 														<td>{{$value->opr_name}}</td>
+														<td>{{$value->firstname . ' ' . $value->lastname}}</td>
 														<td>{{$value->d_code}}</td>
 														{{-- <td>
 															<button type="button" class="btn btn-warning btn-block" onclick="openRestrictionsModal()">
@@ -88,7 +87,7 @@
 	<!-- Add Modal -->
 	<form method="post" action="#" id="frm-pp" data="#">
 	@csrf
-	<div class="modal fade" id="modal-pp" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	<div class="modal fade" id="modal-pp" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
 		<div class="modal-dialog" role="document">
 			<div class="modal-content">
 				<div class="modal-header">
@@ -103,14 +102,23 @@
 						<span class="AddMode">
 							<div class="row">
 								<div class="col"> <!-- Column 1 -->
+									<div class="form-group">
+										<label>Associated Employee:</label>
+										<select name="cbo_emp" id="" style="text-transform: uppercase;" class="form-control">
+											<option disabled hidden selected value="">---</option>
+											@foreach(Employee::Load_Employees() as $key => $value)
+												<option value="{{$value->empid}}">{{$value->firstname . ' ' . $value->lastname}}</option>
+											@endforeach
+										</select>
+									</div>
 									<div class="form-grou">
 										<label>Group:</label>
 										<select name="cbo_grp" id="" style="text-transform: uppercase;" class="form-control" required>
 											<option disabled hidden selected value="">---</option>
-											@foreach(X07::Load_X07() as $key => $value)
-												@if($value->grp_id != "001")
+											@foreach(X07::Load_ALL_X07() as $key => $value)
+												{{-- @if($value->grp_id != "001") --}}
 													<option value="{{$value->grp_id}}">{{$value->grp_desc}}</option>
-												@endif	
+												{{-- @endif	 --}}
 											@endforeach
 										</select>
 									</div>
@@ -127,7 +135,7 @@
 									</div>
 									<div class="form-group">
 										<label>Username:</label>
-										<input type="text" name="txt_user" class="form-control" maxlength="10" required>
+										<input type="text" style="text-transform: uppercase;" name="txt_user" class="form-control" maxlength="10" required>
 									</div>
 									<div class="form-group">
 										<label>Password:</label>
@@ -160,7 +168,7 @@
 	</div>
 
 	<!-- Restriction Modal -->
-	<div class="modal fade" id="modal-pp-r" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel11" aria-hidden="true">
+	<div class="modal fade" id="modal-pp-r" role="dialog" aria-labelledby="exampleModalLabel11" aria-hidden="true">
 		<div class="modal-dialog" role="document" style="background-color: black; width: 20vw;">
 			<div class="modal-content" style="background-color: rgb(248,248,248);">
 				<div class="modal-header">
@@ -225,6 +233,7 @@
 
 			$('select[name="cbo_grp"]').removeAttr('readonly');
 			$('select[name="cbo_grp"]').val('').trigger('change');
+			$('select[name="cbo_emp"]').val('').trigger('change');
 			$('input[name="txt_name"]').val('');
 			$('input[name="txt_user"]').val('');
 			$('input[name="txt_pass"]').val('');
@@ -247,6 +256,7 @@
 			$('input[name="txt_code"]').attr('readonly', '');
 
 			$('select[name="cbo_grp"]').removeAttr('readonly');
+			$('select[name="cbo_emp"]').val(selected_row.attr('empid')).trigger('change');
 			$('select[name="cbo_grp"]').val(selected_row.attr('grp_id')).trigger('change');
 			$('input[name="txt_name"]').val(selected_row.attr('opr_name'));
 			$('input[name="txt_user"]').val(selected_row.attr('uid'));

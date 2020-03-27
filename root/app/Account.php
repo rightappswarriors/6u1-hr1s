@@ -52,6 +52,24 @@ class Account extends Model
 		}
 	}
 
+	public static function GET_ASSOCIATED_EMPLOYEE()
+	{
+		try {
+			return self::CURRENT()->empid;
+		} catch (\Exception $e) {
+			return null;
+		}
+	}
+
+	public static function GET_DATA_FROM_CURRENT(string $objectData)
+	{
+		try {
+			return self::CURRENT()->$objectData;
+		} catch (\Exception $e) {
+			return null;
+		}
+	}
+
 	public static function ID()
 	{
 		try {

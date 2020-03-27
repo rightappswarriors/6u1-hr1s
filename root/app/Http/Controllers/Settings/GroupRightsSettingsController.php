@@ -17,7 +17,8 @@ class GroupRightsSettingsController extends Controller
     public function __construct()
     {
         $this->employees = Employee::Load_Employees();
-        $this->ag = X07::Load_X07();
+        // $this->ag = X07::Load_X07();
+        $this->ag = X07::Load_ALL_X07();
     }
 
     public function viewModules()

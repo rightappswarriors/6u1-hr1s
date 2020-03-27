@@ -7,6 +7,7 @@ use DB;
 use Core;
 use JobTitle;
 use Employee;
+use session;
 
 class Office extends Model
 {
@@ -16,7 +17,12 @@ class Office extends Model
 
     public static function get_all()
     {
-    	return DB::table(self::$tbl_name)->where('active', '=', 't')->orderBy('cc_desc', 'ASC')->get();
+        $office = Employee::getOfficeByID(Account::GET_ASSOCIATED_EMPLOYEE());
+    	$toRet = DB::table(self::$tbl_name)->where('active', '=', 't');
+        if(isset($office)){
+            $toRet = $toRet->where(self::$id, '=', $office->department);
+        }
+        return $toRet->orderBy('cc_desc', 'ASC')->get();
     }
 
     public static function GetOffice($val)
@@ -26,8 +32,13 @@ class Office extends Model
 
     public static function OfficeEmployees($ofc_id)
     {
+        $id = Account::GET_ASSOCIATED_EMPLOYEE();
 
-        $employees = DB::table('hr_employee')->where('department', '=', $ofc_id)->where('cancel', null)->orderBy('empid', 'ASC')->get();
+        $employees = DB::table('hr_employee')->where('department', '=', $ofc_id)->where('cancel', null);
+        if(isset($id)){
+            $employees = $employees->where('empid', '=', $id);
+        }
+        $employees = $employees->orderBy('empid', 'ASC')->get();
 
         if (count($employees) > 0) {
             for ($i=0; $i < count($employees); $i++) {

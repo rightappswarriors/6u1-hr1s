@@ -14,7 +14,7 @@ class X08 extends Model
 
     public static function Load_X08()
     {
-        return DB::table(self::$tbl_name)->where('approve_disc', '<>', 'n')->get();
+        return DB::table(self::$tbl_name)->leftjoin('hr_employee','hr_employee.empid',self::$tbl_name.'.'.'empid')->where('approve_disc', '<>', 'n')->select(self::$tbl_name.'.*','hr_employee.empid','hr_employee.lastname','hr_employee.firstname')->get();
     }
 
     public static function GetAdmins() 

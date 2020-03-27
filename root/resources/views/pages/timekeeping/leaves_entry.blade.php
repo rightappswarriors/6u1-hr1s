@@ -4,18 +4,23 @@
 	<div class="card">
 		<div class="card-header">
 			<i class="fa fa-calendar"></i> Leaves Entry
+			@if(Account::GET_DATA_FROM_CURRENT('grp_id') == '001')
 			<button type="button" class="btn btn-success" id="opt-add">
 				<i class="fa fa-plus"></i> Add
 			</button>
+			@endif
+
 			<button type="button" class="btn btn-success" id="opt-apply">
 				<i class="fa fa-plane"></i> Apply For Leave
 			</button>
 			<button type="button" class="btn btn-info" id="opt-print">
 				<i class="fa fa-print"></i> Print List
 			</button>
+			@if(Account::GET_DATA_FROM_CURRENT('grp_id') == '001')
 			<button type="button" class="btn btn-warning text-white" id="opt-override">
 				<i class="fa fa-edit"></i> Override Remaining Credit
 			</button>
+			@endif
 			<div class="float-right">
 				<a href="{{ url('master-file/leave-types') }}" class="btn btn-default btn-sm"><i class="fa fa-cogs"></i></a>
 			</div>
