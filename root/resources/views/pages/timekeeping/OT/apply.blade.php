@@ -4,9 +4,9 @@
 	<div class="card">
 		<div class="card-header">
 			<i class="fa fa-suitcase"></i>
-			{{-- @if($current_loggedin != '001') --}}
+			@if($current_loggedin != '001')
 			Apply for OT <button type="button" class="btn btn-success" id="opt-add"><i class="fa fa-plus"></i> Add</button>
-			{{-- @endif --}}
+			@endif
 		</div>
 		<div class="card-body">
 			<div class="row">
