@@ -129,12 +129,22 @@
   </li>
   @endif
   @if(DB::table('x06')->where([['grp_id',$session[0]->grp_id],['mod_id','T0000000'],['restrict','=',1]])->doesntexist())
-  <li class="nav-item" id="timekeeping">
-    <a class="nav-link nav-link-collapse collapsed" data-toggle="collapse" href="#TK" aria-expanded="false">
+  <li class="nav-item">
+    <a class="nav-link nav-link-collapse collapsed" data-toggle="collapse" href="#TKOT" aria-expanded="false">
       <i class="fa fa-fw fa-clock-o"></i>
       <span>Timekeeping</span>
     </a>
-    <ul class="sidenav-second-level collapse-menu collapse" id="TK" data-parent="#sidebar-parent">
+    <ul class="sidenav-second-level collapse-menu collapse" id="TKOT" data-parent="#sidebar-parent">
+      <li id="timekeeping">
+        <a class="nav-link-collapse collapsed" data-toggle="collapse" href="#TKOT_OP" aria-expanded="false">Overtime</a>
+        <ul class="sidenav-third-level collapse" id="TKOT_OP" data-parent="#TKOT">
+          {{-- <li id="reportstimekeepingEmployeeDTR"> --}}
+          <li id="timekeepingApply-For-OT">
+            {{-- <a href="{{url('reports/timekeeping/EmployeeDTR')}}">Print Employee DTR</a> --}}
+            <a href="{{url('timekeeping/Apply-For-OT')}}">Apply for Overtime</a>
+          </li>
+        </ul>
+      </li>
       <li id="timekeepinglog-box">
         <a href="{{url('timekeeping/log-box')}}">Log Box</a>
       </li>

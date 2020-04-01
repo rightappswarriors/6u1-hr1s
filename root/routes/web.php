@@ -262,6 +262,14 @@ Route::prefix('Biometric')->group(function(){
 		Route::group(['prefix'=>'timekeeping', 'middleware'=>'restrictions', 'restriction'=>'timekeeping'], function() {
 		// Route::prefix('timekeeping')->group(function() {
 			/* LOG BOX */
+
+			Route::prefix('Apply-For-OT')->group(function() {
+				Route::get('/', 'Timekeeping\OTController@view');
+				Route::post('/', 'Timekeeping\OTController@add');
+				Route::post('/update', 'Timekeeping\OTController@update');
+				Route::post('/delete', 'Timekeeping\OTController@delete');
+			});
+
 			Route::prefix('log-box')->group(function() {
 				Route::get('/', 'Timekeeping\LogBoxController@view');
 				Route::post('/in', 'Timekeeping\LogBoxController@getLastestTimeIn');

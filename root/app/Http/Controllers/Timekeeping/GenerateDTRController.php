@@ -208,18 +208,18 @@ class GenerateDTRController extends Controller
                             */
                             $tl_ti = "";
                             if (count($rec_ti) > 0) {
-                                for ($j=0; $j < count($rec_ti); $j++) { 
-                                    $tl_ti = $rec_ti[$j];
-                                    /*if (Timelog::ValidateLog_AM($tl_ti) && $tl_in_am == "00:00") {
-                                        $tl_in_am = $tl_ti;
-                                    } elseif (Timelog::ValidateLog_PM($tl_ti) && $tl_in_pm == "00:00") {
-                                        $tl_in_pm = $tl_ti;
-                                    } else*/if(Timelog::ValidateLog_OTHrs2($tl_ti)) {
-                                        array_push($tl_in_ot, $j."|".$tl_ti);
-                                    } else {
-                                        array_push($tl_in_trsh, [$date, $tl_ti]);
-                                    }
-                                }
+                                // for ($j=0; $j < count($rec_ti); $j++) { 
+                                //     $tl_ti = $rec_ti[$j];
+                                //     if (Timelog::ValidateLog_AM($tl_ti) && $tl_in_am == "00:00") {
+                                //         $tl_in_am = $tl_ti;
+                                //     } elseif (Timelog::ValidateLog_PM($tl_ti) && $tl_in_pm == "00:00") {
+                                //         $tl_in_pm = $tl_ti;
+                                //     } elseif(Timelog::ValidateLog_OTHrs2($tl_ti)) {
+                                //         array_push($tl_in_ot, $j."|".$tl_ti);
+                                //     } else {
+                                //         array_push($tl_in_trsh, [$date, $tl_ti]);
+                                //     }
+                                // }
                             }
                             $tl_ti = "";
                             if (count($rec_to) > 0) {
@@ -229,7 +229,8 @@ class GenerateDTRController extends Controller
                                         $tl_out_am = $tl_ti;
                                     } elseif (Timelog::ValidateLog_PM($tl_ti) && $tl_out_pm == "00:00") {
                                         $tl_out_pm = $tl_ti;
-                                    } else*/if(Timelog::ValidateLog_OTHrs2($tl_ti)) {
+                                    } elseif(Timelog::ValidateLog_OTHrs2($tl_ti)) {*/
+                                    if(Timelog::isOT($tl_ti)){
                                         array_push($tl_out_ot, $j."|".$tl_ti);
                                     } else {
                                         array_push($tl_out_trsh, [$date, $tl_ti]);
@@ -426,32 +427,42 @@ class GenerateDTRController extends Controller
                             }
 
                             # OVERTIME DAYS WORKED
-                            if (count($tl_in_ot) > 0) {
-                                for ($j=0; $j < count($tl_in_ot); $j++) {
-                                    list($ja, $jb) = explode("|", $tl_in_ot[$j]);
-                                    for ($k=0; $k < count($tl_out_ot); $k++) {
-                                        list($ka, $kb) = explode("|", $tl_out_ot[$k]);
-                                        if ($ja == $ka) {
-                                            $jk = Timelog::GetRenHours($jb, $kb);
-                                            if (Timelog::IfOvertime($jk)) {
-                                                array_push($r_time_ot_arr, [$jb, $kb, $jk]);
-                                            }
-                                        }
-                                    } 
+                            // if (count($tl_in_ot) > 0) {
+                            //     for ($j=0; $j < count($tl_in_ot); $j++) {
+                            //         list($ja, $jb) = explode("|", $tl_in_ot[$j]);
+                            //         for ($k=0; $k < count($tl_out_ot); $k++) {
+                            //             list($ka, $kb) = explode("|", $tl_out_ot[$k]);
+                            //             if ($ja == $ka) {
+                            //                 $jk = Timelog::GetRenHours($jb, $kb);
+                            //                 if (Timelog::IfOvertime($jk)) {
+                            //                     array_push($r_time_ot_arr, [$jb, $kb, $jk]);
+                            //                 }
+                            //             }
+                            //         } 
+                            //     }
+                            // }
+                            if (count($tl_out_ot) > 0) {
+                                for ($k=0; $k < count($tl_out_ot); $k++) {
+                                    list($ka, $kb) = explode("|", $tl_out_ot[$k]);
+                                    $jk = Timelog::GetRenHours(Timelog::adjustFormattedTimestamp(Timelog::ReqTimeOut_2(),0,1), $kb);
+                                    if(Timelog::isPassedOnRequiredOT($jk)){
+                                        array_push($arr_overtime, [$date, [Timelog::adjustFormattedTimestamp(Timelog::ReqTimeOut_2(),0,1), $kb], $jk]);
+                                        $totalovertime+=1;
+                                    }
                                 }
                             }
-                            if (count($r_time_ot_arr) > 0) {
-                                $tmp = [];
-                                for ($j=0; $j < count($r_time_ot_arr); $j++) { 
-                                    list($ja, $jb, $jc) = $r_time_ot_arr[$j];
-                                    array_push($tmp, [[$ja, $jb], $jc]);
-                                }
-                                for ($j=0; $j < count($tmp); $j++) { 
-                                    list($ja, $jb) = $tmp[$j];
-                                    array_push($arr_overtime, [$date, $ja, $jb]);
-                                }
-                                $totalovertime+=1;
-                            }
+                            // if (count($r_time_ot_arr) > 0) {
+                            //     $tmp = [];
+                            //     for ($j=0; $j < count($r_time_ot_arr); $j++) { 
+                            //         list($ja, $jb, $jc) = $r_time_ot_arr[$j];
+                            //         array_push($tmp, [[$ja, $jb], $jc]);
+                            //     }
+                            //     for ($j=0; $j < count($tmp); $j++) { 
+                            //         list($ja, $jb) = $tmp[$j];
+                            //         array_push($arr_overtime, [$date, $ja, $jb]);
+                            //     }
+                            //     $totalovertime+=1;
+                            // }
                         } catch (\Exception $e) {
                             ErrorCode::Generate('controller', 'GenerateDTRController', 'A00002', $e->getMessage());
                             return $e;
@@ -542,6 +553,7 @@ class GenerateDTRController extends Controller
                 $weekdayhrs = Core::GET_TIME_TOTAL($arr_weekdayhrs);
                 $weekendhrs = Core::GET_TIME_TOTAL($arr_weekendhrs);
 
+
                 if ($r->gtype == "OVERTIME") { 
                     $tmp = [];
                     for ($i=0; $i < count($arr_holidays); $i++) { 
@@ -551,7 +563,7 @@ class GenerateDTRController extends Controller
                     }
                     $totaldays = $totalovertime;
                     $tmp = Core::GET_TIME_TOTAL($tmp);
-                    $weekdayhrs = Core::GET_TIME_TOTAL([$overtime, $weekendhrs, $tmp]);
+                    $weekdayhrs = Core::GET_TIME_TOTAL([$overtime/*, $weekendhrs, $tmp*/]);
                     $totalabsent = 0;
                 }
             } catch (\Exception $e) {
@@ -626,8 +638,8 @@ class GenerateDTRController extends Controller
                 'leaves_arr'=> $arr_leavedates,
                 'updateToGenerate' => $leaveID,
                 'ob' => json_encode($obArr),
-                'forDeductOnLeave' => json_encode($arr_leave_data),
-                'forDeductNextPayroll' => json_encode($arr_leave_deduction),
+                'forDeductOnLeave' => json_encode(($r->gtype == "OVERTIME" ? [] : $arr_leave_data)),
+                'forDeductNextPayroll' => json_encode(($r->gtype == "OVERTIME" ? [] : $arr_leave_deduction)),
 
                 'errors'=>$errors,
                 '_errors2'=>$errors2,

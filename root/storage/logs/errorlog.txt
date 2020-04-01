@@ -423,3 +423,4 @@
 03-18-2020 11:17 | SyncSystemSettings | Undefined property: stdClass::$hy (SSS00001)
 03-18-2020 11:18 | SyncSystemSettings | Undefined property: stdClass::$hy (SSS00001)
 03-18-2020 18:22 | GenerateDTRController | SQLSTATE[42703]: Undefined column: 7 ERROR:  column "cancel" does not exist LINE 1: ... = $1 and "datefrom" >= $2 and "dateto" <= $3 and "cancel" =...                                                              ^ (SQL: select * from "hr_ob" where ("empid" = CH -28 and "datefrom" >= 2020-02-01 and "dateto" <= 2020-02-01 and "cancel" = 0) limit 1) (GDTRCA00000)
+04-01-2020 13:47 | GenerateDTRController | Method App\Http\Controllers\Timekeeping\GenerateDTRController::ReqTimeOut_2 does not exist. (GDTRCA00002)

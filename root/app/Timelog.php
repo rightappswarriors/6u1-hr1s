@@ -155,6 +155,20 @@ class Timelog extends Model
         return "00:59";
     }
 
+    public static function MinReqOTHrs2()
+    {
+        /**
+        * Minimum OT Hours
+        * Must be in h:m:s format and 24 hours
+        * @return "hh:mm:ss"
+        * from database
+        */
+        $fy = DB::table('hris.m99')->first()->fy;
+        $d = DB::table('hris.m99')->where('fy', $fy)->first()->req_min_ot;
+        return ($d == null || $d == "")?"01:00":$d;
+    }
+
+
     public static function ValidateLog_AM(string $time)
     {
         /**
@@ -516,6 +530,29 @@ class Timelog extends Model
         // should be from hour
         list($hour,$minute) = explode(':', $time);
         return ($minute / 60) + $hour;
+    }
+
+    public static function adjustFormattedTimestamp($time,$hourToAdd = 0, $minuteToAdd = 0){
+        list($hour,$minute) = explode(':', $time);
+        $hour += $hourToAdd;
+        $minute += $minuteToAdd;
+        $formatted = sprintf("%02d",$hour) . ':' . sprintf("%02d",$minute);
+        return $formatted;
+    }
+
+    public static function isOT(string $time){
+        /**
+        * @param string "00:00" format
+        * Validates a log if it is Over ReqTimeOut_2()(PM time out) + MinReqOTHrs() (Minimum OT Hrs)
+        * @return bolean true / false
+        */
+        // return [self::toMinuteCustom(self::ReqTimeOut_2()), self::toMinuteCustom($time)];
+        return self::toMinuteCustom(self::ReqTimeOut_2()) < self::toMinuteCustom($time);
+    }
+
+    public static function isPassedOnRequiredOT(string $rendered_time)
+    {
+        return self::toMinuteCustom(self::MinReqOTHrs2()) <= self::toMinuteCustom($rendered_time);
     }
 
     public static function isLate($in,$ampm = 'am', $getResult = false){

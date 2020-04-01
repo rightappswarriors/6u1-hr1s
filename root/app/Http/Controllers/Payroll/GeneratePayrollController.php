@@ -270,7 +270,7 @@ class GeneratePayrollController extends Controller
                                 $late_amt = 0;
                                 $undertime = '';
                                 $undertime_amt = 0;
-                                $leaves = '';
+                                $leaves = [];
                                 $leave_count = '';
                                 $leave_amt = 0;
                             }
