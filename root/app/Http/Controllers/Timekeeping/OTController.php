@@ -8,6 +8,7 @@ use Core;
 use DB;
 use Session;
 use Account;
+use Notification_N;
 
 class OTController extends Controller
 {
@@ -69,6 +70,58 @@ class OTController extends Controller
             return back();
 
         } catch (\Illuminate\Database\QueryException $e) {
+            Core::Set_Alert('danger', $e->getMessage());
+            return back();
+        }
+    }
+
+    public function finalize_view($param = null)
+    {
+        $ret = [
+            'list' => DB::table('hr_ot')->leftjoin('hr_employee as emp','hr_ot.empid','emp.empid')->where([['hr_ot.cancel',FALSE],['hr_ot.finalize_decision',null]])->select('hr_ot.*','emp.lastname','emp.firstname')->get(),
+            'title' => 'Finalize OT Application'
+        ];
+        return view('pages.timekeeping.OT.finalize',$ret);
+    }
+
+    public function finalize_actions(Request $r){
+        try {
+            
+            $data = ['finalize_uid' => Account::ID(), 'finalize_decision' => $r->actionrequired, 'finalize_remark' => $r->remark, 'finalize_date_time' => Date('Y-m-d H:i:m')];
+            if(DB::table('hr_ot')->where('otid',$r->txt_code)->update($data)){
+                $data = DB::table('hr_ot')->where('otid',$r->txt_code)->first();
+                Notification_N::sendNotificationSingle('Your OT application has been Finalized.','OT Application','/timekeeping/Apply-For-OT',$data->empid);
+                Core::Set_Alert('success', 'Successfully Updated OT Application');
+                return back();
+            }
+
+        } catch (Exception $e) {
+            Core::Set_Alert('danger', $e->getMessage());
+            return back();
+        }
+    }
+
+    public function approval_view($param = null)
+    {
+        $ret = [
+            'list' => DB::table('hr_ot')->leftjoin('hr_employee as emp','hr_ot.empid','emp.empid')->where([['hr_ot.cancel',FALSE],['hr_ot.finalize_decision','<>',null],['hr_ot.approval_decision',null]])->select('hr_ot.*','emp.lastname','emp.firstname')->get(),
+            'title' => 'Approval of OT Application'
+        ];
+        return view('pages.timekeeping.OT.finalize',$ret);
+    }
+
+    public function approval_actions(Request $r){
+        try {
+            
+            $data = ['approval_uid' => Account::ID(), 'approval_decision' => $r->actionrequired, 'approval_remark' => $r->remark, 'approval_date_time' => Date('Y-m-d H:i:m')];
+            if(DB::table('hr_ot')->where('otid',$r->txt_code)->update($data)){
+                $data = DB::table('hr_ot')->where('otid',$r->txt_code)->first();
+                Notification_N::sendNotificationSingle('Your OT application has been ' . ($r->actionrequired == 1 ? 'Approved' : 'Disapproved') . '.','OT Application','/timekeeping/Apply-For-OT',$data->empid);
+                Core::Set_Alert('success', 'Successfully Updated OT Application');
+                return back();
+            }
+
+        } catch (Exception $e) {
             Core::Set_Alert('danger', $e->getMessage());
             return back();
         }

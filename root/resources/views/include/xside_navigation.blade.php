@@ -143,6 +143,14 @@
             {{-- <a href="{{url('reports/timekeeping/EmployeeDTR')}}">Print Employee DTR</a> --}}
             <a href="{{url('timekeeping/Apply-For-OT')}}">Apply for Overtime</a>
           </li>
+          <li id="timekeepingFinalize-OT">
+            {{-- <a href="{{url('reports/timekeeping/EmployeeDTR')}}">Print Employee DTR</a> --}}
+            <a href="{{url('timekeeping/Finalize-OT')}}">Finalize Overtime</a>
+          </li>
+          <li id="timekeepingApproval-OT">
+            {{-- <a href="{{url('reports/timekeeping/EmployeeDTR')}}">Print Employee DTR</a> --}}
+            <a href="{{url('timekeeping/Approval-OT')}}">Approve/Disapprove Overtime</a>
+          </li>
         </ul>
       </li>
       <li id="timekeepinglog-box">

@@ -270,6 +270,16 @@ Route::prefix('Biometric')->group(function(){
 				Route::post('/delete', 'Timekeeping\OTController@delete');
 			});
 
+			Route::prefix('Finalize-OT')->group(function() {
+				Route::get('/', 'Timekeeping\OTController@finalize_view');
+				Route::post('/', 'Timekeeping\OTController@finalize_actions');
+			});
+
+			Route::prefix('Approval-OT')->group(function() {
+				Route::get('/', 'Timekeeping\OTController@approval_view');
+				Route::post('/', 'Timekeeping\OTController@approval_actions');
+			});
+
 			Route::prefix('log-box')->group(function() {
 				Route::get('/', 'Timekeeping\LogBoxController@view');
 				Route::post('/in', 'Timekeeping\LogBoxController@getLastestTimeIn');
