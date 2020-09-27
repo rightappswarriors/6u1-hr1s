@@ -44,8 +44,8 @@ DB_CONNECTION=pgsql
 DB_HOST=127.0.0.1
 DB_PORT=5432
 DB_DATABASE=rightapps_guihulngan
-DB_USERNAME=postgres
-DB_PASSWORD=rightech777
+DB_USERNAME=homestead
+DB_PASSWORD=secret
 DB_SCHEMA=hris
 
 BROADCAST_DRIVER=log
