@@ -18,50 +18,90 @@ class EmployeeController extends Controller
 {
     public function __construct()
     {
-        $SQLOffice = "SELECT * FROM rssys.m08 WHERE active = TRUE ORDER BY cc_desc ASC";
-        $this->office = DB::select($SQLOffice);
-        $SQLDept = "SELECT * FROM hris.hr_department WHERE COALESCE(cancel, cancel, '')<>'Y' ORDER BY dept_name ASC";
-        $this->dept = DB::select($SQLDept);
-        $SQLPosition = "SELECT * FROM hris.hr_jobtitle WHERE COALESCE(cancel, cancel, '')<>'Y' ORDER BY jtitle_name ASC";
-        $this->position = DB::select($SQLPosition);
-        $SQLEmpStatus = "SELECT * FROM hris.hr_emp_status WHERE COALESCE(cancel, cancel, '')<>'Y'";
-        $this->emp_status = DB::select($SQLEmpStatus);
-        $SQLRate = "SELECT * FROM hris.hr_rate_type";
-        $this->rate_type = DB::select($SQLRate);
-        $SQLTax = "SELECT * FROM hris.hr_wtax WHERE COALESCE(cancel, cancel, '')<>'Y'";
-        $this->tax= DB::select($SQLTax);
-        $SQLSSS = "SELECT code,s_credit FROM hris.hr_sss ORDER BY s_credit";
-        $this->sss= DB::select($SQLSSS);
-        $SQLDays = "SELECT * FROM hris.hr_days";
-        $this->days= DB::select($SQLDays);
-        $SQLCivilStatus = "SELECT * FROM hris.hr_civil_status";
-        $this->civil_stat = DB::select($SQLCivilStatus);
-        $SQLEmployee = "SELECT increment,isheadoffacility,empid,lastname,firstname,mi,positions,department,section,date_hired,contractual_date,date_resigned,date_terminated,prohibition_date,date_regular,empstatus,contract_days,prc,ctc,rate_type,pay_rate,biometric,sss,pagibig,philhealth,payroll_account,tin,tax_bracket,shift_sched_from,dayoff1,dayoff2,sex,birth,civil_status,religion,height,weight,father,father_address,father_contact,father_job,mother,mother_address,mother_contact,mother_job,emp_contact,home_tel,email,home_address,emergency_name,emergency_contact,em_home_address,relationship,shift_sched_sat_from,shift_sched_to,shift_sched_sat_to,fixed_rate,primary_ed,secondary_ed,tertiary_ed,graduate,post_graduate, sss_bracket,fixed_sched FROM hris.hr_employee WHERE COALESCE(cancel, cancel, '')<>'Y' order by increment DESC";
-        $this->employee = DB::select($SQLEmployee);
+        $this->officeQuery = "SELECT * FROM rssys.m08 WHERE active = TRUE ORDER BY cc_desc ASC";
+        $this->deptQuery = "SELECT * FROM hris.hr_department WHERE COALESCE(cancel, cancel, '')<>'Y' ORDER BY dept_name ASC";
+        $this->positionQuery = "SELECT * FROM hris.hr_jobtitle WHERE COALESCE(cancel, cancel, '')<>'Y' ORDER BY jtitle_name ASC";
+        $this->empStatusQuery = "SELECT * FROM hris.hr_emp_status WHERE COALESCE(cancel, cancel, '')<>'Y'";
+        $this->rateQuery = "SELECT * FROM hris.hr_rate_type";
+        $this->taxQuery = "SELECT * FROM hris.hr_wtax WHERE COALESCE(cancel, cancel, '')<>'Y'";
+        $this->sssQuery = "SELECT code,s_credit FROM hris.hr_sss ORDER BY s_credit";
+        $this->daysQuery = "SELECT * FROM hris.hr_days";
+        $this->civilStatusQuery = "SELECT * FROM hris.hr_civil_status";
+
+        $this->employeeQuery = "SELECT
+                                emp.empid,
+                                emp.increment, 
+                                emp.positions, 
+                                emp.department,
+                                emp.firstname,
+                                emp.lastname,
+                                emp.empstatus,
+                                emp.biometric,
+                                emp.isheadoffacility,
+                                emp.mi,
+
+                                -- get employee's job title, limit 1 is needed because hris.hr_jobtitle's new pk jt_cn is not unique and has duplicate
+                                (select 
+                                    jt.jtitle_name 
+                                 from hris.hr_jobtitle jt 
+                                 where jt.jt_cn = emp.positions 
+                                 limit 1) as jobtitle,
+
+                                -- get employee's office
+                                coalesce((select ofc.cc_desc 
+                                          from rssys.m08 ofc 
+                                          where ofc.cc_id = emp.department::integer), 
+                                         'office-not-found') as office,
+
+                                -- get employee's employment status  
+                                coalesce((select est.description
+                                          from hris.hr_emp_status est
+                                          where est.status_id = emp.empstatus::integer), 
+                                         'employee-status-not-found') as emp_status
+
+                            from hris.hr_employee emp
+                            WHERE coalesce(emp.cancel, emp.cancel, '')<>'Y'
+                            order by increment desc";
     }
     public function view()
     {
-        for ($i=0; $i < count($this->employee); $i++) { 
-            // $inc =(empty(DB::table('hr_employee')->max('increment')) ? 1 : DB::table('hr_employee')->max('increment') + 1);
-            $emp = $this->employee[$i];
-            // if(!isset($emp->increment)){
-                // DB::table('hr_employee')->where('empid',$emp->empid)->update(['increment' => $inc]);
-            // }
-            $emp->office = (Office::GetOffice($emp->department)!=null) ? Office::GetOffice($emp->department)->cc_desc : "office-not-found";
-            $emp->jobtitle = JobTitle::Get_JobTitle($emp->positions);
-            $emp->emp_status = (EmployeeStatus::find($emp->empstatus)!=null) ? EmployeeStatus::find($emp->empstatus)->description : "employee-status-not-found";
-        }
-        // dd($this->emp_status);
-        // return dd($this->employee);
-        return view('pages.mfile.employee', ['dept' => $this->dept, 'position' => $this->position, 'emp_status' => $this->emp_status, 'tax' => $this->tax, 'rate' => $this->rate_type, 'sss' => $this->sss, 'day' => $this->days, 'civil_stat' => $this->civil_stat, 'employee' => $this->employee, 'office' => $this->office] );
+        $this->office = DB::select($this->officeQuery);
+        $this->employee = DB::select($this->employeeQuery);
+
+        $data = [
+            'employee'  => $this->employee,
+            'office'    => $this->office,
+        ];
+        return view('pages.mfile.employee', $data);
     }
     public function new()
     {
-        // return dd($this->office);
+        $this->office = DB::select($this->officeQuery);
+        $this->dept = DB::select($this->deptQuery);
+        $this->position = DB::select($this->positionQuery);
+        $this->emp_status = DB::select($this->empStatusQuery);
+        $this->rate_type = DB::select($this->rateQuery);
+        $this->tax= DB::select($this->taxQuery);
+        $this->sss= DB::select($this->sssQuery);
+        $this->days= DB::select($this->daysQuery);
+        $this->civil_stat = DB::select($this->civilStatusQuery);
+        $this->employee = DB::select($this->employeeQuery);
+
         return view('pages.mfile.employee_new', ['dept' => $this->dept, 'position' => $this->position, 'emp_status' => $this->emp_status, 'tax' => $this->tax, 'rate' => $this->rate_type, 'sss' => $this->sss, 'day' => $this->days, 'civil_stat' => $this->civil_stat, 'employee' => $this->employee, 'office' => $this->office] );
     }
     public function new2()
     {
+        $this->office = DB::select($this->officeQuery);
+        $this->dept = DB::select($this->deptQuery);
+        $this->position = DB::select($this->positionQuery);
+        $this->emp_status = DB::select($this->empStatusQuery);
+        $this->rate_type = DB::select($this->rateQuery);
+        $this->tax= DB::select($this->taxQuery);
+        $this->sss= DB::select($this->sssQuery);
+        $this->days= DB::select($this->daysQuery);
+        $this->civil_stat = DB::select($this->civilStatusQuery);
+        $this->employee = DB::select($this->employeeQuery);
+
         return view('pages.mfile.employee_crud', ['mode' => 'new', 'url'=>url('master-file/employee/add2'), 'office' => $this->office, 'position' => $this->position, 'emp_status' => $this->emp_status, 'rate' => $this->rate_type, 'tax' => $this->tax, 'civil_stat' => $this->civil_stat, 'MYDATA' => null]);
     }
     public function add2(Request $r)
@@ -286,6 +326,13 @@ class EmployeeController extends Controller
     }
     public function edit($id)
     {
+        $this->office = DB::select($this->officeQuery);
+        $this->position = DB::select($this->positionQuery);
+        $this->emp_status = DB::select($this->empStatusQuery);
+        $this->rate_type = DB::select($this->rateQuery);
+        $this->tax= DB::select($this->taxQuery);
+        $this->civil_stat = DB::select($this->civilStatusQuery);
+
         // return dd($id);
         $Employee = Employee::GetEmployee($id);
         // return dd($Employee);

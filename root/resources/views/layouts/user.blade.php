@@ -95,11 +95,11 @@
 </head>
 <body id="page-top">
    
-    <div id='preloader'>
+    <!-- <div id='preloader'>
         <div class='spinner'>
             <span class='loader'><span class='loader-inner'></span></span>
         </div>
-    </div> 
+    </div>  -->
 
     <div id="wrapper">
         @include('include.xside_navigation')

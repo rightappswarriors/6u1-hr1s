@@ -110,6 +110,7 @@ Route::prefix('Biometric')->group(function(){
 				Route::post('/upadte-flag', 'MFile\EmployeeController@updateFlag');
 				//Check if biometric id is unique
 				Route::post('/check-biometric', 'MFile\EmployeeController@checkBiometric');
+				// pagination
 
 			});
 			/* EMPLOYEE */
