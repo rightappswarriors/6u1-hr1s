@@ -92,17 +92,15 @@ class EmployeeController extends Controller
     public function new2()
     {
         $this->office = DB::select($this->officeQuery);
-        $this->dept = DB::select($this->deptQuery);
         $this->position = DB::select($this->positionQuery);
         $this->emp_status = DB::select($this->empStatusQuery);
         $this->rate_type = DB::select($this->rateQuery);
         $this->tax= DB::select($this->taxQuery);
-        $this->sss= DB::select($this->sssQuery);
-        $this->days= DB::select($this->daysQuery);
         $this->civil_stat = DB::select($this->civilStatusQuery);
-        $this->employee = DB::select($this->employeeQuery);
 
         return view('pages.mfile.employee_crud', ['mode' => 'new', 'url'=>url('master-file/employee/add2'), 'office' => $this->office, 'position' => $this->position, 'emp_status' => $this->emp_status, 'rate' => $this->rate_type, 'tax' => $this->tax, 'civil_stat' => $this->civil_stat, 'MYDATA' => null]);
+
+
     }
     public function add2(Request $r)
     {
