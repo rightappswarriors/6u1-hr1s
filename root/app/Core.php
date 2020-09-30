@@ -39,6 +39,10 @@ class Core extends Model
 		}
 	}
 
+	public static function getOne($table, $cols) {
+		return DB::table($table)->first($cols);
+	}
+
 	public static function getm99One($clm)
 	{
 		/*

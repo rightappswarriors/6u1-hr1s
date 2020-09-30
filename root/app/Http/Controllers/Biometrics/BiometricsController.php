@@ -14,7 +14,15 @@ class BiometricsController extends Controller
 {
     public $databaseData;
     public function __construct(){
-        $this->databaseData = [['1','am',Core::getm99One('span_am_in')->span_am_in],['0','am',Core::getm99One('span_am_out')->span_am_out],['1','pm',Core::getm99One('span_pm_in')->span_pm_in],['0','pm',Core::getm99One('span_pm_out')->span_pm_out]];
+        $cols = ['span_am_in', 'span_am_out', 'span_pm_in', 'span_pm_out'];
+        $amPmInOut = Core::getOne('hris.m99', $cols);
+
+        $this->databaseData = [
+            ['1','am',$amPmInOut->span_am_in],
+            ['0','am',$amPmInOut->span_am_out],
+            ['1','pm',$amPmInOut->span_pm_in],
+            ['0','pm',$amPmInOut->span_pm_out]
+        ];
     }
 
     //

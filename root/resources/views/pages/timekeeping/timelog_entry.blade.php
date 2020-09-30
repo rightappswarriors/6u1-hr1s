@@ -411,6 +411,7 @@
 		var $filterLoader = $("#loader-conainter");
 		var $filterSubmit = $("#filters-submit");
 		var $filterSelectEmployee = $("#tito_emp");
+		var $office = $("#office");
 
 		// will hold the fetched employees for faster display of previously loaded data
 		var data = getLocalStorageItem(OFFICE_EMPLOYEES);
@@ -433,7 +434,7 @@
 			var H = +timeString.substr(0, 2);
 			var h = H % 12 || 12;
 			var ampm = (H < 12 || H === 24) ? "am" : "pm";
-			timeString = h + timeString.substr(2, 3) + ampm;
+			timeString = h + timeString.substr(2, 3) + " " + ampm;
 			return timeString;
 		}
 
@@ -493,8 +494,8 @@
 			$('#tito_id').val('');
 		});
 
-		$('#office').on('change', function() {
-			var officeId = $(this).val();
+		$office.on('change', function() {
+			var officeId = $office.val();
 			var employees = officeEmployees[officeId];
 
 			showFilterLoader(true);
@@ -511,6 +512,8 @@
 				url: '{{url('timekeeping/timelog-entry/find-emp-office')}}',
 				data: {ofc_id: officeId},
 				success: function(data) {
+					var prevSelectedEmployee = $filterSelectEmployee.val();
+
 					showFilterLoader(false);
 					initFilterSelectEmployee();
 
@@ -519,6 +522,7 @@
 					setLocalStorageItem(OFFICE_EMPLOYEES, officeEmployees);
 
 					fillSelectEmployeeOptions(data);
+					$filterSelectEmployee.val(prevSelectedEmployee); // selects the previously selected option
 				},
 			});
 		});
@@ -643,40 +647,78 @@
 			});
 		});
 
+		function parseTime(t1) {
+			return parseInt(t1.replace(":", ""));
+		}
+
 		function LoadTable(data) {
+			const OUT = '0';
+			const IN = '1';
+			const NOON = parseTime("12:00");
+
 			for (x in data) {
 				let amin = '', amout = '', amsource = '', pmin = '', pmout = '', pmsource = '';
 				let log_id = [];
 				for (var i = 0; i < data[x].length; i++) {
 					// am
 					let dataParsed = data[x][i];
+					let time = dataParsed['time_log'];
+					let intTime = parseTime(time);
+
 					log_id.push(dataParsed['logs_id']);
-					if(dataParsed['ampm'][1] == 'am'){
-						amsource = dataParsed['source_desc'];
-						if(dataParsed['status'] == '1' && dataParsed['ampm'][0] == '1'){
-							amin = formatAMPM2(dataParsed['time_log']);
-						} else if(dataParsed['status'] == '0' && dataParsed['ampm'][0] == '0'){
-							amout = formatAMPM2(dataParsed['time_log']);
-						}
-						// pm
-					} else if(dataParsed['ampm'][1] == 'pm'){
-						pmsource = dataParsed['source_desc'];
-						if(dataParsed['status'] == '1' && dataParsed['ampm'][0] == '1'){
-							pmin = formatAMPM2(dataParsed['time_log']);
-						} else if(dataParsed['status'] == '0' && dataParsed['ampm'][0] == '0'){
-							pmout = formatAMPM2(dataParsed['time_log']);
-						}
+					amsource = dataParsed['source_desc'];
+					pmsource = dataParsed['source_desc'];
+
+					switch(dataParsed['status']) {
+						case IN:
+							if (intTime < NOON) {
+								amin = time;
+							} else {
+								pmin = time;
+							}
+
+							if (amin !== '' && pmin !== '') {
+								var intAmin = parseTime(amin);
+								var intPmin = parseTime(pmin);
+								var tmp;
+
+								if (intAmin > intPmin) { // swap
+									tmp = amin;
+									amin = pmin;
+									pmin = tmp;
+								}
+							}
+							break;
+						case OUT:
+							if (intTime < NOON) {
+								amout = time;
+							} else {
+								pmout = time;
+							}
+
+							if (amout !== '' && pmout !== '') {
+								var intAmout = parseTime(amout);
+								var intPmout = parseTime(pmout);
+								var tmp;
+
+								if (intAmout > intPmout) { // swap
+									tmp = amout;
+									amout = pmout;
+									pmout = tmp;
+								}
+							}
+							break;
 					}
 				}
 
 
 				table.row.add([
 					x,
-					amin,
-					amout,
+					formatAMPM2(amin),
+					formatAMPM2(amout),
 					amsource,
-					pmin,
-					pmout,
+					formatAMPM2(pmin),
+					formatAMPM2(pmout),
 					pmsource,
 					'<button type="button" class="btn btn-success btn-edit mr-1" data="'+log_id.toString()+'"><i class="fa fa-edit"></i></button><button type="button" class="btn btn-danger btn-delete" data="'+log_id.toString()+'"><i class="fa fa-trash"></i></button>'
 				]).draw();
@@ -720,21 +762,22 @@
 		$('#frm-batchtimeloginfo').on('submit', function(e) {
 			e.preventDefault();
 			table.clear().draw();
+
 			if ($filterSelectEmployee.val()==null) {
 				alert("No employee selected");
+			} else {
+				showFilterLoader(true);
 			}
 			$('#empid').html("(Employee ID: " + $filterSelectEmployee.val() + " )");
 			$.ajax({
 				type : this.getAttribute('method'),
 				url : this.getAttribute('action'),
 				data : $('#frm-batchtimeloginfo').serialize(),
-				dataTy : 'json',
 				success : function(data) {
+					showFilterLoader(false);
+					
 					if (data!="error") {
 						if (data!="empty") {
-							// for(var i = 0 ; i < data.length; i++) {
-							// 	LoadTable(data[i]);
-							// }
 							LoadTable(data);
 						} else {
 							alert("No record.");
