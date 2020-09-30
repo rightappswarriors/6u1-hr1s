@@ -15,6 +15,23 @@ class Office extends Model
     public static $pk = "cc_code";
     public static $id = "cc_id";
 
+    public static function getEmployees($ofc_id, $columns = []) {
+        $id = Account::GET_ASSOCIATED_EMPLOYEE();
+        
+        $employees = DB::table('hr_employee')->where('department', '=', $ofc_id)->where('cancel', null);
+        if(isset($id)){
+            $employees = $employees->where('empid', '=', $id);
+        }
+
+        if (count($columns) > 0) {
+            $employees = $employees->orderBy('empid', 'ASC')->get($columns);
+        } else {
+            $employees = $employees->orderBy('empid', 'ASC')->get();
+        }
+
+        return $employees;
+    }
+
     public static function get_all()
     {
         $office = Employee::getOfficeByID(Account::GET_ASSOCIATED_EMPLOYEE());
@@ -32,13 +49,7 @@ class Office extends Model
 
     public static function OfficeEmployees($ofc_id)
     {
-        $id = Account::GET_ASSOCIATED_EMPLOYEE();
-
-        $employees = DB::table('hr_employee')->where('department', '=', $ofc_id)->where('cancel', null);
-        if(isset($id)){
-            $employees = $employees->where('empid', '=', $id);
-        }
-        $employees = $employees->orderBy('empid', 'ASC')->get();
+        $employees = self::getEmployees($ofc_id);
 
         if (count($employees) > 0) {
             for ($i=0; $i < count($employees); $i++) {

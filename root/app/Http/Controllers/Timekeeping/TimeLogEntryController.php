@@ -20,11 +20,11 @@ class TimeLogEntryController extends Controller
     public function __construct()
     {
     	$this->page = "pages.timekeeping.timelog_entry";
-    	$this->employees = Employee::Load_Employees();
     }
 
     public function view(Request $request, $workdate = null, $office = null, $empid = null)
     {
+        $offices = Office::get_all();
         $ref = null;
         if($request->has('ref') && DB::table('biometricdata')->where('bioid',$request->ref)->exists()){
             $data = DB::table('biometricdata')->where('bioid',$request->ref)->first();
@@ -33,15 +33,22 @@ class TimeLogEntryController extends Controller
             $office = (Employee::getOfficeByID( ( Employee::Load_Employees_Dynamic([['empid',$data->empid]],true)->empid ?? Employee::Load_Employees_Dynamic([['biometric',$data->empid]],true))->empid )->department ?? null);
             $ref = $data;
         }
-        $misc = [$workdate, $office, $empid];
-    	$data = [$this->employees, Office::get_all()];
-        // dd($data);
+        $misc = [
+            $workdate, 
+            $office, 
+            $empid
+        ];
+
+    	$data = ['offices'   => $offices];
+        
     	return view($this->page, compact('data','misc','ref'));
     }
 
     public function viewtimeout()
     {
-        $data = [$this->employees, Office::get_all()];
+        $employees = Employee::Load_Employees();
+
+        $data = [$employees, Office::get_all()];
         $dataRecorded = $filtered = [];
         $timeLogs = DB::table('hr_tito2')->join('hr_employee','hr_tito2.empid','hr_employee.empid')->orderBy('work_date','ASC')->get();
         if(isset($timeLogs)){
@@ -72,13 +79,15 @@ class TimeLogEntryController extends Controller
 
     public function get_emp(Request $r)
     {
-        $new_data = array();
-        $data = json_decode(Office::OfficeEmployees($r->ofc_id), true);
-        for($i=0; $i<count($data);$i++) {
-            $new_data[$i]['empid'] = $data[$i]['empid'];
-            $new_data[$i]['name'] = Employee::Name($data[$i]['empid']);
-        }
-        return $new_data;
+        $columns = [
+            'empid',
+            'firstname',
+            'mi',
+            'lastname'
+        ];
+        $employees = Office::getEmployees($r->ofc_id, $columns);
+
+        return $employees;
     }
 
     public function loadBatchTimeLogsInfo(Request $r)

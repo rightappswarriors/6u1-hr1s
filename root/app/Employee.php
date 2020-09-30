@@ -81,6 +81,14 @@ class Employee extends Model
         }
     }
 
+    public static function fullname($employee) {
+        try {
+            return $employee->firstname . " " . $employee->mi . " " . " " . $employee->lastname;
+        } catch (\Exception $e) {
+            return null;
+        }    
+    }
+
     public static function Name($empid, $mode = null)
     {
         try {

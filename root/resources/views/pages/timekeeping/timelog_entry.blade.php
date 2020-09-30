@@ -70,25 +70,20 @@
 							<label>Search Filters:</label>
 						</div>
 						<div class="form-group form-inline">
-							<div class="row w-75">
-								<div class="col">
+							<div class="row w-75 no-gutters">
+								<div class="col ml-1 mr-3">
 									<select class="form-control w-100" name="office" id="office" required>
 										<option disabled selected value="">Please select an office</option>
-										@if(!empty($data[1]))
-										@foreach($data[1] as $off)
+										@if(!empty($data['offices']))
+										@foreach($data['offices'] as $off)
 										<option value="{{$off->cc_id}}">{{$off->cc_desc}}</option>
 										@endforeach
 										@endif
 									</select>
 								</div>
-								<div class="col">
+								<div class="col col ml-1 mr-1">
 									<select class="form-control w-100" name="tito_emp" id="tito_emp" required>
 										<option disabled selected value="">Please select an employee</option>
-										{{-- @if(!empty($data[0]))
-										@foreach($data[0] as $emp)
-										<option value="{{$emp->empid}}">{{$emp->firstname." ".$emp->lastname}}</option>
-										@endforeach
-										@endif --}}
 									</select>
 									{{-- <div class="row">
 										<div class="col">
@@ -96,7 +91,12 @@
 										</div>
 									</div> --}}
 								</div>
-								<button type="submit" class="btn btn-primary ml-3">Go</button>
+								<div class="col-1 d-none" id="loader-conainter">
+									<div class="loader-circle"></div>
+								</div>
+								<div class="col-1 ml-2">
+									<button type="submit" class="btn btn-primary" id="filters-submit">Go</button>
+								</div>
 							</div>
 						</div>
 					</form>
@@ -404,6 +404,25 @@
 		$( "#tito_dateEnd").datepicker(date_option);
 		$( "#date_workdate").datepicker(date_option);
 		$( "#date_workdate2, #date_workdate3, #date_workdate4, #date_workdate5").datepicker(date_option);
+
+		const OFFICE_EMPLOYEES = "OFFICE_EMPLOYEES";
+
+		// add  $ prefix on jquery selector to differentiate from other variables
+		var $filterLoader = $("#loader-conainter");
+		var $filterSubmit = $("#filters-submit");
+		var $filterSelectEmployee = $("#tito_emp");
+
+		// will hold the fetched employees for faster display of previously loaded data
+		var data = getLocalStorageItem(OFFICE_EMPLOYEES);
+		var officeEmployees = data === null ? {} : data;
+
+		function getLocalStorageItem (key) {
+			return JSON.parse(window.localStorage.getItem(key));
+		}
+
+		function setLocalStorageItem(key, value) {
+			window.localStorage.setItem(key, JSON.stringify(value));
+		}
 	</script>
 	<script type="text/javascript">
 		function formatAMPM2(time) {
@@ -418,6 +437,50 @@
 			return timeString;
 		}
 
+		// show/hide loader for search filter
+		function showFilterLoader(show) {
+			var displayNone = "d-none";
+			var filterSubmitLoaderShow = "filter-submit-loader-show";
+
+			if (show) {
+				$filterLoader.removeClass(displayNone);
+				$filterSubmit.addClass(filterSubmitLoaderShow); // fixes the submit button's spacing when loader is shown
+			} else {
+				$filterLoader.addClass(displayNone);
+				$filterSubmit.removeClass(filterSubmitLoaderShow);
+			}
+		}
+
+		function fillSelectEmployeeOptions(data) {
+			if(data.length > 0) {
+				for(i=0; i<data.length; i++) {
+					var option = document.createElement('option');
+					var firstname = data[i].firstname;
+					var lastname = data[i].lastname;
+					var mi = data[i].mi;
+					var name = firstname + " " + mi + " " + lastname;
+
+					option.setAttribute('value', data[i].empid);
+					option.innerText=name;
+
+					$filterSelectEmployee[0].appendChild(option);
+				}
+			}
+		}
+
+		function initFilterSelectEmployee() {
+			// removes all select options
+			$filterSelectEmployee.html("");
+
+			var hiddenChild = document.createElement('option');
+			hiddenChild.setAttribute('selected', '');
+			hiddenChild.setAttribute('disabled', '');
+			hiddenChild.setAttribute('value', '');
+			hiddenChild.innerText='Please select an employee';
+
+			$filterSelectEmployee[0].appendChild(hiddenChild);
+		}
+
 		var table = $('#dataTable').DataTable();
 		var selected_row = "";
 		$('#dataTable').on('click', '.btn-delete', function() {
@@ -426,39 +489,36 @@
 			selected_row = $(this).parents('tr');
 		});
 
-		$('#tito_emp').on('input', function() {
+		$filterSelectEmployee.on('input', function() {
 			$('#tito_id').val('');
 		});
 
 		$('#office').on('change', function() {
+			var officeId = $(this).val();
+			var employees = officeEmployees[officeId];
 
-			while($('#tito_emp')[0].firstChild) {
-				$('#tito_emp')[0].removeChild($('#tito_emp')[0].firstChild);
+			showFilterLoader(true);
+			initFilterSelectEmployee();
+
+			// loads previously stored data for faster experience then do the query on background to update the stored data
+			if (employees !== undefined && employees.length > 0) {
+				fillSelectEmployeeOptions(employees);
+				showFilterLoader(false);
 			}
-
-			var hiddenChild = document.createElement('option');
-				hiddenChild.setAttribute('selected', '');
-				hiddenChild.setAttribute('disabled', '');
-				hiddenChild.setAttribute('value', '');
-				hiddenChild.innerText='Please select an employee';
-
-			$('#tito_emp')[0].appendChild(hiddenChild);
 
 			$.ajax({
 				type: 'post',
 				url: '{{url('timekeeping/timelog-entry/find-emp-office')}}',
-				data: {ofc_id: $(this).val()},
+				data: {ofc_id: officeId},
 				success: function(data) {
-					// console.log(typeof(data));
-					if(data.length > 0) {
-						for(i=0; i<data.length; i++) {
-							var option = document.createElement('option');
-								option.setAttribute('value', data[i].empid);
-								option.innerText=data[i].name;
+					showFilterLoader(false);
+					initFilterSelectEmployee();
 
-							$('#tito_emp')[0].appendChild(option);
-						}
-					}
+					// store data for later use
+					officeEmployees[officeId] = data;
+					setLocalStorageItem(OFFICE_EMPLOYEES, officeEmployees);
+
+					fillSelectEmployeeOptions(data);
 				},
 			});
 		});
@@ -503,7 +563,7 @@
 		});
 
 		$('#dataTable').on('click', '.btn-edit', function() {
-			var emp = $('#tito_emp').val();
+			var emp = $filterSelectEmployee.val();
 			let stringFix = '';
 
 			selected_row = $(this).parents('tr');
@@ -647,7 +707,7 @@
 		}
 
 		function toggleDeleteAllModal() {
-			if ($('#tito_emp').val()!=null) {
+			if ($filterSelectEmployee.val()!=null) {
 				$('#frm-deleteAll').attr('action', '{{url('timekeeping/timelog-entry/delete-all-log')}}');
 				$('#da-date1').html($('#tito_dateStrt').val());
 				$('#da-date2').html($('#tito_dateEnd').val());
@@ -660,10 +720,10 @@
 		$('#frm-batchtimeloginfo').on('submit', function(e) {
 			e.preventDefault();
 			table.clear().draw();
-			if ($('#tito_emp').val()==null) {
+			if ($filterSelectEmployee.val()==null) {
 				alert("No employee selected");
 			}
-			$('#empid').html("(Employee ID: "+$('#tito_emp').val()+" )");
+			$('#empid').html("(Employee ID: " + $filterSelectEmployee.val() + " )");
 			$.ajax({
 				type : this.getAttribute('method'),
 				url : this.getAttribute('action'),
@@ -810,7 +870,7 @@
 			$('#tito_dateStrt, #tito_dateEnd').val('{{$misc[0]}}').trigger('change');
 			$('#office').val('{{$misc[1]}}').trigger('change');
 			setTimeout(function() {
-				$('#tito_emp').val('{{$misc[2]}}').trigger('change');
+				$filterSelectEmployee.val('{{$misc[2]}}').trigger('change');
 			}, 100);
 			setTimeout(function() {
 				$('#frm-batchtimeloginfo').submit();
