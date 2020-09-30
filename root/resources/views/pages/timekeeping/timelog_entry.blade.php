@@ -431,10 +431,11 @@
 			if(time=="") return "";
 			if(time=="<span class='text-danger'>missing</span>") return "";
 			var timeString = time;
-			var H = +timeString.substr(0, 2);
+			var timeArr = timeString.split(":");
+			var H = timeArr[0];
 			var h = H % 12 || 12;
 			var ampm = (H < 12 || H === 24) ? "am" : "pm";
-			timeString = h + timeString.substr(2, 3) + " " + ampm;
+			timeString = h + ":" + timeArr[1] + " " + ampm;
 			return timeString;
 		}
 
@@ -647,8 +648,14 @@
 			});
 		});
 
-		function parseTime(t1) {
-			return parseInt(t1.replace(":", ""));
+		function parseTime(time) {
+			time = parseInt(time.replace(":", ""));
+
+			if (!isNaN(time)) {
+				return time;
+			}
+
+			return 0;
 		}
 
 		function LoadTable(data) {
@@ -664,53 +671,55 @@
 					let dataParsed = data[x][i];
 					let time = dataParsed['time_log'];
 					let intTime = parseTime(time);
+					let status = dataParsed['status'];
 
 					log_id.push(dataParsed['logs_id']);
 					amsource = dataParsed['source_desc'];
 					pmsource = dataParsed['source_desc'];
 
-					switch(dataParsed['status']) {
-						case IN:
-							if (intTime < NOON) {
+					if (intTime < NOON) {
+						switch(status) {
+							case IN:
 								amin = time;
-							} else {
-								pmin = time;
-							}
+								break;
 
-							if (amin !== '' && pmin !== '') {
-								var intAmin = parseTime(amin);
-								var intPmin = parseTime(pmin);
-								var tmp;
-
-								if (intAmin > intPmin) { // swap
-									tmp = amin;
-									amin = pmin;
-									pmin = tmp;
-								}
-							}
-							break;
-						case OUT:
-							if (intTime < NOON) {
+							case OUT:
 								amout = time;
-							} else {
+								break;
+						}
+					} else {
+						switch(status) {
+							case IN:
+								pmin = time;
+								break;
+
+							case OUT:
 								pmout = time;
-							}
+								break;
+						}
+					}
 
-							if (amout !== '' && pmout !== '') {
-								var intAmout = parseTime(amout);
-								var intPmout = parseTime(pmout);
-								var tmp;
+					var intAmout = parseTime(amout);
+					var intPmin = parseTime(pmin);
+					var intPmout = parseTime(pmout);
+					if (intPmin > 0 && intPmout > 0) { // check if pm in and out has values
+						if (intPmin > intPmout && intAmout === 0) { 
+							/**
+							*	swap amout and pmout when pmin > pmout
+							*	sample case: 
+							*	
+							*	|        AM         |         PM          |                |        AM         |          PM          |
+							*	-------------------------------------------		----->     --------------------------------------------
+							*	|   IN    |   OUT   |    IN    |   OUT    |                |   IN    |   OUT    |    IN    |   OUT    |
+							*	| 7:45 am |         | 12:46 pm | 12:00 pm |                | 7:45 am | 12:00 pm | 12:46 pm |          |
+							*
+							**/
 
-								if (intAmout > intPmout) { // swap
-									tmp = amout;
-									amout = pmout;
-									pmout = tmp;
-								}
-							}
-							break;
+							amout = pmout;
+							pmout = '';
+						}
 					}
 				}
-
 
 				table.row.add([
 					x,
@@ -722,8 +731,6 @@
 					pmsource,
 					'<button type="button" class="btn btn-success btn-edit mr-1" data="'+log_id.toString()+'"><i class="fa fa-edit"></i></button><button type="button" class="btn btn-danger btn-delete" data="'+log_id.toString()+'"><i class="fa fa-trash"></i></button>'
 				]).draw();
-				amin = '', amout = '', amsource = '', pmin = '', pmout = '', pmsource = '';
-				log_id = [];
 			}
 			
 		}
@@ -775,7 +782,6 @@
 				data : $('#frm-batchtimeloginfo').serialize(),
 				success : function(data) {
 					showFilterLoader(false);
-					
 					if (data!="error") {
 						if (data!="empty") {
 							LoadTable(data);
