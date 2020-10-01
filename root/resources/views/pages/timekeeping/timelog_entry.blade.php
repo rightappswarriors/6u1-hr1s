@@ -703,7 +703,7 @@
 					var intPmin = parseTime(pmin);
 					var intPmout = parseTime(pmout);
 					if (intPmin > 0 && intPmout > 0) { // check if pm in and out has values
-						if (intPmin > intPmout && intAmout === 0) { 
+						if (intPmin > intPmout && intAmout === 0) {
 							/**
 							*	swap amout and pmout when pmin > pmout
 							*	sample case: 

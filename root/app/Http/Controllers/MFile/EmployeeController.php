@@ -98,7 +98,17 @@ class EmployeeController extends Controller
         $this->tax= DB::select($this->taxQuery);
         $this->civil_stat = DB::select($this->civilStatusQuery);
 
-        return view('pages.mfile.employee_crud', ['mode' => 'new', 'url'=>url('master-file/employee/add2'), 'office' => $this->office, 'position' => $this->position, 'emp_status' => $this->emp_status, 'rate' => $this->rate_type, 'tax' => $this->tax, 'civil_stat' => $this->civil_stat, 'MYDATA' => null]);
+        return view('pages.mfile.employee_crud', 
+            [
+                'mode'          => 'new',
+                'url'           => url('master-file/employee/add2'),
+                'office'        => $this->office, 
+                'position'      => $this->position,
+                'emp_status'    => $this->emp_status,
+                'rate'          => $this->rate_type,
+                'tax'           => $this->tax,
+                'civil_stat'    => $this->civil_stat
+            ]);
 
 
     }
@@ -331,11 +341,19 @@ class EmployeeController extends Controller
         $this->tax= DB::select($this->taxQuery);
         $this->civil_stat = DB::select($this->civilStatusQuery);
 
-        // return dd($id);
-        $Employee = Employee::GetEmployee($id);
-        // return dd($Employee);
-        // return view('pages.mfile.employee_new_update', ['dept' => $this->dept, 'position' => $this->position, 'emp_status' => $this->emp_status, 'tax' => $this->tax, 'rate' => $this->rate_type, 'sss' => $this->sss, 'day' => $this->days, 'civil_stat' => $this->civil_stat, 'employee' => $this->employee, 'office' => $this->office, 'MYDATA' => $Employee] );
-        return view('pages.mfile.employee_crud', ['mode' => 'edit', 'url' => url('master-file/employee/update'), 'office' => $this->office, 'position' => $this->position, 'emp_status' => $this->emp_status, 'rate' => $this->rate_type, 'tax' => $this->tax, 'civil_stat' => $this->civil_stat, 'MYDATA' => $Employee] );
+        $employee = Employee::GetEmployee($id);
+        return view('pages.mfile.employee_crud', 
+            [
+                'mode' => 'edit', 
+                'url' => url('master-file/employee/update'),
+                'office' => $this->office,
+                'position' => $this->position,
+                'emp_status' => $this->emp_status,
+                'rate' => $this->rate_type, 
+                'tax' => $this->tax, 
+                'civil_stat' => $this->civil_stat,
+                'MYDATA' => $employee
+            ]);
     }
     public function update(Request $r)
     {
@@ -362,7 +380,7 @@ class EmployeeController extends Controller
             'contract_days' => ($r->txt_contract != '') ? (int)$r->txt_contract : 0,
             'prc' => ($r->txt_prc != '') ? $r->txt_prc : '',
             'ctc' => ($r->txt_ctc != '') ? $r->txt_ctc : '',
-            'rate_type' => 'M',
+            'rate_type' => $r->txt_rate_type,
             // 'pay_rate' => floatval($r->txt_py_rate),
             'pay_rate' => Core::ToFloat($r->txt_py_rate),
             'biometric' => ($r->txt_biometric != '') ? $r->txt_biometric : '',
