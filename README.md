@@ -13,7 +13,11 @@ This right here needs to be provided with an apt description
 	* ```pg_restore -h localhost -p 5432 -U postgres -d rightapps_guihulngan -v rssys-09-27-20```
 	* ```pg_restore -h localhost -p 5432 -U postgres -d rightapps_guihulngan -v hris-09-27-20```
 4. Configure your `.env` file
-5. From the projects root folder run
+5. Run migrations
+	* Set `DB_PORT` to `54320` on `.env` file
+	* Run ```php artisan migrate```, to do a rollback run ```php artisan migrate:rollback```
+	* Set `DB_PORT` back to `5432`
+6. From the projects root folder run
 	* ```composer update```
 	* ```npm install```
 	* ```npm run dev or npm run production```
