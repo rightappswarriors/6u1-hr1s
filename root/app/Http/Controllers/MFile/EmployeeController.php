@@ -572,7 +572,7 @@ class EmployeeController extends Controller
                 't_date' => Date('Y-m-d'),
                 't_time' => Date('H:i:s')
             ];
-            DB::table('hr_employee_history')->insert($data);
+            DB::table('hris.hr_employee_history')->insert($data);
             // DB::table(Employee::$tbl_name)->where(Employee::$pk, $r->txt_id)->delete();
             Core::Set_Alert('success', 'Successfully deleted an Employee.');
             DB::table(Employee::$tbl_name)->where(Employee::$pk, $r->txt_id)->delete();
