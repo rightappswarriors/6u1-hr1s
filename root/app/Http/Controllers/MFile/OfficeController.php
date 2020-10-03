@@ -13,13 +13,12 @@ class OfficeController extends Controller
 {
 	public function __construct()
     {
-        // $SQLOffice = "SELECT * FROM rssys.m08 WHERE active = TRUE ORDER BY cc_desc ASC";
-        $SQLOffice = "SELECT * FROM (SELECT * FROM rssys.m08 WHERE active IS TRUE ORDER BY cc_desc ASC) ofc LEFT JOIN (SELECT hp_id, hp_type, CAST(cc_id AS integer) AS ofc_id, withpay, hp_pct, hp_amount FROM hris.hr_hazardpay) hp ON ofc.cc_id = hp.ofc_id ORDER BY cc_desc ASC, cc_id ASC";
-        $this->office = DB::select($SQLOffice);;
+        
     }
     public function view()
     {
-    	// return dd($this->office);
+        $SQLOffice = "SELECT * FROM (SELECT * FROM rssys.m08 WHERE active IS TRUE ORDER BY cc_desc ASC) ofc LEFT JOIN (SELECT hp_id, hp_type, CAST(cc_id AS integer) AS ofc_id, withpay, hp_pct, hp_amount FROM hris.hr_hazardpay) hp ON ofc.cc_id = hp.ofc_id ORDER BY cc_desc ASC, cc_id ASC";
+        $this->office = DB::select($SQLOffice);;
     	return view('pages.mfile.office', ['office' => $this->office]);
     }
     /**

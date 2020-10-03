@@ -12,12 +12,11 @@ class JobTitleController extends Controller
 {
 	public function __construct()
     {
-        $SQLJobTitle = "SELECT * FROM hris.hr_jobtitle WHERE COALESCE(cancel,cancel,'')<>'Y' ORDER BY jtid ASC";
-        $this->jobtitle = DB::select($SQLJobTitle);
+        $this->SQLJobTitle = "SELECT * FROM hris.hr_jobtitle WHERE COALESCE(cancel,cancel,'')<>'Y' ORDER BY jtid ASC";
     }
     public function view()
     {
-    	// return dd($this->jobtitle);
+        $this->jobtitle = DB::select($this->SQLJobTitle);
     	return view('pages.mfile.job_title', ['jobtitle' => $this->jobtitle]);
     }
     public function add(Request $r)
