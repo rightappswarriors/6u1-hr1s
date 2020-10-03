@@ -82,7 +82,7 @@
 									</div>
 									<div class="form-group">
 										<label>Name:</label>
-										<input type="text" name="txt_name" style="text-transform: uppercase;" class="form-control" placeholder="DESCRIPTION" required>
+										<input type="text" name="txt_name" class="form-control" placeholder="Description" required>
 									</div>
 									<div class="form-group form-inline">
 										<label>With Hazard Pay:</label>

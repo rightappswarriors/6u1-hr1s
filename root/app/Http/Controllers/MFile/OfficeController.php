@@ -33,12 +33,15 @@ class OfficeController extends Controller
             Core::Set_Alert('danger', "Office ID Already Used. Please try again.");
             return back();
         } else {
-            # Save to rssys.m08
-            $to_ofc = ['cc_code'=>$r->txt_code , 'cc_desc' => $r->txt_name];
-            $new_entry_id = null;
             try {
-                DB::table(Office::$tbl_name)->insert($to_ofc);
-                $new_entry_id = DB::table(Office::$tbl_name)->where('cc_code', $r->txt_code)->where('cc_desc', $r->txt_name)->first()->cc_id;
+                # Save to rssys.m08
+                $table = Office::$tbl_name;
+                $values = [
+                    strtoupper($r->txt_code),
+                    $r->txt_name
+                ];
+
+                $new_entry_id = DB::selectOne("INSERT into " . $table . " (cc_code, cc_desc) values (?, ?) returning cc_id", $values)->cc_id;
             } catch (\Illuminate\Database\QueryException $e) {
                 Core::Set_Alert('danger', $e->getMessage());
                 return back();
@@ -75,7 +78,10 @@ class OfficeController extends Controller
         } else {
             # Update rssys.m08
             try {
-                $data = ['cc_desc' => $r->txt_name];
+                $data = [
+                    'cc_code'   => strtoupper($r->txt_code),
+                    'cc_desc'   => $r->txt_name
+                ];
                 DB::table(Office::$tbl_name)->where('cc_id', $r->txt_id)->update($data);
                 Core::Set_Alert('success', 'Successfully modified a Office.');
 
@@ -109,7 +115,7 @@ class OfficeController extends Controller
             if (DB::table('hr_hazardpay')->where('cc_id', $r->txt_id)->first() != null) {
                 DB::table('hr_hazardpay')->where('cc_id', $r->txt_id)->update($data);
             }
-            if (DB::table(Office::$tbl_name)->where(Office::$pk, $r->txt_code)->update($data)) {
+            if (DB::table(Office::$tbl_name)->where(Office::$id, $r->txt_id)->update($data)) {
                 Core::Set_Alert('success', 'Successfully remove a Office.');
             } else {
                 Core::Set_Alert('danger', 'Unable to delete office.');
@@ -123,7 +129,8 @@ class OfficeController extends Controller
     }
     public function ifExists(Request $r)
     {
-        if (DB::table(Office::$tbl_name)->where(Office::$id, '!=', $r->txt_id)->where(Office::$pk, '=', $r->txt_code)->first()) {
+        $code = strtoupper($r->txt_code);
+        if (DB::table(Office::$tbl_name)->where(Office::$id, '!=', $r->txt_id)->where(Office::$pk, '=', $code)->first()) {
             return true;
         }
         return false;
