@@ -13,12 +13,13 @@ class HDMFController extends Controller
 {
 	public function __construct()
 	{
-		$SQLHDMF = "SELECT * from hris.hr_hdmf WHERE COALESCE(cancel,cancel,'')<>'Y'";
-		$this->hdmf = DB::select($SQLHDMF);
+		
 	}
 	public function view()
 	{
-		// return dd($this->HDMF);
+		$SQLHDMF = "SELECT * from hris.hr_hdmf WHERE COALESCE(cancel,cancel,'')<>'Y'";
+		$this->hdmf = DB::select($SQLHDMF);
+		
 		return view('pages.mfile.hdmf', ['hdmf' => $this->hdmf]);
 	}
 	public function add(Request $r)
