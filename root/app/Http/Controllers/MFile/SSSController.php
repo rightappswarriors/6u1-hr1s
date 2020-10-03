@@ -12,17 +12,17 @@ class SSSController extends Controller
 {
 	public function __construct()
 	{
-		$SQLSSS = "SELECT * from hris.hr_sss WHERE COALESCE(cancel,cancel,'')<>'Y'";
-		$this->sss = DB::select($SQLSSS);
+		
 	}
 	public function view()
 	{
-		// return dd($this->sss);
+		$SQLSSS = "SELECT * from hris.hr_sss WHERE COALESCE(cancel,cancel,'')<>'Y'";
+		$this->sss = DB::select($SQLSSS);
+
 		return view('pages.mfile.sss', ['sss' => $this->sss]);
 	}
 	public function add(Request $r)
 	{
-		// return dd($r->all());
 		$data  = [
 					'code' => $r->txt_code,
 					'bracket1' => $r->txt_br_1,
@@ -31,7 +31,6 @@ class SSSController extends Controller
 					'empshare_sc' => $r->txt_emp_sh,
 					's_ec' => $r->txt_ec,
 					'empshare_ec' => $r->txt_eme_sh
-
 				];
 		try {
 

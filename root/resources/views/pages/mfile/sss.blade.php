@@ -263,7 +263,7 @@
 								<div class="col">
 									<div class="form-group">
 										<label>Code: <strong style="color:red">*</strong></label>
-										<input type="text" maxlength="8" name="txt_code" style="text-transform: uppercase;" class="form-control RX" placeholder="XXXX" required>
+										<input type="text" maxlength="8" name="txt_code" style="text-transform: uppercase;" class="form-control RX" placeholder="XXXX" onkeyup="this.value = this.value.toUpperCase()" required>
 									</div>
 								</div>
 							</div>
