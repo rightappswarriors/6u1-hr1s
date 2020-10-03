@@ -77,7 +77,7 @@
 								<div class="col"> <!-- Column 1 -->
 									<div class="form-group">
 										<label>Office ID:</label>
-										<input type="text" name="txt_code" style="text-transform: uppercase;" class="form-control" maxlength="8" placeholder="XXX" required>
+										<input type="text" name="txt_code" style="text-transform: uppercase;" class="form-control" maxlength="8" placeholder="XXX" onkeyup="toUpperCase(this)" required>
 										<input type="hidden" name="txt_id">
 									</div>
 									<div class="form-group">
@@ -142,6 +142,10 @@
 			$('.DeleteMode').hide();
 			$('#modal-pp').modal('show');
 		});
+
+		function toUpperCase(e) {
+			e.value = e.value.toUpperCase();
+		}
 
 		function row_update(obj) {
 			var selected_row = $($(obj).parents()[1]);

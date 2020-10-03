@@ -37,7 +37,7 @@ class OfficeController extends Controller
                 # Save to rssys.m08
                 $table = Office::$tbl_name;
                 $values = [
-                    strtoupper($r->txt_code),
+                    $r->txt_code,
                     $r->txt_name
                 ];
 
@@ -79,7 +79,7 @@ class OfficeController extends Controller
             # Update rssys.m08
             try {
                 $data = [
-                    'cc_code'   => strtoupper($r->txt_code),
+                    'cc_code'   => $r->txt_code,
                     'cc_desc'   => $r->txt_name
                 ];
                 DB::table(Office::$tbl_name)->where('cc_id', $r->txt_id)->update($data);
@@ -129,8 +129,7 @@ class OfficeController extends Controller
     }
     public function ifExists(Request $r)
     {
-        $code = strtoupper($r->txt_code);
-        if (DB::table(Office::$tbl_name)->where(Office::$id, '!=', $r->txt_id)->where(Office::$pk, '=', $code)->first()) {
+        if (DB::table(Office::$tbl_name)->where(Office::$id, '!=', $r->txt_id)->where(Office::$pk, '=', $r->txt_code)->first()) {
             return true;
         }
         return false;
