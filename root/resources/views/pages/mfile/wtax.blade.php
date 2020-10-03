@@ -87,7 +87,7 @@
 								<div class="col-sm-3">
 									<div class="form-group">
 										<label>Code: <strong style="color:red">*</strong></label>
-										<input type="text" name="txt_code" style="text-transform: uppercase;" class="form-control RX" placeholder="XXXX" required>
+										<input type="text" name="txt_code" style="text-transform: uppercase;" class="form-control RX" placeholder="XXXX" onkeyup="this.value = this.value.toUpperCase()" required>
 									</div>
 								</div>
 								<div class="col-sm-3">
@@ -99,7 +99,7 @@
 								<div class="col-sm-6">
 									<div class="form-group">
 										<label>Description: <strong style="color:red">*</strong></label>
-										<input type="text" name="txt_desc" style="text-transform: uppercase;" class="form-control RX" placeholder="Description" required>
+										<input type="text" name="txt_desc" class="form-control RX" placeholder="Description" required>
 									</div>
 								</div>
 							</div>
