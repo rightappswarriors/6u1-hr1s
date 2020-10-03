@@ -12,17 +12,17 @@ class PhilhealthController extends Controller
 {
 	public function __construct()
 	{
-		$SQLPhilhealth = "SELECT * from hris.hr_Philhealth WHERE COALESCE(cancel,cancel,'')<>'Y'";
-		$this->Philhealth = DB::select($SQLPhilhealth);
+		
 	}
 	public function view()
 	{
-		// return dd($this->Philhealth);
+		$SQLPhilhealth = "SELECT * from hris.hr_philhealth WHERE COALESCE(cancel,cancel,'')<>'Y'";
+		$this->Philhealth = DB::select($SQLPhilhealth);
+
 		return view('pages.mfile.philhealth', ['philhealth' => $this->Philhealth]);
 	}
 	public function add(Request $r)
 	{
-		// return dd($r->all());
 		$data  = [
 					'code' => $r->txt_code,
 					'bracket1' => $r->txt_br_1,
