@@ -19,12 +19,11 @@ class HDMFController extends Controller
 	{
 		$SQLHDMF = "SELECT * from hris.hr_hdmf WHERE COALESCE(cancel,cancel,'')<>'Y'";
 		$this->hdmf = DB::select($SQLHDMF);
-		
+
 		return view('pages.mfile.hdmf', ['hdmf' => $this->hdmf]);
 	}
 	public function add(Request $r)
 	{
-		// return dd($r->all());
 		$data  = [
 					'code' => $r->txt_code,
 					'bracket1' => $r->txt_br_1,
@@ -100,6 +99,7 @@ class HDMFController extends Controller
 			Core::Set_Alert('success', 'Successfully added a Pag-ibig Loan Type.');
     		return "Okay";
 		} catch (\Illuminate\Database\QueryException $e) {
+			dd($e);
     		Core::Set_Alert('danger', $e->getMessage());
     		return "Error";
     	}
