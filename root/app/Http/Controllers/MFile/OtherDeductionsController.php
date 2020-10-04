@@ -12,12 +12,13 @@ class OtherDeductionsController extends Controller
 {
 	public function __construct()
     {
-        $SQLOtherEarnings = "SELECT * from hris.hr_other_deductions WHERE COALESCE(cancel,cancel,'')<>'Y'";
-        $this->otherearnings = DB::select($SQLOtherEarnings);
+        
     }
     public function view()
     {
-    	// return dd($this->depart);
+    	$SQLOtherEarnings = "SELECT * from hris.hr_other_deductions WHERE COALESCE(cancel,cancel,'')<>'Y'";
+        $this->otherearnings = DB::select($SQLOtherEarnings);
+        
     	return view('pages.mfile.otherdeductions', ['otherearnings' => $this->otherearnings]);
     }
 
