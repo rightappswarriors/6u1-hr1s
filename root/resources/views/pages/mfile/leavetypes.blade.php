@@ -90,15 +90,15 @@
 								<div class="col"> <!-- Column 1 -->
 									<div class="form-group">
 										<label>Code:</label>
-										<input type="text" name="txt_code" style="text-transform: uppercase;" class="form-control" maxlength="8" placeholder="XXX" required>
+										<input type="text" name="txt_code" style="text-transform: uppercase;" class="form-control" maxlength="8" placeholder="XXX" onkeyup="this.value = this.value.toUpperCase()" required>
 									</div>
 									<div class="form-group">
 										<label>Name:</label>
-										<input type="text" name="txt_name" style="text-transform: uppercase;" class="form-control" placeholder="DESCRIPTION" required>
+										<input type="text" name="txt_name" class="form-control" placeholder="Description" required>
 									</div>
 									<div class="form-group">
 										<label>Leave Limit:</label>
-										<input step="any" type="number" name="txt_limit" step="0.01" style="text-transform: uppercase;" class="form-control" placeholder="LEAVE LIMIT" required>
+										<input step="any" type="number" name="txt_limit" step="0.01" class="form-control" placeholder="Leave Limit" required>
 									</div>
 									<div class="form-group">
 										<label>Carry Over:</label>
@@ -112,7 +112,7 @@
 										<label>Incremental Per Month?</label>
 										<select name="increment" class="form-control" required="">
 											<option value="Yes">Yes</option>
-											<option value="No" selected="">No</option>
+											<option value="No" selected="selected">No</option>
 										</select>
 									</div>
 								</div>
@@ -169,7 +169,7 @@
 			$('input[name="txt_name"]').val('');
 			$('input[name="txt_limit"]').val('');
 			$('select[name="txt_carry_over"]').val('').trigger('change');
-			$('[name=increment]').val('').trigger('change');
+			$('[name=increment]').val('No').trigger('change');
 
 			$('.AddMode').show();
 			$('.DeleteMode').hide();
@@ -186,7 +186,7 @@
 			$('input[name="txt_name"]').val(selected_row.attr('data_name'));
 			$('input[name="txt_limit"]').val(selected_row.attr('data_le_lmt'));
 			$('select[name="txt_carry_over"]').val(selected_row.attr('data_carry_over')).trigger('change');
-			$('[name=increment]').val('').val(selected_row.attr('data_increment')).trigger('change');
+			$('[name=increment]').val(selected_row.attr('data_increment')).trigger('change');
 
 			$('.AddMode').show();
 			$('.DeleteMode').hide();

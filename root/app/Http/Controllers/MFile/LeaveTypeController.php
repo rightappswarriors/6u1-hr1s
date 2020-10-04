@@ -12,24 +12,30 @@ class LeaveTypeController extends Controller
 {
 	public function __construct()
     {
-        $SQLOtherEarnings = "SELECT * from hris.hr_leave_type WHERE COALESCE(cancel,cancel,'')<>'Y'";
-        $this->otherearnings = DB::select($SQLOtherEarnings);
+        
     }
     public function view()
     {
-    	// return dd($this->depart);
+    	$SQLOtherEarnings = "SELECT * from hris.hr_leave_type WHERE COALESCE(cancel,cancel,'')<>'Y'";
+        $this->otherearnings = DB::select($SQLOtherEarnings);
+
     	return view('pages.mfile.leavetypes', ['otherearnings' => $this->otherearnings]);
     }
     public function add(Request $r)
     {
-        // return dd($r->all());
-    	$data = ['code'=>strtoupper($r->txt_code) , 'description' => strtoupper($r->txt_name), 'leave_limit' => $r->txt_limit, 'carry_over' => $r->txt_carry_over, 'incremental' => $r->increment];
-    	try {
+    	$data = [
+            'code'          => $r->txt_code,
+            'description'   => $r->txt_name,
+            'leave_limit'   => $r->txt_limit,
+            'carry_over'    => $r->txt_carry_over,
+            'incremental'   => $r->increment
+        ];
 
+    	try {
     		DB::table(LeaveType::$tbl_name)->insert($data);
     		Core::Set_Alert('success', 'Successfully added new Leave Types.');
-    		return back();
 
+    		return back();
     	} catch (\Illuminate\Database\QueryException $e) {
     		Core::Set_Alert('danger', $e->getMessage());
     		return back();
@@ -37,13 +43,18 @@ class LeaveTypeController extends Controller
     }
     public function update(Request $r)
     {
-    	$data = ['description' => strtoupper($r->txt_name), 'leave_limit' => $r->txt_limit, 'carry_over' => $r->txt_carry_over, 'incremental' => $r->increment];
+    	$data = [
+            'description'   => $r->txt_name,
+            'leave_limit'   => $r->txt_limit,
+            'carry_over'    => $r->txt_carry_over,
+            'incremental'   => $r->increment
+        ];
+
     	try {
-
-    		DB::table(LeaveType::$tbl_name)->where(LeaveType::$pk, strtoupper($r->txt_code))->update($data);
+    		DB::table(LeaveType::$tbl_name)->where(LeaveType::$pk, $r->txt_code)->update($data);
     		Core::Set_Alert('success', 'Successfully modified an Leave Types.');
-    		return back();
 
+    		return back();
     	} catch (\Illuminate\Database\QueryException $e) {
     		Core::Set_Alert('danger', $e->getMessage());
     		return back();
@@ -53,11 +64,10 @@ class LeaveTypeController extends Controller
     {
     	$data = ['cancel' => 'Y'];
         try {
-
             DB::table(LeaveType::$tbl_name)->where(LeaveType::$pk, $r->txt_code)->update($data);
             Core::Set_Alert('success', 'Successfully modified an Leave Types.');
-            return back();
 
+            return back();
         } catch (\Illuminate\Database\QueryException $e) {
             Core::Set_Alert('danger', $e->getMessage());
             return back();
