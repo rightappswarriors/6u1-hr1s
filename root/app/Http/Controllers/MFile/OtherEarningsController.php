@@ -12,12 +12,13 @@ class OtherEarningsController extends Controller
 {
 	public function __construct()
     {
-        $SQLOtherEarnings = "SELECT * from hr_other_earnings WHERE COALESCE(cancel,cancel,'')<>'Y'";
-        $this->otherearnings = DB::select($SQLOtherEarnings);
+        
     }
     public function view()
     {
-    	// return dd($this->depart);
+        $SQLOtherEarnings = "SELECT * from hris.hr_other_earnings WHERE COALESCE(cancel,cancel,'')<>'Y'";
+        $this->otherearnings = DB::select($SQLOtherEarnings);
+
     	return view('pages.mfile.otherearnings', ['otherearnings' => $this->otherearnings]);
     }
 
@@ -29,7 +30,6 @@ class OtherEarningsController extends Controller
     */
     public function add(Request $r) 
     {
-        // return dd($r->all());
     	$data = ['code'=>$r->txt_code , 'description' => $r->txt_name];
     	try {
 
