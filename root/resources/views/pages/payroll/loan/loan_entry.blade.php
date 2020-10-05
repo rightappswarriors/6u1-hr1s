@@ -545,17 +545,19 @@
 
 	<script>
 		function fillEmployeeSelect(data) {
-			for (var i = 0; i < data.length; i++) {
-				var firstname = data[i].firstname;
-				var lastname = data[i].lastname;
-				var mi = data[i].mi;
-				var name = firstname + " " + mi + " " + lastname;
-				var option = {
-					text: name,
-					value: data[i].empid,
-				};
+			if (data.length > 0) {
+				for (var i = 0; i < data.length; i++) {
+					var firstname = data[i].firstname;
+					var lastname = data[i].lastname;
+					var mi = data[i].mi;
+					var name = firstname + " " + mi + " " + lastname;
+					var option = {
+						text: name,
+						value: data[i].empid,
+					};
 
-				Util.appendOption($employeeSelect, option);
+					Util.appendOption($employeeSelect, option);
+				}
 			}
 		}
 
@@ -568,8 +570,6 @@
 				disabled: '',
 				selected: ''
 			};
-
-			console.log("employees", employees);
 
 			// clear employee select
 			Util.initSelect($employeeSelect, option);
@@ -584,21 +584,19 @@
 				url: '{{url('timekeeping/timelog-entry/find-emp-office')}}',
 				data: {ofc_id: officeId},
 				success: function(data) {
-					if (data.length > 0) {
-						var prevSelectedEmployee = $employeeSelect.val();
+					var prevSelectedEmployee = $employeeSelect.val();
 
-						// clear employee select
-						Util.initSelect($employeeSelect, option);
+					// clear employee select
+					Util.initSelect($employeeSelect, option);
 
-						// update/store employees
-						LocalStorage.setEmployees(officeId, data);
+					// update/store employees
+					LocalStorage.setEmployees(officeId, data);
 
-						// repopulate employee select
-						fillEmployeeSelect(data);
+					// repopulate employee select
+					fillEmployeeSelect(data);
 
-						// reselect previous selected employee
-						$employeeSelect.val(prevSelectedEmployee);
-					}
+					// reselect previous selected employee
+					$employeeSelect.val(prevSelectedEmployee);
 				},
 			});
 		});

@@ -399,31 +399,18 @@
 @endsection
 
 @section('to-bottom')
+	<script type="text/javascript" src="/root/resources/assets/js/utils.js"></script>
 	<script type="text/javascript">
 		$( "#tito_dateStrt").datepicker(date_option);
 		$( "#tito_dateEnd").datepicker(date_option);
 		$( "#date_workdate").datepicker(date_option);
 		$( "#date_workdate2, #date_workdate3, #date_workdate4, #date_workdate5").datepicker(date_option);
 
-		const OFFICE_EMPLOYEES = "OFFICE_EMPLOYEES";
-
 		// add  $ prefix on jquery selector to differentiate from other variables
 		var $filterLoader = $("#loader-conainter");
 		var $filterSubmit = $("#filters-submit");
 		var $filterSelectEmployee = $("#tito_emp");
 		var $office = $("#office");
-
-		// will hold the fetched employees for faster display of previously loaded data
-		var data = getLocalStorageItem(OFFICE_EMPLOYEES);
-		var officeEmployees = data === null ? {} : data;
-
-		function getLocalStorageItem (key) {
-			return JSON.parse(window.localStorage.getItem(key));
-		}
-
-		function setLocalStorageItem(key, value) {
-			window.localStorage.setItem(key, JSON.stringify(value));
-		}
 	</script>
 	<script type="text/javascript">
 		function formatAMPM2(time) {
@@ -461,26 +448,14 @@
 					var lastname = data[i].lastname;
 					var mi = data[i].mi;
 					var name = firstname + " " + mi + " " + lastname;
+					var option = {
+						text: name,
+						value: data[i].empid,
+					};
 
-					option.setAttribute('value', data[i].empid);
-					option.innerText=name;
-
-					$filterSelectEmployee[0].appendChild(option);
+					Util.appendOption($filterSelectEmployee, option);
 				}
 			}
-		}
-
-		function initFilterSelectEmployee() {
-			// removes all select options
-			$filterSelectEmployee.html("");
-
-			var hiddenChild = document.createElement('option');
-			hiddenChild.setAttribute('selected', '');
-			hiddenChild.setAttribute('disabled', '');
-			hiddenChild.setAttribute('value', '');
-			hiddenChild.innerText='Please select an employee';
-
-			$filterSelectEmployee[0].appendChild(hiddenChild);
 		}
 
 		var table = $('#dataTable').DataTable();
@@ -497,13 +472,19 @@
 
 		$office.on('change', function() {
 			var officeId = $office.val();
-			var employees = officeEmployees[officeId];
+			var employees = LocalStorage.getEmployees(officeId);
+			var option = {
+				text: 'Please select an employee',
+				value: '',
+				disabled: '',
+				selected: ''
+			};
 
 			showFilterLoader(true);
-			initFilterSelectEmployee();
+			Util.initSelect($filterSelectEmployee, option); // clear employee select
 
 			// loads previously stored data for faster experience then do the query on background to update the stored data
-			if (employees !== undefined && employees.length > 0) {
+			if (employees.length > 0) {
 				fillSelectEmployeeOptions(employees);
 				showFilterLoader(false);
 			}
@@ -516,11 +497,10 @@
 					var prevSelectedEmployee = $filterSelectEmployee.val();
 
 					showFilterLoader(false);
-					initFilterSelectEmployee();
+					Util.initSelect($filterSelectEmployee, option);
 
-					// store data for later use
-					officeEmployees[officeId] = data;
-					setLocalStorageItem(OFFICE_EMPLOYEES, officeEmployees);
+					// update/store employees
+					LocalStorage.setEmployees(officeId, data);
 
 					fillSelectEmployeeOptions(data);
 					$filterSelectEmployee.val(prevSelectedEmployee); // selects the previously selected option
