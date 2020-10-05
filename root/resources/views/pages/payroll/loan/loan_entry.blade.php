@@ -28,10 +28,10 @@
 											<div class="col">
 												<select class="form-control w-100" name="office" id="office" required>
 													<option disabled selected value="">Please select an office</option>
-													@if(!empty($data[2]))
-													@foreach($data[2] as $off)
-													<option value="{{$off->cc_id}}">{{$off->cc_desc}}</option>
-													@endforeach
+													@if(!empty($data['offices']))
+														@foreach($data['offices'] as $office)
+															<option value="{{$office->cc_id}}">{{$office->cc_desc}}</option>
+														@endforeach		
 													@endif
 												</select>
 											</div>
@@ -45,11 +45,11 @@
 											<div class="col">
 												<select class="form-control" name="tito_emp" id="tito_emp" required>
 													<option disabled selected value="">---</option>
-													{{-- @if(!empty($data[1]))
+													<!-- {{-- @if(!empty($data[1]))
 													@foreach($data[1] as $emp)
 													<option value="{{$emp->empid}}">{{$emp->firstname." ".$emp->lastname}}</option>
 													@endforeach
-													@endif --}}
+													@endif --}} -->
 												</select>
 											</div>
 										</div>
@@ -83,24 +83,24 @@
 											<div class="col">
 												<input type="text" name="tito_id" id="tito_id" class="form-control float-right ml-2" placeholder="Search by ID">
 											</div>
-											{{-- <i class="fa fa-spinner fa-spin fa-2x hidden" id="frm-spinner"></i> --}}
+											<!-- {{-- <i class="fa fa-spinner fa-spin fa-2x hidden" id="frm-spinner"></i> --}} -->
 										</div>
 										<div class="row">
 											<div class="col-4">
 												<button type="button" class="btn btn-primary" id="opt-submit">Go</button>
 											</div>
 											<div class="col">
-												{{-- <button type="button" class="btn btn-success" id="opt-add"><i class="fa fa-plus"></i></button>
+												<!-- {{-- <button type="button" class="btn btn-success" id="opt-add"><i class="fa fa-plus"></i></button>
 												<button type="button" class="btn btn-primary" id="opt-update"><i class="fa fa-edit"></i></button>
 												<button type="button" class="btn btn-danger" id="opt-delete"><i class="fa fa-trash"></i></button>
 												<button type="button" class="btn btn-warning" id="opt-money"><i class="fa fa-money"></i></button>
-												<button type="button" class="btn btn-info" id="opt-print"><i class="fa fa-print"></i></button> --}}
+												<button type="button" class="btn btn-info" id="opt-print"><i class="fa fa-print"></i></button> --}} -->
 											</div>
 										</div>
 									</div>
 								</div>
 
-								{{-- <div class="form-inline">
+								<!-- {{-- <div class="form-inline">
 									<div class="form-group mr-2">
 										<label>Employee:</label>
 										<select class="form-control" name="tito_emp" id="tito_emp" required>
@@ -119,10 +119,10 @@
 									<div class="form-group mr-2">
 										<label>To:</label>
 										<input type="text" name="date_to" id="date_to" class="form-control" value="{{date('Y-m-d')}}" required>
-									</div> --}}
-									{{-- <i class="fa fa-spinner fa-spin fa-2x hidden" id="frm-spinner"></i> --}}
-									{{-- <button type="submit" class="btn btn-primary mr-2">Go</button> --}}
-									{{-- <button type="button" class="btn btn-primary" id="btn-print" data="#" onclick="PrintPage(this.getAttribute('data'))"><i class="fa fa-print"></i></button> --}}
+									</div> --}} -->
+									<!-- {{-- <i class="fa fa-spinner fa-spin fa-2x hidden" id="frm-spinner"></i> --}} -->
+									<!-- {{-- <button type="submit" class="btn btn-primary mr-2">Go</button> --}} -->
+									<!-- {{-- <button type="button" class="btn btn-primary" id="btn-print" data="#" onclick="PrintPage(this.getAttribute('data'))"><i class="fa fa-print"></i></button> --}} -->
 								</div>
 							</form>
 						</div>
@@ -165,7 +165,7 @@
 										</tr>
 									</thead>
 									<tbody>
-										{{-- @isset($data)
+										<!-- {{-- @isset($data)
 											@if(count($data[0]) > 0)
 												@foreach($data[0] as $key => $value)
 													<tr loan_code="{{$value->loan_code}}" 
@@ -192,7 +192,7 @@
 													</tr>
 												@endforeach
 											@endif
-										@endisset --}}
+										@endisset --}} -->
 									</tbody>
 								</table>
 							</div>
@@ -392,7 +392,12 @@
 @endsection
 
 @section('to-bottom')
-	<script>
+	<script type="text/javascript" src="/root/resources/assets/js/utils.js"></script>
+	<script type="text/javascript">
+		// variable declaration
+		var $officeSelect = $('#office');
+		var $employeeSelect = $('#tito_emp');
+
 		$('select[name="cbo_contraacct"]').on('change', function() {
 			// let div = $('#pagibig_sub');
 			// if($(this).val() == "pagibig") {
@@ -462,7 +467,7 @@
 			}
 		});
 
-		$('#tito_emp').on('input', function() {
+		$employeeSelect.on('input', function() {
 			$('#tito_id').val('');
 		});
 
@@ -525,7 +530,7 @@
 			$('input[name="txt_deduction"]').val( Math.round( $('input[name="txt_amnt_loan"]').val() / $('input[name="txt_mo_tbp"]').val() * 100 ) / 100);
 		});
 
-		$('#tito_emp').on('change', function() {
+		$employeeSelect.on('change', function() {
 			$('input[name="empid"]').val($(this).val());
 		});
 
@@ -539,34 +544,60 @@
 	</script>
 
 	<script>
-		$('#office').on('change', function() {
+		function fillEmployeeSelect(data) {
+			for (var i = 0; i < data.length; i++) {
+				var firstname = data[i].firstname;
+				var lastname = data[i].lastname;
+				var mi = data[i].mi;
+				var name = firstname + " " + mi + " " + lastname;
+				var option = {
+					text: name,
+					value: data[i].empid,
+				};
 
-			while($('#tito_emp')[0].firstChild) {
-				$('#tito_emp')[0].removeChild($('#tito_emp')[0].firstChild);
+				Util.appendOption($employeeSelect, option);
 			}
+		}
 
-			var hiddenChild = document.createElement('option');
-				hiddenChild.setAttribute('selected', '');
-				hiddenChild.setAttribute('disabled', '');
-				hiddenChild.setAttribute('value', '');
-				hiddenChild.innerText='---';
+		$officeSelect.on('change', function() {
+			var officeId = $(this).val();
+			var employees = LocalStorage.getEmployees(officeId);
+			var option = {
+				text: '---',
+				value: '',
+				disabled: '',
+				selected: ''
+			};
 
-			$('#tito_emp')[0].appendChild(hiddenChild);
+			console.log("employees", employees);
+
+			// clear employee select
+			Util.initSelect($employeeSelect, option);
+
+			// has employees saved on local storage
+			if (employees.length > 0) {
+				fillEmployeeSelect(employees);
+			}
 
 			$.ajax({
 				type: 'post',
 				url: '{{url('timekeeping/timelog-entry/find-emp-office')}}',
-				data: {ofc_id: $(this).val()},
+				data: {ofc_id: officeId},
 				success: function(data) {
-					// console.log(typeof(data));
-					if(data.length > 0) {
-						for(i=0; i<data.length; i++) {
-							var option = document.createElement('option');
-								option.setAttribute('value', data[i].empid);
-								option.innerText=data[i].name;
+					if (data.length > 0) {
+						var prevSelectedEmployee = $employeeSelect.val();
 
-							$('#tito_emp')[0].appendChild(option);
-						}
+						// clear employee select
+						Util.initSelect($employeeSelect, option);
+
+						// update/store employees
+						LocalStorage.setEmployees(officeId, data);
+
+						// repopulate employee select
+						fillEmployeeSelect(data);
+
+						// reselect previous selected employee
+						$employeeSelect.val(prevSelectedEmployee);
 					}
 				},
 			});

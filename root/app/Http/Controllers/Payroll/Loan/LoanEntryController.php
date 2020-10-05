@@ -37,13 +37,14 @@ class LoanEntryController extends Controller
 
     public function __construct()
     {
-    	$this->ghistory = DB::table('hr_loanhdr')->where('cancel', '=', null)->orderBy('loan_transdate', 'DESC')/*->orderBy('time_generated', 'DESC')*/->get();
-        $this->employees = Employee::Load_Employees();
+    	
     }
 
     public function view()
     {
-    	$data = [$this->ghistory, $this->employees, Office::get_all()];
+
+    	$data = ['offices'  => Office::get_all()];
+
     	return view('pages.payroll.loan.loan_entry', compact('data'));
     }
 
