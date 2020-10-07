@@ -86,15 +86,18 @@
 											<!-- {{-- <i class="fa fa-spinner fa-spin fa-2x hidden" id="frm-spinner"></i> --}} -->
 										</div>
 										<div class="row">
-											<div class="col-4">
+											<div class="col-2">
 												<button type="button" class="btn btn-primary" id="opt-submit">Go</button>
 											</div>
-											<div class="col">
+											<!-- <div class="col"> -->
 												<!-- {{-- <button type="button" class="btn btn-success" id="opt-add"><i class="fa fa-plus"></i></button>
 												<button type="button" class="btn btn-primary" id="opt-update"><i class="fa fa-edit"></i></button>
 												<button type="button" class="btn btn-danger" id="opt-delete"><i class="fa fa-trash"></i></button>
 												<button type="button" class="btn btn-warning" id="opt-money"><i class="fa fa-money"></i></button>
 												<button type="button" class="btn btn-info" id="opt-print"><i class="fa fa-print"></i></button> --}} -->
+											<!-- </div> -->
+											<div class="col-1" id="loader-conainter">
+												<div class="loader-circle"></div>
 											</div>
 										</div>
 									</div>
@@ -397,6 +400,9 @@
 		// variable declaration
 		var $officeSelect = $('#office');
 		var $employeeSelect = $('#tito_emp');
+		var $loader = $("#loader-conainter");
+
+		$loader.hide();
 
 		$('select[name="cbo_contraacct"]').on('change', function() {
 			// let div = $('#pagibig_sub');
@@ -476,6 +482,8 @@
 
 			// min length to do a query 3
 			if (id.length > 2) {
+				$loader.show();
+
 				$.ajax({
 					type : 'post',
 					url : '{{url('payroll/loan-entry/find-id')}}',
@@ -496,8 +504,12 @@
 						} else {
 							
 						}
+
+						$loader.hide();
 					},
 				});
+			} else {
+				table.clear().draw();
 			}
 		});
 
@@ -618,7 +630,10 @@
 		{
 			e.preventDefault();
 			var frm = $('#frm-loaddtr');
+
 			$('#frm-spinner').show();
+			$loader.show();
+
 			$.ajax({
 				type : frm.attr('method'),
 				url : frm.attr('action'),
@@ -640,7 +655,9 @@
 					} else {
 						alert('Error on loading data.');
 					}
+					
 					$('#frm-spinner').hide();
+					$loader.hide();
 				}
 			});
 		}
