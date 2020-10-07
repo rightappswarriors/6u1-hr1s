@@ -241,9 +241,9 @@
 										<span id="cbo_select">
 											<select name="cbo_employee" id="cbo_employee_select" style="text-transform: uppercase;" class="form-control" >
 												<option disabled hidden selected value="">---</option>
-												@foreach(Employee::Load_Employees() as $key => $value)
+												<!-- @foreach(Employee::Load_Employees() as $key => $value)
 													<option value="{{$value->empid}}">{{$value->lastname}}, {{$value->firstname}} {{$value->mi}}</option>
-												@endforeach
+												@endforeach -->
 											</select>
 										</span>
 									</div>
@@ -606,8 +606,8 @@
 		function ValidateSearchFrm()
 		{
 			if ($('#date_from').val() != "" && $('#date_from') != null && $('#date_to').val() != "" && $('#date_to') != null) {
-				if ($('#tito_emp').val() != null) {
-					if ($('#tito_emp').val() != "") {
+				if ($employeeSelect.val() != null) {
+					if ($employeeSelect.val() != "") {
 						return true;
 					} else {
 						return false;
@@ -763,15 +763,29 @@
 			// $('.DeleteMode').hide();
 			// $('#modal-pp').modal('show');
 			if (ValidateSearchFrm()) {
+				var $modalEmployeeSelect = $('#cbo_employee_select');
+				var $modalEmployeeTxt = $('#cbo_employee_txt');
+				var selectedEmployeeName = $("#tito_emp option:selected").text();
+
+				var option = {
+					text: selectedEmployeeName,
+					value: $employeeSelect.val(),
+					selected: ''
+				};
+
 				ClearFld();
+				$modalEmployeeSelect.html("");
+
 				$('#exampleModalLabel').text("New Loan Entry");
 				$('#frm-pp').attr('action', '{{url('payroll/loan-entry')}}');
-				$('#cbo_employee_txt').val($('#tito_emp option:selected').text());
-				$('#cbo_employee').val($('#tito_emp').val());
+
+				$modalEmployeeTxt.val(selectedEmployeeName);
+				Util.appendOption($modalEmployeeSelect, option);
+				// $('#cbo_employee').val($employeeSelect.val());
 				// $('#dtp_filed, #dtp_lfrm, #dtp_lto').val('{{date('m/d/Y')}}');
-				$("#cbo_employee_txt").hide();
-				$("#cbo_employee_select").show();
-				$("#cbo_employee_select").val($("#tito_emp").val()).trigger('change');
+				$modalEmployeeTxt.show();
+				$modalEmployeeSelect.parent().hide();
+				// $("#cbo_employee_select").val($("#tito_emp").val()).trigger('change');
 				OpenModal('.AddMode');
 			}
 		});
@@ -894,7 +908,7 @@
 					$('#exampleModalLabel').text("Edit Loan Entry");
 					$('#frm-pp').attr('action', '#');
 					$('#cbo_employee_txt').val($('#tito_emp option:selected').text());
-					$('#cbo_employee').val($('#tito_emp').val());
+					$('#cbo_employee').val($employeeSelect.val());
 					OpenModal('.EditMode');
 				} else {
 					NoSelectedRow();
