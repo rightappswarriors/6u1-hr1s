@@ -14,14 +14,15 @@ class NotificationController extends Controller
 {
 	public function __construct()
     {
-        $this->notif = Notification_N::Load_Notifications();
-        $this->x07 = X07::Load_X07();
-        $this->x08 = X08::Load_X08();
+        
     }
 
 	public function view()
     {
-        // dd(date('Y-m-d H:i:s'));
+        $this->notif = Notification_N::Load_Notifications();
+        $this->x07 = X07::Load_X07();
+        // $this->x08 = X08::Load_X08();
+
  		$x07 = $this->x07;
  		$notif = $this->notif;
 
