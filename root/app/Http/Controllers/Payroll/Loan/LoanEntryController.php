@@ -37,7 +37,46 @@ class LoanEntryController extends Controller
 
     public function __construct()
     {
-    	
+    	$this->loanEntryQuery = "SELECT 
+                                loan.loan_code,
+                                loan.loan_desc,
+                                loan.loan_type,
+                                loan.loan_amount,
+                                loan.loan_deduction,
+                                loan.months_to_be_paid,
+                                (case 
+                                 when loan.period_to_pay = '30' then 
+                                    '30th day' 
+                                 else 
+                                    '15th day' 
+                                 end) as period_readable,
+                                (to_char(loan.deduction_date :: date, 'Mon dd, yyyy')) as deduction_date,
+                                (to_char(loan.loan_transdate :: date, 'Mon dd, yyyy')) as loan_transdate,
+                                (emp.lastname||', '||emp.firstname||' '||emp.mi) as emp_name,
+                                emp.department as deptid,
+
+                                -- loan type
+                                (coalesce((select lt.description 
+                                            from hris.hr_loan_type lt
+                                            where lt.code = loan.loan_type), 
+
+                                            -- when the result of above select is empty
+                                          (case
+                                           when loan.loan_type = 'pagibig' then 
+                                                (select pb.description 
+                                                 from hris.hr_pagibig_sub pb 
+                                                 where pb.id::integer = loan.loan_sub_type::integer)
+                                           when  loan.loan_type = 'gsis' then
+                                                (select s.description
+                                                 from hris.hr_sss_sub s 
+                                                 where s.id::integer = loan.loan_sub_type::integer)
+                                           else 
+                                                'Loan type not found'
+                                           end))
+                                ) as type_readable 
+                                from hris.hr_loanhdr loan 
+                                left join hris.hr_employee emp 
+                                    on emp.empid = loan.employee_no "; // space at the end is intentional
     }
 
     public function view()
@@ -122,16 +161,16 @@ class LoanEntryController extends Controller
     public function find(Request $r)
     {
         try {
-            $sql = Core::sql("SELECT * FROM hris.hr_loanhdr WHERE hr_loanhdr.employee_no = '".$r->tito_emp."' AND hr_loanhdr.loan_transdate >='".$r->date_from."' AND hr_loanhdr.loan_transdate <= '".$r->date_to."' AND hr_loanhdr.cancel IS NULL ORDER BY hr_loanhdr.loan_transdate DESC");
-            if ($sql!=null) {
-                for($i=0;$i<count($sql);$i++) {
-                    $sql[$i]->type_readable = LoanType::Get_LoanType($sql[$i]->loan_type, $sql[$i]->loan_sub_type);
-                    $sql[$i]->loan_transdate = \Carbon\Carbon::parse($sql[$i]->loan_transdate)->format('M d, Y');
-                    $sql[$i]->emp_name = Employee::GetEmployee($sql[$i]->employee_no)->lastname.', '.Employee::GetEmployee($sql[$i]->employee_no)->firstname.' '.Employee::GetEmployee($sql[$i]->employee_no)->mi;
-                    $sql[$i]->deduction_date = \Carbon\Carbon::parse($sql[$i]->deduction_date)->format('M d, Y');
-                    $sql[$i]->period_readable = ($sql[$i]->period_to_pay == "30")?"30th day":"15th day";
-                }
-                return $sql;
+            $employeeNo = Core::quote($r->tito_emp);
+            $dateFrom = Core::quote($r->date_from);
+            $dateTo = Core::quote($r->date_to);
+
+            $where = "where loan.employee_no = " . $employeeNo . " and loan.loan_transdate >=" . $dateFrom ." and loan.loan_transdate <=" . $dateTo . " and loan.cancel is null order by loan.loan_transdate desc";
+
+            $data = DB::select($this->loanEntryQuery . $where);
+
+            if ($data != null) {
+                return $data;
             } else {
                 return "No record found.";
             }
@@ -242,33 +281,14 @@ class LoanEntryController extends Controller
     public function FindID(Request $r)
     {
         try {
-            // return $r->all();
-            $data = DB::table('hr_loanhdr')->where('employee_no', $r->id)->/*whereBetween('loan_transdate', [$r->date_start, $r->date_to])->*/get();
-            for($i = 0; $i < count($data); $i++)
-            {
-                $data[$i]->deptid = Employee::GetEmployee($data[$i]->employee_no)->department;
-                $data[$i]->type_readable = LoanType::Get_LoanType($data[$i]->loan_type, $data[$i]->loan_sub_type);
-                $data[$i]->loan_transdate = \Carbon\Carbon::parse($data[$i]->loan_transdate)->format('M d, Y');
-                $data[$i]->emp_name = Employee::GetEmployee($data[$i]->employee_no)->lastname.', '.Employee::GetEmployee($data[$i]->employee_no)->firstname.' '.Employee::GetEmployee($data[$i]->employee_no)->mi;
-                $data[$i]->deduction_date = \Carbon\Carbon::parse($data[$i]->deduction_date)->format('M d, Y');
-                $data[$i]->period_readable = ($data[$i]->period_to_pay == "30")?"30th day":"15th day";
-            }
+            $id = Core::quote("%". strtoupper($r->id) ."%");
+            $where = "where employee_no like " . $id ." and loan.cancel is null order by loan.loan_transdate desc";
+            $data = DB::select($this->loanEntryQuery . $where);
+
             return $data;
         } catch (Exception $e) {
             return "error";
         }
-        // try {
-        //     $data = DB::table('hr_tito2')->where('empid', $r->id)->whereBetween('work_date', [$r->date_start, $r->date_to])->get();
-        //     for($i = 0; $i < count($data); $i++)
-        //     {
-        //         $data[$i]->status_desc = Core::io((string)$data[$i]->status);
-        //         $data[$i]->source_desc = Core::source($data[$i]->source);
-        //         $data[$i]->deptid = Employee::GetEmployee($data[$i]->empid)->department;
-        //     }
-        //     return $data;
-        // } catch (Exception $e) {
-        //     return "error";
-        // }
     }
 
 }

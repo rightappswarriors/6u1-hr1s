@@ -472,40 +472,33 @@
 		});
 
 		$('#tito_id').on('input', function() {
+			var id = $(this).val();
 
-			// $('select[name=office]').val('').trigger('change');
-
-			// if($('select[name="tito_emp"]').val($(this).val()).trigger('change').val() == null)	
-			// 	$('select[name="tito_emp"]').val('').trigger('change');
-
-			$.ajax({
-				type : 'post',
-				url : '{{url('payroll/loan-entry/find-id')}}',
-				data : {id:$(this).val(), date_start:$('#date_from').val(), date_to:$('#date_to').val()},
-				success: function(data) {
-					table.clear().draw();
-					if (data!="error") {
-						if (data!="empty") {
-							if(data.length > 0) {
-								// $('select[name=office]').val(data[0].deptid).trigger('change');
-								for(var i = 0 ; i < data.length; i++) {
-									LoadTable(data[i]);
-								}
-							} 	
+			// min length to do a query 3
+			if (id.length > 2) {
+				$.ajax({
+					type : 'post',
+					url : '{{url('payroll/loan-entry/find-id')}}',
+					data : {id: id, date_start:$('#date_from').val(), date_to:$('#date_to').val()},
+					success: function(data) {
+						table.clear().draw();
+						if (data!="error") {
+							if (data!="empty") {
+								if(data.length > 0) {
+									// $('select[name=office]').val(data[0].deptid).trigger('change');
+									for(var i = 0 ; i < data.length; i++) {
+										LoadTable(data[i]);
+									}
+								} 	
+							} else {
+								
+							}
 						} else {
 							
 						}
-					} else {
-						
-					}
-				},
-			});
-
-			setTimeout(function() {
-				if($('select[name=office]').val() != null) {
-					$('select[name=tito_emp]').val($('#tito_id').val()).trigger('change');
-				}
-			}, 500);
+					},
+				});
+			}
 		});
 
 		$('#opt-submit').on('click', function(e) {

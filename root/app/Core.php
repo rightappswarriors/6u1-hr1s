@@ -971,5 +971,9 @@ class Core extends Model
     	return false;
     }
 
+    public static function quote($string) {
+    	return "'" . $string . "'";
+    }
+
     public static $default_img = 'root/storage/app/public/profile_images/profile_user2.jpg';
 }
