@@ -83,7 +83,8 @@ class TimeLogEntryController extends Controller
             'empid',
             'firstname',
             'mi',
-            'lastname'
+            'lastname',
+            DB::raw("(lastname||', '||firstname||' '||mi) as name")
         ];
         $employees = Office::getEmployees($r->ofc_id, $columns);
 

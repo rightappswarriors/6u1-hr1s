@@ -555,7 +555,7 @@
 					var firstname = data[i].firstname;
 					var lastname = data[i].lastname;
 					var mi = data[i].mi;
-					var name = firstname + " " + mi + " " + lastname;
+					var name = data[i].name;
 					var option = {
 						text: name,
 						value: data[i].empid,
@@ -655,7 +655,6 @@
 					} else {
 						alert('Error on loading data.');
 					}
-					
 					$('#frm-spinner').hide();
 					$loader.hide();
 				}
