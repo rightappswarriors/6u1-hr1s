@@ -2,6 +2,11 @@ const LocalStorage = {};
 
 const Util = {};
 
+const ErrorCodes = {};
+
+ErrorCodes.CODE_DELETED = 216;
+ErrorCodes.CODE_EXISTS = 215;
+
 LocalStorage.EMPLOYEES = "EMPLOYEES";
 
 LocalStorage.getItem = (key) => {

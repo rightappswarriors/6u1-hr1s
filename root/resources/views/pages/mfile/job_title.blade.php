@@ -84,6 +84,23 @@
 										<label>Name:</label>
 										<input type="text" name="txt_name" class="form-control" placeholder="Description" required>
 									</div>
+									<div>
+										<div class="d-flex justify-content-center">
+											<div class="col-1 d-none" id="modal-loader-container">
+												<div class="loader-circle"></div>
+											</div>
+										</div>
+										<div>
+											<div class="row">
+												<div class="col-9">
+													<span class="error-span" id="error-message"></span>
+												</div>
+												<div class="col">
+													<button type="button" class="btn btn-success d-none" id="restore-jobtitle">Restore</button>
+												</div>
+											</div>
+										</div>
+									</div>
 								</div>
 							</div>
 						</span>
@@ -108,6 +125,7 @@
 @endsection
 
 @section('to-bottom')
+	<script type="text/javascript" src="/root/resources/assets/js/utils.js"></script>
 	<script type="text/javascript" src="{{asset('js/for-fixed-tag.js')}}"></script>
 	<script type="text/javascript">
 		$('#date_from').datepicker(date_option5);
@@ -122,8 +140,81 @@
 		});
 	</script> --}}
 	<script type="text/javascript">
+		var FRM_STATE = {
+			ADD: 0,
+			UPDATE: 1,
+			DELETE: 2
+		}
+
+		var $frmPP = $('#frm-pp');
+		var $modalLoaderContainer = $('#modal-loader-container');
+		var $errorMessage = $('#error-message');
+		var $restoreJobtitle = $('#restore-jobtitle');
+		var $saveButton = $('#btn-save');
+		var $modalpp = $('#modal-pp');
+
+		var frmState = '';
+
+		$frmPP.on('submit', function(e) {
+			$errorMessage.text('');
+			$restoreJobtitle.addClass('d-none');
+
+			switch (frmState) {
+				case FRM_STATE.ADD:
+					e.preventDefault();
+
+					$modalLoaderContainer.removeClass('d-none');
+
+					$.ajax({
+						type: $(this).attr('method'),
+						url: $(this).attr('action'),
+						data: $(this).serialize(),
+						dataType: 'json',
+						success: function(response) {
+							$modalLoaderContainer.addClass('d-none');
+						},
+						error: function(response) {
+							$modalLoaderContainer.addClass('d-none');
+
+							var error = response.responseJSON.error;
+
+							$errorMessage.text(error.message);
+							if (error.code == ErrorCodes.CODE_DELETED) {
+								$restoreJobtitle.removeClass('d-none');
+							}
+						}
+					});
+					break;
+			}
+		});
+
+		$restoreJobtitle.on('click', function() {
+			$modalLoaderContainer.removeClass('d-none');
+
+			$.ajax({
+				type: 'post',
+				url: '{{url('master-file/job-title')}}/restore',
+				data: $frmPP.serialize(),
+				dataType: 'json',
+				success: function(response) {
+					$modalLoaderContainer.addClass('d-none');
+					location.reload();
+				}, 
+				error: function(response) {
+					console.log('error', response);
+				}
+			});
+		});
+
+		$modalpp.on('hidden.bs.modal', function() {
+			$restoreJobtitle.addClass('d-none');
+			$modalLoaderContainer.addClass('d-none');
+			$errorMessage.text('');
+		});
+
 		$('#opt-add').on('click', function(){
-			$('#frm-pp').attr('action', '{{url('master-file/job-title')}}');
+			$frmPP.attr('action', '{{url('master-file/job-title')}}');
+			frmState = FRM_STATE.ADD;
 
 			// $('input[name="txt_code"]').removeAttr('readonly');
 			$('input[name="txt_code"]').val('');
@@ -133,12 +224,13 @@
 
 			$('.AddMode').show();
 			$('.DeleteMode').hide();
-			$('#modal-pp').modal('show');
+			$modalpp.modal('show');
 		});
 
 		function row_update(obj) {
 			var selected_row = $($(obj).parents()[1]);
-			$('#frm-pp').attr('action', '{{url('master-file/job-title')}}/update');
+			$frmPP.attr('action', '{{url('master-file/job-title')}}/update');
+			frmState = FRM_STATE.UPDATE;
 		
 			// $('input[name="txt_code"]').attr('readonly', '');
 			$('input[name="txt_temp"]').val(selected_row.attr('data_id'));
@@ -148,12 +240,13 @@
 
 			$('.AddMode').show();
 			$('.DeleteMode').hide();
-			$('#modal-pp').modal('show');
+			$modalpp.modal('show');
 		};
 
 		function row_delete(obj) {
 			var selected_row = $($(obj).parents()[1]);
-			$('#frm-pp').attr('action', '{{url('master-file/job-title')}}/delete');
+			$frmPP.attr('action', '{{url('master-file/job-title')}}/delete');
+			frmState = FRM_STATE.DELETE;
 		
 			// $('input[name="txt_code"]').attr('readonly', '');
 			$('input[name="txt_temp"]').val(selected_row.attr('data_id'));
@@ -164,25 +257,25 @@
 
 			$('.AddMode').hide();
 			$('.DeleteMode').show();
-			$('#modal-pp').modal('show');
+			$modalpp.modal('show');
 		};
 
-		$('input[name="txt_code"]').on('input', function() {
-			$.ajax({
-				type : "post",
-				url : "{{url('master-file/job-title')}}/check-jt",
-				data : {code : $(this).val(), id : $('input[name="txt_temp"]').val()},
-				dataTy : 'json',
-				success : function(data) {
-					if (data=="true") {
-						$('#error-span').removeAttr('hidden');
-						$('#error-span').text('Code already exists. Please try again.');
-						$('#btn-save').attr('disabled' ,true);
-					}
-				}
-			});
-			$('#btn-save').removeAttr('disabled');
-			$('#error-span').attr('hidden', true);
-		});
+		// $('input[name="txt_code"]').on('input', function() {
+		// 	$.ajax({
+		// 		type : "post",
+		// 		url : "{{url('master-file/job-title')}}/check-jt",
+		// 		data : {code : $(this).val(), id : $('input[name="txt_temp"]').val()},
+		// 		dataTy : 'json',
+		// 		success : function(data) {
+		// 			if (data=="true") {
+		// 				$('#error-span').removeAttr('hidden');
+		// 				$('#error-span').text('Code already exists. Please try again.');
+		// 				$('#btn-save').attr('disabled' ,true);
+		// 			}
+		// 		}
+		// 	});
+		// 	$('#btn-save').removeAttr('disabled');
+		// 	$('#error-span').attr('hidden', true);
+		// });
 	</script>
 @endsection

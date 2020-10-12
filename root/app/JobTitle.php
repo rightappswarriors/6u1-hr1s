@@ -10,6 +10,7 @@ class JobTitle extends Model
     public static $tbl_name = "hr_jobtitle";
     public static $pk = "jtid";
     public static $newpk = "jt_cn";
+    public static $jtid = "jtid";
 
     public static function Load_JobTitles()
     {
@@ -49,4 +50,22 @@ class JobTitle extends Model
         return $return_val;
     }
 
+    public static function getJobTitleByCode($jobTitleCode) {
+        return DB::table(self::$tbl_name)
+                    ->where('jtid', '=', $jobTitleCode)
+                    ->first();
+    }
+
+    public static function getNextIncrement() {
+        return DB::table(self::$tbl_name)
+                    ->select('jt_cn')
+                    ->where('jt_cn', '<>', null)
+                    ->orderBy(DB::raw('jt_cn::integer'), 'desc')
+                    ->first()
+                    ->jt_cn + 1;
+    }
+
+    public static function isDeleted($jobTitle) {
+        return $jobTitle->cancel == 'Y';
+    }
 }

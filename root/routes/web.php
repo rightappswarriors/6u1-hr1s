@@ -79,10 +79,11 @@ Route::prefix('Biometric')->group(function(){
 			/* JOB TITLE */
 			Route::prefix('job-title')->group(function() {
 				Route::get('/', 'MFile\JobTitleController@view');
-				Route::post('/', 'MFile\JobTitleController@add');
+				Route::post('/', 'MFile\JobTitleController@newAdd');
 				Route::post('/update', 'MFile\JobTitleController@update');
 				Route::post('/check-jt', 'MFile\JobTitleController@check');
 				Route::post('/delete', 'MFile\JobTitleController@delete');
+				Route::post('/restore', 'MFile\JobTitleController@restore');
 			});
 			/* JOB TITLE */
 			/* EMPLOYEE STATUS */

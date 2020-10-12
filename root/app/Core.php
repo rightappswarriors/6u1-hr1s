@@ -9,6 +9,9 @@ use Carbon\Carbon;
 
 class Core extends Model
 {
+	public static $CODE_EXISTS = 215;
+	public static $CODE_DELETED = 216;
+
     public static function company_name()
     {
     	/**
@@ -973,6 +976,22 @@ class Core extends Model
 
     public static function quote($string) {
     	return "'" . $string . "'";
+    }
+
+    public static function createErrorResponse($responseCode, $message) {
+    	$error = [
+    		'code' 		=> $responseCode,
+    		'message'	=> $message
+    	];
+    	return ['error' => $error];
+    }
+
+    public static function createSuccessResponse($responseCode, $data) {
+    	return ['data' => $data];
+    }
+
+    public static function error500() {
+    	$errorCode = 500;
     }
 
     public static $default_img = 'root/storage/app/public/profile_images/profile_user2.jpg';

@@ -36,6 +36,64 @@ class JobTitleController extends Controller
     		return back();
     	}
     }
+
+    public function newAdd(Request $r) {
+        try {
+            $code = strtoupper($r->txt_code);
+            $name = $r->txt_name;
+            $nextIncrement = JobTitle::getNextIncrement();
+
+            $jobTitle = JobTitle::getJobTitleByCode($code);
+            if ($jobTitle != null) {
+
+                if (JobTitle::isDeleted($jobTitle)) {
+                    $errorCode = Core::$CODE_DELETED;
+                    $message = 'Code was previously used but deleted';
+                } else {
+                    $errorCode = Core::$CODE_EXISTS;
+                    $message = 'Code already exists';
+                }
+
+                return response()->json(Core::createErrorResponse($errorCode, $message), 400);
+            }
+
+            $data = [
+                'jtid'          => $code,
+                'jtitle_name'   => $name,
+                'jt_cn'         => $nextIncrement
+            ];
+            DB::table(JobTitle::$tbl_name)->insert($data);
+
+            $responseCode = 201;
+            return response()->json(Core::createSuccessResponse($responseCode, $data), $responseCode);
+
+        } catch (\Illuminate\Database\QueryException $e) {
+            $errorCode = 500;
+            return response()->json(Core::createErrorResponse($errorCode, $e->getMessage()), $errorCode);
+        }
+    }
+
+    public function restore(Request $r) {
+        try {
+            $code = strtoupper($r->txt_code);
+            
+            $data = ['cancel' => null];
+
+            $restored = tap(DB::table(JobTitle::$tbl_name)
+                            ->where(JobTitle::$jtid, $code))
+                            ->update($data)
+                            ->first();
+
+            Core::Set_Alert('success', 'Successfully restored Job Title.');
+
+            $responseCode = 200;
+            return response()->json(Core::createSuccessResponse($responseCode, $restored), $responseCode);
+        } catch (\Illuminate\Database\QueryException $e) {
+            $errorCode = 500;
+            return response()->json(Core::createErrorResponse($errorCode, $e->getMessage()), $errorCode);    
+        }
+    }
+
     public function update(Request $r)
     {
         // return dd($r->all());
